@@ -5,6 +5,14 @@ This project provides solid understanding of full-stack development, including f
 ## Note:
 This project is a boilerplate and will be subject to change according to implemented features.
 
+## Table of Contents
+- [Features](#features)
+- [Technical Stack](#technical-stack)
+- [Installation](#installation)
+- [Contributing](#contributing)
+- [License](#license)
+- [Contact](#contact)
+
 ## Features
 
   1. **Real-Time Chat Application**:
@@ -76,7 +84,8 @@ This project is a boilerplate and will be subject to change according to impleme
     npm run server
     ```
 
-##Contributing
+## Contributing
+
 Contributions are welcome! Please follow these steps to contribute:
 
   1. Fork the repository.
@@ -85,8 +94,8 @@ Contributions are welcome! Please follow these steps to contribute:
   4. Push to the branch (git push origin feature/your-feature-name).
   5. Open a pull request.
 
-##License
+## License
 This project is licensed under the MIT License. See the LICENSE file for details.
 
-##Contact
+## Contact
 For any questions or feedback, please reach out via martin730036@gmail.com.
