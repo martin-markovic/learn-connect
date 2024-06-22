@@ -1,0 +1,38 @@
+{
+  "name": "learn-connect",
+  "version": "1.0.0",
+  "description": "This project is a multi-feature platform designed to enhance the online learning experience. It combines real-time chat capabilities, a quiz system for learning reinforcement, and an image gallery for sharing educational resources. \r This project provides solid understanding of full-stack development, including front-end frameworks, back-end server handling, and real-time data processing.",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon backend/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/martin-markovic/learn-connect.git"
+  },
+  "keywords": [
+    "MongoDB",
+    "Express.js",
+    "React.js",
+    "Node.js",
+    "Firebase",
+    "Dropzone.js",
+    "Socket.io",
+    "RESTful API"
+  ],
+  "author": "Martin Markovic",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/martin-markovic/learn-connect/issues"
+  },
+  "homepage": "https://github.com/martin-markovic/learn-connect#readme",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "mongoose": "^8.4.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  }
+}
