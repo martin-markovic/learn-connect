@@ -13,7 +13,7 @@ export const getUsers = (req, res) => {
 // PUT user api/users/:id
 
 export const updateUser = (req, res) => {
-  res.status(200).json({ message: `UPDATE user ${req.params.id}` });
+  res.status(200).json({ message: `PUT user ${req.params.id}` });
 };
 
 // DELETE user api/users/:id
