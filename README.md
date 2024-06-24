@@ -15,74 +15,85 @@ This project is a boilerplate and will be subject to change according to impleme
 
 ## Features
 
-  1. **Real-Time Chat Application**:
-    - **Technology**: Socket.IO for real-time communication.
-    - **Features**:
-      - User authentication and authorization.
-      - Real-time messaging with typing indicators and messeage receipts.
-      - Group chat functionality for class discussions.
-      - Chat history saved in a database (MongoDB).
+1. **Real-Time Chat Application**:
 
-  2. **Quiz Application**:
+  - **Technology**: Socket.IO for real-time communication.
 
-     - **Technology**: Node.js for back-end, React.js for the front-end.
-     - **Features**:
-         - Multiple-choice quizzes on various educational topics.
-         - Timed quizzes and immediate feedback on answers.
-         - Score tracking and leaderboards.
-         - Admin interface for adding, editing and deleting quiz questions.
+  - **Features**:
+
+    - User authentication and authorization.
+    - Real-time messaging with typing indicators and messeage receipts.
+    - Group chat functionality for class discussions.
+    - Chat history saved in a database (MongoDB).
+ 
+2. **Quiz Application**:
+
+  - **Technology**: Node.js for back-end, React.js for the front-end.
+     
+  - **Features**:
+    - Multiple-choice quizzes on various educational topics.
+    - Timed quizzes and immediate feedback on answers.
+    - Score tracking and leaderboards.
+    - Admin interface for adding, editing and deleting quiz questions.
   
-  3. **Image Gallery**:
+3. **Image Gallery**:
 
-       - **Technology**: Dropzone.js for file uploading, Reactj.js for the front-end, Node.js for the back-end.
+  - **Technology**: Dropzone.js for file uploading, Reactj.js for the front-end, Node.js for the back-end.
 
-       - **Features**:
+  - **Features**:
 
-           - User authentication to manage who can upload and view iamges.
-           - Image upladodoing with drag-and-drop funcitonality.
-           - Categorize and tag images for easy searching and organization.
-           - Ability to comment on and like imges.
-           - Image metadata storage and retrieval from a database.
+    - User authentication to manage who can upload and view iamges.
+    - Image upladodoing with drag-and-drop funcitonality.
+    - Categorize and tag images for easy searching and organization.
+    - Ability to comment on and like imges.
+    - Image metadata storage and retrieval from a database.
 
 ## **Technical Stack**:
 
   - **Front-end**:
-      - HTML, CSS, Javascript
-      - React.js for building interactive UIs
-      - Dropzone.js for image uploads
+    
+    - HTML, CSS, Javascript
+    - React.js for building interactive UIs
+    - Dropzone.js for image uploads
 
-  -  **Back-end**:
-      - Node.js with Express.js for server-side logc
-      - Socket.IO for real-time chat functionalitu
-      - MongoDB for storing user data, chat history, quiz questions, and images
-      - Firebase for optional real-time database and authentication features
+  - **Back-end**:
+
+    - Node.js with Express.js for server-side logc
+    - Socket.IO for real-time chat functionalitu
+    - MongoDB for storing user data, chat history, quiz questions, and images
+    - Firebase for optional real-time database and authentication features
 
 ## Installation
 
-1. **Clone the repository:**
+1. **Clone the repository**
+ 
     ```sh
     git clone https://github.com/martin-markovic/learn-connect.git
     cd learn-connect
     ```
 
 2. **Install dependencies:**
+ 
     ```sh
     npm install express 
     ```
 
-3. **Set up environment variables:**
-    Create a `.env` file in the root directory and add the following:
-    ```env
-    MONGODB_URI=your_mongodb_uri
-    JWT_SECRET=your_jwt_secret
-    FIREBASE_API_KEY=your_firebase_api_key
-    FIREBASE_AUTH_DOMAIN=your_firebase_auth_domain
-    ```
+5. **Set up environment variables:**
 
-4. **Start the server:**
-    ```sh
-    npm run server
-    ```
+    Create a `.env` file in the root directory and add the following:
+   
+      ```env
+      MONGODB_URI=your_mongodb_uri
+      JWT_SECRET=your_jwt_secret
+      FIREBASE_API_KEY=your_firebase_api_key
+      FIREBASE_AUTH_DOMAIN=your_firebase_auth_domain
+      ```
+
+7. **Start the server:**
+
+      ```sh
+      npm run server
+      ```
 
 ## Contributing
 
