@@ -1,18 +1,33 @@
 import express from "express";
+import { createServer } from "http";
+import { Server } from "socket.io";
+
 const app = express();
+const server = createServer(app);
+const io = new Server(server);
 
 import dotenv from "dotenv";
 dotenv.config();
 
 const PORT = process.env.SERVER_PORT || 8000;
 
+import router from "./routes/router.js";
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.get("/", (req, res) => {
-  res.status(200).json({ message: "Hello World" });
+app.use("/", router);
+
+io.on("connection", (socket) => {
+  console.log(`a user connected to socket: ${socket.id}`);
+
+  socket.on("disconnect", () => {
+    console.log("user disconnected");
+  });
 });
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server is running...go to http://localhost:${PORT}`);
 });
+
+export { server, io, PORT };
