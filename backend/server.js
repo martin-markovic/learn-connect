@@ -8,8 +8,10 @@ const io = new Server(server);
 
 import dotenv from "dotenv";
 dotenv.config();
+import connectDB from "./config/db.js";
 
 const PORT = process.env.SERVER_PORT || 8000;
+connectDB();
 
 import router from "./routes/router.js";
 
