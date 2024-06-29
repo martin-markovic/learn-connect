@@ -8,8 +8,13 @@ import {
   updateQuiz,
   deleteQuiz,
 } from "../../controller/quizzes/quizController.js";
+import { protect } from "../../middleware/authMiddleware.js";
 
-quizRoutes.route("/").post(createQuiz).get(getAllQuizzes);
-quizRoutes.route("/:id").get(getQuiz).put(updateQuiz).delete(deleteQuiz);
+quizRoutes.route("/").post(protect, createQuiz).get(protect, getAllQuizzes);
+quizRoutes
+  .route("/:id")
+  .get(protect, getQuiz)
+  .put(protect, updateQuiz)
+  .delete(protect, deleteQuiz);
 
 export default quizRoutes;
