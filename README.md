@@ -73,27 +73,45 @@ This project is a boilerplate and will be subject to change according to impleme
     ```
 
 2. **Install dependencies:**
- 
-    ```sh
-    npm install express 
-    ```
 
-5. **Set up environment variables:**
+   ```sh
+   npm install express
+   ```
 
-    Create a `.env` file in the root directory and add the following:
-   
-      ```env
-      MONGODB_URI=your_mongodb_uri
-      JWT_SECRET=your_jwt_secret
-      FIREBASE_API_KEY=your_firebase_api_key
-      FIREBASE_AUTH_DOMAIN=your_firebase_auth_domain
-      ```
+3. **Set up development environment variables:**
 
-7. **Start the server:**
+   Create a `.env` file in the root directory and add the following:
 
-      ```sh
-      npm run server
-      ```
+   ```env
+   MONGODB_URI=your_mongodb_uri
+   JWT_SECRET=your_jwt_secret
+   FIREBASE_API_KEY=your_firebase_api_key
+   FIREBASE_AUTH_DOMAIN=your_firebase_auth_domain
+   ```
+
+4. **Set up test environment variables:**
+
+   Create a `.env.test` file in the root directory and add the following:
+
+   ```env
+   PORT=your_port_number
+   JWT_SECRET=your_jwt_secret
+   ```
+      
+
+4. **Start the server:**
+
+   ```sh
+   npm run server
+   ```
+
+5. **Start the client:**
+
+   ```sh
+   npm run client
+   ```
+
+6. Navigate to http://localhost:8000
 
 ## Contributing
 
