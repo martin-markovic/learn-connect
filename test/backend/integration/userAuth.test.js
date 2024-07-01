@@ -2,16 +2,17 @@ import request from "supertest";
 import { expect } from "chai";
 import express from "express";
 import mongoose from "mongoose";
-import userRouter from "../../backend/routes/users/userRoutes.js";
-import User from "../../backend/models/users/userModel.js";
+import userRouter from "../../../backend/routes/users/userRoutes.js";
+import User from "../../../backend/models/users/userModel.js";
 import bcrypt from "bcrypt";
 
-const app = express();
-app.use(express.json());
-app.use("/api/users", userRouter);
+let app;
 
 describe("Router", () => {
   before(async () => {
+    app = express();
+    app.use(express.json());
+    app.use("/api/users", userRouter);
     await mongoose.connect(process.env.MONGO_URI);
   });
 
