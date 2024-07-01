@@ -5,7 +5,9 @@
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "test": "mocha test/backend",
+    "test": "mocha test/**/**.test.js",
+    "test:unit": "mocha test/backend/unit/**/*test.js",
+    "test:integration": "mocha test/backend/integration/**/*test.js",
     "dev": "nodemon backend/server.js"
   },
   "repository": {

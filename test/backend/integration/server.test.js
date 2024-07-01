@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { server, PORT } from "../../backend/server.js";
+import { server, PORT } from "../../../backend/server.js";
 import { io as clientIo } from "socket.io-client";
 import mongoose from "mongoose";
 
@@ -21,10 +21,7 @@ describe("Server Tests", () => {
   describe("MongoDB Connection", () => {
     before((done) => {
       mongoose
-        .connect(process.env.MONGO_URI, {
-          useNewUrlParser: true,
-          useUnifiedTopology: true,
-        })
+        .connect(process.env.MONGO_URI, {})
         .then(() => done())
         .catch((err) => done(err));
     });
