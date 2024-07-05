@@ -5,9 +5,11 @@ import mockQuizRoutes from "../../mocks/routes/quizzes/mockQuizRoutes.js";
 import testDB from "../../mocks/config/mockDatabase.js";
 
 let app;
-let user;
+let existingUser = testDB.storage.users[0];
 // add unauthorizedUser
 let newQuiz = testDB.storage.quizzes[0];
+let mockToken = existingUser.token;
+// add unauthorizedToken
 // let updatedQuiz = testDB.storage.quizzes[1]
 
 describe("Quizz API", () => {
@@ -23,7 +25,9 @@ describe("Quizz API", () => {
   describe("Quiz API", () => {
     describe("createQuiz", () => {
       it("should create a new quiz and verify it", async () => {
-        const res = await request(app).post("/api/quizzes/");
+        const res = await request(app)
+          .post("/api/quizzes/")
+          .set("Authorization", `Bearer ${mockToken}`);
 
         expect(res.status).to.equal(201);
         expect(res.body).to.have.property("message", "createQuiz");
@@ -32,7 +36,9 @@ describe("Quizz API", () => {
 
     describe("getQuizzes", () => {
       it("should get all quizzes and verify them", async () => {
-        const res = await request(app).get("/api/quizzes/");
+        const res = await request(app)
+          .get("/api/quizzes/")
+          .set("Authorization", `Bearer ${mockToken}`);
 
         expect(res.status).to.equal(200);
         expect(res.body).to.have.property("message", "getQuizzes");
@@ -43,7 +49,8 @@ describe("Quizz API", () => {
       it("should get a quiz by ID and verify it", async () => {
         const res = await request(app)
           .get(`/api/quizzes/${newQuiz.id}`)
-          .send(newQuiz);
+          .send(newQuiz)
+          .set("Authorization", `Bearer ${mockToken}`);
 
         expect(res.status).to.equal(200);
         expect(res.body).to.have.property("message", "getQuizById");
@@ -54,7 +61,8 @@ describe("Quizz API", () => {
       it("should update a quiz and verify it", async () => {
         const res = await request(app)
           .put(`/api/quizzes/${newQuiz.id}`)
-          .send(newQuiz);
+          .send(newQuiz)
+          .set("Authorization", `Bearer ${mockToken}`);
 
         expect(res.status).to.equal(200);
         expect(res.body).to.have.property("message", "updateQuiz");
@@ -65,7 +73,8 @@ describe("Quizz API", () => {
       it("should delete a quiz and verify it", async () => {
         const res = await request(app)
           .delete(`/api/quizzes/${newQuiz.id}`)
-          .send(newQuiz);
+          .send(newQuiz)
+          .set("Authorization", `Bearer ${mockToken}`);
 
         expect(res.status).to.equal(200);
         expect(res.body).to.have.property("message", "deleteQuiz");

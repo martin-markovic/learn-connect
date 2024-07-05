@@ -11,12 +11,12 @@ import { mockProtect } from "../../middleware/mockMiddleware.js";
 
 const mockQuizRoutes = Router();
 
-mockQuizRoutes.post("/", createQuiz);
-mockQuizRoutes.get("/", getQuizzes);
+mockQuizRoutes.post("/", mockProtect, createQuiz);
+mockQuizRoutes.get("/", mockProtect, getQuizzes);
 
-mockQuizRoutes.get("/:id", getQuizById);
+mockQuizRoutes.get("/:id", mockProtect, getQuizById);
 
-mockQuizRoutes.put("/:id", updateQuiz);
-mockQuizRoutes.delete("/:id", deleteQuiz);
+mockQuizRoutes.put("/:id", mockProtect, updateQuiz);
+mockQuizRoutes.delete("/:id", mockProtect, deleteQuiz);
 
 export default mockQuizRoutes;
