@@ -1,5 +1,4 @@
 import Quiz from "../../models/quizzes/quizModel.js";
-import quiz from "../../models/quizzes/quizModel.js";
 import User from "../../models/users/userModel.js";
 
 // POST /api/quizzes
@@ -31,7 +30,7 @@ export const createQuiz = async (req, res) => {
 // GET /api/quizzes/
 export const getAllQuizzes = async (req, res) => {
   try {
-    const quizzes = await quiz.find({ user: req.user });
+    const quizzes = await Quiz.find({ user: req.user });
     return res.status(200).json(quizzes);
   } catch (error) {
     return res.status(500).json({
