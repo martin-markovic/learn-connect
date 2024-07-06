@@ -29,14 +29,14 @@ const getQuizzes = (req, res) => {
 };
 
 const getQuizById = (req, res) => {
-  const quizFound = testDB.findOne("quizzes", { id: parseInt(req.user.id) });
+  const quizFound = testDB.findOne("quizzes", { id: parseInt(req.params.id) });
 
   if (!quizFound) {
     return res.status(404).json({ message: "Quiz not found" });
   }
 
   if (quizFound.id !== req.user.id) {
-    return res.status(401).json({ message: "Not authorized" });
+    return res.status(401).json({ message: "User not authorized" });
   }
 
   return res.status(200).json({
@@ -48,7 +48,6 @@ const getQuizById = (req, res) => {
 };
 
 const updateQuiz = (req, res) => {
-  console.log(`req params id: ${req.params.id}`);
   const quizFound = testDB.findOne("quizzes", {
     id: parseInt(req.params.id),
   });
@@ -70,7 +69,7 @@ const updateQuiz = (req, res) => {
 };
 
 const deleteQuiz = (req, res) => {
-  const quizFound = testDB.findOne("quizzes", { id: parseInt(req.user.id) });
+  const quizFound = testDB.findOne("quizzes", { id: parseInt(req.params.id) });
 
   if (!quizFound) {
     return res.status(404).json({ message: "Quiz not found" });
