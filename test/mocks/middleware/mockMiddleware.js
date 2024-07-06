@@ -4,10 +4,10 @@ export const mockProtect = async (req, res, next) => {
   let token;
 
   if (
-    !req.headers.authorization &&
+    !req.headers.authorization ||
     !req.headers.authorization.startsWith("Bearer")
   ) {
-    return res.status(401).json({ message: "Not authorized,no token" });
+    return res.status(401).json({ message: "Not authorized, no token" });
   } else {
     try {
       token = req.headers.authorization.split(" ")[1];
@@ -26,7 +26,7 @@ export const mockProtect = async (req, res, next) => {
 
       next();
     } catch (error) {
-      return res.status(400).json({ message: error.message });
+      return res.status(500).json({ message: "Bad request" });
     }
   }
 };

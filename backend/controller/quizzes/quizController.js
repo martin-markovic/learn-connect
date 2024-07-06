@@ -1,14 +1,13 @@
 import Quiz from "../../models/quizzes/quizModel.js";
 import User from "../../models/users/userModel.js";
 
-// POST /api/quizzes
 export const createQuiz = async (req, res) => {
   try {
     const { question, answer, choices } = req.body;
 
     if (!question || !answer || !choices || choices.length < 3) {
       return res.status(400).json({
-        message: "Please provide question, answer, and at least 3 choices",
+        message: "Please add all fields",
       });
     }
 
@@ -27,7 +26,6 @@ export const createQuiz = async (req, res) => {
   }
 };
 
-// GET /api/quizzes/
 export const getAllQuizzes = async (req, res) => {
   try {
     const quizzes = await Quiz.find({ user: req.user });
@@ -38,7 +36,7 @@ export const getAllQuizzes = async (req, res) => {
     });
   }
 };
-// GET /api/quizzes/:id
+
 export const getQuiz = async (req, res) => {
   try {
     const quiz = await Quiz.findById(req.params.id);
@@ -64,7 +62,6 @@ export const getQuiz = async (req, res) => {
   }
 };
 
-// PUT /api/quizzes/:id
 export const updateQuiz = async (req, res) => {
   try {
     const quizToUpdate = await Quiz.findById(req.params.id);
@@ -99,7 +96,6 @@ export const updateQuiz = async (req, res) => {
   }
 };
 
-// DELETE /api/quizzes/:id
 export const deleteQuiz = async (req, res) => {
   try {
     const quiz = await Quiz.findById(req.params.id);
