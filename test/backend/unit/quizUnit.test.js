@@ -5,6 +5,7 @@ import mockQuizRoutes from "../../mocks/routes/quizzes/mockQuizRoutes.js";
 import testDB from "../../mocks/config/mockDatabase.js";
 
 let app;
+let server;
 let existingUser = testDB.storage.users[0];
 let unauthorizedUser = testDB.storage.users[1];
 let newQuiz = testDB.storage.quizzes[0];
@@ -19,11 +20,17 @@ let unauthorizedToken = unauthorizedUser.token;
 describe("Quizz API", () => {
   before(() => {
     app = createMockServer();
-    app.listen(4001, () => {
+    server = app.listen(4001, () => {
       console.log("Test server running on port 4001");
     });
 
     app.use("/api/quizzes/", mockQuizRoutes);
+  });
+
+  after(() => {
+    server.close(() => {
+      console.log("Test server stopped");
+    });
   });
 
   describe("Quiz API", () => {
