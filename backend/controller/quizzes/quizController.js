@@ -8,7 +8,7 @@ export const createQuiz = async (req, res) => {
 
     if (!question || !answer || !choices || choices.length < 3) {
       return res.status(400).json({
-        message: "Please provide question, answer, and at least 3 choices",
+        message: "Please add all fields",
       });
     }
 

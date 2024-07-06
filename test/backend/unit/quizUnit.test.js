@@ -8,9 +8,13 @@ let app;
 let existingUser = testDB.storage.users[0];
 // add unauthorizedUser
 let newQuiz = testDB.storage.quizzes[0];
+let updatedQuiz = {
+  question: "Updated question",
+  choices: ["new choice", "new choice", "new choice"],
+  answer: "new answer",
+};
 let mockToken = existingUser.token;
 // add unauthorizedToken
-// let updatedQuiz = testDB.storage.quizzes[1]
 
 describe("Quizz API", () => {
   before(() => {
@@ -27,10 +31,15 @@ describe("Quizz API", () => {
       it("should create a new quiz and verify it", async () => {
         const res = await request(app)
           .post("/api/quizzes/")
+          .send(newQuiz)
           .set("Authorization", `Bearer ${mockToken}`);
 
         expect(res.status).to.equal(201);
-        expect(res.body).to.have.property("message", "createQuiz");
+        expect(res.body).to.have.property("question", newQuiz.question);
+        expect(res.body)
+          .to.have.property("choices")
+          .that.deep.equals(newQuiz.choices);
+        expect(res.body).to.have.property("answer", newQuiz.answer);
       });
     });
 
@@ -41,7 +50,8 @@ describe("Quizz API", () => {
           .set("Authorization", `Bearer ${mockToken}`);
 
         expect(res.status).to.equal(200);
-        expect(res.body).to.have.property("message", "getQuizzes");
+        expect(res.body).to.have.property("quizzes").that.is.an("array");
+        expect(res.body.quizzes).to.deep.equal([testDB.storage.quizzes[0]]);
       });
     });
 
@@ -49,11 +59,15 @@ describe("Quizz API", () => {
       it("should get a quiz by ID and verify it", async () => {
         const res = await request(app)
           .get(`/api/quizzes/${newQuiz.id}`)
-          .send(newQuiz)
           .set("Authorization", `Bearer ${mockToken}`);
 
         expect(res.status).to.equal(200);
-        expect(res.body).to.have.property("message", "getQuizById");
+        expect(res.body).to.have.property("user", existingUser.id);
+        expect(res.body).to.have.property("question", newQuiz.question);
+        expect(res.body)
+          .to.have.property("choices")
+          .that.deep.equals(newQuiz.choices);
+        expect(res.body).to.have.property("answer", newQuiz.answer);
       });
     });
 
@@ -61,11 +75,16 @@ describe("Quizz API", () => {
       it("should update a quiz and verify it", async () => {
         const res = await request(app)
           .put(`/api/quizzes/${newQuiz.id}`)
-          .send(newQuiz)
+          .send(updatedQuiz)
           .set("Authorization", `Bearer ${mockToken}`);
 
         expect(res.status).to.equal(200);
-        expect(res.body).to.have.property("message", "updateQuiz");
+        expect(res.body).to.have.property("user", existingUser.id);
+        expect(res.body).to.have.property("question", updatedQuiz.question);
+        expect(res.body)
+          .to.have.property("choices")
+          .that.deep.equals(updatedQuiz.choices);
+        expect(res.body).to.have.property("answer", updatedQuiz.answer);
       });
     });
 
@@ -73,11 +92,10 @@ describe("Quizz API", () => {
       it("should delete a quiz and verify it", async () => {
         const res = await request(app)
           .delete(`/api/quizzes/${newQuiz.id}`)
-          .send(newQuiz)
           .set("Authorization", `Bearer ${mockToken}`);
 
         expect(res.status).to.equal(200);
-        expect(res.body).to.have.property("message", "deleteQuiz");
+        expect(res.body).to.have.property("id", newQuiz.id);
       });
     });
   });
