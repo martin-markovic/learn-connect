@@ -41,6 +41,24 @@ describe("User API", () => {
       expect(res.body).to.have.property("email", newUser.email);
       expect(res.body).to.have.property("token", newUser.token);
     });
+
+    it("should return status 400 and a message please add all fields", async () => {
+      const res = await request(app).post("/api/users/").send({
+        email: newUser.email,
+        password: newUser.password,
+        password2: newUser.password2,
+      });
+
+      expect(res.status).to.equal(400);
+      expect(res.body).to.have.property("message", "Please add all fields");
+    });
+
+    it("should return status 400 and a message user already registered", async () => {
+      const res = await request(app).post("/api/users/").send(existingUser);
+
+      expect(res.status).to.equal(400);
+      expect(res.body).to.have.property("message", "User already registered");
+    });
   });
 
   describe("loginUser", () => {
@@ -55,6 +73,25 @@ describe("User API", () => {
       expect(res.body).to.have.property("name", existingUser.name);
       expect(res.body).to.have.property("email", existingUser.email);
       expect(res.body).to.have.property("token", existingUser.token);
+    });
+
+    it("should return status 400 and a message please add all fields", async () => {
+      const res = await request(app).post("/api/users/login").send({
+        name: existingUser.name,
+      });
+
+      expect(res.status).to.equal(400);
+      expect(res.body).to.have.property("message", "Please add all fields");
+    });
+
+    it("should return status 404 and a message user not found", async () => {
+      const res = await request(app).post("/api/users/login").send({
+        email: newUser.email,
+        password: newUser.password,
+      });
+
+      expect(res.status).to.equal(404);
+      expect(res.body).to.have.property("message", "User not found");
     });
   });
 });
