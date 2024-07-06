@@ -80,7 +80,7 @@ This project is a boilerplate and will be subject to change according to impleme
    npm install express
    ```
 
-3. **Set up environment variables:**
+3. **Set up development environment variables:**
 
    Create a `.env` file in the root directory and add the following:
 
@@ -89,13 +89,22 @@ This project is a boilerplate and will be subject to change according to impleme
    JWT_SECRET=your_jwt_secret
    FIREBASE_API_KEY=your_firebase_api_key
    FIREBASE_AUTH_DOMAIN=your_firebase_auth_domain
-   ```
+   ```   
 
 4. **Start the server:**
 
    ```sh
    npm run server
    ```
+
+5. **Start the client:**
+
+   ```sh
+   npm run client
+   ```
+
+6. Navigate to http://localhost:8000
+
 
 ## Contributing
 
