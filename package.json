@@ -8,7 +8,8 @@
     "test": "mocha test/**/**.test.js",
     "test:unit": "mocha test/backend/unit/**/*test.js",
     "test:integration": "mocha test/backend/integration/**/*test.js",
-    "dev": "nodemon backend/server.js"
+    "dev": "nodemon backend/server.js",
+    "client": "npm start --prefix frontend"
   },
   "repository": {
     "type": "git",
@@ -43,7 +44,6 @@
     "chai-http": "^5.0.0",
     "mocha": "^10.4.0",
     "nodemon": "^3.1.4",
-    "socket.io-client": "^4.7.5",
     "supertest": "^7.0.0"
   }
 }
