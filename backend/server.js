@@ -1,35 +1,53 @@
 import express from "express";
-import { createServer } from "http";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
 import { Server } from "socket.io";
-
-const app = express();
-const server = createServer(app);
-const io = new Server(server);
-
 import dotenv from "dotenv";
 dotenv.config();
-import connectDB from "./config/db.js";
 
 const PORT = process.env.SERVER_PORT || 8000;
+
+const app = express();
+
+const expressServer = app.listen(PORT, () => {
+  console.log(`Server is running...go to http://localhost:${PORT}`);
+});
+
+const io = new Server(expressServer, {
+  cors: {
+    origin: [
+      "http://localhost:3000",
+      "http://127.0.0.1:3000",
+      "http://localhost:8000",
+    ],
+  },
+});
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+import connectDB from "./config/db.js";
+
 connectDB();
 
 import router from "./routes/router.js";
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static(join(__dirname, "../frontend/public")));
 
 app.use("/", router);
 
 io.on("connection", (socket) => {
-  console.log(`a user connected to socket: ${socket.id}`);
+  console.log(`User connected to socket: ${socket.id}`);
+
+  socket.on("chat message", (data) => {
+    io.emit("chat message", `${socket.id.substring(0, 5)}: ${data}`);
+  });
 
   socket.on("disconnect", () => {
     console.log("user disconnected");
   });
 });
 
-server.listen(PORT, () => {
-  console.log(`Server is running...go to http://localhost:${PORT}`);
-});
-
-export { server, io, PORT };
+export { expressServer, io, PORT };
