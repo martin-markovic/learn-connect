@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { server, PORT } from "../../../backend/server.js";
+import { expressServer, PORT } from "../../../backend/server.js";
 import { io as clientIo } from "socket.io-client";
 import mongoose from "mongoose";
 
@@ -8,7 +8,7 @@ describe("Server Tests", () => {
     let serverInstance;
 
     before((done) => {
-      serverInstance = server;
+      serverInstance = expressServer;
       done();
     });
 
