@@ -45,6 +45,10 @@ io.on("connection", (socket) => {
     io.emit("chat message", `${socket.id.substring(0, 5)}: ${data}`);
   });
 
+  socket.on("chat activity", (name) => {
+    socket.broadcast.emit("chat activity", name);
+  });
+
   socket.on("disconnect", () => {
     console.log("user disconnected");
   });
