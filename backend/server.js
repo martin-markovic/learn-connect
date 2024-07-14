@@ -42,7 +42,8 @@ io.on("connection", (socket) => {
   console.log(`User connected to socket: ${socket.id}`);
 
   socket.on("chat message", (data) => {
-    io.emit("chat message", `${socket.id.substring(0, 5)}: ${data}`);
+    const { friend, message } = data;
+    socket.broadcast.emit("chat message", { friend, message });
   });
 
   socket.on("chat activity", (name) => {
