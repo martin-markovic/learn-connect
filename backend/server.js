@@ -34,9 +34,15 @@ import router from "./routes/router.js";
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(join(__dirname, "../frontend/public")));
+app.use(express.static(join(__dirname, "public")));
 
 app.use("/", router);
+
+app.get("/js/main.js", (req, res) => {
+  res.setHeader("Content-Type", "application/javascript");
+
+  res.sendFile(path.join(__dirname, "public", "js", "main.js"));
+});
 
 io.on("connection", (socket) => {
   console.log(`User connected to socket: ${socket.id}`);
