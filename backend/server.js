@@ -9,6 +9,14 @@ const PORT = process.env.SERVER_PORT || 8000;
 
 const app = express();
 
+import cors from "cors";
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+  })
+);
+
 const expressServer = app.listen(PORT, () => {
   console.log(`Server is running...go to http://localhost:${PORT}`);
 });
@@ -20,6 +28,7 @@ const io = new Server(expressServer, {
       "http://127.0.0.1:3000",
       "http://localhost:8000",
     ],
+    credentials: true,
   },
 });
 
@@ -34,7 +43,7 @@ import router from "./routes/router.js";
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(join(__dirname, "../frontend/public")));
+app.use(express.static(join(__dirname, "public")));
 
 app.use("/", router);
 
