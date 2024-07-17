@@ -20,6 +20,7 @@ const io = new Server(expressServer, {
       "http://127.0.0.1:3000",
       "http://localhost:8000",
     ],
+    credentials: true,
   },
 });
 
@@ -37,12 +38,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(join(__dirname, "public")));
 
 app.use("/", router);
-
-app.get("/js/main.js", (req, res) => {
-  res.setHeader("Content-Type", "application/javascript");
-
-  res.sendFile(path.join(__dirname, "public", "js", "main.js"));
-});
 
 io.on("connection", (socket) => {
   console.log(`User connected to socket: ${socket.id}`);
