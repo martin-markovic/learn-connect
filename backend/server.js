@@ -9,6 +9,14 @@ const PORT = process.env.SERVER_PORT || 8000;
 
 const app = express();
 
+import cors from "cors";
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+  })
+);
+
 const expressServer = app.listen(PORT, () => {
   console.log(`Server is running...go to http://localhost:${PORT}`);
 });
