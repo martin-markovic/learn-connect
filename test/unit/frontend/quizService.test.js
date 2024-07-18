@@ -28,6 +28,21 @@ describe("quizService", () => {
         console.error("Error during createQuiz test:", error);
       }
     });
+
+    it("should handle errors", async () => {
+      nock(API_URL)
+        .get("/")
+        .matchHeader("Authorization", `Bearer ${token}`)
+        .replyWithError("Network Error");
+
+      try {
+        const result = await quizService.getQuizzes(token);
+
+        expect(result).to.be.undefined;
+      } catch (error) {
+        console.error("Error during createQuiz test:", error);
+      }
+    });
   });
 
   describe("getQuizzes", () => {
@@ -61,6 +76,21 @@ describe("quizService", () => {
       const result = await quizService.getQuizById("1", token);
       expect(result).to.eql(responseData);
     });
+
+    it("should handle errors", async () => {
+      nock(API_URL)
+        .post("/")
+        .matchHeader("Authorization", `Bearer ${token}`)
+        .replyWithError("Network Error");
+
+      try {
+        const result = await quizService.createQuiz(quizData, token);
+
+        expect(result).to.be.undefined;
+      } catch (error) {
+        console.error("Error during createQuiz test:", error);
+      }
+    });
   });
 
   describe("updateQuiz", () => {
@@ -75,6 +105,16 @@ describe("quizService", () => {
       const result = await quizService.updateQuiz("1", quizData, token);
       expect(result).to.eql(responseData);
     });
+
+    it("should handle network errors", async () => {
+      nock(API_URL)
+        .put("/1")
+        .matchHeader("Authorization", `Bearer ${token}`)
+        .replyWithError("Network Error");
+
+      const result = await quizService.updateQuiz("1", quizData, token);
+      expect(result).to.be.undefined;
+    });
   });
 
   describe("deleteQuiz", () => {
@@ -88,6 +128,16 @@ describe("quizService", () => {
 
       const result = await quizService.deleteQuiz("1", token);
       expect(result).to.eql(responseData);
+    });
+
+    it("should handle network errors", async () => {
+      nock(API_URL)
+        .delete("/1")
+        .matchHeader("Authorization", `Bearer ${token}`)
+        .replyWithError("Network Error");
+
+      const result = await quizService.deleteQuiz("1", token);
+      expect(result).to.be.undefined;
     });
   });
 });
