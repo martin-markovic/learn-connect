@@ -86,7 +86,10 @@ const Chat = () => {
           <form onSubmit={handleSubmit}>
             <input
               type="text"
+              id="message"
+              name="message"
               value={message}
+              autoComplete="off"
               onChange={handleInputChange}
               onKeyDown={handleKeyPress}
               placeholder="Type message"
