@@ -1,6 +1,9 @@
 import { expect } from "chai";
 import authService from "../../../frontend/src/features/auth/authService.js";
 import axios from "axios";
+import nock from "nock";
+
+const API_URL = "http://127.0.0.1:8000/api/users";
 
 describe("Auth Service", function () {
   beforeEach(function () {
@@ -18,10 +21,7 @@ describe("Auth Service", function () {
     };
 
     axios.post = function (url, data) {
-      if (
-        url === "http://127.0.0.1:8000/api/users" ||
-        url === "http://127.0.0.1:8000/api/users/login"
-      ) {
+      if (url === API_URL || url === `${API_URL}/login`) {
         return Promise.resolve({ data: { token: "sample-token" } });
       }
       return Promise.reject(new Error("Invalid URL"));
@@ -30,7 +30,10 @@ describe("Auth Service", function () {
 
   describe("registerUser", function () {
     it("should register a user successfully and store data in localStorage", async function () {
-      await authService.registerUser("user@example.com", "password");
+      await authService.registerUser({
+        email: "user@example.com",
+        password: "password",
+      });
 
       try {
         const storedData = JSON.parse(localStorage.getItem("user"));
@@ -39,11 +42,24 @@ describe("Auth Service", function () {
         console.log(error);
       }
     });
+
+    it("should handle network errors", async () => {
+      nock(API_URL).post("/").replyWithError("Network Error");
+
+      const userData = { email: "user@example.com", password: "password" };
+      await authService.registerUser(userData);
+
+      const storedUser = localStorage.getItem("user");
+      expect(storedUser).to.be.null;
+    });
   });
 
   describe("loginUser", function () {
     it("should login a user successfully and store data in localStorage", async function () {
-      await authService.loginUser("user@example.com", "password");
+      await authService.loginUser({
+        email: "user@example.com",
+        password: "password",
+      });
 
       try {
         const storedData = JSON.parse(localStorage.getItem("user"));
@@ -51,6 +67,17 @@ describe("Auth Service", function () {
       } catch (error) {
         console.log(error);
       }
+    });
+
+    it("should handle network errors", async () => {
+      nock(API_URL).post("/login").replyWithError("Network Error");
+
+      const userData = { email: "user@example.com", password: "password" };
+      const result = await authService.loginUser(userData);
+
+      const storedUser = localStorage.getItem("user");
+      expect(storedUser).to.be.null;
+      expect(result).to.be.undefined;
     });
   });
 
