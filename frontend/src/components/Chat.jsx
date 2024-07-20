@@ -62,8 +62,8 @@ const Chat = () => {
   };
 
   return (
-    <div>
-      <div>
+    <div className="conversation">
+      <div className="conversation-list">
         <h3>Friends</h3>
         <ul>
           {friends.map((friend, index) => (
@@ -81,7 +81,7 @@ const Chat = () => {
         </ul>
       </div>
       {selectedFriend && (
-        <div>
+        <div className="conversation-display">
           <h3>Chat with {selectedFriend}</h3>
           <form onSubmit={handleSubmit}>
             <input

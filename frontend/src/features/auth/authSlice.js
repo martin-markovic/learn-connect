@@ -1,5 +1,4 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-
 import authService from "./authService.js";
 
 const user = JSON.parse(localStorage.getItem("user"));
@@ -14,9 +13,10 @@ const initialState = {
 
 export const registerUser = createAsyncThunk(
   "auth/register",
-  async (user, thunkAPI) => {
+  async (userData, thunkAPI) => {
     try {
-      return await authService.registerUser(user);
+      const response = await authService.registerUser(userData);
+      return response;
     } catch (error) {
       const message =
         (error.response && error.response && error.response.data.message) ||
@@ -32,7 +32,9 @@ export const loginUser = createAsyncThunk(
   "auth/login",
   async (userData, thunkAPI) => {
     try {
-      return await authService.loginUser(userData);
+      const response = await authService.loginUser(userData);
+
+      return response;
     } catch (error) {
       const message =
         (error.response && error.response && error.response.data.message) ||
@@ -44,8 +46,8 @@ export const loginUser = createAsyncThunk(
   }
 );
 
-export const logoutUser = createAsyncThunk("auth/logout", () => {
-  return authService.logoutUser();
+export const logoutUser = createAsyncThunk("auth/logout", async () => {
+  await authService.logoutUser();
 });
 
 export const authSlice = createSlice({
@@ -53,6 +55,7 @@ export const authSlice = createSlice({
   initialState,
   reducers: {
     reset: (state) => {
+      state.user = null;
       state.isLoading = false;
       state.isSuccess = false;
       state.isError = false;

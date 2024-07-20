@@ -9,8 +9,8 @@ function Header() {
   const location = useLocation();
   const { user } = useSelector((state) => state.auth);
 
-  const onClick = () => {
-    dispatch(logoutUser());
+  const onClick = async () => {
+    await dispatch(logoutUser());
     dispatch(reset());
     navigate("/login");
   };
