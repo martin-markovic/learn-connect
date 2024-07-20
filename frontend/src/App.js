@@ -7,10 +7,10 @@ import {
 import { useSelector } from "react-redux";
 import { ToastContainer } from "react-toastify";
 
-import Dashboard from "./pages/Dashboard";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Header from "./components/Header";
+import Dashboard from "./pages/Dashboard.jsx";
+import Login from "./pages/Login.jsx";
+import Register from "./pages/Register.jsx";
+import Header from "./components/Header.jsx";
 
 function App() {
   const { user } = useSelector((state) => state.auth);
