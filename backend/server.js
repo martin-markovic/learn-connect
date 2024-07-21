@@ -1,7 +1,12 @@
 import express from "express";
-import { fileURLToPath } from "url";
-import { dirname, join } from "path";
 import { Server } from "socket.io";
+import admin from "firebase-admin";
+import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import path from "path";
+import fs from "fs";
+import { getAnalytics } from "firebase/analytics";
+import { fileURLToPath } from "url";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -33,7 +38,7 @@ const io = new Server(expressServer, {
 });
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const __dirname = path.dirname(__filename);
 
 import connectDB from "./config/db.js";
 
@@ -43,7 +48,31 @@ import router from "./routes/router.js";
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "public")));
+
+const serviceAccountPath = path.resolve(
+  __dirname,
+  "./config/serviceAccountKey.json"
+);
+
+const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, "utf-8"));
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDlyc0oRPpBs5JQzlH_C1dpVoOrogHQ7I4",
+  authDomain: "martin-portfolio-app.firebaseapp.com",
+  projectId: "martin-portfolio-app",
+  storageBucket: "martin-portfolio-app.appspot.com",
+  messagingSenderId: "781194994635",
+  appId: "1:781194994635:web:fc3018007738f3b5e50c4e",
+  measurementId: "G-0BR6BZJCPF",
+};
+
+const firebaseApp = initializeApp(firebaseConfig);
+const auth = getAuth(firebaseApp);
 
 app.use("/", router);
 
@@ -64,4 +93,4 @@ io.on("connection", (socket) => {
   });
 });
 
-export { expressServer, io, PORT };
+export { expressServer, io, PORT, admin, auth };
