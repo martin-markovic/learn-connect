@@ -1,3 +1,4 @@
+import { admin, auth } from "../../server.js";
 import User from "../../models/users/userModel.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
@@ -31,16 +32,20 @@ export const registerUser = async (req, res) => {
     });
 
     if (user) {
+      const firebaseToken = await generateFirebaseToken(user._id);
+
       return res.status(201).json({
         _id: user.id,
         name: user.name,
         email: user.email,
         token: generateToken(user._id),
+        firebaseToken,
       });
     } else {
       return res.status(400).json({ message: "Invalid user data" });
     }
   } catch (error) {
+    console.error("Error registering user", error);
     return res.status(500).json({ message: "Server error" });
   }
 };
@@ -57,11 +62,15 @@ export const loginUser = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (user && bcrypt.compare(password, user.password)) {
+      const firebaseToken = await generateFirebaseToken(user._id);
+      await loginWithFirebaseToken(firebaseToken);
+
       return res.status(200).json({
         _id: user.id,
         name: user.name,
         email: user.email,
         token: generateToken(user._id),
+        firebaseToken,
       });
     } else {
       return res.status(400).json({ message: "Invalid credentials" });
@@ -71,8 +80,35 @@ export const loginUser = async (req, res) => {
   }
 };
 
+export const loginWithFirebaseToken = async (firebaseToken) => {
+  try {
+    const userCredential = await auth.signInWithCustomToken(firebaseToken);
+    const user = userCredential.user;
+    return user;
+  } catch (error) {
+    console.error("Error signing in with custom token:", error);
+    throw error;
+  }
+};
+
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: "1d",
   });
+};
+
+const generateFirebaseToken = async (id) => {
+  try {
+    const uid = id.toString();
+
+    if (!uid) {
+      throw new Error("UID is empty");
+    }
+
+    const token = await admin.auth().createCustomToken(uid);
+    return token;
+  } catch (error) {
+    console.error("Error creating custom token:", error);
+    throw error;
+  }
 };
