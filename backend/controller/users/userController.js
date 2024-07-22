@@ -1,5 +1,4 @@
 import { admin, auth } from "../../server.js";
-import { signInWithCustomToken } from "firebase/auth";
 import User from "../../models/users/userModel.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
@@ -34,7 +33,6 @@ export const registerUser = async (req, res) => {
 
     if (user) {
       const firebaseToken = await generateFirebaseToken(user._id);
-      await loginWithFirebaseToken(firebaseToken);
 
       return res.status(201).json({
         _id: user.id,
@@ -47,6 +45,7 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({ message: "Invalid user data" });
     }
   } catch (error) {
+    console.error("Error registering user", error);
     return res.status(500).json({ message: "Server error" });
   }
 };
@@ -83,9 +82,12 @@ export const loginUser = async (req, res) => {
 
 export const loginWithFirebaseToken = async (firebaseToken) => {
   try {
-    await signInWithCustomToken(auth, firebaseToken);
+    const userCredential = await auth.signInWithCustomToken(firebaseToken);
+    const user = userCredential.user;
+    return user;
   } catch (error) {
     console.error("Error signing in with custom token:", error);
+    throw error;
   }
 };
 
@@ -97,9 +99,16 @@ const generateToken = (id) => {
 
 const generateFirebaseToken = async (id) => {
   try {
-    const token = await admin.auth().createCustomToken(id);
+    const uid = id.toString();
+
+    if (!uid) {
+      throw new Error("UID is empty");
+    }
+
+    const token = await admin.auth().createCustomToken(uid);
     return token;
   } catch (error) {
     console.error("Error creating custom token:", error);
+    throw error;
   }
 };
