@@ -1,11 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
 import { loginUser } from "../features/auth/authSlice.js";
 import { toast } from "react-toastify";
 
 function Login() {
-  const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const [formData, setFormData] = useState({
@@ -13,9 +11,8 @@ function Login() {
     password: "",
   });
 
-  const { user, isSuccess } = useSelector((state) => state.auth);
-
   const { email, password } = formData;
+  const { isError, message } = useSelector((state) => state.auth);
 
   const handleInput = (e) => {
     e.preventDefault();
@@ -41,11 +38,9 @@ function Login() {
     }
   };
 
-  useEffect(() => {
-    if (isSuccess || user) {
-      navigate("/");
-    }
-  }, [isSuccess, user, navigate]);
+  if (isError) {
+    toast.error(message);
+  }
 
   return (
     <div className="container">

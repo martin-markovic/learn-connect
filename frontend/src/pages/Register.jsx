@@ -1,11 +1,9 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { registerUser, reset } from "../features/auth/authSlice";
+import { registerUser } from "../features/auth/authSlice";
 import { toast } from "react-toastify";
 
 function Register() {
-  const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const [formData, setFormData] = useState({
@@ -24,19 +22,11 @@ function Register() {
     // avatar
   } = formData;
 
-  const { user, isError, isSuccess, message } = useSelector(
-    (state) => state.auth
-  );
+  const { isError, message } = useSelector((state) => state.auth);
 
-  useEffect(() => {
-    if (isError) {
-      toast.error(message);
-    } else if (isSuccess) {
-      navigate("/");
-    }
-
-    dispatch(reset());
-  }, [user, isError, isSuccess, message, navigate, dispatch]);
+  if (isError) {
+    toast.error(message);
+  }
 
   const handleInput = (e) => {
     e.preventDefault();

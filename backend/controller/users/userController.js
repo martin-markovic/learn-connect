@@ -63,7 +63,6 @@ export const loginUser = async (req, res) => {
 
     if (user && bcrypt.compare(password, user.password)) {
       const firebaseToken = await generateFirebaseToken(user._id);
-      await loginWithFirebaseToken(firebaseToken);
 
       return res.status(200).json({
         _id: user.id,
@@ -77,17 +76,6 @@ export const loginUser = async (req, res) => {
     }
   } catch (error) {
     return res.status(500).json({ message: "Server error" });
-  }
-};
-
-export const loginWithFirebaseToken = async (firebaseToken) => {
-  try {
-    const userCredential = await auth.signInWithCustomToken(firebaseToken);
-    const user = userCredential.user;
-    return user;
-  } catch (error) {
-    console.error("Error signing in with custom token:", error);
-    throw error;
   }
 };
 
