@@ -1,26 +1,17 @@
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
-import { reset } from "../features/auth/authSlice.js";
+import { useSelector } from "react-redux";
+
 import Profile from "../components/Profile";
 import Newsfeed from "../components/Newsfeed.jsx";
+import { useEffect } from "react";
 
 export default function Dashboard() {
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
 
   useEffect(() => {
-    if (!user) {
-      navigate("/login");
-    }
-  }, [user, navigate]);
+    console.log("User in redux store:", user);
 
-  useEffect(() => {
-    return () => {
-      dispatch(reset());
-    };
-  }, [dispatch]);
+    return () => {};
+  }, [user]);
 
   return (
     <main className="flex__container-dashboard">

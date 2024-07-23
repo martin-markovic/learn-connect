@@ -20,7 +20,6 @@ const registerUser = async (userData) => {
     }
 
     const userCredential = await signInWithCustomToken(auth, firebaseToken);
-    const user = userCredential.user;
 
     if (!userCredential.user) {
       throw new Error("Failed to sign in anonymously");
@@ -48,7 +47,9 @@ const loginUser = async (userData) => {
 
     const userCredential = await signInWithCustomToken(auth, firebaseToken);
 
-    const user = userCredential.user;
+    if (!userCredential.user) {
+      throw new Error("Failed to sign in anonymously");
+    }
 
     if (response.data) {
       localStorage.setItem("user", JSON.stringify(response.data));

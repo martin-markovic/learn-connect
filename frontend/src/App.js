@@ -4,16 +4,30 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { ToastContainer } from "react-toastify";
 
 import Dashboard from "./pages/Dashboard.jsx";
 import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx";
 import Header from "./components/Header.jsx";
+import { setUser } from "./features/auth/authSlice.js";
 
 function App() {
+  const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      if (JSON.stringify(parsedUser) !== JSON.stringify(user)) {
+        dispatch(setUser(parsedUser));
+      }
+    }
+  }, [dispatch]);
 
   return (
     <>
