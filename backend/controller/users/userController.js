@@ -1,4 +1,4 @@
-import { admin, auth } from "../../server.js";
+import { admin } from "../../server.js";
 import User from "../../models/users/userModel.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";

@@ -1,7 +1,8 @@
 import { FaSignInAlt, FaSignOutAlt, FaUser } from "react-icons/fa";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { logoutUser, reset } from "../features/auth/authSlice.js";
+import { logoutUser, resetUser } from "../features/auth/authSlice.js";
+import { resetQuizzes } from "../features/quizzes/quizSlice.js";
 
 function Header() {
   const navigate = useNavigate();
@@ -11,7 +12,8 @@ function Header() {
 
   const onClick = async () => {
     await dispatch(logoutUser());
-    dispatch(reset());
+    dispatch(resetQuizzes());
+    dispatch(resetUser());
     navigate("/login");
   };
 

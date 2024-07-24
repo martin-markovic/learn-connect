@@ -1,17 +1,9 @@
 import { useSelector } from "react-redux";
-
-import Profile from "../components/Profile";
+import Chat from "../components/Chat.jsx";
 import Newsfeed from "../components/Newsfeed.jsx";
-import { useEffect } from "react";
 
 export default function Dashboard() {
   const { user } = useSelector((state) => state.auth);
-
-  useEffect(() => {
-    console.log("User in redux store:", user);
-
-    return () => {};
-  }, [user]);
 
   return (
     <main className="flex__container-dashboard">
@@ -19,7 +11,7 @@ export default function Dashboard() {
         <Newsfeed />
       </div>
       <div className="flex__container-item">
-        <Profile />
+        <Chat />
       </div>
     </main>
   );
