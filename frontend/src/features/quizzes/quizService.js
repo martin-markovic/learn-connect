@@ -74,29 +74,6 @@ const getQuizById = async (id, token) => {
   }
 };
 
-const editQuiz = async (id, token) => {
-  try {
-    const config = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
-
-    const response = await axios.get(API_URL + id, config);
-
-    return response.data;
-  } catch (error) {
-    if (error.response) {
-      console.error("Server error:", error.response.data);
-    } else if (error.request) {
-      console.error("No request recevied:", error.request);
-    } else {
-      console.error("Error setting up request:", error.message);
-    }
-    throw error;
-  }
-};
-
 const updateQuiz = async (id, quizData, token) => {
   try {
     const config = {
@@ -116,6 +93,7 @@ const updateQuiz = async (id, quizData, token) => {
     } else {
       console.error("Error setting up request:", error.message);
     }
+    throw error;
   }
 };
 
@@ -146,7 +124,6 @@ const quizService = {
   getQuizzes,
   getQuizById,
   updateQuiz,
-  editQuiz,
   deleteQuiz,
 };
 
