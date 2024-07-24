@@ -12,6 +12,7 @@ import Dashboard from "./pages/Dashboard.jsx";
 import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx";
 import Header from "./components/Header.jsx";
+import Quizzes from "./pages/Quizzes.jsx";
 import { setUser } from "./features/auth/authSlice.js";
 
 function App() {
@@ -27,7 +28,7 @@ function App() {
         dispatch(setUser(parsedUser));
       }
     }
-  }, [dispatch]);
+  }, [dispatch, user]);
 
   return (
     <>
@@ -45,6 +46,10 @@ function App() {
           <Route
             path="/"
             element={user ? <Dashboard /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/quizzes"
+            element={user ? <Quizzes /> : <Navigate to="/login" />}
           />
         </Routes>
       </Router>
