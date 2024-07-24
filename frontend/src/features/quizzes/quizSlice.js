@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import quizService from "./quizService";
+import quizService from "./quizService.js";
 
 const initialState = {
   quizzes: [],
@@ -96,10 +96,10 @@ export const deleteQuiz = createAsyncThunk(
 );
 
 export const quizSlice = createSlice({
-  name: "quiz",
+  name: "quizzes",
   initialState,
   reducers: {
-    reset: (state) => initialState,
+    resetQuizzes: (state) => initialState,
   },
   extraReducers: (builder) => {
     builder
@@ -122,7 +122,7 @@ export const quizSlice = createSlice({
       .addCase(getQuizzes.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
-        state.goals = action.payload;
+        state.quizzes = action.payload;
       })
       .addCase(getQuizzes.rejected, (state, action) => {
         state.isError = true;
@@ -168,5 +168,5 @@ export const quizSlice = createSlice({
   },
 });
 
-export const { reset } = quizSlice.actions;
+export const { resetQuizzes } = quizSlice.actions;
 export default quizSlice.reducer;
