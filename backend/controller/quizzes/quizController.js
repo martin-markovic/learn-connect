@@ -101,7 +101,7 @@ export const deleteQuiz = async (req, res) => {
     const quiz = await Quiz.findById(req.params.id);
 
     if (!quiz) {
-      return res.status(400).json({ message: "Quiz not found" });
+      return res.status(404).json({ message: "Quiz not found" });
     }
 
     const user = await User.findById(req.user.id);
@@ -114,8 +114,11 @@ export const deleteQuiz = async (req, res) => {
       return res.status(401).json({ message: "User not authorized" });
     }
 
+    await Quiz.deleteOne({ _id: req.params.id });
+
     return res.status(200).json({
       message: `quiz ${req.params.id} successfully deleted`,
+      _id: req.params.id,
     });
   } catch (error) {
     return res.status(500).json({

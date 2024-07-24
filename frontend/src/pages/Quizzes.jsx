@@ -1,22 +1,36 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import {
   createQuiz,
   getQuizzes,
+  updateQuiz,
+  deleteQuiz,
   resetQuizzes,
 } from "../features/quizzes/quizSlice.js";
 
-function Quizzes() {
-  const [quizData, setQuizData] = useState({
-    question: "",
-    choices: ["", "", ""],
-    answer: "",
-  });
+const initialState = {
+  question: "",
+  choices: ["", "", ""],
+  answer: "",
+  isEditing: false,
+  editQuizId: null,
+};
 
+function Quizzes() {
+  const [quizFormData, setQuizFormData] = useState(initialState);
+  const [localQuizzes, setLocalQuizzes] = useState([]);
+  const [quizQuery, setQuizQuery] = useState(null);
+
+  const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const { question, choices, answer } = quizData;
-  const { quizzes, isError, isSuccess } = useSelector((state) => state.quizzes);
+  const { question, choices, answer, isEditing } = quizFormData;
+  const {
+    quizzes: reduxQuizzes = [],
+    isError,
+    isSuccess,
+  } = useSelector((state) => state.quizzes);
 
   useEffect(() => {
     dispatch(getQuizzes());
@@ -26,9 +40,18 @@ function Quizzes() {
     };
   }, [dispatch]);
 
+  useEffect(() => {
+    if (Array.isArray(reduxQuizzes)) {
+      setLocalQuizzes(reduxQuizzes);
+    } else {
+      setLocalQuizzes([]);
+    }
+  }, [reduxQuizzes]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setQuizData((prevState) => ({
+
+    setQuizFormData((prevState) => ({
       ...prevState,
       [name]: value,
     }));
@@ -37,25 +60,75 @@ function Quizzes() {
   const handleChoiceChange = (index, value) => {
     const newChoices = [...choices];
     newChoices[index] = value;
-    setQuizData((prevState) => ({
+
+    setQuizFormData((prevState) => ({
       ...prevState,
       choices: newChoices,
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
 
     try {
-      dispatch(createQuiz(quizData));
+      dispatch(createQuiz(quizFormData));
     } catch (error) {
       console.error("Error in handleSubmit:", error);
     }
+
+    setQuizFormData(initialState);
+  };
+
+  const handleDelete = (id) => {
+    try {
+      dispatch(deleteQuiz(id));
+    } catch (error) {
+      console.error("Error in handleDelete:", error);
+    }
+  };
+
+  const handleEdit = (quizToEdit) => {
+    setQuizQuery(quizFormData);
+
+    setQuizFormData({
+      question: quizToEdit.question,
+      choices: quizToEdit.choices,
+      answer: quizToEdit.answer,
+      isEditing: true,
+      editQuizId: quizToEdit._id,
+    });
+  };
+
+  const handleUpdate = (e) => {
+    e.preventDefault();
+
+    try {
+      const quizData = {
+        question: quizFormData.question,
+        choices: quizFormData.choices,
+        answer: quizFormData.answer,
+      };
+
+      if (!quizFormData.editQuizId) {
+        throw new Error("Quiz ID is missing");
+      }
+
+      dispatch(updateQuiz({ id: quizFormData.editQuizId, quizData }));
+    } catch (error) {
+      return console.error("Error in handleUpdate:", error);
+    }
+
+    setQuizFormData(initialState);
+  };
+
+  const cancelUpdate = () => {
+    setQuizFormData(quizQuery || initialState);
+    setQuizQuery(null);
   };
 
   return (
     <div>
-      <form id="quiz-form" onSubmit={handleSubmit}>
+      <form id="quiz-form" onSubmit={isEditing ? handleUpdate : handleSubmit}>
         <div>
           <label htmlFor="question">Add question</label>
           <input
@@ -100,19 +173,45 @@ function Quizzes() {
             onChange={handleChange}
           />
         </div>
-
-        <input type="submit" value="Create Quiz" />
+        {isEditing ? (
+          <>
+            <button type="button" onClick={cancelUpdate}>
+              Cancel
+            </button>
+            <input type="submit" value="Update Quiz" />
+          </>
+        ) : (
+          <input type="submit" value="Create Quiz" />
+        )}
       </form>
-      <div>
-        {quizzes.map((quiz, index) => (
-          <div key={index}>
-            <p>{quiz.question}</p>
-            <button>Open</button>
-            <button>Edit</button>
-            <button>Delete</button>
+      {!isEditing ? (
+        localQuizzes.length > 0 ? (
+          <div>
+            {localQuizzes.map((quiz, index) => (
+              <div key={index}>
+                <p>{quiz.question}</p>
+                <button
+                  onClick={() => {
+                    navigate(`/${quiz._id}`);
+                  }}
+                >
+                  Open
+                </button>
+                <button
+                  onClick={() => {
+                    handleEdit(quiz);
+                  }}
+                >
+                  Edit
+                </button>
+                <button onClick={() => handleDelete(quiz._id)}>Delete</button>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        ) : (
+          <p>No quizzes available.</p>
+        )
+      ) : null}
     </div>
   );
 }

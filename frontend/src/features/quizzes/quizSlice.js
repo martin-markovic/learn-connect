@@ -6,9 +6,6 @@ const initialState = {
   isError: false,
   isLoading: false,
   isSuccess: false,
-  isEditing: false,
-  formMessage: { question: "", choices: [], answer: "" },
-  errorMessage: "",
 };
 
 export const createQuiz = createAsyncThunk(
@@ -45,28 +42,18 @@ export const getQuizzes = createAsyncThunk(
   }
 );
 
-export const editQuiz = createAsyncThunk("quiz/edit", async (id, thunkAPI) => {
-  try {
-    const token = thunkAPI.getState().auth.user.token;
-
-    return await quizService.editQuiz(id, token);
-  } catch (error) {
-    const message =
-      (error.response && error.response && error.response.data.message) ||
-      error.message ||
-      error.toString();
-
-    return thunkAPI.rejectWithValue(message);
-  }
-});
-
 export const updateQuiz = createAsyncThunk(
   "quizzes/update",
   async ({ id, quizData }, thunkAPI) => {
     try {
       const token = thunkAPI.getState().auth.user.token;
 
-      return await quizService.updateQuiz(id, quizData, token);
+      if (!id) {
+        throw new Error("ID is required for updating a quiz.");
+      }
+
+      const response = await quizService.updateQuiz(id, quizData, token);
+      return { id, ...response };
     } catch (error) {
       const message =
         (error.response && error.response && error.response.data.message) ||
@@ -83,7 +70,13 @@ export const deleteQuiz = createAsyncThunk(
   async (id, thunkAPI) => {
     try {
       const token = thunkAPI.getState().auth.user.token;
-      return await quizService.deleteQuiz(id, token);
+
+      if (!id) {
+        throw new Error("ID is required for deleting a quiz.");
+      }
+
+      await quizService.deleteQuiz(id, token);
+      return id;
     } catch (error) {
       const message =
         (error.response && error.response && error.response.data.message) ||
@@ -129,21 +122,6 @@ export const quizSlice = createSlice({
         state.isSuccess = false;
         state.errorMessage = action.payload;
       })
-      .addCase(deleteQuiz.pending, (state) => {
-        state.isLoading = true;
-      })
-      .addCase(deleteQuiz.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.isSuccess = true;
-        state.quizzes = state.quizzes.filter(
-          (quiz) => quiz._id !== action.payload.id
-        );
-      })
-      .addCase(deleteQuiz.rejected, (state, action) => {
-        state.isError = true;
-        state.isSuccess = false;
-        state.errorMessage = action.payload;
-      })
       .addCase(updateQuiz.pending, (state) => {
         state.isLoading = true;
       })
@@ -151,19 +129,25 @@ export const quizSlice = createSlice({
         state.isLoading = false;
         state.isSuccess = true;
         state.quizzes = state.quizzes.map((quiz) =>
-          quiz._id === action.payload._id ? action.payload : quiz
+          quiz._id === action.payload.id ? action.payload : quiz
         );
-        state.isEditing = false;
       })
       .addCase(updateQuiz.rejected, (state, action) => {
         state.isError = true;
         state.isSuccess = false;
         state.errorMessage = action.payload;
-        state.isEditing = false;
       })
-      .addCase(editQuiz.fulfilled, (state, action) => {
-        state.isEditing = true;
-        state.formMessage = action.payload;
+      .addCase(deleteQuiz.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.quizzes = state.quizzes.filter(
+          (quiz) => quiz._id !== action.payload
+        );
+      })
+      .addCase(deleteQuiz.rejected, (state, action) => {
+        state.isError = true;
+        state.isSuccess = false;
+        state.errorMessage = action.payload;
       });
   },
 });
