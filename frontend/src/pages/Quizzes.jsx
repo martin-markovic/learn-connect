@@ -20,6 +20,7 @@ function Quizzes() {
     quizzes: reduxQuizzes = [],
     isError,
     isSuccess,
+    isLoading,
   } = useSelector((state) => state.quizzes);
 
   useEffect(() => {
@@ -51,11 +52,13 @@ function Quizzes() {
     }
   };
 
-  return (
+  return isLoading ? (
+    <p>Loading...</p>
+  ) : (
     <div>
       {openForm ? (
         <QuizForm quiz={editQuiz} onClose={() => setOpenForm(false)} />
-      ) : localQuizzes.length > 0 ? (
+      ) : (
         <div>
           <button
             onClick={() => {
@@ -65,31 +68,36 @@ function Quizzes() {
           >
             Add New Quiz
           </button>
-          {localQuizzes.map((quiz, index) => (
-            <div key={index}>
-              <p>{quiz.question}</p>
-              <button
-                onClick={() => {
-                  navigate(`/${quiz._id}`);
-                }}
-              >
-                Open
-              </button>
-              <button
-                onClick={() => {
-                  handleEdit(quiz);
-                }}
-              >
-                Edit
-              </button>
-              <button onClick={() => handleDelete(quiz._id)}>Delete</button>
+          {localQuizzes.length > 0 ? (
+            <div>
+              {localQuizzes.map((quiz, index) => (
+                <div key={index}>
+                  <p>{quiz.title}</p>
+                  <button
+                    onClick={() => {
+                      navigate(`/${quiz._id}`);
+                    }}
+                  >
+                    Open
+                  </button>
+                  <button
+                    onClick={() => {
+                      handleEdit(quiz);
+                    }}
+                  >
+                    Edit
+                  </button>
+                  <button onClick={() => handleDelete(quiz._id)}>Delete</button>
+                </div>
+              ))}
             </div>
-          ))}
+          ) : (
+            <p>No quizzes created.</p>
+          )}
         </div>
-      ) : (
-        <p>No quizzes available.</p>
       )}
     </div>
   );
 }
+
 export default Quizzes;
