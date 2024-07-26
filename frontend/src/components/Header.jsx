@@ -1,4 +1,10 @@
-import { FaSignInAlt, FaSignOutAlt, FaUser } from "react-icons/fa";
+import {
+  FaSignInAlt,
+  FaSignOutAlt,
+  FaUser,
+  FaClipboard,
+  FaHome,
+} from "react-icons/fa";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logoutUser, resetUser } from "../features/auth/authSlice.js";
@@ -10,8 +16,8 @@ function Header() {
   const location = useLocation();
   const { user } = useSelector((state) => state.auth);
 
-  const onClick = async () => {
-    await dispatch(logoutUser());
+  const handleLogout = () => {
+    dispatch(logoutUser());
     dispatch(resetQuizzes());
     dispatch(resetUser());
     navigate("/login");
@@ -23,10 +29,31 @@ function Header() {
         {user ? (
           <>
             <li>
-              <button onClick={onClick}>
+              <button onClick={handleLogout}>
                 <FaSignOutAlt /> Logout
               </button>
             </li>
+            {location.pathname === "/quizzes" ? (
+              <li>
+                <button
+                  onClick={() => {
+                    navigate("/");
+                  }}
+                >
+                  <FaHome /> Home
+                </button>
+              </li>
+            ) : (
+              <li>
+                <button
+                  onClick={() => {
+                    navigate("/quizzes");
+                  }}
+                >
+                  <FaClipboard /> Quizzes
+                </button>
+              </li>
+            )}
           </>
         ) : (
           <>

@@ -3,18 +3,18 @@ import User from "../../models/users/userModel.js";
 
 export const createQuiz = async (req, res) => {
   try {
-    const { question, answer, choices } = req.body;
+    const { title, questions, timeLimit } = req.body;
 
-    if (!question || !answer || !choices || choices.length < 3) {
+    if (!title || questions.length < 5 || timeLimit < 3 || timeLimit > 10) {
       return res.status(400).json({
         message: "Please add all fields",
       });
     }
 
     const quiz = await Quiz.create({
-      question,
-      answer,
-      choices,
+      title,
+      questions,
+      timeLimit,
       user: req.user.id,
     });
 

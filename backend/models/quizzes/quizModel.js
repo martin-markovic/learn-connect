@@ -1,5 +1,38 @@
 import mongoose from "mongoose";
 
+const questionSchema = new mongoose.Schema({
+  question: {
+    type: String,
+    required: [true, "Please add a question"],
+  },
+  choices: {
+    type: [String],
+    required: [true, "Please add choices"],
+    validate: {
+      validator: function (v) {
+        return v.length === 3;
+      },
+      message: "Please provide 3 choices",
+    },
+  },
+  answer: {
+    type: String,
+    required: [true, "Please add an answer"],
+  },
+});
+
+const scoreSchema = new mongoose.Schema({
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+  score: {
+    type: Number,
+    required: true,
+  },
+});
+
 const quizSchema = mongoose.Schema(
   {
     user: {
@@ -7,17 +40,28 @@ const quizSchema = mongoose.Schema(
       required: true,
       ref: "User",
     },
-    question: {
+    title: {
       type: String,
-      required: [true, "Please add a question"],
+      required: true,
     },
-    choices: {
-      type: [String],
-      required: [true, "Please add choices"],
+    questions: {
+      type: [questionSchema],
+      validate: {
+        validator: function (v) {
+          return v.length >= 5 && v.length <= 20;
+        },
+        message: "Please provide between 5 and 20 questions",
+      },
     },
-    answer: {
-      type: String,
-      required: [true, "Please add an answer"],
+    timeLimit: {
+      type: Number,
+      required: true,
+      validate: {
+        validator: function (v) {
+          return v >= 3 && v <= 10;
+        },
+        message: "Please provide a valid time limit (between 3 and 10 minutes",
+      },
     },
   },
   {
