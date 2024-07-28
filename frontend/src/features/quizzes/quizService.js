@@ -28,7 +28,30 @@ const createQuiz = async (quizData, token) => {
   }
 };
 
-const getQuizzes = async (token) => {
+const getUserQuizzes = async (token) => {
+  try {
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    const response = await axios.get(API_URL, config);
+
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      console.error("Server error:", error.response.data);
+    } else if (error.request) {
+      console.error("No response received:", error.request);
+    } else {
+      console.error("Error setting up request:", error.message);
+    }
+    throw error;
+  }
+};
+
+const getClassQuizzes = async (token) => {
   try {
     const config = {
       headers: {
@@ -121,7 +144,8 @@ const deleteQuiz = async (id, token) => {
 
 const quizService = {
   createQuiz,
-  getQuizzes,
+  getUserQuizzes,
+  getClassQuizzes,
   getQuizById,
   updateQuiz,
   deleteQuiz,
