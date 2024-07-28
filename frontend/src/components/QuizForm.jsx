@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { createQuiz, updateQuiz } from "../features/quizzes/quizSlice.js";
 
 const initialQuestionState = {
@@ -10,6 +10,8 @@ const initialQuestionState = {
 
 const initialQuizState = {
   title: "",
+  subject: "",
+  classroomId: "",
   questions: [],
   timeLimit: 3,
   isEditing: false,
@@ -24,7 +26,8 @@ function QuizForm({ quiz, onClose }) {
   const dispatch = useDispatch();
 
   const { title, timeLimit, isEditing } = quizState;
-  const { question, choices, answer } = questionState;
+  const { question, choices, answer, classroomId } = questionState;
+  const { classrooms = [] } = useSelector((state) => state.auth.user);
 
   useEffect(() => {
     if (quiz) {
@@ -52,7 +55,17 @@ function QuizForm({ quiz, onClose }) {
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    if (name.startsWith("choice-")) {
+    if (name === "subject") {
+      setQuizState((prevState) => ({
+        ...prevState,
+        subject: value || "",
+      }));
+    } else if (name === "classroom") {
+      setQuizState((prevState) => ({
+        ...prevState,
+        classroomId: value || "",
+      }));
+    } else if (name.startsWith("choice-")) {
       const index = parseInt(name.split("-")[1], 10);
       handleChoiceChange(index, value || "");
     } else if (name === "answer") {
@@ -91,10 +104,11 @@ function QuizForm({ quiz, onClose }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const { title, timeLimit, questions, editQuizId } = quizState;
+    const { title, subject, classroom, timeLimit, questions, editQuizId } =
+      quizState;
 
-    if (!title) {
-      console.error("Please provide a quiz title.");
+    if (!title || !subject || !classroom) {
+      console.error("Please add all fields");
       return;
     }
 
@@ -128,6 +142,8 @@ function QuizForm({ quiz, onClose }) {
     try {
       const quizData = {
         title,
+        subject,
+        classroomId,
         questions,
         timeLimit,
       };
@@ -210,6 +226,38 @@ function QuizForm({ quiz, onClose }) {
             value={title || ""}
             onChange={handleChange}
           />
+        </div>
+
+        <div>
+          <label htmlFor="subject">Add subject:</label>
+          <input
+            type="text"
+            id="subject"
+            name="subject"
+            value={quizState.subject || ""}
+            onChange={handleChange}
+          />
+        </div>
+
+        <div>
+          <label htmlFor="classroom">Select Classroom:</label>
+          <select
+            id="classroom"
+            name="classroom"
+            value={quizState.classroomId || ""}
+            onChange={handleChange}
+          >
+            <option value="">Select a classroom</option>
+            {classrooms.length > 0 ? (
+              classrooms.map((classroom) => (
+                <option key={classroom._id} value={classroom._id}>
+                  {classroom.name}
+                </option>
+              ))
+            ) : (
+              <option value="">No classrooms available</option>
+            )}
+          </select>
         </div>
 
         <div>
