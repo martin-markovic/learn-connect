@@ -2,7 +2,8 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import quizService from "./quizService.js";
 
 const initialState = {
-  quizzes: [],
+  userQuizzes: [],
+  classQuizzes: [],
   isError: false,
   isLoading: false,
   isSuccess: false,
@@ -25,12 +26,29 @@ export const createQuiz = createAsyncThunk(
   }
 );
 
-export const getQuizzes = createAsyncThunk(
-  "quizzes/getAll",
+export const getUserQuizzes = createAsyncThunk(
+  "quizzes/getUser",
   async (_, thunkAPI) => {
     try {
       const token = thunkAPI.getState().auth.user.token;
-      return await quizService.getQuizzes(token);
+      return await quizService.getUserQuizzes(token);
+    } catch (error) {
+      const message =
+        (error.response && error.response && error.response.data.message) ||
+        error.message ||
+        error.toString();
+
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+export const getClassQuizzes = createAsyncThunk(
+  "quizzes/getClass",
+  async (_, thunkAPI) => {
+    try {
+      const token = thunkAPI.getState().auth.user.token;
+      return await quizService.getClassQuizzes(token);
     } catch (error) {
       const message =
         (error.response && error.response && error.response.data.message) ||
@@ -102,22 +120,35 @@ export const quizSlice = createSlice({
       .addCase(createQuiz.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
-        state.quizzes.push(action.payload);
+        state.userQuizzes.push(action.payload);
       })
       .addCase(createQuiz.rejected, (state, action) => {
         state.isError = true;
         state.isSuccess = false;
         state.errorMessage = action.payload;
       })
-      .addCase(getQuizzes.pending, (state) => {
+      .addCase(getUserQuizzes.pending, (state) => {
         state.isLoading = true;
       })
-      .addCase(getQuizzes.fulfilled, (state, action) => {
+      .addCase(getUserQuizzes.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
         state.quizzes = action.payload;
       })
-      .addCase(getQuizzes.rejected, (state, action) => {
+      .addCase(getUserQuizzes.rejected, (state, action) => {
+        state.isError = true;
+        state.isSuccess = false;
+        state.errorMessage = action.payload;
+      })
+      .addCase(getClassQuizzes.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(getClassQuizzes.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.quizzes = action.payload;
+      })
+      .addCase(getClassQuizzes.rejected, (state, action) => {
         state.isError = true;
         state.isSuccess = false;
         state.errorMessage = action.payload;

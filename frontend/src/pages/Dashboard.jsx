@@ -1,6 +1,7 @@
 import { useSelector } from "react-redux";
 import Chat from "../components/Chat.jsx";
 import Newsfeed from "../components/Newsfeed.jsx";
+import Classroom from "../components/Classroom.jsx";
 
 export default function Dashboard() {
   const { user } = useSelector((state) => state.auth);
@@ -13,6 +14,7 @@ export default function Dashboard() {
       <div className="flex__container-item">
         <Chat />
       </div>
+      <Classroom />
     </main>
   );
 }

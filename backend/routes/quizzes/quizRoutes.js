@@ -4,6 +4,7 @@ const quizRoutes = Router();
 import {
   createQuiz,
   getAllQuizzes,
+  getQuizzesByClassroom,
   getQuiz,
   updateQuiz,
   deleteQuiz,
@@ -17,4 +18,5 @@ quizRoutes
   .put(protect, updateQuiz)
   .delete(protect, deleteQuiz);
 
+quizRoutes.get("/:classroomId", getQuizzesByClassroom);
 export default quizRoutes;
