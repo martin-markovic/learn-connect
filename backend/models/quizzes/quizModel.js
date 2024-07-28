@@ -21,24 +21,17 @@ const questionSchema = new mongoose.Schema({
   },
 });
 
-const scoreSchema = new mongoose.Schema({
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
-  },
-  score: {
-    type: Number,
-    required: true,
-  },
-});
-
 const quizSchema = mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
       ref: "User",
+    },
+    classroom: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: "Classroom",
     },
     title: {
       type: String,
@@ -60,7 +53,7 @@ const quizSchema = mongoose.Schema(
         validator: function (v) {
           return v >= 3 && v <= 10;
         },
-        message: "Please provide a valid time limit (between 3 and 10 minutes",
+        message: "Please provide a valid time limit (between 3 and 10 minutes)",
       },
     },
   },
