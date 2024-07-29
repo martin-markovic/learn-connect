@@ -54,6 +54,24 @@ header {
   height: fit-content;
 }
 
+.quiz__list {
+  margin-top: 0;
+  display: inherit;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  height: 40vh;
+}
+
+.quiz__list-controller {
+  display: inherit;
+  flex-direction: row;
+  justify-content: space-between;
+  justify-self: center;
+  width: 30%;
+  margin-bottom: 4rem;
+}
+
 form {
   display: flex;
   flex-direction: column;
