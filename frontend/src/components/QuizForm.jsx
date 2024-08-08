@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { createQuiz, updateQuiz } from "../features/quizzes/quizSlice.js";
+import { toast } from "react-toastify";
 
 const initialQuestionState = {
   question: "",
@@ -108,12 +109,12 @@ function QuizForm({ quiz, onClose }) {
       quizState;
 
     if (!title || !subject || !classroom) {
-      console.error("Please add all fields");
+      toast.error("Please add all fields");
       return;
     }
 
     if (!timeLimit || timeLimit < 3 || timeLimit > 10) {
-      console.error(
+      toast.error(
         "Please provide a valid time limit (between 3 and 10 minutes)."
       );
       return;
@@ -122,7 +123,7 @@ function QuizForm({ quiz, onClose }) {
     const quizLen = questions.length;
 
     if (quizLen < 5 || quizLen > 20) {
-      console.error("Please provide between 5 and 20 questions");
+      toast.error("Please provide between 5 and 20 questions");
       return;
     }
 
@@ -132,7 +133,7 @@ function QuizForm({ quiz, onClose }) {
         question.choices.some((choice) => !choice) ||
         !question.answer
       ) {
-        console.error(
+        toast.error(
           "Please ensure all questions have a question text, choices, and an answer."
         );
         return;
@@ -155,7 +156,7 @@ function QuizForm({ quiz, onClose }) {
       }
       onClose();
     } catch (error) {
-      console.error("Error in handleSubmit:", error);
+      toast.error(error.message);
     }
   };
 
@@ -198,7 +199,7 @@ function QuizForm({ quiz, onClose }) {
 
       setQuestionState(initialQuestionState);
     } catch (error) {
-      console.error("handleCreateQuestion error:", error);
+      toast.error(error.message);
     }
   };
 

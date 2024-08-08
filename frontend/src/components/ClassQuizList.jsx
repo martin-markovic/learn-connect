@@ -49,7 +49,7 @@ function ClassQuizList() {
   return (
     <div>
       <div>
-        <label htmlFor="quiz-search">Search for a quiz:</label>
+        <span>Search for a quiz:</span>
         <input
           type="search"
           id="quiz-search"
