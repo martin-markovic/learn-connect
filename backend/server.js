@@ -1,8 +1,6 @@
 import express from "express";
 import { Server } from "socket.io";
-import admin from "firebase-admin";
 import path from "path";
-import fs from "fs";
 import { fileURLToPath } from "url";
 import dotenv from "dotenv";
 dotenv.config();
@@ -47,19 +45,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
 
-const serviceAccountPath = path.resolve(
-  __dirname,
-  "./config/serviceAccountKey.json"
-);
-
-const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, "utf-8"));
-
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-});
-
-const auth = admin.auth();
-
 app.use("/", router);
 
 io.on("connection", (socket) => {
@@ -79,4 +64,4 @@ io.on("connection", (socket) => {
   });
 });
 
-export { expressServer, io, PORT, admin, auth };
+export { expressServer, io, PORT };
