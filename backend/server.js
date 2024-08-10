@@ -21,7 +21,10 @@ const expressServer = app.listen(PORT, () => {
   console.log(`Server is running...go to http://localhost:${PORT}`);
 });
 
-const io = new Server(expressServer, {
+import configureSocket from "./config/socketIo.js";
+import handleSocketConnection from "./controller/chat/socketController.js";
+
+const ioServer = new Server(expressServer, {
   cors: {
     origin: [
       "http://localhost:3000",
@@ -31,6 +34,9 @@ const io = new Server(expressServer, {
     credentials: true,
   },
 });
+
+configureSocket(ioServer);
+handleSocketConnection(ioServer);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -47,21 +53,4 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/", router);
 
-io.on("connection", (socket) => {
-  console.log(`User connected to socket: ${socket.id}`);
-
-  socket.on("chat message", (data) => {
-    const { friend, message } = data;
-    socket.broadcast.emit("chat message", { friend, message });
-  });
-
-  socket.on("chat activity", (name) => {
-    socket.broadcast.emit("chat activity", name);
-  });
-
-  socket.on("disconnect", () => {
-    console.log("user disconnected");
-  });
-});
-
-export { expressServer, io, PORT };
+export { expressServer, ioServer, PORT };
