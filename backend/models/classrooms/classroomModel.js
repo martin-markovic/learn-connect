@@ -1,6 +1,10 @@
 import mongoose from "mongoose";
 
 const classroomSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+  },
   subject: {
     type: String,
     required: true,
@@ -24,6 +28,13 @@ const classroomSchema = new mongoose.Schema({
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Score",
+    },
+  ],
+  chat: [
+    {
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: "Chat",
+      default: [],
     },
   ],
 });
