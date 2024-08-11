@@ -1,14 +1,20 @@
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 
 function Classroom() {
   const [roomList, setRoomList] = useState([]);
+
+  const dispatch = useDispatch();
 
   const { classrooms = [] } = useSelector((state) => state.auth.user);
 
   useEffect(() => {
     setRoomList(classrooms);
   }, []);
+
+  const handleClick = () => {
+    dispatch();
+  };
 
   return (
     <div>
@@ -23,7 +29,9 @@ function Classroom() {
           ))}
         </select>
       </div>
-      <button type="button">Enroll</button>
+      <button type="button" onClick={handleClick}>
+        Enroll
+      </button>
     </div>
   );
 }
