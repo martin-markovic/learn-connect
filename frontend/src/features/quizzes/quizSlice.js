@@ -133,7 +133,7 @@ export const quizSlice = createSlice({
       .addCase(getUserQuizzes.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
-        state.quizzes = action.payload;
+        state.userQuizzes = action.payload;
       })
       .addCase(getUserQuizzes.rejected, (state, action) => {
         state.isError = true;
@@ -146,7 +146,7 @@ export const quizSlice = createSlice({
       .addCase(getClassQuizzes.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
-        state.quizzes = action.payload;
+        state.classQuizzes = action.payload;
       })
       .addCase(getClassQuizzes.rejected, (state, action) => {
         state.isError = true;
