@@ -2,7 +2,7 @@ import axios from "axios";
 
 const API_URL = "http://127.0.0.1:8000/api/chat/";
 
-const sendMessage = async (messageData, token) => {
+const sendFriendMessage = async (messageData, token) => {
   try {
     const config = {
       headers: {
@@ -18,7 +18,7 @@ const sendMessage = async (messageData, token) => {
   }
 };
 
-const joinClassroom = async (classroomId, token) => {
+const joinClassroom = async (classroomName, token) => {
   try {
     const config = {
       headers: {
@@ -27,8 +27,8 @@ const joinClassroom = async (classroomId, token) => {
     };
 
     const response = await axios.post(
-      `${API_URL}:${classroomId}`,
-      classroomId,
+      `${API_URL}classroom/join`,
+      { classroomName },
       config
     );
     return response.data;
@@ -38,7 +38,7 @@ const joinClassroom = async (classroomId, token) => {
   }
 };
 
-const getMessages = async (token) => {
+const getUserMessages = async (token) => {
   try {
     const config = {
       headers: {
@@ -54,7 +54,7 @@ const getMessages = async (token) => {
   }
 };
 
-const getUserClassrooms = async (token) => {
+const getClassrooms = async (token) => {
   try {
     const config = {
       headers: {
@@ -62,7 +62,26 @@ const getUserClassrooms = async (token) => {
       },
     };
 
-    const response = await axios.get(API_URL, config);
+    const response = await axios.get(`${API_URL}/classrooms`, config);
+    return response.data;
+  } catch (error) {
+    handleError(error);
+    throw error;
+  }
+};
+
+const getClassroomMessages = async (classroomId, token) => {
+  try {
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    const response = await axios.get(
+      `${API_URL}/classroom/${classroomId}/messages`,
+      config
+    );
     return response.data;
   } catch (error) {
     handleError(error);
@@ -78,7 +97,10 @@ const leaveClassroom = async (classroomId, token) => {
       },
     };
 
-    const response = await axios.delete(API_URL, classroomId, token);
+    const response = await axios.delete(
+      `${API_URL}/classroom/${classroomId}/leave`,
+      config
+    );
     return response.data;
   } catch (error) {
     handleError(error);
@@ -97,10 +119,11 @@ const handleError = (error) => {
 };
 
 const chatService = {
-  sendMessage,
-  getMessages,
+  sendFriendMessage,
   joinClassroom,
-  getUserClassrooms,
+  getUserMessages,
+  getClassroomMessages,
+  getClassrooms,
   leaveClassroom,
 };
 
