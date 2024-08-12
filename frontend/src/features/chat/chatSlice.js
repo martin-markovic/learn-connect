@@ -2,15 +2,15 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import chatService from "./chatService.js";
 
 const initialState = {
-  isSuccess,
-  isLoading,
-  isError,
+  isLoading: false,
+  isSuccess: false,
+  isError: false,
   classrooms: [],
   messages: {},
 };
 
-export const sendMessage = createAsyncThunk(
-  "chat/send",
+export const sendFriendMessage = createAsyncThunk(
+  "chat/sendFriendMessage",
   async (messageData, thunkAPI) => {
     try {
       const token = JSON.parse(localStorage.getItem("user")).token;
@@ -19,7 +19,7 @@ export const sendMessage = createAsyncThunk(
         throw new Error("Token not found");
       }
 
-      return await chatService.sendMessage(messageData, token);
+      return await chatService.sendFriendMessage(messageData, token);
     } catch (error) {
       const message =
         (error.response && error.response && error.response.data.message) ||
@@ -31,8 +31,30 @@ export const sendMessage = createAsyncThunk(
   }
 );
 
+export const sendClassroomMessage = createAsyncThunk(
+  "chat/sendClassroomMessage",
+  async (messageData, thunkAPI) => {
+    try {
+      const token = JSON.parse(localStorage.getItem("user")).token;
+
+      if (!token) {
+        throw new Error("Token not found");
+      }
+
+      return await chatService.sendClassroomMessage(messageData, token);
+    } catch (error) {
+      const message =
+        (error.response && error.response.data.message) ||
+        error.message ||
+        error.toString();
+
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
 export const joinClassroom = createAsyncThunk(
-  "chat/joinClass",
+  "chat/joinClassroom",
   async (classroomId, thunkAPI) => {
     try {
       const token = JSON.parse(localStorage.getItem("user")).token;
@@ -53,26 +75,12 @@ export const joinClassroom = createAsyncThunk(
   }
 );
 
-export const getMessages = createAsyncThunk("chat/get", async (_, thunkAPI) => {
-  try {
-    const token = thunkAPI.getState().auth.user.token;
-    return await chatService.getMessages(token);
-  } catch (error) {
-    const message =
-      (error.response && error.response.data.message) ||
-      error.message ||
-      error.toString();
-
-    return thunkAPI.rejectWithValue(message);
-  }
-});
-
-const getUserClassrooms = createAsyncThunk(
-  "chat/getClasses",
+export const getUserMessages = createAsyncThunk(
+  "chat/getUserMessages",
   async (_, thunkAPI) => {
     try {
       const token = thunkAPI.getState().auth.user.token;
-      return await chatService.getUserClassrooms(token);
+      return await chatService.getUserMessages(token);
     } catch (error) {
       const message =
         (error.response && error.response.data.message) ||
@@ -84,8 +92,42 @@ const getUserClassrooms = createAsyncThunk(
   }
 );
 
-const leaveClassroom = createAsyncThunk(
-  "chat/leaveClass",
+export const getClassroomMessages = createAsyncThunk(
+  "chat/getClassroomMessages",
+  async (classroomId, thunkAPI) => {
+    try {
+      const token = thunkAPI.getState().auth.user.token;
+      return await chatService.getClassroomMessages(classroomId, token);
+    } catch (error) {
+      const message =
+        (error.response && error.response.data.message) ||
+        error.message ||
+        error.toString();
+
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+export const getClassrooms = createAsyncThunk(
+  "chat/getClassrooms",
+  async (_, thunkAPI) => {
+    try {
+      const token = thunkAPI.getState().auth.user.token;
+      return await chatService.getClassrooms(token);
+    } catch (error) {
+      const message =
+        (error.response && error.response.data.message) ||
+        error.message ||
+        error.toString();
+
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+export const leaveClassroom = createAsyncThunk(
+  "chat/leaveClassroom",
   async (classroomId, thunkAPI) => {
     try {
       const token = thunkAPI.getState().auth.user.token;
@@ -114,15 +156,35 @@ const chatSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(sendMessage.pending, (state) => {
+      .addCase(sendFriendMessage.pending, (state) => {
         state.isLoading = true;
       })
-      .addCase(sendMessage.fulfilled, (state, action) => {
+      .addCase(sendFriendMessage.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
+        const friend = action.payload.receiver;
+        if (!state.messages[friend]) {
+          state.messages[friend] = [];
+        }
         state.messages[friend].push(action.payload);
       })
-      .addCase(sendMessage.rejected, (state) => {
+      .addCase(sendFriendMessage.rejected, (state) => {
+        state.isSuccess = false;
+        state.isError = true;
+      })
+      .addCase(sendClassroomMessage.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(sendClassroomMessage.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        const classroomId = action.payload.classroom;
+        if (!state.messages[classroomId]) {
+          state.messages[classroomId] = [];
+        }
+        state.messages[classroomId].push(action.payload);
+      })
+      .addCase(sendClassroomMessage.rejected, (state) => {
         state.isSuccess = false;
         state.isError = true;
       })
@@ -138,31 +200,60 @@ const chatSlice = createSlice({
         state.isSuccess = false;
         state.isError = true;
       })
-      .addCase(getMessages.pending, (state) => {
+      .addCase(getUserMessages.pending, (state) => {
         state.isLoading = true;
       })
-      .addCase(getMessages.fulfilled, (state, action) => {
+      .addCase(getUserMessages.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
-        state.messages = action.payload;
+        action.payload.forEach((message) => {
+          const friend =
+            message.sender._id === state.auth.user._id
+              ? message.receiver._id
+              : message.sender._id;
+          if (!state.messages[friend]) {
+            state.messages[friend] = [];
+          }
+          state.messages[friend].push(message);
+        });
       })
-      .addCase(getMessages.rejected, (state) => {
+      .addCase(getUserMessages.rejected, (state) => {
         state.isSuccess = false;
         state.isError = true;
       })
-      .addCase(getUserClassrooms.pending, (state) => {
+      .addCase(getClassroomMessages.pending, (state) => {
         state.isLoading = true;
       })
-      .addCase(getUserClassrooms.fulfilled, (state, action) => {
+      .addCase(getClassroomMessages.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
-        state.messages = action.payload;
+        const classroomId = action.meta.arg;
+        if (!state.messages[classroomId]) {
+          state.messages[classroomId] = [];
+        }
+        state.messages[classroomId] = action.payload;
       })
-      .addCase(getUserClassrooms.fulfilled, (state) => {
+      .addCase(getClassroomMessages.rejected, (state) => {
         state.isSuccess = false;
         state.isError = true;
+      })
+      .addCase(getClassrooms.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(getClassrooms.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.classrooms = action.payload;
+      })
+      .addCase(getClassrooms.rejected, (state) => {
+        state.isSuccess = false;
+        state.isError = true;
+      })
+      .addCase(leaveClassroom.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
         state.classrooms = state.classrooms.filter(
-          (classroom) => classroom.id !== action.payload.id
+          (classroom) => classroom._id !== action.payload._id
         );
       })
       .addCase(leaveClassroom.rejected, (state) => {

@@ -5,17 +5,28 @@ import { protect } from "../../middleware/authMiddleware.js";
 import {
   sendFriendMessage,
   sendClassroomMessage,
-  getClassroomMessages,
   getUserMessages,
+  getClassroomMessages,
+  getClassrooms,
+  joinClassroom,
+  leaveClassroom,
 } from "../../controller/chat/chatController.js";
 
 chatRoutes
   .route("/")
   .post(protect, sendFriendMessage)
   .get(protect, getUserMessages);
+
+chatRoutes.route("/classroom/:id").post(protect, sendClassroomMessage);
+
 chatRoutes
-  .route("/:id")
+  .route("/classroom/:id/messages")
   .post(protect, sendClassroomMessage)
   .get(protect, getClassroomMessages);
+
+chatRoutes.route("/classroom/join").post(protect, joinClassroom);
+chatRoutes.route("/classroom/leave").post(protect, leaveClassroom);
+
+chatRoutes.route("/classrooms").get(protect, getClassrooms);
 
 export default chatRoutes;
