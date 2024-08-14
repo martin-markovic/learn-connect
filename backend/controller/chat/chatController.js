@@ -1,16 +1,30 @@
 import Chat from "../../models/chat/chatModel.js";
 import Classroom from "../../models/classrooms/classroomModel.js";
-import { findCommonClassroom } from "../../utils/chat/chatUtils.js";
 
 export const sendFriendMessage = async (req, res) => {
   try {
     const { receiverName, text } = req.body;
 
-    const { messageReceiver, commonClassroom } = await findCommonClassroom(
-      req.user.id,
-      receiverName
+    // Find the receiver user by their name
+    const messageReceiver = await User.findOne({ username: receiverName });
+
+    if (!messageReceiver) {
+      return res.status(404).json({ message: "Receiver not found" });
+    }
+
+    // Find a common classroom between the sender and the receiver
+    const { commonClassroom } = await findCommonClassroom(
+      req.user._id,
+      messageReceiver._id
     );
 
+    if (!commonClassroom) {
+      return res
+        .status(400)
+        .json({ message: "No common classroom found between users" });
+    }
+
+    // Create a new chat message
     const newMessage = new Chat({
       sender: req.user._id,
       receiver: messageReceiver._id,
@@ -18,6 +32,7 @@ export const sendFriendMessage = async (req, res) => {
       classroom: commonClassroom._id,
     });
 
+    // Save the message to the database
     await newMessage.save();
 
     return res.status(200).json(newMessage);
@@ -37,7 +52,7 @@ export const sendClassroomMessage = async (req, res) => {
       return res.status(404).json({ message: "Classroom not found" });
     }
 
-    const isMember = classroom.members.includes(req.user._id);
+    const isMember = classroom.students.includes(req.user._id);
     if (!isMember) {
       return res
         .status(403)
@@ -62,21 +77,15 @@ export const sendClassroomMessage = async (req, res) => {
 
 export const joinClassroom = async (req, res) => {
   try {
-    const { classroomId } = req.body;
-
-    if (!classroomId) {
-      return res.status(400).json({ message: "Please provide classroom ID" });
-    }
-
-    const token = req.user.token;
-
-    if (!token) {
-      return res.status(401).json({ message: "User not authorized" });
-    }
+    const { classroomName } = req.body;
 
     const userId = req.user._id;
 
-    const classroom = await Classroom.findById(classroomId);
+    if (!classroomName) {
+      return res.status(400).json({ message: "Classroom name is required" });
+    }
+
+    const classroom = await Classroom.findOne({ name: classroomName });
     if (!classroom) {
       return res.status(404).json({ message: "Classroom not found" });
     }
@@ -88,17 +97,9 @@ export const joinClassroom = async (req, res) => {
     classroom.students.push(userId);
     await classroom.save();
 
-    const newChat = new Chat({
-      sender: userId,
-      classroom: classroomId,
-      text: "User has joined the classroom",
-    });
-
-    await newChat.save();
-
     return res.status(200).json({
       message: "User joined classroom successfully",
-      newChat,
+      classroom,
     });
   } catch (error) {
     return res.status(500).json({
@@ -142,6 +143,17 @@ export const getClassroomMessages = async (req, res) => {
       .sort({ createdAt: -1 });
 
     return res.status(200).json(classroomMessages);
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+export const getClassrooms = async (req, res) => {
+  try {
+    const classrooms = await Classroom.find();
+    return res.status(200).json(classrooms);
   } catch (error) {
     return res.status(500).json({
       message: error.message,
