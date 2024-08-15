@@ -1,35 +1,80 @@
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { getClassrooms, joinClassroom } from "../features/chat/chatSlice.js";
+import { toast } from "react-toastify";
 
 function Classroom() {
-  const [roomList, setRoomList] = useState([]);
+  const [selectedClassroom, setSelectedClassroom] = useState("");
 
   const dispatch = useDispatch();
 
-  const { classrooms = [] } = useSelector((state) => state.auth.user);
+  const {
+    classrooms = [],
+    isLoading,
+    isError,
+    errorMessage,
+  } = useSelector((state) => state.chat);
 
   useEffect(() => {
-    setRoomList(classrooms);
-  }, []);
+    if (classrooms.length === 0) {
+      dispatch(getClassrooms());
+    }
+  }, [dispatch, classrooms.length]);
 
-  const handleClick = () => {
-    dispatch();
+  useEffect(() => {
+    if (isError && errorMessage) {
+      console.log("Error in Classroom component: ", errorMessage);
+    }
+  }, [isError, errorMessage]);
+
+  const handleChange = (e) => {
+    setSelectedClassroom(e.target.value);
+  };
+
+  const handleJoinClassroom = () => {
+    if (selectedClassroom) {
+      dispatch(joinClassroom(selectedClassroom))
+        .unwrap()
+        .then(() => {
+          toast.success("Successfully joined the classroom!");
+          dispatch(getClassrooms());
+          setSelectedClassroom("");
+        })
+        .catch((error) => {
+          console.error(`Classroom Error: ${error.message}`);
+          toast.error("Failed to join classroom.");
+        });
+    } else {
+      toast.error("Please select a classroom to join");
+    }
   };
 
   return (
     <div>
       <div>
-        <label htmlFor="classroom-select">Select Classroom:</label>
-        <select id="classroom-select">
-          <option value="">Select a classroom</option>
-          {roomList.map((classroom) => (
-            <option key={classroom._id} value={classroom._id}>
-              {classroom.name}
-            </option>
-          ))}
-        </select>
+        {isLoading ? (
+          <p>Loading classrooms...</p>
+        ) : classrooms.length === 0 ? (
+          <p>No classrooms available.</p>
+        ) : (
+          <div>
+            <label htmlFor="classroom-select">Select a Classroom:</label>
+            <select
+              id="classroom-select"
+              value={selectedClassroom}
+              onChange={handleChange}
+            >
+              <option value="" disabled></option>
+              {classrooms.map((classroom) => (
+                <option key={classroom.name} value={classroom.name}>
+                  {classroom.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
-      <button type="button" onClick={handleClick}>
+      <button type="button" onClick={handleJoinClassroom}>
         Enroll
       </button>
     </div>
