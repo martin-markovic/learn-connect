@@ -18,7 +18,21 @@ const sendFriendMessage = async (messageData, token) => {
   }
 };
 
-const joinClassroom = async (classroomName, token) => {
+const joinClassroom = async (classroomId, token) => {
+  try {
+    const response = await axios.post(
+      API_URL + "classroom/join",
+      { classroomId },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    return response.data;
+  } catch (error) {
+    handleError(error);
+    throw error;
+  }
+};
+
+const leaveClassroom = async (classroomId, token) => {
   try {
     const config = {
       headers: {
@@ -27,8 +41,8 @@ const joinClassroom = async (classroomName, token) => {
     };
 
     const response = await axios.post(
-      `${API_URL}classroom/join`,
-      { classroomName },
+      `${API_URL}classroom/leave`,
+      { classroomId },
       config
     );
     return response.data;
@@ -56,13 +70,10 @@ const getUserMessages = async (token) => {
 
 const getClassrooms = async (token) => {
   try {
-    const config = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
+    const response = await axios.get(API_URL + "classrooms", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
-    const response = await axios.get(`${API_URL}/classrooms`, config);
     return response.data;
   } catch (error) {
     handleError(error);
@@ -80,25 +91,6 @@ const getClassroomMessages = async (classroomId, token) => {
 
     const response = await axios.get(
       `${API_URL}/classroom/${classroomId}/messages`,
-      config
-    );
-    return response.data;
-  } catch (error) {
-    handleError(error);
-    throw error;
-  }
-};
-
-const leaveClassroom = async (classroomId, token) => {
-  try {
-    const config = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
-
-    const response = await axios.delete(
-      `${API_URL}/classroom/${classroomId}/leave`,
       config
     );
     return response.data;
