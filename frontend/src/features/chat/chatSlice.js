@@ -82,6 +82,30 @@ export const joinClassroom = createAsyncThunk(
   }
 );
 
+export const leaveClassroom = createAsyncThunk(
+  "chat/leaveClassroom",
+  async (classroomId, thunkAPI) => {
+    try {
+      const token = thunkAPI.getState().auth.user.token;
+
+      if (!token) {
+        throw new Error("Token not found");
+      }
+
+      return await chatService.leaveClassroom(classroomId, token);
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
 export const getUserMessages = createAsyncThunk(
   "chat/getUserMessages",
   async (_, thunkAPI) => {
@@ -132,30 +156,6 @@ export const getClassrooms = createAsyncThunk(
       const data = await chatService.getClassrooms(token);
 
       return data;
-    } catch (error) {
-      const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-
-      return thunkAPI.rejectWithValue(message);
-    }
-  }
-);
-
-export const leaveClassroom = createAsyncThunk(
-  "chat/leaveClassroom",
-  async (classroomId, thunkAPI) => {
-    try {
-      const token = thunkAPI.getState().auth.user.token;
-
-      if (!token) {
-        throw new Error("Token not found");
-      }
-
-      return await chatService.leaveClassroom(classroomId, token);
     } catch (error) {
       const message =
         (error.response &&
