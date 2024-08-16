@@ -2,12 +2,12 @@ import { findCommonClassroom } from "../../utils/chat/chatUtils.js";
 import Chat from "../../models/chat/chatModel.js";
 import Classroom from "../../models/classrooms/classroomModel.js";
 
-const handleSocketConnection = (server) => {
-  server.on("connection", (socket) => {
+const handleSocketConnection = (io) => {
+  io.on("connection", (socket) => {
     console.log(`User connected to socket: ${socket.id}`);
 
     socket.on("joinRoom", async (room) => {
-      const classroom = await Classroom.findById(room);
+      const classroom = await Classroom.findOne({ name: room });
       if (classroom && classroom.students.includes(socket.user._id)) {
         socket.join(room);
         console.log(`User ${socket.id} joined room ${room}`);

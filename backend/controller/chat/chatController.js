@@ -5,14 +5,12 @@ export const sendFriendMessage = async (req, res) => {
   try {
     const { receiverName, text } = req.body;
 
-    // Find the receiver user by their name
     const messageReceiver = await User.findOne({ username: receiverName });
 
     if (!messageReceiver) {
       return res.status(404).json({ message: "Receiver not found" });
     }
 
-    // Find a common classroom between the sender and the receiver
     const { commonClassroom } = await findCommonClassroom(
       req.user._id,
       messageReceiver._id
@@ -24,7 +22,6 @@ export const sendFriendMessage = async (req, res) => {
         .json({ message: "No common classroom found between users" });
     }
 
-    // Create a new chat message
     const newMessage = new Chat({
       sender: req.user._id,
       receiver: messageReceiver._id,
@@ -32,7 +29,6 @@ export const sendFriendMessage = async (req, res) => {
       classroom: commonClassroom._id,
     });
 
-    // Save the message to the database
     await newMessage.save();
 
     return res.status(200).json(newMessage);
@@ -77,15 +73,15 @@ export const sendClassroomMessage = async (req, res) => {
 
 export const joinClassroom = async (req, res) => {
   try {
-    const { classroomName } = req.body;
+    const { classroomId } = req.body;
 
     const userId = req.user._id;
 
-    if (!classroomName) {
-      return res.status(400).json({ message: "Classroom name is required" });
+    if (!classroomId) {
+      return res.status(400).json({ message: "Classroom ID is required" });
     }
 
-    const classroom = await Classroom.findOne({ name: classroomName });
+    const classroom = await Classroom.findById(classroomId);
     if (!classroom) {
       return res.status(404).json({ message: "Classroom not found" });
     }
@@ -101,6 +97,47 @@ export const joinClassroom = async (req, res) => {
       message: "User joined classroom successfully",
       classroom,
     });
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+export const leaveClassroom = async (req, res) => {
+  try {
+    const { classroomId } = req.body;
+
+    if (!classroomId) {
+      return res.status(400).json({ message: "Please provide classroom ID" });
+    }
+
+    const userId = req.user._id || req.user.id;
+
+    if (!userId) {
+      return res.status(401).json({ message: "User not authorized" });
+    }
+
+    const classroom = await Classroom.findById(classroomId);
+
+    if (!classroom) {
+      return res.status(404).json({ message: "Classroom not found" });
+    }
+
+    if (!classroom.students.includes(userId)) {
+      return res
+        .status(403)
+        .json({ message: "You are not a member of this classroom" });
+    }
+    classroom.students = classroom.students.filter(
+      (student) => !student.equals(userId)
+    );
+
+    await classroom.save();
+
+    await Chat.deleteMany({ sender: userId, classroom: classroomId });
+
+    return res.status(200).json({ message: "Successfully left the classroom" });
   } catch (error) {
     return res.status(500).json({
       message: error.message,
@@ -138,7 +175,7 @@ export const getClassroomMessages = async (req, res) => {
         .json({ message: "You are not a member of this classroom" });
     }
 
-    const classroomMessages = await Chat.find({ classroom: classroomId })
+    const classroomMessages = await Chat.findOne({ classroom: classroomId })
       .populate("sender")
       .sort({ createdAt: -1 });
 
@@ -153,48 +190,8 @@ export const getClassroomMessages = async (req, res) => {
 export const getClassrooms = async (req, res) => {
   try {
     const classrooms = await Classroom.find();
+
     return res.status(200).json(classrooms);
-  } catch (error) {
-    return res.status(500).json({
-      message: error.message,
-    });
-  }
-};
-
-export const leaveClassroom = async (req, res) => {
-  try {
-    const { classroomId } = req.params;
-
-    if (!classroomId) {
-      return res.status(400).json({ message: "Please provide classroom ID" });
-    }
-
-    const { userId, token } = req.user;
-
-    if (!token || !userId) {
-      return res.status(401).json({ message: "User not authorized" });
-    }
-
-    const classroom = await Classroom.findById(classroomId);
-
-    if (!classroom) {
-      return res.status(404).json({ message: "Classroom not found" });
-    }
-
-    if (!classroom.students.includes(userId)) {
-      return res
-        .status(403)
-        .json({ message: "You are not a member of this classroom" });
-    }
-    classroom.students = classroom.students.filter(
-      (student) => !student.equals(userId)
-    );
-
-    await classroom.save();
-
-    await Chat.deleteMany({ sender: userId, classroom: classroomId });
-
-    return res.status(200).json({ message: "Successfully left the classroom" });
   } catch (error) {
     return res.status(500).json({
       message: error.message,

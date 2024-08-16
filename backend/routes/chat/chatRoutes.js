@@ -25,7 +25,7 @@ chatRoutes
 //   .get(protect, getClassroomMessages);
 
 chatRoutes.post("/classroom/join", protect, joinClassroom);
-// chatRoutes.post("/classroom/leave", protect, leaveClassroom);
+chatRoutes.post("/classroom/leave", protect, leaveClassroom);
 
 chatRoutes.route("/classrooms").get(protect, getClassrooms);
 

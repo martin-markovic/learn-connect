@@ -7,6 +7,6 @@ import chatRoutes from "./chat/chatRoutes.js";
 
 router.use("/api/users", userRoutes);
 router.use("/api/quizzes/", quizRoutes);
-router.use("/api/chat/", chatRoutes);
+router.use("/api/chat", chatRoutes);
 
 export default router;
