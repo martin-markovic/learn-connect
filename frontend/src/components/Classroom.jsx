@@ -13,7 +13,7 @@ function Classroom() {
     isLoading,
     isError,
     errorMessage,
-  } = useSelector((state) => state.chat);
+  } = useSelector((state) => state.classroom);
 
   useEffect(() => {
     if (classrooms.length === 0) {
@@ -23,7 +23,7 @@ function Classroom() {
 
   useEffect(() => {
     if (isError && errorMessage) {
-      console.log("Error in Classroom component: ", errorMessage);
+      console.error("Error :", errorMessage);
     }
   }, [isError, errorMessage]);
 
@@ -41,7 +41,7 @@ function Classroom() {
           setSelectedClassroom("");
         })
         .catch((error) => {
-          console.error(`Classroom Error: ${error.message}`);
+          console.error("handleJoinClassroom Error: ", error.message);
           toast.error("Failed to join classroom.");
         });
     } else {
