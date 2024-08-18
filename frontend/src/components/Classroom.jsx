@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { getClassrooms, joinClassroom } from "../features/chat/chatSlice.js";
+import {
+  getClassrooms,
+  joinClassroom,
+  leaveClassroom,
+} from "../features/classroom/classroomSlice.js";
 import { toast } from "react-toastify";
 
 function Classroom() {
@@ -49,6 +53,24 @@ function Classroom() {
     }
   };
 
+  const handleLeaveClassroom = () => {
+    if (selectedClassroom) {
+      dispatch(leaveClassroom(selectedClassroom))
+        .unwrap()
+        .then(() => {
+          toast.success("Successfully left the classroom!");
+          dispatch(getClassrooms());
+          setSelectedClassroom("");
+        })
+        .catch((error) => {
+          console.error("leaveClassroom Error: ", error.message);
+          toast.error("Failed to leave the classroom.");
+        });
+    } else {
+      toast.error("Please select a classroom to join");
+    }
+  };
+
   return (
     <div>
       <div>
@@ -58,7 +80,7 @@ function Classroom() {
           <p>No classrooms available.</p>
         ) : (
           <div>
-            <label htmlFor="classroom-select">Select a Classroom:</label>
+            <p>Select a Classroom:</p>
             <select
               id="classroom-select"
               value={selectedClassroom}
@@ -66,7 +88,7 @@ function Classroom() {
             >
               <option value="" disabled></option>
               {classrooms.map((classroom) => (
-                <option key={classroom.name} value={classroom.name}>
+                <option key={classroom._id} value={classroom._id}>
                   {classroom.name}
                 </option>
               ))}
@@ -74,9 +96,14 @@ function Classroom() {
           </div>
         )}
       </div>
-      <button type="button" onClick={handleJoinClassroom}>
-        Enroll
-      </button>
+      <div>
+        <button type="button" onClick={handleJoinClassroom}>
+          Enroll into classroom
+        </button>
+        <button type="button" onClick={handleLeaveClassroom}>
+          Leave classroom
+        </button>
+      </div>
     </div>
   );
 }

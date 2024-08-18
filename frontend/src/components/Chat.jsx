@@ -1,14 +1,24 @@
 import { useState, useEffect, useRef } from "react";
 import io from "socket.io-client";
+import { useSelector } from "react-redux";
+import { toast } from "react-toastify";
 
 const Chat = () => {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState({});
   const [activity, setActivity] = useState("");
-  const [friends, setFriends] = useState(["Alice", "Bob", "Charlie"]);
-  const [selectedFriend, setSelectedFriend] = useState(null);
+  const [selectedChat, setSelectedChat] = useState(null);
+  const [userClassrooms, setUserClassrooms] = useState([]);
   const socket = useRef(null);
   let activityTimer = useRef(null);
+
+  const {
+    classrooms = [],
+    isLoading,
+    isError,
+    errorMessage,
+  } = useSelector((state) => state.chat);
+  const { user } = useSelector((state) => state.auth);
 
   useEffect(() => {
     socket.current = io("ws://localhost:8000");
@@ -33,6 +43,24 @@ const Chat = () => {
       socket.current.disconnect();
     };
   }, []);
+
+  useEffect(() => {
+    if (!isLoading && !isError && classrooms.length > 0) {
+      const joinedClassrooms = classrooms.filter(
+        (classroom) =>
+          Array.isArray(classroom.students) &&
+          classroom.students.includes(user._id)
+      );
+
+      setUserClassrooms(joinedClassrooms);
+    }
+  }, [classrooms, user._id, isLoading, isError]);
+
+  useEffect(() => {
+    if (isError && errorMessage) {
+      console.log("Error in Chat component: ", errorMessage);
+    }
+  }, [isError, errorMessage]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -64,46 +92,86 @@ const Chat = () => {
   return (
     <div className="conversation">
       <div className="conversation-list">
-        <h3>Friends</h3>
-        <ul>
-          {friends.map((friend, index) => (
-            <li
-              key={index}
-              onClick={() => handleFriendClick(friend)}
-              style={{
-                cursor: "pointer",
-                fontWeight: friend === selectedFriend ? "bold" : "normal",
-              }}
-            >
-              {friend}
-            </li>
-          ))}
-        </ul>
-      </div>
-      {selectedFriend && (
-        <div className="conversation-display">
-          <h3>Chat with {selectedFriend}</h3>
-          <form onSubmit={handleSubmit}>
-            <input
-              type="text"
-              id="message"
-              name="message"
-              value={message}
-              autoComplete="off"
-              onChange={handleInputChange}
-              onKeyDown={handleKeyPress}
-              placeholder="Type message"
-            />
-            <input type="submit" value="Send" />
-          </form>
-          <p>{activity}</p>
-          <ul>
-            {(messages[selectedFriend] || []).map((msg, index) => (
-              <li key={index}>{msg}</li>
-            ))}
-          </ul>
+        {selectedChat &&
+        Array.isArray(selectedChat) &&
+        selectedChat.some((char) => !isNaN(char)) ? (
+          selectedChat.length > 0 ? (
+            <div>
+              <h3>Classmates</h3>
+              <ul>
+                {selectedChat.students.map((student) => (
+                  <li
+                    key={student.name}
+                    onClick={() => handleClick(student)}
+                    style={{
+                      cursor: "pointer",
+                      fontWeight: student === selectedChat ? "bold" : "normal",
+                    }}
+                  >
+                    {student}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : (
+            <p>No other students are enrolled in this classroom.</p>
+          )
+        ) : (
+          <div className="conversation-display">
+            <h3>
+              Chat with{" "}
+              {selectedChat && typeof selectedChat === "object"
+                ? selectedChat.name
+                : selectedChat}
+            </h3>
+            <form onSubmit={handleSubmit}>
+              <input
+                type="text"
+                id="message"
+                name="message"
+                value={message}
+                autoComplete="off"
+                onChange={handleInputChange}
+                onKeyDown={handleKeyPress}
+                placeholder="Type message"
+              />
+              <input type="submit" value="Send" />
+            </form>
+            <p>{activity}</p>
+            <ul>
+              {(messages[selectedChat] || []).map((msg, index) => (
+                <li key={`message-${index}`}>{msg}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+        <div>
+          {userClassrooms.length > 0 ? (
+            <div>
+              <h3>Your Classrooms:</h3>
+              <ul>
+                {userClassrooms.map((classroom) => (
+                  <li
+                    key={classroom._id}
+                    style={{
+                      cursor: "pointer",
+                      fontWeight:
+                        classroom === selectedChat ? "bold" : "normal",
+                    }}
+                    onClick={() => handleClick(classroom.name)}
+                  >
+                    {classroom.name}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : (
+            !isLoading && (
+              <p>You are not currently enrolled in any classrooms.</p>
+            )
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 };
