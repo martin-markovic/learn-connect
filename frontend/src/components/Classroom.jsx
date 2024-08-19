@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { getClassrooms, joinClassroom } from "../features/chat/chatSlice.js";
+import {
+  getClassrooms,
+  joinClassroom,
+  leaveClassroom,
+} from "../features/classroom/classroomSlice.js";
 import { toast } from "react-toastify";
 
 function Classroom() {
@@ -13,7 +17,7 @@ function Classroom() {
     isLoading,
     isError,
     errorMessage,
-  } = useSelector((state) => state.chat);
+  } = useSelector((state) => state.classroom);
 
   useEffect(() => {
     if (classrooms.length === 0) {
@@ -23,7 +27,7 @@ function Classroom() {
 
   useEffect(() => {
     if (isError && errorMessage) {
-      console.log("Error in Classroom component: ", errorMessage);
+      console.error("Error :", errorMessage);
     }
   }, [isError, errorMessage]);
 
@@ -31,21 +35,43 @@ function Classroom() {
     setSelectedClassroom(e.target.value);
   };
 
-  const handleJoinClassroom = () => {
-    if (selectedClassroom) {
-      dispatch(joinClassroom(selectedClassroom))
-        .unwrap()
-        .then(() => {
-          toast.success("Successfully joined the classroom!");
+  const handleJoinClassroom = async () => {
+    try {
+      if (selectedClassroom) {
+        const result = await dispatch(joinClassroom(selectedClassroom));
+
+        if (result.error) {
+          console.error("Error:", result.error.message);
+        } else {
+          toast.success("Successfully joined classroom:", result.payload);
           dispatch(getClassrooms());
           setSelectedClassroom("");
-        })
-        .catch((error) => {
-          console.error(`Classroom Error: ${error.message}`);
-          toast.error("Failed to join classroom.");
-        });
-    } else {
-      toast.error("Please select a classroom to join");
+        }
+      } else {
+        return toast.error("Please select a classroom");
+      }
+    } catch (error) {
+      console.error("handleJoinClassroom Error: ", error.message);
+      toast.error("Failed to join classroom.");
+    }
+  };
+  const handleLeaveClassroom = async () => {
+    try {
+      if (selectedClassroom) {
+        const result = await dispatch(leaveClassroom(selectedClassroom));
+
+        if (result.error) {
+          console.error("Error:", result.error.message);
+        } else {
+          toast.success("Successfully left the classroom:", result.payload);
+          dispatch(getClassrooms());
+        }
+      } else {
+        toast.error("Please select a classroom");
+      }
+    } catch (error) {
+      console.error("leaveClassroom Error: ", error.message);
+      toast.error("Failed to leave the classroom.");
     }
   };
 
@@ -58,7 +84,7 @@ function Classroom() {
           <p>No classrooms available.</p>
         ) : (
           <div>
-            <label htmlFor="classroom-select">Select a Classroom:</label>
+            <p>Select a Classroom:</p>
             <select
               id="classroom-select"
               value={selectedClassroom}
@@ -66,7 +92,7 @@ function Classroom() {
             >
               <option value="" disabled></option>
               {classrooms.map((classroom) => (
-                <option key={classroom.name} value={classroom.name}>
+                <option key={classroom._id} value={classroom._id}>
                   {classroom.name}
                 </option>
               ))}
@@ -74,9 +100,14 @@ function Classroom() {
           </div>
         )}
       </div>
-      <button type="button" onClick={handleJoinClassroom}>
-        Enroll
-      </button>
+      <div>
+        <button type="button" onClick={handleJoinClassroom}>
+          Enroll into classroom
+        </button>
+        <button type="button" onClick={handleLeaveClassroom}>
+          Leave classroom
+        </button>
+      </div>
     </div>
   );
 }
