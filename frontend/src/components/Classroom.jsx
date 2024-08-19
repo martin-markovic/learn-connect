@@ -35,39 +35,43 @@ function Classroom() {
     setSelectedClassroom(e.target.value);
   };
 
-  const handleJoinClassroom = () => {
-    if (selectedClassroom) {
-      dispatch(joinClassroom(selectedClassroom))
-        .unwrap()
-        .then(() => {
-          toast.success("Successfully joined the classroom!");
+  const handleJoinClassroom = async () => {
+    try {
+      if (selectedClassroom) {
+        const result = await dispatch(joinClassroom(selectedClassroom));
+
+        if (result.error) {
+          console.error("Error:", result.error.message);
+        } else {
+          toast.success("Successfully joined classroom:", result.payload);
           dispatch(getClassrooms());
           setSelectedClassroom("");
-        })
-        .catch((error) => {
-          console.error("handleJoinClassroom Error: ", error.message);
-          toast.error("Failed to join classroom.");
-        });
-    } else {
-      toast.error("Please select a classroom to join");
+        }
+      } else {
+        return toast.error("Please select a classroom");
+      }
+    } catch (error) {
+      console.error("handleJoinClassroom Error: ", error.message);
+      toast.error("Failed to join classroom.");
     }
   };
+  const handleLeaveClassroom = async () => {
+    try {
+      if (selectedClassroom) {
+        const result = await dispatch(leaveClassroom(selectedClassroom));
 
-  const handleLeaveClassroom = () => {
-    if (selectedClassroom) {
-      dispatch(leaveClassroom(selectedClassroom))
-        .unwrap()
-        .then(() => {
-          toast.success("Successfully left the classroom!");
+        if (result.error) {
+          console.error("Error:", result.error.message);
+        } else {
+          toast.success("Successfully left the classroom:", result.payload);
           dispatch(getClassrooms());
-          setSelectedClassroom("");
-        })
-        .catch((error) => {
-          console.error("leaveClassroom Error: ", error.message);
-          toast.error("Failed to leave the classroom.");
-        });
-    } else {
-      toast.error("Please select a classroom to join");
+        }
+      } else {
+        toast.error("Please select a classroom");
+      }
+    } catch (error) {
+      console.error("leaveClassroom Error: ", error.message);
+      toast.error("Failed to leave the classroom.");
     }
   };
 

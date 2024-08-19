@@ -1,15 +1,18 @@
 import axios from "axios";
 import handleError from "../service.errorHandler.js";
 
-const API_URL = "http://127.0.0.1:8000/api/chat/";
+const API_URL = "http://127.0.0.1:8000/api/classroom/";
 
 const joinClassroom = async (classroomId, token) => {
   try {
     const response = await axios.post(
-      API_URL + "classroom/join",
-      { classroomId },
-      { headers: { Authorization: `Bearer ${token}` } }
+      `${API_URL}join/${classroomId}`,
+      {},
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
     );
+
     return response.data;
   } catch (error) {
     handleError(error);
@@ -19,16 +22,12 @@ const joinClassroom = async (classroomId, token) => {
 
 const leaveClassroom = async (classroomId, token) => {
   try {
-    const config = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
-
     const response = await axios.post(
-      `${API_URL}classroom/leave`,
-      { classroomId },
-      config
+      `${API_URL}leave/${classroomId}`,
+      {},
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
     );
     return response.data;
   } catch (error) {
@@ -39,7 +38,7 @@ const leaveClassroom = async (classroomId, token) => {
 
 const getClassrooms = async (token) => {
   try {
-    const response = await axios.get(API_URL + "classrooms", {
+    const response = await axios.get(API_URL, {
       headers: { Authorization: `Bearer ${token}` },
     });
 

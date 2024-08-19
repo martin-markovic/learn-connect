@@ -13,6 +13,10 @@ export const joinClassroom = createAsyncThunk(
   "classroom/joinClassroom",
   async (classroomId, thunkAPI) => {
     try {
+      if (!classroomId) {
+        throw new Error("Classroom ID is required");
+      }
+
       const { token } = thunkAPI.getState().auth.user;
 
       if (!token) {
@@ -129,6 +133,7 @@ const classroomSlice = createSlice({
       .addCase(leaveClassroom.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
+        state.isError = false;
         state.errorMessage = "";
         state.classrooms = state.classrooms.filter(
           (classroom) => classroom._id !== action.payload._id
