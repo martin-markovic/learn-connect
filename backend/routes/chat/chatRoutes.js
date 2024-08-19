@@ -9,13 +9,13 @@ import {
   getClassroomMessages,
 } from "../../controller/chat/chatController.js";
 
+chatRoutes.post("/", protect, sendFriendMessage);
+chatRoutes.get("/messages/:id", protect, getUserMessages);
+
 chatRoutes
-  .route("/")
-  // .post(protect, sendFriendMessage)
-  .get(protect, getUserMessages);
-
-// chatRoutes.route("/classroom/:id").post(protect, sendClassroomMessage);
-
+  .route("/messages/classroom/:id/")
+  .post(protect, sendClassroomMessage)
+  .get(protect, getClassroomMessages);
 
 
 export default chatRoutes;
