@@ -35,9 +35,24 @@ const ioServer = new Server(expressServer, {
       "http://localhost:3000",
       "http://127.0.0.1:3000",
       "http://localhost:8000",
+      "http://127.0.0.1:8000",
     ],
+    methods: ["GET", "POST"],
     credentials: true,
+    transports: ["websocket"],
   },
+});
+
+ioServer.on("connection", (socket) => {
+  console.log("New socket connection:", socket.id);
+
+  socket.on("disconnect", () => {
+    console.log("Socket disconnected:", socket.id);
+  });
+});
+
+ioServer.on("error", (err) => {
+  console.error("Socket.IO error:", err);
 });
 
 configureSocket(ioServer);
