@@ -14,6 +14,14 @@ const configureSocket = (server) => {
       next();
     });
   });
+
+  server.on("connection_error", (err) => {
+    console.error("Connection Error:", err.message);
+  });
+
+  server.on("connection", (socket) => {
+    console.log("New socket connection:", socket.id);
+  });
 };
 
 export default configureSocket;

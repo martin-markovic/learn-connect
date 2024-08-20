@@ -17,5 +17,4 @@ chatRoutes
   .post(protect, sendClassroomMessage)
   .get(protect, getClassroomMessages);
 
-
 export default chatRoutes;

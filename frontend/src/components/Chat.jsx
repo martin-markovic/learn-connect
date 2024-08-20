@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef } from "react";
-import io from "socket.io-client";
+import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
+import useSocket from "../hooks/useSocket.js";
+import { getUserMessages } from "../features/chat/chatService.js";
 
 const Chat = () => {
   const [message, setMessage] = useState("");
@@ -9,8 +10,6 @@ const Chat = () => {
   const [activity, setActivity] = useState("");
   const [selectedChat, setSelectedChat] = useState(null);
   const [userClassrooms, setUserClassrooms] = useState([]);
-  const socket = useRef(null);
-  let activityTimer = useRef(null);
 
   const {
     classrooms = [],
@@ -19,6 +18,8 @@ const Chat = () => {
     errorMessage,
   } = useSelector((state) => state.chat);
   const { user } = useSelector((state) => state.auth);
+  const token = user?.token;
+  const { socket, activityTimer } = useSocket("http://localhost:8000", token);
 
   useEffect(() => {
     socket.current = io("ws://localhost:8000");
@@ -58,7 +59,7 @@ const Chat = () => {
 
   useEffect(() => {
     if (isError && errorMessage) {
-      console.log("Error in Chat component: ", errorMessage);
+      console.error("Error in Chat component: ", errorMessage);
     }
   }, [isError, errorMessage]);
 
@@ -68,7 +69,7 @@ const Chat = () => {
       socket.current.emit("chat message", { friend: selectedFriend, message });
       setMessages((prevMessages) => ({
         ...prevMessages,
-        [selectedFriend]: [...(prevMessages[selectedFriend] || []), message],
+        [selectedChat]: [...(prevMessages[selectedChat] || []), message],
       }));
       setMessage("");
       setActivity("");
