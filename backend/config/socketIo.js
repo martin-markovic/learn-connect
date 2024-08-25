@@ -1,26 +1,36 @@
 import jwt from "jsonwebtoken";
 
-const configureSocket = (server) => {
-  server.use((socket, next) => {
+const configureSocket = (io) => {
+  io.use((socket, next) => {
     const token = socket.handshake.auth.token;
 
     if (!token) {
       return next(new Error("Authentication error: No token provided"));
     }
 
-    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-      if (err) return next(new Error("Authentication error: Invalid token"));
-      socket.user = user;
+    try {
+      const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+      socket.user = { _id: decodedToken.id };
       next();
-    });
+    } catch (error) {
+      next(new Error("Authentication error"));
+    }
   });
 
-  server.on("connection_error", (err) => {
+  io.on("connection", (socket) => {
+    console.log(`User connected with ID: ${socket.user._id}`);
+  });
+
+  io.on("connection_error", (err) => {
     console.error("Connection Error:", err.message);
   });
 
-  server.on("connection", (socket) => {
-    console.log("New socket connection:", socket.id);
+  io.on("error", (err) => {
+    console.error("Socket.IO error:", err);
+  });
+
+  io.on("disconnect", () => {
+    console.log("Socket disconnected:", socket.id);
   });
 };
 

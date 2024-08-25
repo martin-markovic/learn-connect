@@ -4,7 +4,7 @@ import {
   getClassrooms,
   joinClassroom,
   leaveClassroom,
-} from "../features/classroom/classroomSlice.js";
+} from "../../features/classroom/classroomSlice.js";
 import { toast } from "react-toastify";
 
 function Classroom() {

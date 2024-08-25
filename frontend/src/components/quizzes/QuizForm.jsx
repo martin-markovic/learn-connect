@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { createQuiz, updateQuiz } from "../features/quizzes/quizSlice.js";
+import { createQuiz, updateQuiz } from "../../features/quizzes/quizSlice.js";
 import { toast } from "react-toastify";
 
 const initialQuestionState = {

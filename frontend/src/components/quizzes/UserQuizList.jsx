@@ -5,8 +5,8 @@ import {
   getUserQuizzes,
   deleteQuiz,
   resetQuizzes,
-} from "../features/quizzes/quizSlice.js";
-import QuizForm from "../components/QuizForm.jsx";
+} from "../../features/quizzes/quizSlice.js";
+import QuizForm from "./QuizForm.jsx";
 
 function UserQuizList() {
   const [localQuizzes, setLocalQuizzes] = useState([]);

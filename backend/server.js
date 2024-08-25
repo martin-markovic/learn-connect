@@ -27,7 +27,7 @@ const expressServer = app.listen(PORT, () => {
 });
 
 import configureSocket from "./config/socketIo.js";
-import handleSocketConnection from "./controller/chat/socketController.js";
+import manageSocketEvents from "./controller/socket/socketController.js";
 
 const ioServer = new Server(expressServer, {
   cors: {
@@ -43,20 +43,8 @@ const ioServer = new Server(expressServer, {
   },
 });
 
-ioServer.on("connection", (socket) => {
-  console.log("New socket connection:", socket.id);
-
-  socket.on("disconnect", () => {
-    console.log("Socket disconnected:", socket.id);
-  });
-});
-
-ioServer.on("error", (err) => {
-  console.error("Socket.IO error:", err);
-});
-
 configureSocket(ioServer);
-handleSocketConnection(ioServer);
+manageSocketEvents(ioServer);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

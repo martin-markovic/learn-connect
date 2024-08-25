@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { resetQuizzes } from "../features/quizzes/quizSlice";
+import { resetQuizzes } from "../../features/quizzes/quizSlice";
 
 function ClassQuizList() {
   const [quizList, setQuizList] = useState([]);
