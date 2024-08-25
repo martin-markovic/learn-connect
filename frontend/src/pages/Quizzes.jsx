@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import ClassQuizList from "../components/ClassQuizList";
-import UserQuizList from "../components/UserQuizList";
+import ClassQuizList from "../components/quizzes/ClassQuizList";
+import UserQuizList from "../components/quizzes/UserQuizList";
 
 function Quizzes() {
   const [listOpen, setListOpen] = useState(null);

@@ -1,6 +1,6 @@
-import Chat from "../components/Chat.jsx";
-import Newsfeed from "../components/Newsfeed.jsx";
-import Classroom from "../components/Classroom.jsx";
+import Chat from "../components/chat/Chat.jsx";
+import Newsfeed from "../components/quizzes/Newsfeed.jsx";
+import Classroom from "../components/classroom/Classroom.jsx";
 
 export default function Dashboard() {
   return (
