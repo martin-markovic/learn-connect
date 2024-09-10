@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import classroomService from "./classroomService.js";
+import { handleSliceError } from "../redux.errorHandler.js";
 
 const initialState = {
   isLoading: false,
@@ -33,6 +34,7 @@ export const joinClassroom = createAsyncThunk(
         error.toString();
 
       return thunkAPI.rejectWithValue(message);
+      handleSliceError(error);
     }
   }
 );
@@ -57,6 +59,7 @@ export const leaveClassroom = createAsyncThunk(
         error.toString();
 
       return thunkAPI.rejectWithValue(message);
+      handleSliceError(error);
     }
   }
 );

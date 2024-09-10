@@ -1,5 +1,5 @@
 import axios from "axios";
-import handleError from "../service.errorHandler.js";
+import { handleServiceError } from "../redux.errorHandler.js";
 
 const API_URL = "http://127.0.0.1:8000/api/chat/";
 
@@ -15,6 +15,7 @@ const sendFriendMessage = async (messageData, token) => {
     return response.data;
   } catch (error) {
     handleError(error);
+    handleServiceError(error);
     throw error;
   }
 };
@@ -31,6 +32,7 @@ const getUserMessages = async (token) => {
     return response.data;
   } catch (error) {
     handleError(error);
+    handleServiceError(error);
     throw error;
   }
 };
@@ -50,6 +52,7 @@ const getClassroomMessages = async (classroomId, token) => {
     return response.data;
   } catch (error) {
     handleError(error);
+    handleServiceError(error);
     throw error;
   }
 };
