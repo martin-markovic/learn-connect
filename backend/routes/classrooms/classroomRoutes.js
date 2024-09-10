@@ -6,10 +6,13 @@ import {
   joinClassroom,
   leaveClassroom,
   getClassrooms,
+  getAllClassrooms,
+  getUserClassrooms,
 } from "../../controller/classroom/classroomController.js";
 
 classroomRoutes.post("/join/:classroomId", protect, joinClassroom);
 classroomRoutes.post("/leave/:classroomId", protect, leaveClassroom);
-classroomRoutes.get("/", protect, getClassrooms);
+classroomRoutes.get("/", protect, getAllClassrooms);
+classroomRoutes.get("/me", protect, getUserClassrooms);
 
 export default classroomRoutes;
