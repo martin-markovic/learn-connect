@@ -63,6 +63,7 @@ export const leaveClassroom = async (req, res) => {
         .status(403)
         .json({ message: "You are not a member of this classroom" });
     }
+
     classroom.students = classroom.students.filter(
       (student) => !student.equals(userId)
     );
@@ -71,9 +72,7 @@ export const leaveClassroom = async (req, res) => {
 
     await Chat.deleteMany({ sender: userId, classroom: classroomId });
 
-    return res
-      .status(200)
-      .json({ message: "Successfully left the classroom", classroomId });
+    return res.status(200).json(classroomId);
   } catch (error) {
     return res.status(500).json({
       message: error.message,
@@ -81,9 +80,27 @@ export const leaveClassroom = async (req, res) => {
   }
 };
 
-export const getClassrooms = async (req, res) => {
+export const getAllClassrooms = async (req, res) => {
   try {
     const classrooms = await Classroom.find();
+
+    return res.status(200).json(classrooms);
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+export const getUserClassrooms = async (req, res) => {
+  try {
+    const user = req.user;
+
+    if (!user || !user._id) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const classrooms = await Classroom.find({ students: user._id });
 
     return res.status(200).json(classrooms);
   } catch (error) {

@@ -17,7 +17,7 @@ const registerUser = async (userData) => {
     }
     return response.data;
   } catch (error) {
-    console.log("Error during registration:", error.message);
+    console.error("Error during registration:", error.message);
     throw error;
   }
 };
@@ -32,7 +32,7 @@ const loginUser = async (userData) => {
 
     return response.data;
   } catch (error) {
-    console.log(error);
+    console.error(error.message);
   }
 };
 

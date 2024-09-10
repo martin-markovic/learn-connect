@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import chatService from "./chatService.js";
+import { handleSliceError } from "../redux.errorHandler.js";
 
 const initialState = {
   isLoading: false,
@@ -29,6 +30,7 @@ export const sendFriendMessage = createAsyncThunk(
         error.toString();
 
       return thunkAPI.rejectWithValue(message);
+      handleSliceError(error);
     }
   }
 );
@@ -53,6 +55,7 @@ export const sendClassroomMessage = createAsyncThunk(
         error.toString();
 
       return thunkAPI.rejectWithValue(message);
+      handleSliceError(error, thunkAPI);
     }
   }
 );
@@ -91,6 +94,7 @@ export const getClassroomMessages = createAsyncThunk(
         error.toString();
 
       return thunkAPI.rejectWithValue(message);
+      handleSliceError(error);
     }
   }
 );

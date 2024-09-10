@@ -1,13 +1,25 @@
-import { useSelector } from "react-redux";
+import { useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { useChatContext } from "../../features/chat/chatContext.js";
+import { getUserClassrooms } from "../../features/classroom/classroomSlice.js";
 
 function ChatList() {
-  const { selectedChat, setSelectedChat, classrooms } = useChatContext();
-  const { isError, isLoading } = useSelector((state) => state.classroom);
+  const { selectedChat, setSelectedChat } = useChatContext();
+  const {
+    isError,
+    isLoading,
+    userClassrooms = [],
+  } = useSelector((state) => state.classroom);
+
+  const dispatch = useDispatch();
 
   const handleSelect = (receiver) => {
     setSelectedChat(receiver);
   };
+
+  useEffect(() => {
+    dispatch(getUserClassrooms());
+  }, [dispatch]);
 
   return (
     <div>
@@ -16,20 +28,20 @@ function ChatList() {
           An error occurred while fetching your classrooms. Please try again
           later.
         </p>
-      ) : classrooms.length > 0 ? (
+      ) : userClassrooms && userClassrooms.length > 0 ? (
         <div>
           <h3>Your Classrooms:</h3>
           <ul>
-            {classrooms.map((classroom) => (
+            {userClassrooms.map((classroom) => (
               <li
-                key={classroom._id}
+                key={`chat-${classroom._id}`}
                 style={{
                   cursor: "pointer",
                   fontWeight: classroom === selectedChat ? "bold" : "normal",
                 }}
                 onClick={() => handleSelect(classroom.name)}
               >
-                {classroom.name}
+                {classroom.name || "Unnamed Classroom"}
               </li>
             ))}
           </ul>
