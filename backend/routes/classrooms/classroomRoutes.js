@@ -5,7 +5,6 @@ import { protect } from "../../middleware/authMiddleware.js";
 import {
   joinClassroom,
   leaveClassroom,
-  getClassrooms,
   getAllClassrooms,
   getUserClassrooms,
 } from "../../controller/classroom/classroomController.js";
