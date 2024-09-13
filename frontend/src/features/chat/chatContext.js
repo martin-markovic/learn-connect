@@ -1,8 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import displayAPI from "../socket/displayHandlers.js";
-import configAPI from "../socket/configHandlers.js";
-import { initSocket, handleSocketEvents } from "../socket/socketManager.js";
+import { handleConnect, handleDisconnect } from "../socket/configHandlers.js";
 
 const ChatContext = createContext();
 
@@ -11,23 +10,15 @@ export const ChatProvider = ({ children }) => {
   const [selectedChat, setSelectedChat] = useState(null);
   const { token } = useSelector((state) => state.auth.user);
 
-  const dispatch = useDispatch();
-
   useEffect(() => {
-    initSocket(token, setSocketInstance);
+    handleConnect(token, setSocketInstance);
 
     return () => {
       if (socketInstance) {
-        configAPI.handleDisconnect(socketInstance);
+        handleDisconnect(socketInstance);
       }
     };
   }, [token]);
-
-  useEffect(() => {
-    if (socketInstance) {
-      handleSocketEvents(socketInstance, dispatch);
-    }
-  }, [socketInstance, dispatch]);
 
   const contextValue = {
     socketInstance,

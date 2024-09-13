@@ -27,22 +27,6 @@ const handleSubmit = async (socketInstace, messageData, handleCallback) => {
   }
 };
 
-const handleActivity = async (socketInstance, activity, activityCallback) => {
-  if (socketInstance && typeof socketInstance.on === "function") {
-    const { senderId, activityTimer } = activity;
-
-    socketInstance.on("chat activity", (senderId) => {
-      activityCallback(`${senderId} is typing...`);
-      clearTimeout(activityTimer.current);
-      activityTimer.current = setTimeout(() => {
-        activityCallback("");
-      }, 3000);
-    });
-  } else {
-    console.error("Invalid socket instance: ", socketInstance);
-  }
-};
-
 const handleChatOpen = async (messageData, handleCallback) => {
   try {
     const response = await handleCallback(messageData);
@@ -53,7 +37,7 @@ const handleChatOpen = async (messageData, handleCallback) => {
   }
 };
 
-export const handleChatInit = async (fetchCallback, token) => {
+const handleChatInit = async (fetchCallback, token) => {
   try {
     const response = await fetchCallback(token);
     return response;
@@ -85,7 +69,6 @@ const handleUnsendMessage = async (messageId, handleCallback) => {
 
 const displayAPI = {
   handleSubmit,
-  handleActivity,
   handleChatOpen,
   handleChatInit,
   handleRemoveMessage,
