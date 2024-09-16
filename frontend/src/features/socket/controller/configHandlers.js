@@ -2,7 +2,7 @@ import io from "socket.io-client";
 import { toast } from "react-toastify";
 
 // remove toast from this module
-export const initSocket = async (token, setupCallback) => {
+export const handleConnect = async (token, setupCallback) => {
   if (!token) {
     console.error("User not authorized, no token.");
     return null;

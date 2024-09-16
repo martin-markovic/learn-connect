@@ -1,15 +1,16 @@
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
-  getClassrooms,
   getAllClassrooms,
   joinClassroom,
   leaveClassroom,
 } from "../../features/classroom/classroomSlice.js";
+import { useSocketContext } from "../../features/socket/socketContext.js";
 import { toast } from "react-toastify";
 
 function Classroom() {
   const [selectedClassroom, setSelectedClassroom] = useState("");
+  const { socketInstance, token } = useSocketContext();
 
   const dispatch = useDispatch();
 

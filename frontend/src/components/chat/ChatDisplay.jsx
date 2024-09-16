@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 
 function ChatDisplay() {
   const [input, setInput] = useState("");
-  const { socketInstance, handleSubmit, selectedChat } = useChatContext();
+  const { socketInstance, handleSubmit, selectedChat } = useSocketContext();
   const [chatMessages, setChatMessages] = useState([]);
   const [activity, setActivity] = useState("");
   const activityTimer = useRef(null);
