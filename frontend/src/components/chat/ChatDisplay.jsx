@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useChatContext } from "../../features/chat/chatContext.js";
+import { useSocketContext } from "../../features/socket/socketContext.js";
 import { useSelector } from "react-redux";
 
 function ChatDisplay() {
