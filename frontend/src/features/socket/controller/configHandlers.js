@@ -1,8 +1,8 @@
-import configAPI from "./configHandlers.js";
-import { sendMessage, updateMessageStatus } from "../chat/chatSlice.js";
+import io from "socket.io-client";
 import { toast } from "react-toastify";
 
-export const initSocket = async (token, setupCallback) => {
+// remove toast from this module
+export const handleConnect = async (token, setupCallback) => {
   if (!token) {
     console.error("User not authorized, no token.");
     return null;
@@ -10,10 +10,13 @@ export const initSocket = async (token, setupCallback) => {
 
   try {
     // implement conditional API url based on process.env.mode
-    const socket = await configAPI.handleConnect(
-      "http://localhost:8000",
-      token
-    );
+    const socket = io("http://localhost:8000", {
+      reconnection: false,
+      withCredentials: true,
+      auth: {
+        token,
+      },
+    });
 
     socket.on("connect", () => {
       setupCallback(socket);
@@ -41,21 +44,12 @@ export const initSocket = async (token, setupCallback) => {
   }
 };
 
-export const handleSocketEvents = (socketInstance, dispatch) => {
-  if (!socketInstance) {
-    console.error("Socket instance is null, cannot set up event handlers.");
-    return;
+export const handleDisconnect = async (socketInstance) => {
+  try {
+    if (socketInstance) {
+      socketInstance.disconnect();
+    }
+  } catch (error) {
+    console.error("Error disconnecting socket:", error);
   }
-
-  socketInstance.on("newMessage", (message) => {
-    console.log("New message received:", message);
-
-    dispatch(sendMessage(message));
-  });
-
-  socketInstance.on("chatOpen", (chatId) => {
-    console.log("Chat messages marked as read: ", chatId);
-
-    dispatch(updateMessageStatus(chatId));
-  });
 };
