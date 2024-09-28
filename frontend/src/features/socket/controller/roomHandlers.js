@@ -1,10 +1,10 @@
 import { validateClientData } from "../clientMiddleware.js";
 
 export const handleJoinRoom = async (data) => {
-  const isValidData = validateClientData(data);
+  const { errorMessage } = validateClientData(data);
 
-  if (!isValidData) {
-    console.error("Please provide valid user data");
+  if (errorMessage) {
+    console.error(errorMessage);
     return;
   }
 
@@ -14,7 +14,7 @@ export const handleJoinRoom = async (data) => {
     const roomData = { user, room };
 
     await socketInstance.emit("join room", roomData);
-    console.log("Successfully joined room via socket");
+    console.log("Successfully joined rooms via socket");
   } catch (error) {
     console.error("Failed to join room via socket:", error);
   }
