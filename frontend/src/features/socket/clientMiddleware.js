@@ -2,18 +2,16 @@ export const validateClientData = (data) => {
   const { socketInstance, token, room } = data;
 
   if (!socketInstance) {
-    console.error("Invalid socket");
-    return false;
+    return { errorMessage: "Invalid socket" };
   }
 
   if (!token) {
-    console.error("Invalid token");
-    return false;
+    return { errorMessage: "Invalid token" };
   }
 
   if (!room) {
-    console.error("Room data missing");
-    return false;
+    return { errorMessage: "Room data missing" };
   }
-  return true;
+
+  return { errorMessage: null };
 };

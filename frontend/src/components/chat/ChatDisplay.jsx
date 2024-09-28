@@ -2,9 +2,9 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useSocketContext } from "../../features/socket/socketContext.js";
 import { useSelector } from "react-redux";
 
-function ChatDisplay() {
+const ChatDisplay = () => {
   const [input, setInput] = useState("");
-  const { socketInstance, handleSubmit, selectedChat } = useSocketContext();
+  const { socketInstance, selectedChat } = useSocketContext();
   const [chatMessages, setChatMessages] = useState([]);
   const [activity, setActivity] = useState("");
   const activityTimer = useRef(null);
@@ -15,12 +15,11 @@ function ChatDisplay() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    }
-
-  const handleInputChange = (e) => {
-    setMessage(e.target.value);
   };
+
+  // const handleInputChange = (e) => {
+  //   setMessage(e.target.value);
+  // };
 
   const handleKeyPress = () => {
     try {
@@ -37,14 +36,16 @@ function ChatDisplay() {
     <div className="conversation-display">
       <h3>Chat with {selectedChat}</h3>
       <button onClick={joinRoom}>Join Socket Room</button>
-      <form onSubmit={sendMessage}>
+      <form onSubmit={handleSubmit}>
         <input
           type="text"
           id="message"
           name="message"
           value={input}
           autoComplete="off"
-          onChange={(e) => handleInputChange(e.target.value)}
+          onChange={(e) => {
+            setInput(e.target.value);
+          }}
           placeholder="Type message..."
         />
         <input type="submit" value="Send" />
@@ -57,6 +58,6 @@ function ChatDisplay() {
       </ul>
     </div>
   );
-}
+};
 
 export default ChatDisplay;

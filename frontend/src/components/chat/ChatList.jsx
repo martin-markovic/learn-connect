@@ -6,6 +6,7 @@ import {
   handleJoinRoom,
   handleLeaveRoom,
 } from "../../features/socket/controller/roomHandlers.js";
+import { handleChatOpen } from "../../features/socket/controller/displayHandlers.js";
 
 function ChatList() {
   const [listOpen, setListOpen] = useState(false);
@@ -21,10 +22,15 @@ function ChatList() {
 
   const handleOpen = () => {
     if (userClassrooms.length > 0) {
-      userClassrooms.forEach((classroom) => {
-        handleJoinRoom(socketInstance, token, classroom.name);
-      });
+      const roomNames = userClassrooms.map((classroom) => classroom.name);
 
+      const roomData = {
+        socketInstance,
+        token,
+        roomNames,
+      };
+
+      handleChatOpen(roomData, handleJoinRoom);
       setListOpen(!listOpen);
     }
   };
