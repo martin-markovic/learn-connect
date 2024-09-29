@@ -14,7 +14,6 @@ const sendFriendMessage = async (messageData, token) => {
     const response = await axios.post(API_URL, messageData, config);
     return response.data;
   } catch (error) {
-    handleError(error);
     handleServiceError(error);
     throw error;
   }
@@ -31,7 +30,6 @@ const getUserMessages = async (token) => {
     const response = await axios.get(API_URL, config);
     return response.data;
   } catch (error) {
-    handleError(error);
     handleServiceError(error);
     throw error;
   }
@@ -51,7 +49,6 @@ const getClassroomMessages = async (classroomId, token) => {
     );
     return response.data;
   } catch (error) {
-    handleError(error);
     handleServiceError(error);
     throw error;
   }

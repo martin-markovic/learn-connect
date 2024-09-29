@@ -1,6 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import displayAPI from "./controller/displayHandlers.js";
 import {
   handleConnect,
   handleDisconnect,
@@ -25,10 +24,8 @@ export const SocketProvider = ({ children }) => {
 
   const contextValue = {
     socketInstance,
-    token,
     selectedChat,
     setSelectedChat,
-    ...displayAPI,
   };
 
   return (

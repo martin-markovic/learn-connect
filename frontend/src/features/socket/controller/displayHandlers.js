@@ -1,6 +1,10 @@
 import { validateClientData } from "../clientMiddleware.js";
 
-const handleSubmit = async (socketInstace, messageData, handleCallback) => {
+export const handleSubmit = async (
+  socketInstace,
+  messageData,
+  handleCallback
+) => {
   const { token, roomId, messageText } = messageData;
 
   try {
@@ -27,27 +31,7 @@ const handleSubmit = async (socketInstace, messageData, handleCallback) => {
   }
 };
 
-const handleChatOpen = async (messageData, handleCallback) => {
-  try {
-    const response = await handleCallback(messageData);
-    return response;
-  } catch (error) {
-    console.error("Error opening message:", error);
-    return {};
-  }
-};
-
-const handleChatInit = async (fetchCallback, token) => {
-  try {
-    const response = await fetchCallback(token);
-    return response;
-  } catch (error) {
-    console.error("Error fetching initial messages:", error);
-    return {};
-  }
-};
-
-const handleRemoveMessage = async (messageId, handleCallback) => {
+export const handleRemoveMessage = async (messageId, handleCallback) => {
   try {
     const response = await handleCallback(messageId);
     return response;
@@ -56,23 +40,3 @@ const handleRemoveMessage = async (messageId, handleCallback) => {
     return {};
   }
 };
-
-const handleUnsendMessage = async (messageId, handleCallback) => {
-  try {
-    const response = await handleCallback(messageId);
-    return response;
-  } catch (error) {
-    console.error("Error unsending message:", error);
-    return {};
-  }
-};
-
-const displayAPI = {
-  handleSubmit,
-  handleChatOpen,
-  handleChatInit,
-  handleRemoveMessage,
-  handleUnsendMessage,
-};
-
-export default displayAPI;
