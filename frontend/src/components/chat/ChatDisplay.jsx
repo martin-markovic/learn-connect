@@ -11,8 +11,6 @@ const ChatDisplay = () => {
 
   const { user } = useSelector((state) => state.auth);
 
-  useEffect(() => {
-
   const handleSubmit = async (e) => {
     e.preventDefault();
   };
@@ -35,7 +33,6 @@ const ChatDisplay = () => {
   ) : (
     <div className="conversation-display">
       <h3>Chat with {selectedChat}</h3>
-      <button onClick={joinRoom}>Join Socket Room</button>
       <form onSubmit={handleSubmit}>
         <input
           type="text"

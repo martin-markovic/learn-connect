@@ -9,8 +9,7 @@ import {
 
 function ChatList() {
   const [listOpen, setListOpen] = useState(false);
-  const { socketInstance, token, selectedChat, setSelectedChat } =
-    useSocketContext();
+  const { selectedChat, setSelectedChat } = useSocketContext();
   const {
     isError,
     isLoading,
@@ -23,25 +22,22 @@ function ChatList() {
     if (userClassrooms.length > 0) {
       const roomNames = userClassrooms.map((classroom) => classroom.name);
 
-      const roomData = {
-        socketInstance,
-        token,
-        roomNames,
-      };
+      console.log("handleOpen room data: ", { roomNames });
 
-      handleChatOpen(roomData, handleJoinRoom);
-      setListOpen(!listOpen);
+      handleRoomJoin({ roomNames });
     }
   };
 
   const handleClose = () => {
     if (userClassrooms.length > 0) {
-      userClassrooms.forEach((classroom) => {
-        handleLeaveRoom(socketInstance, token, classroom.name);
-      });
+      const roomNames = userClassrooms.map((classroom) => classroom.name);
 
-      setListOpen(!listOpen);
+      console.log("handleClose room data: ", { roomNames });
+
+      handleRoomLeave({ roomNames });
     }
+
+    setListOpen(!listOpen);
   };
 
   const handleSelect = (receiver) => {
