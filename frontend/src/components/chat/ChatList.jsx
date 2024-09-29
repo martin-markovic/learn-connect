@@ -3,10 +3,9 @@ import { useSelector, useDispatch } from "react-redux";
 import { useSocketContext } from "../../features/socket/socketContext.js";
 import { getUserClassrooms } from "../../features/classroom/classroomSlice.js";
 import {
-  handleJoinRoom,
-  handleLeaveRoom,
+  handleRoomJoin,
+  handleRoomLeave,
 } from "../../features/socket/controller/roomHandlers.js";
-import { handleChatOpen } from "../../features/socket/controller/displayHandlers.js";
 
 function ChatList() {
   const [listOpen, setListOpen] = useState(false);

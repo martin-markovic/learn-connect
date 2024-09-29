@@ -24,7 +24,6 @@ export const SocketProvider = ({ children }) => {
 
   const contextValue = {
     socketInstance,
-    token,
     selectedChat,
     setSelectedChat,
   };

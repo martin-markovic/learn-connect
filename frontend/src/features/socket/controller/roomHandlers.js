@@ -1,44 +1,31 @@
 import { validateClientData } from "../clientMiddleware.js";
 
-export const handleJoinRoom = async (data) => {
-  const { errorMessage } = validateClientData(data);
-
-  if (errorMessage) {
-    console.error(errorMessage);
+export const handleRoomJoin = async (roomNames) => {
+  if (!roomNames) {
+    console.error("Room names not found.");
     return;
   }
 
   try {
-    const { socketInstance, user, room } = data;
+    console.log("roomHandlers data:", { roomNames });
 
-    const roomData = { user, room };
-
-    await socketInstance.emit("join room", roomData);
-    console.log("Successfully joined rooms via socket");
+    await socketInstance.emit("join room", { roomNames });
+    console.log("Successfully joined the socket rooms.");
   } catch (error) {
-    console.error("Failed to join room via socket:", error);
+    console.error("Failed to join the socket room:", error);
   }
 };
 
-export const handleLeaveRoom = async (data) => {
-  const isValidData = validateClientData(data);
-
-  if (!isValidData) {
-    console.error("Please provide valid user data");
+export const handleRoomLeave = async (data) => {
+  if (!roomNames) {
+    console.error("Room names not found.");
     return;
   }
 
   try {
-    const { socketInstance, user, room } = data;
-
-    const roomData = {
-      user,
-      room,
-    };
-
-    await socketInstance.emit("leave room", roomData);
-    console.log("Successfully left the socket room.");
+    await socketInstance.emit("leave room", { roomNames });
+    console.log("Successfully left the socket rooms.");
   } catch (error) {
-    console.error("Failed to leave the room via socket:", error);
+    console.error("Failed to leave the socket rooms:", error);
   }
 };

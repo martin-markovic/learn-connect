@@ -31,16 +31,6 @@ export const handleSubmit = async (
   }
 };
 
-export const handleChatOpen = async (data, handleCallback) => {
-  try {
-    const response = await handleCallback(data);
-    return response;
-  } catch (error) {
-    console.error("Error opening message:", error);
-    return {};
-  }
-};
-
 export const handleRemoveMessage = async (messageId, handleCallback) => {
   try {
     const response = await handleCallback(messageId);
