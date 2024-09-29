@@ -26,6 +26,8 @@ function ChatList() {
 
       handleRoomJoin({ roomNames });
     }
+    // commit message: to open chat regardless of length
+    setListOpen(!listOpen);
   };
 
   const handleClose = () => {
@@ -37,6 +39,7 @@ function ChatList() {
       handleRoomLeave({ roomNames });
     }
 
+    // commit message: to open chat regardless of length
     setListOpen(!listOpen);
   };
 
