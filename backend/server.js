@@ -27,7 +27,6 @@ const expressServer = app.listen(PORT, () => {
 });
 
 import configureSocket from "./config/socketIo.js";
-import manageSocketEvents from "./controller/socket/socketController.js";
 
 const ioServer = new Server(expressServer, {
   cors: {
@@ -44,7 +43,6 @@ const ioServer = new Server(expressServer, {
 });
 
 configureSocket(ioServer);
-manageSocketEvents(ioServer);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
