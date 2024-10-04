@@ -1,10 +1,10 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useRef } from "react";
 import { useSocketContext } from "../../features/socket/socketContext.js";
 import { useSelector } from "react-redux";
 
 const ChatDisplay = () => {
   const [input, setInput] = useState("");
-  const { socketInstance, selectedChat } = useSocketContext();
+  const { selectedChat } = useSocketContext();
   const [chatMessages, setChatMessages] = useState([]);
   const [activity, setActivity] = useState("");
   const activityTimer = useRef(null);
@@ -21,7 +21,7 @@ const ChatDisplay = () => {
 
   const handleKeyPress = () => {
     try {
-      if (selectedChat && typeof selectedChat === "object" && socketInstance) {
+      if (selectedChat && typeof selectedChat === "object") {
       }
     } catch (error) {
       console.error("Error:", error);

@@ -10,7 +10,6 @@ import { toast } from "react-toastify";
 
 function Classroom() {
   const [selectedClassroom, setSelectedClassroom] = useState("");
-  const { socketInstance, token } = useSocketContext();
 
   const dispatch = useDispatch();
 

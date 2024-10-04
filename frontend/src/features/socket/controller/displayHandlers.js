@@ -1,5 +1,3 @@
-import { validateClientData } from "../clientMiddleware.js";
-
 export const handleSubmit = async (
   socketInstace,
   messageData,
@@ -9,10 +7,6 @@ export const handleSubmit = async (
 
   try {
     const socketData = { socketInstace, token, roomId };
-
-    if (!validateClientData(socketData)) {
-      throw new Error("Invalid socket data");
-    }
 
     if (!roomId) {
       throw new Error("Please add message recipient");

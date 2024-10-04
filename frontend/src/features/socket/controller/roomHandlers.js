@@ -1,31 +1,28 @@
-import { validateClientData } from "../clientMiddleware.js";
+const emitSocketEvent = async (data) => {
+  const { socketInstance, eventName, roomNames } = data;
 
-export const handleRoomJoin = async (roomNames) => {
+  if (!socketInstance) {
+    console.error("Socket not connected.");
+  }
+
+  if (!eventName) {
+    console.error("Invalid socket event.");
+  }
+
   if (!roomNames) {
     console.error("Room names not found.");
     return;
   }
 
   try {
-    console.log("roomHandlers data:", { roomNames });
+    await socketInstance.emit(eventName, { roomNames });
+    console.log(`Successfully emitted event: ${eventName}`, { roomNames });
 
-    await socketInstance.emit("join room", { roomNames });
-    console.log("Successfully joined the socket rooms.");
+    return { success: true };
   } catch (error) {
-    console.error("Failed to join the socket room:", error);
+    console.error(`Error emitting event: ${eventName}`, error.message);
+    return { success: false, error: error.message };
   }
 };
 
-export const handleRoomLeave = async (data) => {
-  if (!roomNames) {
-    console.error("Room names not found.");
-    return;
-  }
-
-  try {
-    await socketInstance.emit("leave room", { roomNames });
-    console.log("Successfully left the socket rooms.");
-  } catch (error) {
-    console.error("Failed to leave the socket rooms:", error);
-  }
-};
+export default emitSocketEvent;

@@ -2,14 +2,11 @@ import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useSocketContext } from "../../features/socket/socketContext.js";
 import { getUserClassrooms } from "../../features/classroom/classroomSlice.js";
-import {
-  handleRoomJoin,
-  handleRoomLeave,
-} from "../../features/socket/controller/roomHandlers.js";
+import emitSocketEvent from "../../features/socket/controller/roomHandlers.js";
 
 function ChatList() {
   const [listOpen, setListOpen] = useState(false);
-  const { selectedChat, setSelectedChat } = useSocketContext();
+  const { socketInstance, selectedChat, setSelectedChat } = useSocketContext();
   const {
     isError,
     isLoading,
@@ -24,9 +21,15 @@ function ChatList() {
 
       console.log("handleOpen room data: ", { roomNames });
 
-      handleRoomJoin({ roomNames });
+      const roomData = {
+        socketInstance,
+        eventName: "join room",
+        roomNames,
+      };
+
+      emitSocketEvent(roomData);
     }
-    // commit message: to open chat regardless of length
+
     setListOpen(!listOpen);
   };
 
@@ -36,10 +39,15 @@ function ChatList() {
 
       console.log("handleClose room data: ", { roomNames });
 
-      handleRoomLeave({ roomNames });
+      const roomData = {
+        socketInstance,
+        eventName: "leave room",
+        roomNames,
+      };
+
+      emitSocketEvent(roomData);
     }
 
-    // commit message: to open chat regardless of length
     setListOpen(!listOpen);
   };
 

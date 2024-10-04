@@ -1,9 +1,12 @@
 import Classroom from "../../models/classrooms/classroomModel.js";
 
 const handleRoomEvents = (socket, io) => {
-  socket.on("join room", async (rooms) => {
-    for (const room of rooms) {
+  socket.on("join room", async (data) => {
+    const { rooms } = data;
+
+    for (const room in rooms) {
       const classroom = await Classroom.findOne({ name: room });
+
       if (classroom && classroom.students.includes(socket.user._id)) {
         socket.join(room);
 
@@ -31,11 +34,13 @@ const handleRoomEvents = (socket, io) => {
   });
 
   socket.on("leave room", (data) => {
-    const { roomName } = data;
+    const { rooms } = data;
 
-    socket.leave(roomName);
-    io.to(room).emit("message", `User ${socket.user._id} left the room`);
-    console.log(`User ${socket.user._id} left room ${roomName}`);
+    for (const room in rooms) {
+      socket.leave(room);
+      io.to(room).emit("message", `User ${socket.user._id} left the room`);
+      console.log(`User ${socket.user._id} left room ${room}`);
+    }
   });
 };
 
