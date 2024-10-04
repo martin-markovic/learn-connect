@@ -11,8 +11,8 @@ const socketMiddleware = (socket, next) => {
   try {
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
 
-    console.log(decodedToken);
-    socket.user = { _id: decodedToken._id };
+    socket.user = { id: decodedToken.id };
+    console.log("Socket user set:", socket.user);
 
     next();
   } catch (error) {

@@ -4,7 +4,14 @@ import handleErrorEvents from "./errorController.js";
 
 const handleSocketLifeCycle = (io) => {
   io.on("connection", (socket) => {
-    console.log(`User connected with ID: ${socket.user._id}`);
+    console.log(`New connection: Socket ID ${socket.id}`);
+
+    if (!socket.user || !socket.user.id) {
+      console.log("User ID is undefined, aborting socket event handlers");
+      return;
+    }
+
+    console.log(`User connected with ID: ${socket.user.id}`);
 
     handleMessages(socket, io);
     handleRoomEvents(socket, io);
