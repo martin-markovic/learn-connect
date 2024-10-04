@@ -13,11 +13,14 @@ export const SocketProvider = ({ children }) => {
   const { token } = useSelector((state) => state.auth.user);
 
   useEffect(() => {
-    handleConnect(token, setSocketInstance);
+    if (!socketInstance && token) {
+      handleConnect(token, setSocketInstance);
+    }
 
     return () => {
       if (socketInstance) {
         handleDisconnect(socketInstance);
+        setSocketInstance(null);
       }
     };
   }, [token]);

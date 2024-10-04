@@ -39,7 +39,6 @@ function ChatList() {
       handleRoomLeave({ roomNames });
     }
 
-    // commit message: to open chat regardless of length
     setListOpen(!listOpen);
   };
 

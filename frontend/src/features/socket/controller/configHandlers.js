@@ -47,7 +47,7 @@ export const handleConnect = async (token, setupCallback) => {
 export const handleDisconnect = async (socketInstance) => {
   try {
     if (socketInstance) {
-      socketInstance.disconnect();
+      await socketInstance.disconnect();
     }
   } catch (error) {
     console.error("Error disconnecting socket:", error);
