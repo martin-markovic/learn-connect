@@ -1,5 +1,5 @@
-const emitSocketEvent = async (data) => {
-  const { socketInstance, eventName, roomNames } = data;
+const emitRoomEvent = async (data) => {
+  const { socketInstance, eventName, roomData } = data;
 
   if (!socketInstance) {
     console.error("Socket not connected.");
@@ -9,14 +9,13 @@ const emitSocketEvent = async (data) => {
     console.error("Invalid socket event.");
   }
 
-  if (!roomNames) {
-    console.error("Room names not found.");
+  if (!roomData) {
+    console.error("Room data not found.");
     return;
   }
 
   try {
-    await socketInstance.emit(eventName, { roomNames });
-    console.log(`Successfully emitted event: ${eventName}`, { roomNames });
+    await socketInstance.emit(eventName, { roomData });
 
     return { success: true };
   } catch (error) {
@@ -25,4 +24,4 @@ const emitSocketEvent = async (data) => {
   }
 };
 
-export default emitSocketEvent;
+export default emitRoomEvent;

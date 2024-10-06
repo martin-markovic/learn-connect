@@ -11,8 +11,6 @@ const handleSocketLifeCycle = (io) => {
       return;
     }
 
-    console.log(`User connected with ID: ${socket.user.id}`);
-
     handleMessages(socket, io);
     handleRoomEvents(socket, io);
     handleErrorEvents(socket);
