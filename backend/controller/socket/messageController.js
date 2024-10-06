@@ -20,12 +20,11 @@ const handleMessages = (socket, io) => {
   });
 
   socket.on("user typing", (data) => {
-    const { room, senderId, senderName } = data;
+    const { roomNames, senderName } = data.roomData;
 
-    console.log("User is in rooms: ", socket.rooms);
+    console.log(`Emitting chat activity for ${senderName}`);
 
-    socket.broadcast.to(room).emit("chat activity", {
-      senderId,
+    socket.broadcast.to(roomNames).emit("chat activity", {
       senderName,
     });
   });

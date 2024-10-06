@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useSocketContext } from "../../features/socket/socketContext.js";
 import { getUserClassrooms } from "../../features/classroom/classroomSlice.js";
-import emitSocketEvent from "../../features/socket/controller/roomHandlers.js";
+import emitRoomEvent from "../../features/socket/controller/roomHandlers.js";
 
 function ChatList() {
   const [listOpen, setListOpen] = useState(false);
@@ -19,15 +19,17 @@ function ChatList() {
     if (userClassrooms.length > 0) {
       const roomNames = userClassrooms.map((classroom) => classroom.name);
 
-      console.log("handleOpen room data: ", { roomNames });
-
       const roomData = {
-        socketInstance,
-        eventName: "join room",
         roomNames,
       };
 
-      emitSocketEvent(roomData);
+      const clientData = {
+        socketInstance,
+        roomData,
+        eventName: "join room",
+      };
+
+      emitRoomEvent(clientData);
     }
 
     setListOpen(!listOpen);
@@ -40,12 +42,16 @@ function ChatList() {
       console.log("handleClose room data: ", { roomNames });
 
       const roomData = {
-        socketInstance,
-        eventName: "leave room",
         roomNames,
       };
 
-      emitSocketEvent(roomData);
+      const clientData = {
+        socketInstance,
+        eventName: "leave room",
+        roomData,
+      };
+
+      emitRoomEvent(clientData);
     }
 
     setListOpen(!listOpen);
