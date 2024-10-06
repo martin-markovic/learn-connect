@@ -2,19 +2,19 @@ import Classroom from "../../models/classrooms/classroomModel.js";
 
 const handleRoomEvents = (socket, io) => {
   socket.on("join room", async (data) => {
-    const { rooms } = data;
+    const { roomNames } = data.roomData;
 
-    for (const room in rooms) {
+    for (const room of roomNames) {
       const classroom = await Classroom.findOne({ name: room });
 
-      if (classroom && classroom.students.includes(socket.user._id)) {
+      if (classroom && classroom.students.includes(socket.user.id)) {
         socket.join(room);
 
-        console.log(`User ${socket.user._id} joined room ${room}`);
+        console.log(`User ${socket.user.id} joined room ${room}`);
 
         io.to(room).emit(
           "message",
-          `User ${socket.user._id} joined the classroom`
+          `User ${socket.user.id} joined the classroom`
         );
       } else {
         console.log("Join room failed: user not in classroom");
@@ -23,8 +23,6 @@ const handleRoomEvents = (socket, io) => {
   });
 
   socket.on("join user rooms", (rooms) => {
-    co;
-
     roomNames.forEach((room) => {
       socket.join(room);
       console.log(`User joined room: ${room}`);
@@ -38,7 +36,7 @@ const handleRoomEvents = (socket, io) => {
 
     for (const room in rooms) {
       socket.leave(room);
-      io.to(room).emit("message", `User ${socket.user._id} left the room`);
+      io.to(room).emit("message", `User ${socket.user.id} left the room`);
       console.log(`User ${socket.user._id} left room ${room}`);
     }
   });
