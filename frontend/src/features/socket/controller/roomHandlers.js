@@ -1,17 +1,13 @@
+import validateRoomData from "../dataMiddleware.js";
+
 const emitRoomEvent = async (data) => {
   const { socketInstance, eventName, roomData } = data;
 
-  if (!socketInstance) {
-    console.error("Socket not connected.");
-  }
+  const response = validateRoomData(data);
 
-  if (!eventName) {
-    console.error("Invalid socket event.");
-  }
-
-  if (!roomData) {
-    console.error("Room data not found.");
-    return;
+  if (!response.success) {
+    console.error(response.errorMessage);
+    return { success: false, error: response.errorMessage };
   }
 
   try {
