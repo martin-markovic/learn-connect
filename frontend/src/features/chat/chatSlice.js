@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import chatService from "./chatService.js";
 import { handleSliceError } from "../redux.errorHandler.js";
+import findMessageIndex from "../chat.findMessage.js";
 
 const initialState = {
   isLoading: false,
@@ -39,12 +40,9 @@ export const getMessages = createAsyncThunk(
   "chat/getMessages",
   async (classroomId, thunkAPI) => {
     try {
-      const token = JSON.parse(localStorage.getItem("user")).token;
       const token = thunkAPI.getState().auth.user.token;
 
-      if (!token) {
-        throw new Error("Token not found");
-      }
+      const response = await chatService.getMessages(classroomId, token);
 
       return response.data;
     } catch (error) {
@@ -115,12 +113,13 @@ const chatSlice = createSlice({
       .addCase(sendMessage.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
-        const friend = action.payload.receiver;
-        if (!state.messages[friend]) {
-          state.messages[friend] = [];
-        }
-        state.messages[friend].push(action.payload);
         state.errorMessage = "";
+        const classroom = action.payload.classroom;
+        if (!state.messages[classroom]) {
+          state.messages[classroom] = [];
+        }
+
+        state.messages[classroom].push(action.payload);
       })
       .addCase(sendMessage.rejected, (state, action) => {
         state.isSuccess = false;
@@ -135,16 +134,19 @@ const chatSlice = createSlice({
         state.isLoading = false;
         state.isSuccess = true;
         state.errorMessage = "";
-        const classroomId = action.payload.classroom;
-        if (!state.messages[classroomId]) {
-          state.messages[classroomId] = [];
+
+        const messages = action.payload;
+        if (messages.length > 0) {
+          const classroomId = messages[0].classroom;
+
+          state.messages[classroomId] = messages;
         }
-        state.messages[classroomId].push(action.payload);
       })
       .addCase(getMessages.rejected, (state, action) => {
         state.isSuccess = false;
         state.isError = true;
-        state.errorMessage = action.payload || "Failed to send message";
+        state.errorMessage =
+          action.payload || "Failed to get classroom messages";
       })
       .addCase(getUserMessages.pending, (state) => {
         state.isLoading = true;
