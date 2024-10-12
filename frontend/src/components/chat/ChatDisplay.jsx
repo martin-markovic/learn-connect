@@ -1,16 +1,32 @@
 import { useState, useRef, useEffect } from "react";
 import { useSocketContext } from "../../features/socket/socketContext.js";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import emitRoomEvent from "../../features/socket/controller/roomHandlers.js";
+import {
+  sendMessage,
+  getMessages,
+} from "../../features/chat/chatSlice.js";
 
 const ChatDisplay = () => {
   const [input, setInput] = useState("");
   const { socketInstance, selectedChat } = useSocketContext();
-  const [chatMessages, setChatMessages] = useState([]);
   const [activity, setActivity] = useState("");
   const activityTimer = useRef(null);
 
+  const dispatch = useDispatch();
+
   const { user } = useSelector((state) => state.auth);
+  const { userClassrooms } = useSelector((state) => state.classroom);
+  const messages = useSelector((state) => state.chat.messages);
+  const classroomId = userClassrooms.find(
+    (classroom) => classroom.name === selectedChat
+  )?._id;
+
+  useEffect(() => {
+    if (classroomId) {
+      dispatch(getMessages(classroomId));
+    }
+  }, [selectedChat, dispatch, userClassrooms]);
 
   useEffect(() => {
     if (socketInstance) {
@@ -37,9 +53,25 @@ const ChatDisplay = () => {
     e.preventDefault();
   };
 
-  // const handleInputChange = (e) => {
-  //   setMessage(e.target.value);
-  // };
+    try {
+      if (selectedChat && socketInstance && classroomId) {
+        const messageData = {
+          sender: user._id,
+          text: input,
+          classroom: classroomId,
+          status: "pending",
+        };
+
+        const response = await dispatch(sendMessage(messageData));
+
+        setInput("");
+      } else {
+        console.error(
+          "Please select a chat and provide valid socket instance."
+        );
+      }
+    }
+  };
 
   const handleKeyPress = async () => {
     try {
@@ -93,8 +125,18 @@ const ChatDisplay = () => {
       </form>
       <p>{activity}</p>
       <ul>
-        {chatMessages.map((msg, index) => (
-          <li key={`message-${index}`}>{msg}</li>
+        {Object.keys(messages).map((classroomId) => (
+          <div key={classroomId}>
+            {messages[classroomId] && messages[classroomId].length > 0 ? (
+              messages[classroomId].map((message) => (
+                <div key={message._id}>
+                  <strong>{message.sender.name}</strong>: {message.text}
+                </div>
+              ))
+            ) : (
+              <div>No messages yet.</div>
+            )}
+          </div>
         ))}
       </ul>
     </div>
