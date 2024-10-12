@@ -41,10 +41,9 @@ const ChatDisplay = () => {
   //   setMessage(e.target.value);
   // };
 
-  const handleKeyPress = () => {
   const handleKeyPress = async () => {
     try {
-      if (selectedChat && selectedChat && socketInstance) {
+      if (selectedChat && socketInstance) {
         const roomData = {
           roomNames: selectedChat,
           senderId: user._id,
@@ -63,8 +62,8 @@ const ChatDisplay = () => {
           throw new Error("Failed to emit typing event");
         }
       } else {
-        console.log(
-          "Validation failed: either selectedChat or socketInstance is missing"
+        console.error(
+          "Please select a chat and provide valid socket instance."
         );
       }
     } catch (error) {
