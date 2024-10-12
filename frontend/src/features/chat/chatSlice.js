@@ -10,8 +10,8 @@ const initialState = {
   messages: {},
 };
 
-export const sendFriendMessage = createAsyncThunk(
-  "chat/sendFriendMessage",
+export const sendMessage = createAsyncThunk(
+  "chat/sendMessage",
   async (messageData, thunkAPI) => {
     try {
       const token = JSON.parse(localStorage.getItem("user")).token;
@@ -20,7 +20,7 @@ export const sendFriendMessage = createAsyncThunk(
         throw new Error("Token not found");
       }
 
-      return await chatService.sendFriendMessage(messageData, token);
+      return await chatService.sendMessage(messageData, token);
     } catch (error) {
       const message =
         (error.response &&
@@ -29,23 +29,24 @@ export const sendFriendMessage = createAsyncThunk(
         error.message ||
         error.toString();
 
+      handleSliceError(error, thunkAPI);
       return thunkAPI.rejectWithValue(message);
-      handleSliceError(error);
     }
   }
 );
 
-export const sendClassroomMessage = createAsyncThunk(
-  "chat/sendClassroomMessage",
-  async (messageData, thunkAPI) => {
+export const getMessages = createAsyncThunk(
+  "chat/getMessages",
+  async (classroomId, thunkAPI) => {
     try {
       const token = JSON.parse(localStorage.getItem("user")).token;
+      const token = thunkAPI.getState().auth.user.token;
 
       if (!token) {
         throw new Error("Token not found");
       }
 
-      return await chatService.sendClassroomMessage(messageData, token);
+      return response.data;
     } catch (error) {
       const message =
         (error.response &&
@@ -54,8 +55,8 @@ export const sendClassroomMessage = createAsyncThunk(
         error.message ||
         error.toString();
 
-      return thunkAPI.rejectWithValue(message);
       handleSliceError(error, thunkAPI);
+      return thunkAPI.rejectWithValue(message);
     }
   }
 );
@@ -107,11 +108,11 @@ const chatSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(sendFriendMessage.pending, (state) => {
+      .addCase(sendMessage.pending, (state) => {
         state.isLoading = true;
         state.errorMessage = "";
       })
-      .addCase(sendFriendMessage.fulfilled, (state, action) => {
+      .addCase(sendMessage.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
         const friend = action.payload.receiver;
@@ -121,16 +122,16 @@ const chatSlice = createSlice({
         state.messages[friend].push(action.payload);
         state.errorMessage = "";
       })
-      .addCase(sendFriendMessage.rejected, (state, action) => {
+      .addCase(sendMessage.rejected, (state, action) => {
         state.isSuccess = false;
         state.isError = true;
         state.errorMessage = action.payload || "Failed to send message";
       })
-      .addCase(sendClassroomMessage.pending, (state) => {
+      .addCase(getMessages.pending, (state) => {
         state.isLoading = true;
         state.errorMessage = "";
       })
-      .addCase(sendClassroomMessage.fulfilled, (state, action) => {
+      .addCase(getMessages.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
         state.errorMessage = "";
@@ -140,7 +141,7 @@ const chatSlice = createSlice({
         }
         state.messages[classroomId].push(action.payload);
       })
-      .addCase(sendClassroomMessage.rejected, (state, action) => {
+      .addCase(getMessages.rejected, (state, action) => {
         state.isSuccess = false;
         state.isError = true;
         state.errorMessage = action.payload || "Failed to send message";
