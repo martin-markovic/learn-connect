@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import chatService from "./chatService.js";
 import { handleSliceError } from "../redux.errorHandler.js";
+import findMessageIndex from "../chat.findMessage.js";
 
 const initialState = {
   isLoading: false,
@@ -10,8 +11,8 @@ const initialState = {
   messages: {},
 };
 
-export const sendFriendMessage = createAsyncThunk(
-  "chat/sendFriendMessage",
+export const sendMessage = createAsyncThunk(
+  "chat/sendMessage",
   async (messageData, thunkAPI) => {
     try {
       const token = JSON.parse(localStorage.getItem("user")).token;
@@ -20,7 +21,7 @@ export const sendFriendMessage = createAsyncThunk(
         throw new Error("Token not found");
       }
 
-      return await chatService.sendFriendMessage(messageData, token);
+      return await chatService.sendMessage(messageData, token);
     } catch (error) {
       const message =
         (error.response &&
@@ -29,23 +30,21 @@ export const sendFriendMessage = createAsyncThunk(
         error.message ||
         error.toString();
 
+      handleSliceError(error, thunkAPI);
       return thunkAPI.rejectWithValue(message);
-      handleSliceError(error);
     }
   }
 );
 
-export const sendClassroomMessage = createAsyncThunk(
-  "chat/sendClassroomMessage",
-  async (messageData, thunkAPI) => {
+export const getMessages = createAsyncThunk(
+  "chat/getMessages",
+  async (classroomId, thunkAPI) => {
     try {
-      const token = JSON.parse(localStorage.getItem("user")).token;
+      const token = thunkAPI.getState().auth.user.token;
 
-      if (!token) {
-        throw new Error("Token not found");
-      }
+      const response = await chatService.getMessages(classroomId, token);
 
-      return await chatService.sendClassroomMessage(messageData, token);
+      return response.data;
     } catch (error) {
       const message =
         (error.response &&
@@ -54,8 +53,8 @@ export const sendClassroomMessage = createAsyncThunk(
         error.message ||
         error.toString();
 
-      return thunkAPI.rejectWithValue(message);
       handleSliceError(error, thunkAPI);
+      return thunkAPI.rejectWithValue(message);
     }
   }
 );
@@ -107,43 +106,47 @@ const chatSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(sendFriendMessage.pending, (state) => {
+      .addCase(sendMessage.pending, (state) => {
         state.isLoading = true;
         state.errorMessage = "";
       })
-      .addCase(sendFriendMessage.fulfilled, (state, action) => {
+      .addCase(sendMessage.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
-        const friend = action.payload.receiver;
-        if (!state.messages[friend]) {
-          state.messages[friend] = [];
-        }
-        state.messages[friend].push(action.payload);
         state.errorMessage = "";
+        const classroom = action.payload.classroom;
+        if (!state.messages[classroom]) {
+          state.messages[classroom] = [];
+        }
+
+        state.messages[classroom].push(action.payload);
       })
-      .addCase(sendFriendMessage.rejected, (state, action) => {
+      .addCase(sendMessage.rejected, (state, action) => {
         state.isSuccess = false;
         state.isError = true;
         state.errorMessage = action.payload || "Failed to send message";
       })
-      .addCase(sendClassroomMessage.pending, (state) => {
+      .addCase(getMessages.pending, (state) => {
         state.isLoading = true;
         state.errorMessage = "";
       })
-      .addCase(sendClassroomMessage.fulfilled, (state, action) => {
+      .addCase(getMessages.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
         state.errorMessage = "";
-        const classroomId = action.payload.classroom;
-        if (!state.messages[classroomId]) {
-          state.messages[classroomId] = [];
+
+        const messages = action.payload;
+        if (messages.length > 0) {
+          const classroomId = messages[0].classroom;
+
+          state.messages[classroomId] = messages;
         }
-        state.messages[classroomId].push(action.payload);
       })
-      .addCase(sendClassroomMessage.rejected, (state, action) => {
+      .addCase(getMessages.rejected, (state, action) => {
         state.isSuccess = false;
         state.isError = true;
-        state.errorMessage = action.payload || "Failed to send message";
+        state.errorMessage =
+          action.payload || "Failed to get classroom messages";
       })
       .addCase(getUserMessages.pending, (state) => {
         state.isLoading = true;
