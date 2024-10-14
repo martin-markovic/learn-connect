@@ -78,12 +78,13 @@ export const getUserMessages = createAsyncThunk(
   }
 );
 
-export const getClassroomMessages = createAsyncThunk(
-  "chat/getClassroomMessages",
-  async (classroomId, thunkAPI) => {
+export const removeMessages = createAsyncThunk(
+  "chat/removeMessages",
+  async (chatData, thunkAPI) => {
     try {
       const token = thunkAPI.getState().auth.user.token;
-      return await chatService.getClassroomMessages(classroomId, token);
+
+      return await chatService.removeMessages(chatData, token);
     } catch (error) {
       const message =
         (error.response &&
@@ -92,8 +93,8 @@ export const getClassroomMessages = createAsyncThunk(
         error.message ||
         error.toString();
 
+      handleSliceError(error, thunkAPI);
       return thunkAPI.rejectWithValue(message);
-      handleSliceError(error);
     }
   }
 );
@@ -172,25 +173,22 @@ const chatSlice = createSlice({
         state.isError = true;
         state.errorMessage = action.payload || "Failed to get user messages";
       })
-      .addCase(getClassroomMessages.pending, (state) => {
+      .addCase(removeMessages.pending, (state) => {
         state.isLoading = true;
         state.errorMessage = "";
       })
-      .addCase(getClassroomMessages.fulfilled, (state, action) => {
+      .addCase(removeMessages.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
         state.errorMessage = "";
-        const classroomId = action.meta.arg;
-        if (!state.messages[classroomId]) {
-          state.messages[classroomId] = [];
-        }
-        state.messages[classroomId] = action.payload;
+        const classroom = action.payload;
+
+        state.messages[classroom] = [];
       })
-      .addCase(getClassroomMessages.rejected, (state, action) => {
+      .addCase(removeMessages.rejected, (state, action) => {
         state.isSuccess = false;
         state.isError = true;
-        state.errorMessage =
-          action.payload || "Failed to get classroom messages";
+        state.errorMessage = action.payload || "Failed to remove messages";
       });
   },
 });

@@ -30,7 +30,7 @@ const classroomSchema = new mongoose.Schema({
       ref: "Score",
     },
   ],
-  chat: [
+  chats: [
     {
       type: [mongoose.Schema.Types.ObjectId],
       ref: "Chat",

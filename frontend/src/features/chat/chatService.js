@@ -57,18 +57,23 @@ const getMessages = async (classroomId, token) => {
   }
 };
 
-const getClassroomMessages = async (classroomId, token) => {
+const removeMessages = async (chatData, token) => {
   try {
+    const { classroomId, messageIds } = chatData;
+
     const config = {
       headers: {
         Authorization: `Bearer ${token}`,
       },
+      data: { messageIds },
     };
 
-    const response = await axios.get(
-      `${API_URL}/classroom/${classroomId}/messages`,
+    const response = await axios.delete(
+      `${API_URL}${classroomId}/chat`,
+
       config
     );
+
     return response.data;
   } catch (error) {
     handleServiceError(error);
@@ -79,6 +84,7 @@ const getClassroomMessages = async (classroomId, token) => {
 const chatService = {
   sendMessage,
   getMessages,
+  removeMessages,
 };
 
 export default chatService;
