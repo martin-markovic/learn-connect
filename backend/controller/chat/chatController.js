@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Chat from "../../models/chat/chatModel.js";
 import Classroom from "../../models/classrooms/classroomModel.js";
 
@@ -91,30 +92,40 @@ export const getUserMessages = async (req, res) => {
   }
 };
 
-export const getClassroomMessages = async (req, res) => {
+export const removeMessages = async (req, res) => {
+  const classroomId = req.params.classroom;
+  const { messageIds } = req.body;
+
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
-    const { classroomId } = req.params;
-    const userId = req.user._id;
-
-    const classroom = await Classroom.findById(classroomId);
-    if (!classroom) {
-      return res.status(404).json({ message: "Classroom not found" });
+    if (!Array.isArray(messageIds) || !messageIds.length) {
+      return res.status(400).json({ message: "Invalid message IDs provided." });
     }
 
-    if (!classroom.students.includes(userId)) {
-      return res
-        .status(403)
-        .json({ message: "You are not a member of this classroom" });
-    }
+    await Classroom.updateOne(
+      { _id: classroomId },
+      { $pull: { chats: { $in: messageIds } } },
+      { session }
+    );
 
-    const classroomMessages = await Chat.findOne({ classroom: classroomId })
-      .populate("sender")
-      .sort({ createdAt: -1 });
+    console.log(`Removed references to messages from classroom ${classroomId}`);
 
-    return res.status(200).json(classroomMessages);
+    console.log(`Deleted messages from chats collection: ${messageIds}`);
+
+    await session.commitTransaction();
+
+    await Chat.deleteMany({ _id: { $in: messageIds } }, { session });
+
+    return res.status(200).json(classroomId);
   } catch (error) {
+    await session.abortTrainsaction();
+    console.error("Error removing message references:", error);
     return res.status(500).json({
       message: error.message,
     });
+  } finally {
+    session.endSession();
   }
 };
