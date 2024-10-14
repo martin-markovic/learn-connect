@@ -1,37 +1,46 @@
 import Chat from "../../models/chat/chatModel.js";
 import Classroom from "../../models/classrooms/classroomModel.js";
 
-export const sendFriendMessage = async (req, res) => {
+export const sendMessage = async (req, res) => {
   try {
-    const { receiverName, text } = req.body;
+    const { classroom } = req.params;
 
-    const messageReceiver = await User.findOne({ username: receiverName });
+    const { sender, text } = req.body.roomData;
 
-    if (!messageReceiver) {
-      return res.status(404).json({ message: "Receiver not found" });
+
+    const userClassroom = await Classroom.findOne({ _id: classroom });
+
+    if (!userClassroom) {
+      return res.status(404).json({ message: "Classroom not found" });
     }
 
-    const { commonClassroom } = await findCommonClassroom(
-      req.user._id,
-      messageReceiver._id
-    );
+    if (!text) {
+      return res.status(400).json({ message: "Please provide message text." });
+    }
 
-    if (!commonClassroom) {
+    const isMember = userClassroom.students.includes(req.user._id);
+    if (!isMember) {
       return res
-        .status(400)
-        .json({ message: "No common classroom found between users" });
+        .status(403)
+        .json({ message: "You are not a member of this classroom" });
     }
 
     const newMessage = new Chat({
-      sender: req.user._id,
-      receiver: messageReceiver._id,
+      classroom,
+      sender,
       text,
-      classroom: commonClassroom._id,
+      status: "delivered",
     });
 
-    await newMessage.save();
+    const savedMessage = await newMessage.save();
 
-    return res.status(200).json(newMessage);
+    await Classroom.findByIdAndUpdate(
+      classroom,
+      { $push: { chats: savedMessage._id } },
+      { new: true }
+    );
+
+    return res.status(200).json(savedMessage);
   } catch (error) {
     return res.status(500).json({
       message: error.message,

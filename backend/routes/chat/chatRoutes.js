@@ -3,18 +3,16 @@ const chatRoutes = Router();
 
 import { protect } from "../../middleware/authMiddleware.js";
 import {
-  sendFriendMessage,
-  sendClassroomMessage,
   getUserMessages,
   getClassroomMessages,
+  sendMessage,
 } from "../../controller/chat/chatController.js";
 
-chatRoutes.post("/", protect, sendFriendMessage);
 chatRoutes.get("/messages/:id", protect, getUserMessages);
 
 chatRoutes
-  .route("/messages/classroom/:id/")
-  .post(protect, sendClassroomMessage)
   .get(protect, getClassroomMessages);
+  .route("/:classroom/chat")
+  .post(protect, sendMessage)
 
 export default chatRoutes;
