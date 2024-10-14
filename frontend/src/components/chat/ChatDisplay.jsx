@@ -5,6 +5,7 @@ import emitRoomEvent from "../../features/socket/controller/roomHandlers.js";
 import {
   sendMessage,
   getMessages,
+  removeMessages,
 } from "../../features/chat/chatSlice.js";
 
 const ChatDisplay = () => {
@@ -103,11 +104,36 @@ const ChatDisplay = () => {
     }
   };
 
+  const handleRemove = async () => {
+    if (selectedChat) {
+      try {
+        const messageIds = messages[classroomId].map((message) => message._id);
+
+        if (messageIds.length === 0 || !messageIds) {
+          console.error("Chat history is already empty");
+          return;
+        }
+
+        const chatData = { classroomId, messageIds };
+
+        const result = await dispatch(removeMessages(chatData));
+        if (result.type === "chat/removeMessages/fulfilled") {
+          console.log("Messages removed successfully");
+        }
+      } catch (error) {
+        console.error("Error:", error.message);
+
+        // implement toasting  messages (not just error messages)
+      }
+    }
+  };
+
   return !selectedChat ? (
     <div></div>
   ) : (
     <div className="conversation-display">
       <h3>Chat with {selectedChat}</h3>
+      <button onClick={handleRemove}>Delete Conversation</button>
       <form onSubmit={handleSubmit}>
         <input
           type="text"
