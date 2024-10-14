@@ -48,31 +48,28 @@ export const sendMessage = async (req, res) => {
   }
 };
 
-export const sendClassroomMessage = async (req, res) => {
+export const getMessages = async (req, res) => {
   try {
-    const { classroomId, text } = req.body;
+    const { classroom } = req.params;
+    const userId = req.user._id;
 
-    const classroom = await Classroom.findById(classroomId);
-    if (!classroom) {
+    const userClassroom = await Classroom.findOne({ _id: classroom });
+
+    if (!userClassroom) {
       return res.status(404).json({ message: "Classroom not found" });
     }
 
-    const isMember = classroom.students.includes(req.user._id);
-    if (!isMember) {
+    if (!userClassroom.students.includes(userId)) {
       return res
         .status(403)
         .json({ message: "You are not a member of this classroom" });
     }
 
-    const newMessage = new Chat({
-      sender: req.user._id,
-      classroom: classroom._id,
-      text,
-    });
+    const classroomMessages = await Chat.find({ classroom: classroom })
+      .populate("sender")
+      .sort({ createdAt: -1 });
 
-    await newMessage.save();
-
-    return res.status(200).json(newMessage);
+    return res.status(200).json(classroomMessages);
   } catch (error) {
     return res.status(500).json({
       message: error.message,

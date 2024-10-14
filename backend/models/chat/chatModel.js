@@ -6,11 +6,6 @@ const chatSchema = new mongoose.Schema({
     ref: "User",
     required: true,
   },
-  receiver: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
-  },
   text: {
     type: String,
     required: true,
@@ -19,6 +14,10 @@ const chatSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Classroom",
     required: true,
+  },
+  status: {
+    type: String,
+    required: false,
   },
   timestamp: {
     type: Date,
