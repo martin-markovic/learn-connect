@@ -42,14 +42,21 @@ const getMessages = async (classroomId, token) => {
   }
 };
 
+const updateMessageStatus = async (messageData, token) => {
   try {
+    const { classroomId, messageId } = messageData;
+
     const config = {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     };
 
-    const response = await axios.get(API_URL, config);
+    const response = await axios.patch(
+      `${API_URL}/${classroomId}/messages/${messageId}`,
+      config
+    );
+
     return response.data;
   } catch (error) {
     handleServiceError(error);
@@ -84,6 +91,7 @@ const removeMessages = async (chatData, token) => {
 const chatService = {
   sendMessage,
   getMessages,
+  updateMessageStatus,
   removeMessages,
 };
 

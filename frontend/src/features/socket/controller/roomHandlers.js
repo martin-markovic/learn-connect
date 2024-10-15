@@ -6,7 +6,7 @@ const emitRoomEvent = async (data) => {
   const response = validateRoomData(data);
 
   if (!response.success) {
-    console.error(response.errorMessage);
+    console.error("Room data validation failed: ", response.errorMessage);
     return { success: false, error: response.errorMessage };
   }
 

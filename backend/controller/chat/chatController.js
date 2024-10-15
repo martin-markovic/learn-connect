@@ -78,13 +78,31 @@ export const getMessages = async (req, res) => {
   }
 };
 
-export const getUserMessages = async (req, res) => {
+export const updateMessageStatus = async (req, res) => {
   try {
-    const userMessages = await Chat.find({
-      $or: [{ sender: req.user._id }, { receiver: req.user._id }],
-    }).populate("sender receiver classroom");
+    const { classroomId, messageId } = req.params;
 
-    return res.status(200).json(userMessages);
+    if (!classroomId || !messageId) {
+      return res
+        .status(400)
+        .json({ message: "Missing classroomId or messageId" });
+    }
+
+    const message = await Chat.findOne({
+      _id: messageId,
+    });
+
+    if (!message) {
+      return res.status(404).json({
+        message: "Message not found",
+      });
+    }
+
+    message.status = "seen";
+
+    await message.save();
+
+    return res.status(200).json(message);
   } catch (error) {
     return res.status(500).json({
       message: error.message,
