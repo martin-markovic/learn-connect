@@ -59,12 +59,12 @@ export const getMessages = createAsyncThunk(
   }
 );
 
-export const getUserMessages = createAsyncThunk(
-  "chat/getUserMessages",
-  async (_, thunkAPI) => {
+export const updateMessageStatus = createAsyncThunk(
+  "chat/updateMessageStatus",
+  async (classroomId, thunkAPI) => {
     try {
       const token = thunkAPI.getState().auth.user.token;
-      return await chatService.getUserMessages(token);
+      return await chatService.updateMessageStatus(classroomId, token);
     } catch (error) {
       const message =
         (error.response &&
@@ -73,6 +73,7 @@ export const getUserMessages = createAsyncThunk(
         error.message ||
         error.toString();
 
+      handleSliceError(error, thunkAPI);
       return thunkAPI.rejectWithValue(message);
     }
   }
@@ -149,29 +150,38 @@ const chatSlice = createSlice({
         state.errorMessage =
           action.payload || "Failed to get classroom messages";
       })
-      .addCase(getUserMessages.pending, (state) => {
-        state.isLoading = true;
-        state.errorMessage = "";
+      .addCase(updateMessageStatus.pending, (state, action) => {
+        const { messageId } = action.payload._id;
+        const { messageIndex, classroom } = findMessageIndex(
+          state.messages,
+          messageId
+        );
+
+        if (messageIndex !== -1 && classroom) {
+          state.messages[classroom][messageIndex].status = "pending";
+        }
       })
-      .addCase(getUserMessages.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.isSuccess = true;
-        state.errorMessage = "";
-        action.payload.forEach((message) => {
-          const friend =
-            message.sender._id === state.auth.user._id
-              ? message.receiver._id
-              : message.sender._id;
-          if (!state.messages[friend]) {
-            state.messages[friend] = [];
-          }
-          state.messages[friend].push(message);
-        });
+      .addCase(updateMessageStatus.fulfilled, (state, action) => {
+        const { messageId } = action.payload._id;
+        const { messageIndex, classroom } = findMessageIndex(
+          state.messages,
+          messageId
+        );
+
+        if (messageIndex !== -1 && classroom) {
+          state.messages[classroom][messageIndex].status = "success";
+        }
       })
-      .addCase(getUserMessages.rejected, (state, action) => {
-        state.isSuccess = false;
-        state.isError = true;
-        state.errorMessage = action.payload || "Failed to get user messages";
+      .addCase(updateMessageStatus.rejected, (state, action) => {
+        const { messageId } = action.payload._id;
+        const { messageIndex, classroom } = findMessageIndex(
+          state.messages,
+          messageId
+        );
+
+        if (messageIndex !== -1 && classroom) {
+          state.messages[classroom][messageIndex].status = "failed";
+        }
       })
       .addCase(removeMessages.pending, (state) => {
         state.isLoading = true;
