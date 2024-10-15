@@ -27,7 +27,7 @@ const ChatDisplay = () => {
     if (classroomId) {
       dispatch(getMessages(classroomId));
     }
-  }, [selectedChat, dispatch, userClassrooms]);
+  }, [dispatch, userClassrooms, classroomId]);
 
   useEffect(() => {
     if (socketInstance) {
@@ -50,9 +50,23 @@ const ChatDisplay = () => {
     };
   }, [socketInstance]);
 
+  useEffect(() => {
+    if (socketInstance) {
+      socketInstance.on("message delivered", (data) => {
+        console.log("Message delivered, sending redux data: ", data);
+        dispatch(sendMessage(data));
+      });
+    }
+
+    return () => {
+      if (socketInstance) {
+        socketInstance.off("message delivered");
+      }
+    };
+  }, [socketInstance, dispatch]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-  };
 
     try {
       if (selectedChat && socketInstance && classroomId) {
@@ -63,14 +77,27 @@ const ChatDisplay = () => {
           status: "pending",
         };
 
-        const response = await dispatch(sendMessage(messageData));
+        const clientData = {
+          socketInstance,
+          eventName: "message room",
+          roomData: messageData,
+        };
 
-        setInput("");
+        console.log("Emitting room event with client data: ", clientData);
+
+        const response = await emitRoomEvent(clientData);
+
+        if (response.success) {
+          console.log("Emit Room event successfull");
+          setInput("");
+        }
       } else {
         console.error(
           "Please select a chat and provide valid socket instance."
         );
       }
+    } catch (error) {
+      console.error("Error:", error.message);
     }
   };
 
