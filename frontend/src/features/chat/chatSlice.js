@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import chatService from "./chatService.js";
 import { handleSliceError } from "../redux.errorHandler.js";
-import findMessageIndex from "../chat.findMessage.js";
 
 const initialState = {
   isLoading: false,
@@ -45,26 +44,6 @@ export const getMessages = createAsyncThunk(
       const response = await chatService.getMessages(classroomId, token);
 
       return response.data;
-    } catch (error) {
-      const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-
-      handleSliceError(error, thunkAPI);
-      return thunkAPI.rejectWithValue(message);
-    }
-  }
-);
-
-export const updateMessageStatus = createAsyncThunk(
-  "chat/updateMessageStatus",
-  async (classroomId, thunkAPI) => {
-    try {
-      const token = thunkAPI.getState().auth.user.token;
-      return await chatService.updateMessageStatus(classroomId, token);
     } catch (error) {
       const message =
         (error.response &&
@@ -149,39 +128,6 @@ const chatSlice = createSlice({
         state.isError = true;
         state.errorMessage =
           action.payload || "Failed to get classroom messages";
-      })
-      .addCase(updateMessageStatus.pending, (state, action) => {
-        const { messageId } = action.payload._id;
-        const { messageIndex, classroom } = findMessageIndex(
-          state.messages,
-          messageId
-        );
-
-        if (messageIndex !== -1 && classroom) {
-          state.messages[classroom][messageIndex].status = "pending";
-        }
-      })
-      .addCase(updateMessageStatus.fulfilled, (state, action) => {
-        const { messageId } = action.payload._id;
-        const { messageIndex, classroom } = findMessageIndex(
-          state.messages,
-          messageId
-        );
-
-        if (messageIndex !== -1 && classroom) {
-          state.messages[classroom][messageIndex].status = "success";
-        }
-      })
-      .addCase(updateMessageStatus.rejected, (state, action) => {
-        const { messageId } = action.payload._id;
-        const { messageIndex, classroom } = findMessageIndex(
-          state.messages,
-          messageId
-        );
-
-        if (messageIndex !== -1 && classroom) {
-          state.messages[classroom][messageIndex].status = "failed";
-        }
       })
       .addCase(removeMessages.pending, (state) => {
         state.isLoading = true;
