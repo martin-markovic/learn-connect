@@ -1,13 +1,9 @@
-import Classroom from "../../models/classrooms/classroomModel.js";
-
 const handleRoomEvents = (socket, io) => {
   socket.on("join room", async (data) => {
     const { roomNames } = data.roomData;
 
     for (const room of roomNames) {
-      const classroom = await Classroom.findOne({ name: room });
-
-      if (classroom && classroom.students.includes(socket.user.id)) {
+      if (!room.includes(socket.user.id)) {
         socket.join(room);
 
         console.log(`User ${socket.user.id} joined room ${room}`);
@@ -17,7 +13,7 @@ const handleRoomEvents = (socket, io) => {
           `User ${socket.user.id} joined the classroom`
         );
       } else {
-        console.log("Join room failed: user not in classroom");
+        console.log("Join room failed: user is already in the classroom");
       }
     }
   });

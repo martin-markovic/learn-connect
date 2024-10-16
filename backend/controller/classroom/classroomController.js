@@ -1,5 +1,6 @@
 import Chat from "../../models/chat/chatModel.js";
 import Classroom from "../../models/classrooms/classroomModel.js";
+import User from "../../models/users/userModel.js";
 
 export const joinClassroom = async (req, res) => {
   try {
@@ -26,6 +27,12 @@ export const joinClassroom = async (req, res) => {
 
     classroom.students.push(userId);
     await classroom.save();
+
+    await User.findByIdAndUpdate(
+      userId,
+      { $push: { classrooms: classroomId } },
+      { new: true }
+    );
 
     return res.status(200).json({
       message: "User joined classroom successfully",
@@ -70,7 +77,11 @@ export const leaveClassroom = async (req, res) => {
 
     await classroom.save();
 
-    await Chat.deleteMany({ sender: userId, classroom: classroomId });
+    await User.findByIdAndUpdate(
+      userId,
+      { $pull: { classrooms: classroomId } },
+      { new: true }
+    );
 
     return res.status(200).json(classroomId);
   } catch (error) {
