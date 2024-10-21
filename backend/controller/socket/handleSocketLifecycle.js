@@ -1,5 +1,6 @@
 import handleMessages from "./messageController.js";
 import handleRoomEvents from "./roomController.js";
+import handleNotificationEvents from "./notificationController.js";
 import handleErrorEvents from "./errorController.js";
 
 const handleSocketLifeCycle = (io) => {
@@ -13,6 +14,7 @@ const handleSocketLifeCycle = (io) => {
 
     handleMessages(socket, io);
     handleRoomEvents(socket, io);
+    handleNotificationEvents(socket);
     handleErrorEvents(socket);
 
     socket.on("connection_error", (err) => {
