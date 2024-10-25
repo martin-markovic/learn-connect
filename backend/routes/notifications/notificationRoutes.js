@@ -8,10 +8,9 @@ import {
   updateNotifications,
 } from "../../controller/notifications/notificationController.js";
 
-notificationRoutes
-  .route("/:userId")
-  .get(protect, getNotifications)
-  .patch(protect, updateNotifications);
+notificationRoutes.get("/:userId", protect, getNotifications);
+
+notificationRoutes.patch("/:userId", protect, updateNotifications);
 
 notificationRoutes.patch(
   "/:userId/:notificationId",

@@ -11,10 +11,6 @@ const notificationSchema = new mongoose.Schema({
     ref: "Classroom",
     required: true,
   },
-  name: {
-    type: String,
-    enum: ["chat", "quiz", ""],
-  },
   relatedId: {
     type: mongoose.Schema.Types.ObjectId,
   },
