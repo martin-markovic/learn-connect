@@ -1,6 +1,7 @@
 import Quiz from "../../models/quizzes/quizModel.js";
 import User from "../../models/users/userModel.js";
 import Classroom from "../../models/classrooms/classroomModel.js";
+import Notification from "../../models/users/notificationModel.js";
 
 export const createQuiz = async (req, res) => {
   try {
@@ -19,6 +20,7 @@ export const createQuiz = async (req, res) => {
     }
 
     const user = await User.findById(req.user.id).populate("classrooms");
+
     if (!user) {
       return res.status(401).json({ message: "User not found" });
     }
@@ -43,6 +45,13 @@ export const createQuiz = async (req, res) => {
       timeLimit,
       user: req.user.id,
       classroom: classroomId,
+    });
+
+    await Notification.create({
+      sender: user._id,
+      receiver: classroomId,
+      name: "quiz",
+      message: `${req.user.name} has created a new quiz ${quiz.title} for classroom ${classroom.name}`,
     });
 
     return res.status(201).json(quiz);
