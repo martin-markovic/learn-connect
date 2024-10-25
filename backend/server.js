@@ -19,6 +19,9 @@ app.use(
 
 app.use((err, req, res, next) => {
   console.error("Global error handler:", err.stack || err.message);
+
+  console.log(`Incoming request: ${req.method} ${req.url}`);
+
   res.status(err.status || 500).json({ message: err.message });
 });
 
