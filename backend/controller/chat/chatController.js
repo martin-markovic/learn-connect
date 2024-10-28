@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import Chat from "../../models/chat/chatModel.js";
 import Classroom from "../../models/classrooms/classroomModel.js";
+import Notification from "../../models/users/notificationModel.js";
 
 export const sendMessage = async (req, res) => {
   try {
@@ -8,15 +9,16 @@ export const sendMessage = async (req, res) => {
 
     const { sender, text } = req.body.roomData;
 
+    console.log("Controller function received data: ", req.body);
+
+    if (!text) {
+      return res.status(400).json({ message: "Please provide message text." });
+    }
 
     const userClassroom = await Classroom.findOne({ _id: classroom });
 
     if (!userClassroom) {
       return res.status(404).json({ message: "Classroom not found" });
-    }
-
-    if (!text) {
-      return res.status(400).json({ message: "Please provide message text." });
     }
 
     const isMember = userClassroom.students.includes(req.user._id);
@@ -40,6 +42,14 @@ export const sendMessage = async (req, res) => {
       { $push: { chats: savedMessage._id } },
       { new: true }
     );
+
+    await Notification.create({
+      sender,
+      receiver: classroom,
+      type: "chat",
+      relatedId: newMessage._id,
+      message: `You have a new message`,
+    });
 
     return res.status(200).json(savedMessage);
   } catch (error) {

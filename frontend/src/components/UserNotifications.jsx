@@ -4,18 +4,37 @@ import { useSocketContext } from "../features/socket/socketContext";
 import {
   getNotifications,
 } from "../features/notifications/notificationSlice.js";
+import { setNewNotifications } from "../features/notifications/notificationSlice.js";
 
 function UserNotifications() {
   const [newsOpen, setNewsOpen] = useState(false);
   const { socketInstance } = useSocketContext();
-  const { userNotifications } = useSelector((state) => state.notifications);
+  const { userNotifications, newNotifications } = useSelector(
+    (state) => state.notifications
+  );
 
   const dispatch = useDispatch();
 
   const handleOpen = () => {
     dispatch(getNotifications());
+  useEffect(() => {
+    if (newNotifications) {
+      dispatch(getNotifications());
+    }
+  }, [dispatch, newNotifications]);
 
-    setNewsOpen((prev) => !prev);
+  const handleOpen = async () => {
+    if (!newsOpen) {
+      if (newNotifications) {
+        try {
+          dispatch(getNotifications());
+        } catch (error) {
+          console.error("Error fetching notifications: ", error);
+        }
+      }
+
+      setNewsOpen((prev) => !prev);
+    }
   };
 
   const handleMark = async (notificationId) => {

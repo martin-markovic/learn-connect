@@ -1,14 +1,27 @@
 import Notification from "../../models/users/notificationModel.js";
+import Classroom from "../../models/classrooms/classroomModel.js";
 
 export const getNotifications = async (req, res) => {
   try {
-    const userId = req.user?._id;
+    const userId = req.params.userId;
 
-    const notifications = await Notification.findOne({ _id: userId }).sort({
-      date: -1,
-    });
+    const userClassrooms = await Classroom.find({ students: userId });
 
-    res.status(200).json(notifications);
+    const notifications = await Promise.all(
+      userClassrooms.map(async (classroom) => {
+        return Notification.find({ receiver: classroom._id });
+      })
+    );
+
+    const newNotifications = notifications
+      .flat()
+      .filter((notification) => !notification.readBy.includes(userId));
+
+    if (!newNotifications.length) {
+      return res.status(200).json([]);
+    }
+
+    res.status(200).json(newNotifications);
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }

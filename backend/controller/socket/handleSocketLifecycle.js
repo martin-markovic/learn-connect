@@ -1,6 +1,6 @@
 import handleMessages from "./messageController.js";
 import handleRoomEvents from "./roomController.js";
-import handleNotificationEvents from "./notificationController.js";
+import handleNotificationEvents from "./handleNotifications.js";
 import handleErrorEvents from "./errorController.js";
 
 const handleSocketLifeCycle = (io) => {

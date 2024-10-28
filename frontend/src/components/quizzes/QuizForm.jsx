@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { createQuiz, updateQuiz } from "../../features/quizzes/quizSlice.js";
 import { toast } from "react-toastify";
+import { setNewNotifications } from "../../features/notifications/notificationSlice.js";
 
 const initialQuestionState = {
   question: "",
@@ -154,6 +155,8 @@ function QuizForm({ quiz, onClose }) {
       } else {
         dispatch(createQuiz(quizData));
       }
+
+      dispatch(setNewNotifications());
       onClose();
     } catch (error) {
       toast.error(error.message);
