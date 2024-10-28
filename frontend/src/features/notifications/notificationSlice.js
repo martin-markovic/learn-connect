@@ -8,6 +8,7 @@ const initialState = {
   isError: false,
   errorMessage: "",
   userNotifications: [],
+  newNotifications: false,
 };
 
 export const getNotifications = createAsyncThunk(
@@ -52,6 +53,9 @@ const notificationSlice = createSlice({
   initialState,
   reducers: {
     resetNotifications: (state) => initialState,
+    setNewNotifications: (state) => {
+      state.newNotifications = true;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -65,6 +69,7 @@ const notificationSlice = createSlice({
         state.isError = false;
         state.errorMessage = "";
         state.userNotifications = action.payload;
+        state.newNotifications = false;
       })
       .addCase(getNotifications.rejected, (state, action) => {
         state.isLoading = false;
@@ -75,5 +80,8 @@ const notificationSlice = createSlice({
       })
   },
 });
+
+export const { resetNotifications, setNewNotifications } =
+  notificationSlice.actions;
 
 export default notificationSlice.reducer;
