@@ -7,21 +7,22 @@ export const getNotifications = async (req, res) => {
 
     const userClassrooms = await Classroom.find({ students: userId });
 
-    const notifications = await Promise.all(
+    const foundNotifications = await Promise.all(
       userClassrooms.map(async (classroom) => {
         return Notification.find({ receiver: classroom._id });
       })
     );
 
-    const newNotifications = notifications
+    const unreadNotifications = foundNotifications
       .flat()
       .filter((notification) => !notification.readBy.includes(userId));
 
-    if (!newNotifications.length) {
+    if (!unreadNotifications.length) {
+      console.log("No unreadNotifications fetched");
       return res.status(200).json([]);
     }
 
-    res.status(200).json(newNotifications);
+    return res.status(200).json(unreadNotifications);
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
@@ -50,7 +51,7 @@ export const updateNotification = async (req, res) => {
       { $push: { readBy: userId } }
     );
 
-    res.status(200).json(notificationId);
+    return res.status(200).json(notificationId);
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
@@ -71,7 +72,7 @@ export const updateNotifications = async (req, res) => {
         .json({ message: "All notifications are already read" });
     }
 
-    res.status(200);
+    return res.status(200);
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
