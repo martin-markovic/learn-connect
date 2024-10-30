@@ -7,7 +7,7 @@ export const sendMessage = async (req, res) => {
   try {
     const { classroom } = req.params;
 
-    const { sender, text } = req.body.roomData;
+    const { sender, text } = req.body;
 
     console.log("Controller function received data: ", req.body);
 
