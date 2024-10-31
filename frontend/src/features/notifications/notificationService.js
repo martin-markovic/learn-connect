@@ -20,25 +20,7 @@ const getNotifications = async (userId, token) => {
   }
 };
 
-const markAllAsRead = async (userId, token) => {
-  try {
-    const config = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
-
-    const response = await axios.patch(`${API_URL}/${userId}`, config);
-
-    return response.data;
-  } catch (error) {
-    handleServiceError(error);
-    throw error;
-  }
-};
-
 const notificationService = {
   getNotifications,
-  markAllAsRead,
 };
 export default notificationService;

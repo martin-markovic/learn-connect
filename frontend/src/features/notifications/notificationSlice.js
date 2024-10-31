@@ -86,6 +86,9 @@ const notificationSlice = createSlice({
         (notification) => notification._id !== action.payload
       );
     },
+    markAllNotificationsAsRead: (state) => {
+      state.userNotifications = [];
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -107,29 +110,15 @@ const notificationSlice = createSlice({
         state.isError = true;
         state.errorMessage =
           action.payload || "Failed to create a new notification";
-      .addCase(markAllAsRead.pending, (state) => {
-        state.isLoading = true;
-        state.errorMessage = "";
-      })
-      .addCase(markAllAsRead.fulfilled, (state) => {
-        state.isLoading = false;
-        state.isSuccess = true;
-        state.isError = false;
-        state.errorMessage = "";
-        state.userNotifications = [];
-        state.newNotifications = false;
-      })
-      .addCase(markAllAsRead.rejected, (state, action) => {
-        state.isLoading = false;
-        state.isSuccess = false;
-        state.isError = true;
-        state.errorMessage =
-          action.payload || "Failed to mark all notifications as read";
       });
   },
 });
 
-export const { resetNotifications, setNewNotifications } =
-  notificationSlice.actions;
+export const {
+  resetNotifications,
+  setNewNotifications,
+  markNotificationAsRead,
+  markAllNotificationsAsRead,
+} = notificationSlice.actions;
 
 export default notificationSlice.reducer;
