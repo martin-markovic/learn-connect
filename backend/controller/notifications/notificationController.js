@@ -27,23 +27,3 @@ export const getNotifications = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
-export const updateNotifications = async (req, res) => {
-  try {
-    const userId = req.user?._id;
-
-    const result = await Notification.updateMany(
-      { readBy: { $ne: userId } },
-      { $push: { readBy: userId } }
-    );
-
-    if (result.nModified === 0) {
-      return res
-        .status(400)
-        .json({ message: "All notifications are already read" });
-    }
-
-    return res.status(200);
-  } catch (error) {
-    return res.status(500).json({ message: error.message });
-  }
-};
