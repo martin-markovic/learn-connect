@@ -3,8 +3,10 @@ import { useSelector, useDispatch } from "react-redux";
 import { useSocketContext } from "../features/socket/socketContext";
 import {
   getNotifications,
+  setNewNotifications,
+  markAllNotificationsAsRead,
+  markNotificationAsRead,
 } from "../features/notifications/notificationSlice.js";
-import { setNewNotifications } from "../features/notifications/notificationSlice.js";
 
 function UserNotifications() {
   const [newsOpen, setNewsOpen] = useState(false);
@@ -15,11 +17,15 @@ function UserNotifications() {
 
   const dispatch = useDispatch();
 
-  const handleOpen = () => {
-    dispatch(getNotifications());
   useEffect(() => {
-    if (newNotifications) {
-      dispatch(getNotifications());
+    dispatch(getNotifications());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (socketInstance) {
+      socketInstance.on("notification received", (data) => {
+        dispatch(setNewNotifications());
+      });
     }
   }, [dispatch, newNotifications]);
 
@@ -31,10 +37,21 @@ function UserNotifications() {
         } catch (error) {
           console.error("Error fetching notifications: ", error);
         }
+    return () => {
+      if (socketInstance) {
+        socketInstance.off("notification received");
       }
+    };
+  }, [socketInstance, dispatch]);
 
       setNewsOpen((prev) => !prev);
+  useEffect(() => {
+    if (newNotifications) {
+      dispatch(getNotifications());
     }
+  }, [newNotifications, dispatch]);
+  const handleOpen = () => {
+    setNewsOpen((prev) => !prev);
   };
 
   const handleMark = async (notificationId) => {
@@ -54,14 +71,18 @@ function UserNotifications() {
         {newsOpen ? (
           <ul>
             {userNotifications && userNotifications.length > 0 ? (
-              userNotifications.map((notification) => (
-                <li key={notification._id}>
-                  {notification.message ? (
-                    <p>{`${notification.message}`}</p>
+              userNotifications.map((notification, index) => (
+                <li key={`${notification._id}-${index}`}>
+                  {notification.message && notification.message.trim() ? (
+                    <p>{notification.message}</p>
                   ) : (
                     <p>No message available</p>
                   )}
-                  <span>{notification.date}</span>
+                  {notification.date ? (
+                    <span> {notification.date}</span>
+                  ) : (
+                    <span>No date available</span>
+                  )}
                   <button
                     onClick={() => {
                       handleMark(notification._id);
@@ -72,7 +93,7 @@ function UserNotifications() {
                 </li>
               ))
             ) : (
-              <p>No new notifications</p>
+              <li>No new notifications</li>
             )}
           </ul>
         ) : null}
