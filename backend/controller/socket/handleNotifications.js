@@ -1,72 +1,30 @@
-import Notification from "../../models/users/notificationModel.js";
+import {
+  markNotificationAsRead,
+  markAllNotificationsAsRead,
+  handleNewNotification,
+} from "./helpers/socket.notification.js";
 
 const handleNotificationEvents = (socket, io) => {
   socket.on("mark as read", async (data) => {
-    const notificationId = data.roomData;
+    const { notificationId } = data;
 
     const userId = socket.user?.id;
 
-    try {
-      const notification = await Notification.findOne({ _id: notificationId });
-
-      if (!notification) {
-        console.log("Notification not found on server");
-        return socket.emit("error", { message: "Notification not found" });
-      }
-
-      const userNotified = notification.readBy.includes(userId);
-
-      if (userNotified) {
-        console.log("User is already notified.");
-        return socket.emit("notification error", {
-          message: "User is already notified",
-        });
-      }
-
-      await Notification.updateOne(
-        { _id: notificationId },
-        { $push: { readBy: userId } }
-      );
-
-      socket.emit("notification marked as read", notificationId);
-    } catch (error) {
-      console.error("Error marking notification as read:", error.message);
-      socket.emit("error", { message: "Error updating notification status" });
-    }
+    await markNotificationAsRead(socket, notificationId, userId);
   });
 
-  socket.on("mark all as read", async (data) => {
-    try {
-      const userId = socket.user?.id;
+  socket.on("mark all as read", async () => {
+    const userId = socket.user?.id;
 
-      const result = await Notification.updateMany(
-        { readBy: { $ne: userId } },
-        { $push: { readBy: userId } }
-      );
-
-      if (result.nModified === 0) {
-        return socket.emit("error", {
-          message: "All notifications are already read",
-        });
-      }
-
-      socket.emit("marked all as read", {
-        message: "All notifications are marked as read.",
-      });
-    } catch (error) {
-      console.error("Error marking all notifications as read: ", error.message);
-      socket.emit("error", {
-        message: "Error updating all notification status",
-      });
-    }
+    await markAllNotificationsAsRead(socket, userId);
   });
 
-  socket.on("new notification", (data) => {
-    const { notificationName } = data;
+  socket.on("new notification", async (data) => {
+    const { classroom, eventName } = data.roomData;
 
     console.log("Emitting notification received event with data", data);
 
-    socket.emit("notification received", notificationName);
+    await handleNewNotification(socket, notificationData);
   });
 };
 
