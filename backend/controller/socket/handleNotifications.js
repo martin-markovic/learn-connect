@@ -22,7 +22,11 @@ const handleNotificationEvents = (socket, io) => {
   socket.on("new notification", async (data) => {
     const { classroom, eventName } = data.roomData;
 
-    console.log("Emitting notification received event with data", data);
+    const notificationData = {
+      sender: socket.user?.id,
+      receiver: classroom,
+      eventName,
+    };
 
     await handleNewNotification(socket, notificationData);
   });

@@ -57,4 +57,37 @@ export const markAllNotificationsAsRead = async (socket, userId) => {
 };
 
 export const handleNewNotification = async (socket, notificationData) => {
+  const { sender, receiver, eventName, quizName, quizScore } = notificationData;
+
+  const generateNotificationMessage = (evtName, user, classroom) => {
+    if (evtName === "new message") {
+      return "You have a new message";
+    }
+
+    if (evtName === "new quiz created") {
+      return `${user} created a new quiz in ${classroom}`;
+    }
+
+    if (evtName === "quiz graded") {
+      return `${
+        user === sender ? "You" : user
+      } scored ${quizScore} on quiz ${quizName}`;
+    }
+  };
+
+  const generatedMessage = generateNotificationMessage(
+    eventName,
+    sender,
+    receiver
+  );
+
+  const newNotification = new Notification({
+    sender,
+    receiver,
+    message: generatedMessage,
+  });
+
+  const savedNotification = await newNotification.save();
+
+  await socket.emit("notification received", savedNotification);
 };
