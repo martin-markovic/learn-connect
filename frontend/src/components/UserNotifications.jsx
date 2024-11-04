@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useSocketContext } from "../features/socket/socketContext";
-import emitRoomEvent from "../features/socket/controller/roomHandlers";
 import {
   getNotifications,
   addNewNotification,
   markNotificationAsRead,
   resetNotifications,
 } from "../features/notifications/notificationSlice.js";
+  emitMarkAllAsRead,
+  emitMarkAsRead,
+} from "../features/socket/controller/notificationHandlers.js";
 
 function UserNotifications() {
   const [newsOpen, setNewsOpen] = useState(false);
@@ -53,18 +55,7 @@ function UserNotifications() {
 
   const handleMark = async (notificationId) => {
     try {
-      if (!socketInstance) {
-        console.error("Please provide a valid socket instance");
-        return;
-      }
-
-      const clientData = {
-        socketInstance,
-        eventName: "mark as read",
-        roomData: notificationId,
-      };
-
-      const response = await emitRoomEvent(clientData);
+      await emitMarkAsRead(socketInstance, notificationId);
     } catch (error) {
       console.error(error.message);
     }
@@ -72,22 +63,12 @@ function UserNotifications() {
 
   const handleMarkAll = async () => {
     try {
-      if (!socketInstance) {
-        console.error("Please provide a valid socket instance");
-        return;
-      }
-
-      const clientData = {
-        socketInstance,
-        eventName: "mark all as read",
-        roomData: {},
-      };
-
-      const response = await emitRoomEvent(clientData);
+      await emitMarkAllAsRead(socketInstance);
     } catch (error) {
       console.error(error.message);
     }
   };
+
   return (
     <>
       <div>
