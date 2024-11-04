@@ -86,9 +86,6 @@ const notificationSlice = createSlice({
         (notification) => notification._id !== action.payload
       );
     },
-    markAllNotificationsAsRead: (state) => {
-      state.userNotifications = [];
-    },
   },
   extraReducers: (builder) => {
     builder
@@ -117,7 +114,6 @@ export const {
   resetNotifications,
   addNewNotification,
   markNotificationAsRead,
-  markAllNotificationsAsRead,
 } = notificationSlice.actions;
 
 export default notificationSlice.reducer;

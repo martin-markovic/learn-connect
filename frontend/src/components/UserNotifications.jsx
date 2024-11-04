@@ -6,6 +6,7 @@ import {
   getNotifications,
   addNewNotification,
   markNotificationAsRead,
+  resetNotifications,
 } from "../features/notifications/notificationSlice.js";
 
 function UserNotifications() {
@@ -27,12 +28,21 @@ function UserNotifications() {
         dispatch(addNewNotification(newNotification));
       });
 
+      socketInstance.on("notification marked as read", (data) => {
+        const notificationId = data;
+        dispatch(markNotificationAsRead(notificationId));
+      });
+
+      socketInstance.on("marked all as read", (data) => {
+        dispatch(resetNotifications());
       });
     }
 
     return () => {
       if (socketInstance) {
         socketInstance.off("notification received");
+        socketInstance.off("notification marked as read");
+        socketInstance.off("marked all as read");
       }
     };
   }, [socketInstance, dispatch]);
@@ -42,8 +52,41 @@ function UserNotifications() {
   };
 
   const handleMark = async (notificationId) => {
+    try {
+      if (!socketInstance) {
+        console.error("Please provide a valid socket instance");
+        return;
+      }
+
+      const clientData = {
+        socketInstance,
+        eventName: "mark as read",
+        roomData: notificationId,
+      };
+
+      const response = await emitRoomEvent(clientData);
+    } catch (error) {
+      console.error(error.message);
+    }
   };
+
   const handleMarkAll = async () => {
+    try {
+      if (!socketInstance) {
+        console.error("Please provide a valid socket instance");
+        return;
+      }
+
+      const clientData = {
+        socketInstance,
+        eventName: "mark all as read",
+        roomData: {},
+      };
+
+      const response = await emitRoomEvent(clientData);
+    } catch (error) {
+      console.error(error.message);
+    }
   };
   return (
     <>
