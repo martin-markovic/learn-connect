@@ -1,19 +1,18 @@
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useSocketContext } from "../features/socket/socketContext";
+import emitRoomEvent from "../features/socket/controller/roomHandlers";
 import {
   getNotifications,
-  setNewNotifications,
-  markAllNotificationsAsRead,
+  addNewNotification,
   markNotificationAsRead,
+  resetNotifications,
 } from "../features/notifications/notificationSlice.js";
 
 function UserNotifications() {
   const [newsOpen, setNewsOpen] = useState(false);
   const { socketInstance } = useSocketContext();
-  const { userNotifications, newNotifications } = useSelector(
-    (state) => state.notifications
-  );
+  const { userNotifications } = useSelector((state) => state.notifications);
 
   const dispatch = useDispatch();
 
@@ -24,39 +23,70 @@ function UserNotifications() {
   useEffect(() => {
     if (socketInstance) {
       socketInstance.on("notification received", (data) => {
-        dispatch(setNewNotifications());
+        const newNotification = data;
+
+        dispatch(addNewNotification(newNotification));
+      });
+
+      socketInstance.on("notification marked as read", (data) => {
+        const notificationId = data;
+        dispatch(markNotificationAsRead(notificationId));
+      });
+
+      socketInstance.on("marked all as read", (data) => {
+        dispatch(resetNotifications());
       });
     }
-  }, [dispatch, newNotifications]);
 
-  const handleOpen = async () => {
-    if (!newsOpen) {
-      if (newNotifications) {
-        try {
-          dispatch(getNotifications());
-        } catch (error) {
-          console.error("Error fetching notifications: ", error);
-        }
     return () => {
       if (socketInstance) {
         socketInstance.off("notification received");
+        socketInstance.off("notification marked as read");
+        socketInstance.off("marked all as read");
       }
     };
   }, [socketInstance, dispatch]);
 
-      setNewsOpen((prev) => !prev);
-  useEffect(() => {
-    if (newNotifications) {
-      dispatch(getNotifications());
-    }
-  }, [newNotifications, dispatch]);
   const handleOpen = () => {
     setNewsOpen((prev) => !prev);
   };
 
   const handleMark = async (notificationId) => {
+    try {
+      if (!socketInstance) {
+        console.error("Please provide a valid socket instance");
+        return;
+      }
+
+      const clientData = {
+        socketInstance,
+        eventName: "mark as read",
+        roomData: notificationId,
+      };
+
+      const response = await emitRoomEvent(clientData);
+    } catch (error) {
+      console.error(error.message);
+    }
   };
+
   const handleMarkAll = async () => {
+    try {
+      if (!socketInstance) {
+        console.error("Please provide a valid socket instance");
+        return;
+      }
+
+      const clientData = {
+        socketInstance,
+        eventName: "mark all as read",
+        roomData: {},
+      };
+
+      const response = await emitRoomEvent(clientData);
+    } catch (error) {
+      console.error(error.message);
+    }
   };
   return (
     <>

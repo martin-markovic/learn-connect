@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import Chat from "../../models/chat/chatModel.js";
 import Classroom from "../../models/classrooms/classroomModel.js";
-import Notification from "../../models/users/notificationModel.js";
 
 export const sendMessage = async (req, res) => {
   try {
@@ -42,14 +41,6 @@ export const sendMessage = async (req, res) => {
       { $push: { chats: savedMessage._id } },
       { new: true }
     );
-
-    await Notification.create({
-      sender,
-      receiver: classroom,
-      type: "chat",
-      relatedId: newMessage._id,
-      message: `You have a new message`,
-    });
 
     return res.status(200).json(savedMessage);
   } catch (error) {
