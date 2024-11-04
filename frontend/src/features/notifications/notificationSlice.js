@@ -78,8 +78,8 @@ const notificationSlice = createSlice({
   initialState,
   reducers: {
     resetNotifications: (state) => initialState,
-    setNewNotifications: (state) => {
-      state.newNotifications = true;
+    addNewNotification: (state, action) => {
+      state.userNotifications.push(action.payload);
     },
     markNotificationAsRead: (state, action) => {
       state.userNotifications = state.userNotifications.filter(
@@ -102,7 +102,6 @@ const notificationSlice = createSlice({
         state.isError = false;
         state.errorMessage = "";
         state.userNotifications = action.payload;
-        state.newNotifications = false;
       })
       .addCase(getNotifications.rejected, (state, action) => {
         state.isLoading = false;
@@ -116,7 +115,7 @@ const notificationSlice = createSlice({
 
 export const {
   resetNotifications,
-  setNewNotifications,
+  addNewNotification,
   markNotificationAsRead,
   markAllNotificationsAsRead,
 } = notificationSlice.actions;

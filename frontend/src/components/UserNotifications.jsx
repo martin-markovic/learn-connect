@@ -1,19 +1,17 @@
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useSocketContext } from "../features/socket/socketContext";
+import emitRoomEvent from "../features/socket/controller/roomHandlers";
 import {
   getNotifications,
-  setNewNotifications,
-  markAllNotificationsAsRead,
+  addNewNotification,
   markNotificationAsRead,
 } from "../features/notifications/notificationSlice.js";
 
 function UserNotifications() {
   const [newsOpen, setNewsOpen] = useState(false);
   const { socketInstance } = useSocketContext();
-  const { userNotifications, newNotifications } = useSelector(
-    (state) => state.notifications
-  );
+  const { userNotifications } = useSelector((state) => state.notifications);
 
   const dispatch = useDispatch();
 
@@ -24,19 +22,14 @@ function UserNotifications() {
   useEffect(() => {
     if (socketInstance) {
       socketInstance.on("notification received", (data) => {
-        dispatch(setNewNotifications());
+        const newNotification = data;
+
+        dispatch(addNewNotification(newNotification));
+      });
+
       });
     }
-  }, [dispatch, newNotifications]);
 
-  const handleOpen = async () => {
-    if (!newsOpen) {
-      if (newNotifications) {
-        try {
-          dispatch(getNotifications());
-        } catch (error) {
-          console.error("Error fetching notifications: ", error);
-        }
     return () => {
       if (socketInstance) {
         socketInstance.off("notification received");
@@ -44,12 +37,6 @@ function UserNotifications() {
     };
   }, [socketInstance, dispatch]);
 
-      setNewsOpen((prev) => !prev);
-  useEffect(() => {
-    if (newNotifications) {
-      dispatch(getNotifications());
-    }
-  }, [newNotifications, dispatch]);
   const handleOpen = () => {
     setNewsOpen((prev) => !prev);
   };
