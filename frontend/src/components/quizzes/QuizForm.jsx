@@ -156,7 +156,6 @@ function QuizForm({ quiz, onClose }) {
         dispatch(createQuiz(quizData));
       }
 
-      dispatch(setNewNotifications());
       onClose();
     } catch (error) {
       toast.error(error.message);
