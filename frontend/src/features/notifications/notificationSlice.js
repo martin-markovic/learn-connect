@@ -21,7 +21,7 @@ export const getNotifications = createAsyncThunk(
         throw new Error("User not found");
       }
 
-      const token = user.token;
+      const token = user?.token;
 
       if (!token) {
         throw new Error("Token not found");
@@ -33,7 +33,12 @@ export const getNotifications = createAsyncThunk(
         throw new Error("User ID not found");
       }
 
-      return await notificationService.getNotifications(userId, token);
+      const response = await notificationService.getNotifications(
+        userId,
+        token
+      );
+
+      return response;
     } catch (error) {
       const message =
         (error.response &&

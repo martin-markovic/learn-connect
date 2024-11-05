@@ -77,24 +77,13 @@ const ChatDisplay = () => {
           status: "pending",
         };
 
-        const clientData = {
+        const userData = {
           socketInstance,
-          eventName: "message room",
-          roomData: messageData,
+          eventName: "new notification",
+          roomData: notificationData,
         };
 
-        console.log("Emitting room event with client data: ", clientData);
-
-        const response = await emitRoomEvent(clientData);
-
-        if (response.success) {
-          console.log("Emit Room event successfull");
-          setInput("");
-        }
-      } else {
-        console.error(
-          "Please select a chat and provide valid socket instance."
-        );
+        await emitRoomEvent(userData);
       }
     } catch (error) {
       console.error("Error:", error.message);

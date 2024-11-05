@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useSocketContext } from "../features/socket/socketContext";
-import emitRoomEvent from "../features/socket/controller/roomHandlers";
+import { getNotifications } from "../features/notifications/notificationSlice.js";
+import handleNotificationSetup from "../features/notifications/handleNotifications.js";
 import {
-  getNotifications,
-  addNewNotification,
-  markNotificationAsRead,
-  resetNotifications,
-} from "../features/notifications/notificationSlice.js";
+  emitMarkAllAsRead,
+  emitMarkAsRead,
+} from "../features/socket/controller/notificationHandlers.js";
 
 function UserNotifications() {
   const [newsOpen, setNewsOpen] = useState(false);
@@ -22,29 +21,10 @@ function UserNotifications() {
 
   useEffect(() => {
     if (socketInstance) {
-      socketInstance.on("notification received", (data) => {
-        const newNotification = data;
-
-        dispatch(addNewNotification(newNotification));
-      });
-
-      socketInstance.on("notification marked as read", (data) => {
-        const notificationId = data;
-        dispatch(markNotificationAsRead(notificationId));
-      });
-
-      socketInstance.on("marked all as read", (data) => {
-        dispatch(resetNotifications());
-      });
+      return handleNotificationSetup(socketInstance, dispatch);
     }
 
-    return () => {
-      if (socketInstance) {
-        socketInstance.off("notification received");
-        socketInstance.off("notification marked as read");
-        socketInstance.off("marked all as read");
-      }
-    };
+    return () => {};
   }, [socketInstance, dispatch]);
 
   const handleOpen = () => {
@@ -53,18 +33,7 @@ function UserNotifications() {
 
   const handleMark = async (notificationId) => {
     try {
-      if (!socketInstance) {
-        console.error("Please provide a valid socket instance");
-        return;
-      }
-
-      const clientData = {
-        socketInstance,
-        eventName: "mark as read",
-        roomData: notificationId,
-      };
-
-      const response = await emitRoomEvent(clientData);
+      await emitMarkAsRead(socketInstance, notificationId);
     } catch (error) {
       console.error(error.message);
     }
@@ -72,22 +41,12 @@ function UserNotifications() {
 
   const handleMarkAll = async () => {
     try {
-      if (!socketInstance) {
-        console.error("Please provide a valid socket instance");
-        return;
-      }
-
-      const clientData = {
-        socketInstance,
-        eventName: "mark all as read",
-        roomData: {},
-      };
-
-      const response = await emitRoomEvent(clientData);
+      await emitMarkAllAsRead(socketInstance);
     } catch (error) {
       console.error(error.message);
     }
   };
+
   return (
     <>
       <div>
