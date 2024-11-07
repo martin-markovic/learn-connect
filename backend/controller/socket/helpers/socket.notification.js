@@ -10,14 +10,18 @@ export const markNotificationAsRead = async (
 
     if (!notification) {
       console.log("Notification not found on server");
-      return socket.emit("error", { message: "Notification not found" });
+      socket.emit("error", { message: "Notification not found" });
+
+      return;
     }
 
     if (notification.readBy.includes(userId)) {
       console.log("User is already notified.");
-      return socket.emit("notification error", {
+      socket.emit("notification error", {
         message: "User is already notified",
       });
+
+      return;
     }
 
     await Notification.updateOne(
@@ -40,14 +44,19 @@ export const markAllNotificationsAsRead = async (socket, userId) => {
     );
 
     if (result.nModified === 0) {
-      return socket.emit("error", {
+      socket.emit("error", {
         message: "All notifications are already read",
       });
+
+      return;
     }
 
-    socket.emit("marked all as read", {
+    const response = {
       message: "All notifications are marked as read.",
-    });
+      success: true,
+    };
+
+    socket.emit("marked all as read", response);
   } catch (error) {
     console.error("Error marking all notifications as read:", error.message);
     socket.emit("error", {
