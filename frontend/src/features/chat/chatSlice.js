@@ -10,31 +10,6 @@ const initialState = {
   messages: {},
 };
 
-export const sendMessage = createAsyncThunk(
-  "chat/sendMessage",
-  async (messageData, thunkAPI) => {
-    try {
-      const token = JSON.parse(localStorage.getItem("user")).token;
-
-      if (!token) {
-        throw new Error("Token not found");
-      }
-
-      return await chatService.sendMessage(messageData, token);
-    } catch (error) {
-      const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-
-      handleSliceError(error, thunkAPI);
-      return thunkAPI.rejectWithValue(message);
-    }
-  }
-);
-
 export const getMessages = createAsyncThunk(
   "chat/getMessages",
   async (classroomId, thunkAPI) => {
@@ -84,29 +59,17 @@ const chatSlice = createSlice({
   initialState,
   reducers: {
     resetChat: (state) => initialState,
+    addMessage: (state, action) => {
+      const classroom = action.payload.classroom;
+      if (!state.messages[classroom]) {
+        state.messages[classroom] = [];
+      }
+
+      state.messages[classroom].push(action.payload);
+    },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(sendMessage.pending, (state) => {
-        state.isLoading = true;
-        state.errorMessage = "";
-      })
-      .addCase(sendMessage.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.isSuccess = true;
-        state.errorMessage = "";
-        const classroom = action.payload.classroom;
-        if (!state.messages[classroom]) {
-          state.messages[classroom] = [];
-        }
-
-        state.messages[classroom].push(action.payload);
-      })
-      .addCase(sendMessage.rejected, (state, action) => {
-        state.isSuccess = false;
-        state.isError = true;
-        state.errorMessage = action.payload || "Failed to send message";
-      })
       .addCase(getMessages.pending, (state) => {
         state.isLoading = true;
         state.errorMessage = "";
@@ -148,5 +111,7 @@ const chatSlice = createSlice({
       });
   },
 });
+
+export const { resetChat, addMessage } = chatSlice.actions;
 
 export default chatSlice.reducer;

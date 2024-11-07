@@ -3,7 +3,7 @@ import { useSocketContext } from "../../features/socket/socketContext.js";
 import { useSelector, useDispatch } from "react-redux";
 import emitRoomEvent from "../../features/socket/controller/roomHandlers.js";
 import {
-  sendMessage,
+  addMessage,
   getMessages,
   removeMessages,
 } from "../../features/chat/chatSlice.js";
@@ -31,6 +31,11 @@ const ChatDisplay = () => {
 
   useEffect(() => {
     if (socketInstance) {
+      socketInstance.on("message delivered", (data) => {
+        const messageData = data;
+
+        dispatch(addMessage(messageData));
+
       socketInstance.on("chat activity", (data) => {
         const { senderName } = data;
 
@@ -46,20 +51,6 @@ const ChatDisplay = () => {
     return () => {
       if (socketInstance) {
         socketInstance.off("chat activity");
-      }
-    };
-  }, [socketInstance]);
-
-  useEffect(() => {
-    if (socketInstance) {
-      socketInstance.on("message delivered", (data) => {
-        console.log("Message delivered, sending redux data: ", data);
-        dispatch(sendMessage(data));
-      });
-    }
-
-    return () => {
-      if (socketInstance) {
         socketInstance.off("message delivered");
       }
     };

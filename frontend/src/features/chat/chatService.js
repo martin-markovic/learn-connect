@@ -3,28 +3,6 @@ import { handleServiceError } from "../redux.errorHandler.js";
 
 const API_URL = "http://127.0.0.1:8000/api/chat/";
 
-const sendMessage = async (messageData, token) => {
-  try {
-    const config = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
-    const { classroom } = messageData;
-
-    const response = await axios.post(
-      `${API_URL}${classroom}/chat`,
-      messageData,
-      config
-    );
-
-    return response.data;
-  } catch (error) {
-    handleServiceError(error);
-    throw error;
-  }
-};
-
 const getMessages = async (classroomId, token) => {
   try {
     const config = {
@@ -67,7 +45,6 @@ const removeMessages = async (chatData, token) => {
 };
 
 const chatService = {
-  sendMessage,
   getMessages,
   removeMessages,
 };
