@@ -53,6 +53,29 @@ const handleMessages = (socket, io) => {
       senderName,
     });
   });
+
+  socket.on("open conversation", async (data) => {
+    const { classroomId, messageId } = data.roomData;
+
+    if (!classroomId || !messageId) {
+      socket.emit("error", { message: "Missing classroomId or messageId" });
+    }
+
+    const message = await Chat.findByIdAndUpdate(
+      messageId,
+      { status: "seen" },
+      { new: true }
+    );
+    if (!message) {
+      socket.emit("error", {
+        message: "Message not found",
+      });
+
+      return;
+    }
+
+    socket.emit("message seen", messageId);
+  });
 };
 
 export default handleMessages;

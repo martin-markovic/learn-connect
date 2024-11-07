@@ -31,38 +31,6 @@ export const getMessages = async (req, res) => {
   }
 };
 
-export const updateMessageStatus = async (req, res) => {
-  try {
-    const { classroomId, messageId } = req.params;
-
-    if (!classroomId || !messageId) {
-      return res
-        .status(400)
-        .json({ message: "Missing classroomId or messageId" });
-    }
-
-    const message = await Chat.findOne({
-      _id: messageId,
-    });
-
-    if (!message) {
-      return res.status(404).json({
-        message: "Message not found",
-      });
-    }
-
-    message.status = "seen";
-
-    await message.save();
-
-    return res.status(200).json(message);
-  } catch (error) {
-    return res.status(500).json({
-      message: error.message,
-    });
-  }
-};
-
 export const removeMessages = async (req, res) => {
   const classroomId = req.params.classroom;
   const { messageIds } = req.body;
