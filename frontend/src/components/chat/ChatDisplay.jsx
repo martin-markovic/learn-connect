@@ -59,13 +59,34 @@ const ChatDisplay = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!selectedChat && socketInstance && classroomId) {
+      console.error("Please select a chat and provide valid socket instance.");
+      return;
+    }
+
     try {
-      if (selectedChat && socketInstance && classroomId) {
-        const messageData = {
-          sender: user._id,
-          text: input,
+      const messageData = {
+        sender: { id: user?._id, name: user?.name },
+        text: input,
+        classroom: classroomId,
+        status: "pending",
+      };
+
+      const clientData = {
+        socketInstance,
+        eventName: "message room",
+        roomData: messageData,
+      };
+
+      const response = await emitRoomEvent(clientData);
+
+      if (response.success) {
+        setInput("");
+
+        const notificationData = {
+          sender: { id: user?._id, name: user?.name },
           classroom: classroomId,
-          status: "pending",
+          eventName: "new message",
         };
 
         const userData = {
@@ -111,7 +132,7 @@ const ChatDisplay = () => {
     }
   };
 
-  const handleRemove = async () => {
+  const handleRemove = () => {
     if (selectedChat) {
       try {
         const messageIds = messages[classroomId].map((message) => message._id);
@@ -123,7 +144,7 @@ const ChatDisplay = () => {
 
         const chatData = { classroomId, messageIds };
 
-        const result = await dispatch(removeMessages(chatData));
+        const result = dispatch(removeMessages(chatData));
         if (result.type === "chat/removeMessages/fulfilled") {
           console.log("Messages removed successfully");
         }
