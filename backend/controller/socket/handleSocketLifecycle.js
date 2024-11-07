@@ -22,7 +22,7 @@ const handleSocketLifeCycle = (io) => {
     });
 
     socket.on("error", (err) => {
-      console.error("Socket.IO error:", err);
+      console.error("Socket.IO error:", err.message);
     });
 
     socket.on("disconnect", () => {

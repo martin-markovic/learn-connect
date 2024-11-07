@@ -6,7 +6,7 @@ import {
 
 const handleNotificationEvents = (socket, io) => {
   socket.on("mark as read", async (data) => {
-    const { notificationId } = data;
+    const { notificationId } = data.roomData;
 
     const userId = socket.user?.id;
 
