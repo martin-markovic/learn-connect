@@ -1,4 +1,5 @@
 import Notification from "../../../models/users/notificationModel.js";
+import Chat from "../../../models/chat/chatModel.js";
 
 export const markNotificationAsRead = async (
   socket,
@@ -68,9 +69,16 @@ export const markAllNotificationsAsRead = async (socket, userId) => {
 export const handleNewNotification = async (socket, notificationData) => {
   const { sender, receiver, eventName, quizName, quizScore } = notificationData;
 
+  const unreadMessagesCount = await Chat.countDocuments({
+    classroom: receiver,
+    isRead: false,
+  });
+
   const generateNotificationMessage = (evtName, user, classroom) => {
     if (evtName === "new message") {
-      return "You have a new message";
+      return `You have ${
+        unreadMessagesCount === 0 ? "a" : unreadMessagesCount + 1
+      } new message${unreadMessagesCount > 0 ? "s" : ""}`;
     }
 
     if (evtName === "new quiz created") {

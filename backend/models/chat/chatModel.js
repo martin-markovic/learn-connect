@@ -21,6 +21,10 @@ const chatSchema = new mongoose.Schema({
   status: {
     type: String,
   },
+  isRead: {
+    type: Boolean,
+    default: false,
+  },
   timestamp: {
     type: Date,
     default: Date.now,
