@@ -98,5 +98,10 @@ export const handleNewNotification = async (socket, notificationData) => {
 
   const savedNotification = await newNotification.save();
 
-  await socket.emit("notification received", savedNotification);
+  const isBroadcast = eventName === "new quiz created";
+  const target = isBroadcast
+    ? socket.broadcast.to(receiver)
+    : socket.to(receiver);
+
+  await target.emit("notification received", savedNotification);
 };
