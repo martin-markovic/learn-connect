@@ -13,6 +13,7 @@ const ChatDisplay = () => {
   const { socketInstance, selectedChat } = useSocketContext();
   const [activity, setActivity] = useState("");
   const activityTimer = useRef(null);
+  const chatEndRef = useRef(null);
 
   const dispatch = useDispatch();
 
@@ -35,6 +36,11 @@ const ChatDisplay = () => {
         const messageData = data;
 
         dispatch(addMessage(messageData));
+
+        if (chatEndRef.current) {
+          chatEndRef.current.scrollIntoView({ behavior: "smooth" });
+        }
+      });
 
       socketInstance.on("chat activity", (data) => {
         const { senderName } = data;
@@ -161,6 +167,38 @@ const ChatDisplay = () => {
   ) : (
     <div className="conversation-display">
       <h3>Chat with {selectedChat}</h3>
+
+      <div className="conversation-display__chat">
+        {Object.keys(messages).map((classroomId) => (
+          <ul key={classroomId}>
+            {messages[classroomId] && messages[classroomId].length > 0 ? (
+              messages[classroomId].map((message) => (
+                <li key={message._id} style={{ marginRight: "1em" }}>
+                  {message.sender.id === user?._id ? null : (
+                    <span>
+                      <strong>{message.sender.name}</strong>
+                      <span>:</span>
+                    </span>
+                  )}
+                  <p
+                    style={{
+                      textAlign:
+                        message.sender.id === user?._id ? "right" : "left",
+                    }}
+                  >
+                    {message.text}
+                  </p>
+
+                  {message.status && <span>{message.status}</span>}
+                </li>
+              ))
+            ) : (
+              <div>No messages yet.</div>
+            )}
+          </ul>
+        ))}
+        <div ref={chatEndRef} />
+      </div>
       <button onClick={handleRemove}>Delete Conversation</button>
       <form onSubmit={handleSubmit}>
         <input
@@ -175,24 +213,9 @@ const ChatDisplay = () => {
           }}
           placeholder="Type message..."
         />
-        <input type="submit" value="Send" />
+        <button type="submit">Send</button>
       </form>
       <p>{activity}</p>
-      <ul>
-        {Object.keys(messages).map((classroomId) => (
-          <div key={classroomId}>
-            {messages[classroomId] && messages[classroomId].length > 0 ? (
-              messages[classroomId].map((message) => (
-                <div key={message._id}>
-                  <strong>{message.sender.name}</strong>: {message.text}
-                </div>
-              ))
-            ) : (
-              <div>No messages yet.</div>
-            )}
-          </div>
-        ))}
-      </ul>
     </div>
   );
 };
