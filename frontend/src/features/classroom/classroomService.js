@@ -36,22 +36,9 @@ const leaveClassroom = async (classroomId, token) => {
   }
 };
 
-const getAllClassrooms = async (token) => {
+const getClassroomList = async (token) => {
   try {
     const response = await axios.get(API_URL, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    return response.data;
-  } catch (error) {
-    handleServiceError(error);
-    throw error;
-  }
-};
-
-const getUserClassrooms = async (token) => {
-  try {
-    const response = await axios.get(`${API_URL}me`, {
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -65,8 +52,7 @@ const getUserClassrooms = async (token) => {
 const classroomService = {
   joinClassroom,
   leaveClassroom,
-  getAllClassrooms,
-  getUserClassrooms,
+  getClassroomList,
 };
 
 export default classroomService;

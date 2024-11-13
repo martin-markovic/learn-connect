@@ -7,8 +7,7 @@ const initialState = {
   isSuccess: false,
   isError: false,
   errorMessage: "",
-  allClassrooms: [],
-  userClassrooms: [],
+  classroomList: [],
 };
 
 export const joinClassroom = createAsyncThunk(
@@ -54,8 +53,8 @@ export const leaveClassroom = createAsyncThunk(
   }
 );
 
-export const getAllClassrooms = createAsyncThunk(
-  "classroom/getAll",
+export const getClassroomList = createAsyncThunk(
+  "classroom/getClassroomList",
   async (_, thunkAPI) => {
     try {
       const { token } = thunkAPI.getState().auth.user;
@@ -63,25 +62,7 @@ export const getAllClassrooms = createAsyncThunk(
         throw new Error("Token not found");
       }
 
-      const data = await classroomService.getAllClassrooms(token);
-
-      return data;
-    } catch (error) {
-      handleSliceError(error);
-    }
-  }
-);
-
-export const getUserClassrooms = createAsyncThunk(
-  "classroom/getMe",
-  async (_, thunkAPI) => {
-    try {
-      const { token } = thunkAPI.getState().auth.user;
-      if (!token) {
-        throw new Error("Token not found");
-      }
-
-      const data = await classroomService.getUserClassrooms(token);
+      const data = await classroomService.getClassroomList(token);
 
       return data;
     } catch (error) {
@@ -108,7 +89,7 @@ const classroomSlice = createSlice({
         state.isSuccess = true;
         state.isError = false;
         state.errorMessage = "";
-        state.userClassrooms.push(action.payload.classroom);
+        state.classroomList.push(action.payload.classroom);
       })
       .addCase(joinClassroom.rejected, (state, action) => {
         state.isLoading = false;
@@ -117,38 +98,19 @@ const classroomSlice = createSlice({
         state.errorMessage =
           action.payload?.message || "Failed to join classroom";
       })
-      .addCase(getAllClassrooms.pending, (state) => {
+      .addCase(getClassroomList.pending, (state) => {
         state.isLoading = true;
         state.isError = false;
         state.errorMessage = "";
       })
-      .addCase(getAllClassrooms.fulfilled, (state, action) => {
+      .addCase(getClassroomList.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
         state.isError = false;
         state.errorMessage = "";
-        state.allClassrooms = action.payload;
+        state.classroomList = action.payload;
       })
-      .addCase(getAllClassrooms.rejected, (state, action) => {
-        state.isLoading = false;
-        state.isSuccess = false;
-        state.isError = true;
-        state.errorMessage =
-          action.payload?.message || "Failed to load classrooms";
-      })
-      .addCase(getUserClassrooms.pending, (state) => {
-        state.isLoading = true;
-        state.isError = false;
-        state.errorMessage = "";
-      })
-      .addCase(getUserClassrooms.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.isSuccess = true;
-        state.isError = false;
-        state.errorMessage = "";
-        state.userClassrooms = action.payload;
-      })
-      .addCase(getUserClassrooms.rejected, (state, action) => {
+      .addCase(getClassroomList.rejected, (state, action) => {
         state.isLoading = false;
         state.isSuccess = false;
         state.isError = true;
@@ -165,7 +127,7 @@ const classroomSlice = createSlice({
         state.isSuccess = true;
         state.isError = false;
         state.errorMessage = "";
-        state.userClassrooms = state.userClassrooms.filter(
+        state.classroomList = state.classroomList.filter(
           (classroom) => classroom._id !== action.payload.classroomId
         );
       })
