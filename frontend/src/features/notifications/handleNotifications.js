@@ -18,7 +18,6 @@ const handleNotificationSetup = (socketInstance, dispatch) => {
       return;
     }
 
-    console.log("new notification received in client: ", newNotification);
     dispatch(addNewNotification(newNotification));
   });
 
@@ -34,9 +33,9 @@ const handleNotificationSetup = (socketInstance, dispatch) => {
   });
 
   socketInstance.on("marked all as read", (data) => {
-    const { response } = data;
+    const { success } = data;
 
-    if (!response.success) {
+    if (!success) {
       console.error("Unable to mark all notifications as read");
       return;
     }

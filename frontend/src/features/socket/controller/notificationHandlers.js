@@ -9,7 +9,7 @@ export const emitMarkAsRead = async (socketInstance, notificationId) => {
   const clientData = {
     socketInstance,
     eventName: "mark as read",
-    roomData: notificationId,
+    roomData: { notificationId },
   };
 
   await emitRoomEvent(clientData);
