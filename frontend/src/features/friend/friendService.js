@@ -3,7 +3,7 @@ import { handleServiceError } from "../redux.errorHandler.js";
 
 const API_URL = "http://127.0.0.1:8000/api/friends/";
 
-const addFriend = async (friendName, token) => {
+const sendFriendRequest = async (userId, token) => {
   try {
     const config = {
       headers: {
@@ -11,7 +11,7 @@ const addFriend = async (friendName, token) => {
       },
     };
 
-    const response = await axios.post(API_URL, { friendName }, config);
+    const response = await axios.post(`${API_URL}${userId}`, {}, config);
 
     return response;
   } catch (error) {
@@ -20,7 +20,24 @@ const addFriend = async (friendName, token) => {
   }
 };
 
-const getFriendList = async (_, token) => {
+const handleFriendRequest = async (requestId, token) => {
+  try {
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    const response = await axios.post(`${API_URL}${requestId}`, {}, config);
+
+    return response;
+  } catch (error) {
+    handleServiceError(error);
+    throw error;
+  }
+};
+
+const getFriendList = async (token) => {
   try {
     const config = {
       headers: {
@@ -29,23 +46,6 @@ const getFriendList = async (_, token) => {
     };
 
     const response = await axios.get(`${API_URL}me`, config);
-
-    return response;
-  } catch (error) {
-    handleServiceError(error);
-    throw error;
-  }
-};
-
-const getUserList = async (_, token) => {
-  try {
-    const config = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
-
-    const response = await axios.get(`${API_URL}`, config);
 
     return response;
   } catch (error) {
@@ -72,7 +72,8 @@ const removeFriend = async (friendName, token) => {
 };
 
 const friendService = {
-  addFriend,
+  sendFriendRequest,
+  handleFriendRequest,
   getFriendList,
   getUserList,
   removeFriend,

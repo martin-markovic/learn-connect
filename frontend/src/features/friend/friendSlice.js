@@ -7,8 +7,8 @@ const initialState = {
   isSuccess: false,
   isError: false,
   errorMessage: "",
-  friendList: [],
-  userList: {},
+  friendList: {},
+  userList: [],
 };
 
 export const sendFriendRequest = createAsyncThunk(
@@ -20,7 +20,7 @@ export const sendFriendRequest = createAsyncThunk(
         throw new Error("Token not found");
       }
 
-      const data = await friendService.sendFriendRequest(userName, token);
+      const data = await friendService.handleFriendRequest(userName, token);
 
       return data;
     } catch (error) {
@@ -34,13 +34,13 @@ export const getFriendList = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       const token = thunkAPI.getState().auth.user?.token;
+
       if (!token) {
         throw new Error("Token not found");
       }
 
-      const data = await friendService.getFriendList(token);
+      const response = await friendService.getFriendList(token);
 
-      return data;
     } catch (error) {
       handleSliceError(error);
     }
