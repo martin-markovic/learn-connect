@@ -1,10 +1,12 @@
-import UserNotifications from "../UserNotifications";
+import UserNotifications from "../UserNotifications.jsx";
+import FriendSearch from "../friends/FriendSearch.jsx";
 
 function Newsfeed() {
   return (
-    <div>
+    <div className="flex__container-item">
+      <FriendSearch />
       <div>News filter</div>
-      <div>
+      <div className="conversation">
         <UserNotifications />
       </div>
     </div>

@@ -54,6 +54,23 @@ const getFriendList = async (token) => {
   }
 };
 
+const getUserList = async (token) => {
+  try {
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    const response = await axios.get(API_URL, config);
+
+    return response.data;
+  } catch (error) {
+    handleServiceError(error);
+    throw error;
+  }
+};
+
 const removeFriend = async (friendName, token) => {
   try {
     const config = {

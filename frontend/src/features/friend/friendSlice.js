@@ -13,6 +13,24 @@ const initialState = {
 
 export const sendFriendRequest = createAsyncThunk(
   "friends/sendFriendRequest",
+  async (userId, thunkAPI) => {
+    try {
+      const token = thunkAPI.getState().auth.user?.token;
+      if (!token) {
+        throw new Error("Token not found");
+      }
+
+      const data = await friendService.sendFriendRequest(userId, token);
+
+      return data;
+    } catch (error) {
+      handleSliceError(error);
+    }
+  }
+);
+
+export const handleFriendRequest = createAsyncThunk(
+  "friends/handleFriendRequest",
   async (userName, thunkAPI) => {
     try {
       const token = thunkAPI.getState().auth.user?.token;
@@ -41,6 +59,7 @@ export const getFriendList = createAsyncThunk(
 
       const response = await friendService.getFriendList(token);
 
+      return response.data;
     } catch (error) {
       handleSliceError(error);
     }
@@ -111,8 +130,7 @@ const friendSlice = createSlice({
         state.isSuccess = true;
         state.isError = false;
         state.errorMessage = "";
-        state.userList = state.userList[action.payload].friendshipStatus =
-          "requested";
+        state.friendList[action.payload.receiverId] = action.payload.status;
       })
       .addCase(sendFriendRequest.rejected, (state, action) => {
         state.isLoading = false;
@@ -139,10 +157,29 @@ const friendSlice = createSlice({
         state.isError = true;
         state.errorMessage =
           action.payload?.message || "Failed to load classrooms";
+      })
+      .addCase(getUserList.pending, (state) => {
+        state.isLoading = true;
+        state.isError = false;
+        state.errorMessage = "";
+      })
+      .addCase(getUserList.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.userList = action.payload;
+        state.isError = false;
+        state.errorMessage = "";
+      })
+      .addCase(getUserList.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = false;
+        state.isError = true;
+        state.errorMessage =
+          action.payload?.message || "Failed to load classrooms";
       });
   },
 });
 
-export const { resetUserList, handleFriendRequest } = friendSlice.reducer;
+export const { resetUserList } = friendSlice.actions;
 
 export default friendSlice.reducer;
