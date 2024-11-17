@@ -20,9 +20,9 @@ export const sendFriendRequest = createAsyncThunk(
         throw new Error("Token not found");
       }
 
-      const data = await friendService.sendFriendRequest(userId, token);
+      const response = await friendService.sendFriendRequest(userId, token);
 
-      return data;
+      return response;
     } catch (error) {
       handleSliceError(error);
     }
@@ -31,16 +31,19 @@ export const sendFriendRequest = createAsyncThunk(
 
 export const handleFriendRequest = createAsyncThunk(
   "friends/handleFriendRequest",
-  async (userName, thunkAPI) => {
+  async (clientData, thunkAPI) => {
     try {
       const token = thunkAPI.getState().auth.user?.token;
       if (!token) {
         throw new Error("Token not found");
       }
 
-      const data = await friendService.handleFriendRequest(userName, token);
+      const response = await friendService.handleFriendRequest(
+        clientData,
+        token
+      );
 
-      return data;
+      return response;
     } catch (error) {
       handleSliceError(error);
     }
@@ -59,7 +62,7 @@ export const getFriendList = createAsyncThunk(
 
       const response = await friendService.getFriendList(token);
 
-      return response.data;
+      return response;
     } catch (error) {
       handleSliceError(error);
     }
@@ -75,9 +78,9 @@ export const getUserList = createAsyncThunk(
         throw new Error("Token not found");
       }
 
-      const data = await friendService.getUserList(token);
+      const response = await friendService.getUserList(token);
 
-      return data;
+      return response;
     } catch (error) {
       handleSliceError(error);
     }
@@ -86,16 +89,16 @@ export const getUserList = createAsyncThunk(
 
 export const removeFriend = createAsyncThunk(
   "friends/removeFriend",
-  async (_, thunkAPI) => {
+  async (friendId, thunkAPI) => {
     try {
       const token = thunkAPI.getState().auth.user?.token;
       if (!token) {
         throw new Error("Token not found");
       }
 
-      const data = await friendService.removeFriend(token);
+      const response = await friendService.removeFriend(friendId, token);
 
-      return data;
+      return response;
     } catch (error) {
       handleSliceError(error);
     }
@@ -107,16 +110,6 @@ const friendSlice = createSlice({
   initialState,
   reducers: {
     resetUserList: (state) => initialState,
-    handleFriendRequest: (state, action) => {
-      const { receiver, requestStatus } = action.payload;
-
-      if (requestStatus === "accepted") {
-        state.userList[receiver].friendshipStatus = requestStatus;
-        state.friendList.push(receiver);
-      } else {
-        state.userList[receiver].friendshipStatus = null;
-      }
-    },
   },
   extraReducers: (builder) => {
     builder
