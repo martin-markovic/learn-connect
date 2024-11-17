@@ -13,14 +13,14 @@ const sendFriendRequest = async (userId, token) => {
 
     const response = await axios.post(`${API_URL}${userId}`, {}, config);
 
-    return response;
+    return response.data;
   } catch (error) {
     handleServiceError(error);
     throw error;
   }
 };
 
-const handleFriendRequest = async (requestId, token) => {
+const handleFriendRequest = async (clientData, token) => {
   try {
     const config = {
       headers: {
@@ -28,9 +28,15 @@ const handleFriendRequest = async (requestId, token) => {
       },
     };
 
-    const response = await axios.post(`${API_URL}${requestId}`, {}, config);
+    const { friendReqResponse, userId } = clientData;
 
-    return response;
+    const response = await axios.post(
+      `${API_URL}requests/${userId}`,
+      { friendReqResponse },
+      config
+    );
+
+    return response.data;
   } catch (error) {
     handleServiceError(error);
     throw error;
@@ -47,7 +53,7 @@ const getFriendList = async (token) => {
 
     const response = await axios.get(`${API_URL}me`, config);
 
-    return response;
+    return response.data;
   } catch (error) {
     handleServiceError(error);
     throw error;
@@ -71,7 +77,7 @@ const getUserList = async (token) => {
   }
 };
 
-const removeFriend = async (friendName, token) => {
+const removeFriend = async (friendId, token) => {
   try {
     const config = {
       headers: {
@@ -81,7 +87,7 @@ const removeFriend = async (friendName, token) => {
 
     const response = await axios.delete(API_URL, config);
 
-    return response;
+    return response.data;
   } catch (error) {
     handleServiceError(error);
     throw error;
