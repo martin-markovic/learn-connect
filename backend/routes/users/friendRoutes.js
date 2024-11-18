@@ -2,7 +2,6 @@ import { Router } from "express";
 const friendRouter = Router();
 
 import {
-  sendFriendRequest,
   handleFriendRequest,
   getFriendList,
   getUserList,
@@ -14,10 +13,8 @@ friendRouter.get("/", protect, getUserList);
 
 friendRouter.post("/requests/:userId", protect, handleFriendRequest);
 
-friendRouter
-  .route("/:userId")
-  .post(protect, sendFriendRequest)
   .delete(protect, removeFriend);
+friendRouter.route("/:userId").delete(protect, removeFriend);
 
 friendRouter.get("/me", protect, getFriendList);
 

@@ -1,48 +1,6 @@
 import Friend from "../../models/users/friendModel.js";
 import User from "../../models/users/userModel.js";
 
-export const sendFriendRequest = async (req, res) => {
-  try {
-    const { userId } = req.params;
-
-    if (!userId) {
-      return res.status(400).json({ message: "Incorrect path" });
-    }
-
-    const senderId = req.user?._id;
-
-    if (!senderId) {
-      return res.status(401).json({ message: "User not authorized" });
-    }
-
-    const existingRequest = await Friend.findOne({
-      $or: [
-        { sender: senderId, receiver: userId, status: "pending" },
-        { sender: userId, receiver: senderId, status: "pending" },
-      ],
-    });
-
-    if (existingRequest) {
-      return res
-        .status(401)
-        .json({ message: "Friend request already pending" });
-    }
-
-    const newRequest = new Friend({
-      sender: senderId,
-      receiver: userId,
-      status: "pending",
-    });
-
-    await newRequest.save();
-
-    return res.status(200).json(newRequest);
-  } catch (error) {
-    console.error("Error processing friend request", error);
-    return res.status(500).json({ message: "Server error" });
-  }
-};
-
 export const handleFriendRequest = async (req, res) => {
   try {
     const userId = req.params.id;
