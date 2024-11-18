@@ -12,16 +12,14 @@ export const markNotificationAsRead = async (
     if (!notification) {
       console.log("Notification not found on server");
       socket.emit("error", { message: "Notification not found" });
-
       return;
     }
 
     if (notification.readBy.includes(userId)) {
       console.log("User is already notified.");
-      socket.emit("notification error", {
+      socket.emit("error", {
         message: "User is already notified",
       });
-
       return;
     }
 
@@ -48,7 +46,6 @@ export const markAllNotificationsAsRead = async (socket, userId) => {
       socket.emit("error", {
         message: "All notifications are already read",
       });
-
       return;
     }
 
@@ -69,47 +66,54 @@ export const markAllNotificationsAsRead = async (socket, userId) => {
 export const handleNewNotification = async (socket, notificationData) => {
   const { sender, receiver, eventName, quizName, quizScore } = notificationData;
 
-  const unreadMessagesCount = await Chat.countDocuments({
-    classroom: receiver,
-    isRead: false,
-  });
+  try {
+    const unreadMessagesCount = await Chat.countDocuments({
+      classroom: receiver,
+      isRead: false,
+    });
 
-  const generateNotificationMessage = (evtName, user, classroom) => {
-    if (evtName === "new message") {
-      return `You have ${
-        unreadMessagesCount === 0 ? "a" : unreadMessagesCount + 1
-      } new message${unreadMessagesCount > 0 ? "s" : ""}`;
-    }
+    const generateNotificationMessage = (evtName, user, classroom) => {
+      if (evtName === "new message") {
+        return `You have ${
+          unreadMessagesCount === 0 ? "a" : unreadMessagesCount + 1
+        } new message${unreadMessagesCount > 0 ? "s" : ""}`;
+      }
 
-    if (evtName === "new quiz created") {
-      return `${user} created a new quiz in ${classroom}`;
-    }
+      if (evtName === "new quiz created") {
+        return `${user} created a new quiz in ${classroom}`;
+      }
 
-    if (evtName === "quiz graded") {
-      return `${
-        user === sender ? "You" : user
-      } scored ${quizScore} on quiz ${quizName}`;
-    }
-  };
+      if (evtName === "quiz graded") {
+        return `${
+          user === sender ? "You" : user
+        } scored ${quizScore} on quiz ${quizName}`;
+      }
 
-  const generatedMessage = generateNotificationMessage(
-    eventName,
-    sender,
-    receiver
-  );
+      return "";
+    };
 
-  const newNotification = new Notification({
-    sender,
-    receiver,
-    message: generatedMessage,
-  });
+    const generatedMessage = generateNotificationMessage(
+      eventName,
+      sender,
+      receiver
+    );
 
-  const savedNotification = await newNotification.save();
+    const newNotification = new Notification({
+      sender,
+      receiver,
+      message: generatedMessage,
+    });
 
-  const isBroadcast = eventName === "new quiz created";
-  const target = isBroadcast
-    ? socket.broadcast.to(receiver)
-    : socket.to(receiver);
+    const savedNotification = await newNotification.save();
 
-  await target.emit("notification received", savedNotification);
+    const isBroadcast = eventName === "new message";
+    const target = isBroadcast ? io.broadcast.to(receiver) : io.to(receiver);
+
+    target.emit("notification received", savedNotification);
+  } catch (error) {
+    console.error("Error generating new notification", error.message);
+    socket.emit("error", {
+      message: "Error creating new notification",
+    });
+  }
 };
