@@ -1,5 +1,5 @@
 const handleErrorEvents = (socket) => {
-  socket.on("connect_error", (err) => {
+  socket.on("connection error", (err) => {
     console.error("Socket connection error:", err.message);
   });
 

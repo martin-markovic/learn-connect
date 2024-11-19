@@ -1,7 +1,8 @@
 import handleMessages from "./messageController.js";
-import handleRoomEvents from "./roomController.js";
+
 import handleNotificationEvents from "./handleNotifications.js";
-import handleErrorEvents from "./errorController.js";
+import handleSocialEvents from "./handleSocial.js";
+import handleErrorEvents from "./helpers/socket.errorController.js";
 
 const handleSocketLifeCycle = (io) => {
   io.on("connection", (socket) => {
@@ -13,17 +14,9 @@ const handleSocketLifeCycle = (io) => {
     }
 
     handleMessages(socket, io);
-    handleRoomEvents(socket, io);
-    handleNotificationEvents(socket);
+    handleNotificationEvents(socket, io);
+    handleSocialEvents(socket, io);
     handleErrorEvents(socket);
-
-    socket.on("connection_error", (err) => {
-      console.error("Connection Error:", err.message);
-    });
-
-    socket.on("error", (err) => {
-      console.error("Socket.IO error:", err.message);
-    });
 
     socket.on("disconnect", () => {
       console.log("Socket disconnected:", socket.id);

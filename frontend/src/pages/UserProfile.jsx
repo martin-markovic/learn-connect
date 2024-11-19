@@ -5,13 +5,20 @@ import {
   sendFriendRequest,
   getUserList,
   getFriendList,
+  handleFriendRequest,
 } from "../features/friend/friendSlice.js";
 
-function UserProfile() {
+function UserProfile({ socketInstance }) {
   const [userInfo, setUserInfo] = useState(null);
+  const [friendshipStatus, setFriendshipStatus] = useState(null);
   const { userId } = useParams();
-  const { userList, friendList } = useSelector((state) => state.friends);
+  const {
+    isLoading,
+    userList = [],
+    friendList = [],
+  } = useSelector((state) => state.friends);
   const dispatch = useDispatch();
+  const user = useSelector((state) => state.auth.user);
 
   useEffect(() => {
     dispatch(getUserList());
@@ -24,18 +31,55 @@ function UserProfile() {
     setUserInfo(selectedUser);
   }, [userList, userId]);
 
-  const handleClick = () => {
+  useEffect(() => {
+    const isFriend = friendList.includes(userId);
+
+    setFriendshipStatus(isFriend || null);
+  }, [friendList, userId]);
+
+  useEffect(() => {
+    if (socketInstance) {
+      socketInstance.on("friend request sent", (data) => {
+        console.log("friend request data: ", data);
+        dispatch(sendFriendRequest(data));
+      });
+
+      socketInstance.on("friend request processed", (data) => {
+        const { sender, status } = data;
+
+        if (user?._id === sender) {
+          dispatch(
+            handleFriendRequest({ sender: user?._id, receiver: userId, status })
+          );
+        } else {
+          dispatch(
+            handleFriendRequest({ sender: userId, receiver: user?._id, status })
+          );
+        }
+      });
+    }
+
+    return () => {
+      if (socketInstance) {
+        socketInstance.off("friend request sent");
+        socketInstance.off("friend request processed");
+      }
+    };
+  }, [dispatch, socketInstance]);
+
+  const handleSend = () => {
     try {
       if (!userId) {
         throw new Error("Invalid user requested");
       }
 
-      console.log("button clicked: ", userInfo);
+      if (friendshipStatus === "sent" || friendshipStatus === "accepted") {
+        const errorString =
+          friendshipStatus === "sent"
+            ? "Friend request already sent"
+            : "You are already friends";
 
-      const friendShipStatus = friendList[userId];
-
-      if (friendShipStatus === "sent" || friendShipStatus === "accepted") {
-        throw new Error("Friend request already sent");
+        throw new Error(errorString);
       }
 
       dispatch(sendFriendRequest(userId));
@@ -44,16 +88,69 @@ function UserProfile() {
     }
   };
 
-  if (!userInfo) {
+  if (!isLoading && !userInfo) {
     return <p>User not found.</p>;
   }
 
-  return (
+  return isLoading ? (
+    <p>Loading,please wait...</p>
+  ) : (
     <div>
       <h1>{userInfo.name}</h1>
-      <button type="button" onClick={handleClick}>
-        Add friend
-      </button>
+      {String(user?._id) !== String(userId) && (
+        <>
+          {friendshipStatus === "pending" &&
+            userId ===
+              friendList.find((item) => item.receiver === userId)?.receiver && (
+              <button disabled={true}>Request Sent</button>
+            )}
+
+          {friendshipStatus === "pending" &&
+            userId ===
+              friendList.find((item) => item.sender === userId)?.sender && (
+              <div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    dispatch(
+                      handleFriendRequest({
+                        friendReqResponse: "accept",
+                        userId,
+                      })
+                    );
+                  }}
+                >
+                  Accept
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    dispatch(
+                      handleFriendRequest({
+                        friendReqResponse: "decline",
+                        userId,
+                      })
+                    );
+                  }}
+                >
+                  Decline
+                </button>
+              </div>
+            )}
+          {friendshipStatus === "accepted" && (
+            <select name="friendshipStatus" id="friendshipStatus">
+              <label for="friendshipStatus">Friends</label>
+              <option value="unfriend">Unfriend</option>
+            </select>
+          )}
+          {!isLoading && friendshipStatus === null && (
+            <button type="button" onClick={handleSend}>
+              Add Friend
+            </button>
+          )}
+        </>
+      )}
+
       <button
         type="button"
         onClick={() => {
