@@ -1,40 +1,6 @@
 import Friend from "../../models/users/friendModel.js";
 import User from "../../models/users/userModel.js";
 
-export const handleFriendRequest = async (req, res) => {
-  try {
-    const userId = req.params.id;
-
-    const { friendReqResponse } = req.body;
-
-    const validStatuses = ["pending", "accepted", "declined"];
-
-    if (!validStatuses.includes(friendReqResponse)) {
-      return res.status(400).json({ message: "Invalid friend request status" });
-    }
-
-    if (friendReqResponse === "declined") {
-      await Friend.deleteOne({ receiver: userId, status: "pending" });
-      return res.status(200).json({ message: "Request declined" });
-    }
-
-    const friendRequest = await Friend.findOneAndUpdate(
-      { receiver: userId, status: "pending" },
-      { status: friendReqResponse },
-      { new: true }
-    );
-
-    if (!friendRequest) {
-      return res.status(404).json({ message: "Friend request not found" });
-    }
-
-    return res.status(200).json(friendRequest);
-  } catch (error) {
-    console.error("Error processing friend request", error);
-    return res.status(500).json({ message: "Server error" });
-  }
-};
-
 export const getFriendList = async (req, res) => {
   try {
     const userId = req.user?._id;
