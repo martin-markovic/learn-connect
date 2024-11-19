@@ -68,20 +68,10 @@ const friendSlice = createSlice({
       state.friendList[action.payload.receiver].push(action.payload.sender);
     },
     handleFriendRequest: (state, action) => {
-      const { receiver, friendReqStatus } = action.payload;
-
-      if (friendReqStatus === "accepted") {
-        if (!state.friendList[receiver]) {
-          state.friendList[receiver] = [];
-        }
-        if (!state.friendList[action.payload.sender]) {
-          state.friendList[action.payload.sender] = [];
-        }
-        state.friendList[receiver].push(action.payload.sender);
-        state.friendList[action.payload.sender].push(receiver);
-      } else {
-        state.friendList[receiver] = state.friendList[receiver]?.filter(
-          (friend) => friend !== action.payload.sender
+      const { sender, receiver, status } = action.payload;
+      if (status === "declined") {
+        state.friendList = state.friendList.filter(
+          (item) => item.sender !== sender && item.receiver !== receiver
         );
         state.friendList[action.payload.sender] = state.friendList[
           action.payload.sender

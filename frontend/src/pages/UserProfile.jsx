@@ -5,6 +5,7 @@ import {
   sendFriendRequest,
   getUserList,
   getFriendList,
+  handleFriendRequest,
 } from "../features/friend/friendSlice.js";
 
 function UserProfile() {
@@ -25,6 +26,36 @@ function UserProfile() {
   }, [userList, userId]);
 
   const handleClick = () => {
+  useEffect(() => {
+    if (socketInstance) {
+      socketInstance.on("friend request sent", (data) => {
+        console.log("friend request data: ", data);
+        dispatch(sendFriendRequest(data));
+      });
+
+      socketInstance.on("friend request processed", (data) => {
+        const { sender, status } = data;
+
+        if (user?._id === sender) {
+          dispatch(
+            handleFriendRequest({ sender: user?._id, receiver: userId, status })
+          );
+        } else {
+          dispatch(
+            handleFriendRequest({ sender: userId, receiver: user?._id, status })
+          );
+        }
+      });
+    }
+
+    return () => {
+      if (socketInstance) {
+        socketInstance.off("friend request sent");
+        socketInstance.off("friend request processed");
+      }
+    };
+  }, [dispatch, socketInstance]);
+
     try {
       if (!userId) {
         throw new Error("Invalid user requested");
