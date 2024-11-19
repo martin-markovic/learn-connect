@@ -7,7 +7,7 @@ const initialState = {
   isSuccess: false,
   isError: false,
   errorMessage: "",
-  friendList: {},
+  friendList: [],
   userList: [],
 };
 
@@ -73,12 +73,15 @@ const friendSlice = createSlice({
         state.friendList = state.friendList.filter(
           (item) => item.sender !== sender && item.receiver !== receiver
         );
-        state.friendList[action.payload.sender] = state.friendList[
-          action.payload.sender
-        ]?.filter((friend) => friend !== receiver);
+      } else {
+        state.friendList.push(action.payload);
       }
     },
-    removeFriend: (state, action) => {},
+    removeFriend: (state, action) => {
+      state.friendList = state.friendList.filter(
+        (friend) => friend._id !== action.payload._id
+      );
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -92,7 +95,7 @@ const friendSlice = createSlice({
         state.isSuccess = true;
         state.isError = false;
         state.errorMessage = "";
-        state.friendList = action.payload;
+        state.friendList = action.payload || [];
       })
       .addCase(getFriendList.rejected, (state, action) => {
         state.isLoading = false;
@@ -109,9 +112,9 @@ const friendSlice = createSlice({
       .addCase(getUserList.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
-        state.userList = action.payload;
         state.isError = false;
         state.errorMessage = "";
+        state.userList = action.payload;
       })
       .addCase(getUserList.rejected, (state, action) => {
         state.isLoading = false;
@@ -123,6 +126,11 @@ const friendSlice = createSlice({
   },
 });
 
-export const { resetUserList } = friendSlice.actions;
+export const {
+  resetUserList,
+  sendFriendRequest,
+  handleFriendRequest,
+  removeFriend,
+} = friendSlice.actions;
 
 export default friendSlice.reducer;
