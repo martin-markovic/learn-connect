@@ -7,7 +7,7 @@ import {
   emitMarkAsRead,
 } from "../features/socket/controller/notificationHandlers.js";
 
-function UserNotifications() {
+function UserNotifications({ socketInstance }) {
   const [newsOpen, setNewsOpen] = useState(false);
   const { userNotifications } = useSelector((state) => state.notifications);
 

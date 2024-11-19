@@ -7,7 +7,7 @@ import {
   removeMessages,
 } from "../../features/chat/chatSlice.js";
 
-const ChatDisplay = () => {
+const ChatDisplay = ({ socketInstance, selectedChat }) => {
   const [input, setInput] = useState("");
   const [activity, setActivity] = useState("");
   const activityTimer = useRef(null);

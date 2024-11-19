@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import emitRoomEvent from "../../features/socket/controller/roomHandlers.js";
+import { getFriendList } from "../../features/friend/friendSlice.js";
 
-function ChatList() {
+function ChatList({ selectedChat, setSelectedChat }) {
   const [listOpen, setListOpen] = useState(false);
   const {
     isError,

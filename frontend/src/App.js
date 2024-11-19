@@ -1,13 +1,14 @@
+import { useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { ToastContainer } from "react-toastify";
+import { jwtDecode } from "jwt-decode";
+import useSocket from "./hooks/useSocket.js";
 import {
   BrowserRouter as Router,
   Routes,
   Route,
   Navigate,
 } from "react-router-dom";
-import { useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { ToastContainer } from "react-toastify";
-import { jwtDecode } from "jwt-decode";
 
 import Dashboard from "./pages/Dashboard.jsx";
 import Login from "./pages/Login.jsx";
@@ -21,6 +22,7 @@ function App() {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.auth.user);
   const token = user?.token;
+  const socketInstance = useSocket(token);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -49,6 +51,12 @@ function App() {
     }
   }, [dispatch, user, token]);
 
+  useEffect(() => {
+    if (socketInstance) {
+      socketInstance.emit("initialize", { userId: user?._id });
+    }
+  }, [socketInstance, user]);
+
   return (
     <>
       <Router>
@@ -64,15 +72,33 @@ function App() {
           />
           <Route
             path="/"
-            element={token ? <Dashboard /> : <Navigate to="/login" />}
+            element={
+              token ? (
+                <Dashboard socketInstance={socketInstance} />
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
           />
           <Route
             path="/profile/:userId"
-            element={token ? <UserProfile /> : <Navigate to="/login" />}
+            element={
+              token ? (
+                <UserProfile socketInstance={socketInstance} />
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
           />
           <Route
             path="/quizzes"
-            element={token ? <Quizzes /> : <Navigate to="/login" />}
+            element={
+              token ? (
+                <Quizzes socketInstance={socketInstance} />
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
           />
         </Routes>
       </Router>
