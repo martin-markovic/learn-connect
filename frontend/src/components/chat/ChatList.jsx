@@ -1,17 +1,14 @@
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { useSocketContext } from "../../features/socket/socketContext.js";
-import { getUserClassrooms } from "../../features/classroom/classroomSlice.js";
 import emitRoomEvent from "../../features/socket/controller/roomHandlers.js";
 
 function ChatList() {
   const [listOpen, setListOpen] = useState(false);
-  const { socketInstance, selectedChat, setSelectedChat } = useSocketContext();
   const {
     isError,
     isLoading,
-    userClassrooms = [],
-  } = useSelector((state) => state.classroom);
+    friendList = [],
+  } = useSelector((state) => state.friends);
 
   const dispatch = useDispatch();
 
