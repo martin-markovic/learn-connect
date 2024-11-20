@@ -33,7 +33,9 @@ function UserProfile({ socketInstance }) {
   }, [userList, userId]);
 
   useEffect(() => {
-    const isFriend = friendList.includes(userId);
+    const isFriend = friendList.forEach(
+      (item) => item.sender_id === userId || item.receiver._id === userId
+    );
 
     setFriendshipStatus(isFriend || null);
   }, [friendList, userId]);
