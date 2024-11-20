@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from "react";
-import { useSocketContext } from "../../features/socket/socketContext.js";
 import { useSelector, useDispatch } from "react-redux";
 import emitRoomEvent from "../../features/socket/controller/roomHandlers.js";
 import {
@@ -8,9 +7,8 @@ import {
   removeMessages,
 } from "../../features/chat/chatSlice.js";
 
-const ChatDisplay = () => {
+const ChatDisplay = ({ socketInstance, selectedChat }) => {
   const [input, setInput] = useState("");
-  const { socketInstance, selectedChat } = useSocketContext();
   const [activity, setActivity] = useState("");
   const activityTimer = useRef(null);
   const chatEndRef = useRef(null);

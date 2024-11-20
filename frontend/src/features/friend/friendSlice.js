@@ -58,14 +58,7 @@ const friendSlice = createSlice({
       state.isSuccess = true;
       state.isError = false;
       state.errorMessage = "";
-      if (!state.friendList[action.payload.sender]) {
-        state.friendList[action.payload.sender] = [];
-      }
-      if (!state.friendList[action.payload.receiver]) {
-        state.friendList[action.payload.receiver] = [];
-      }
-      state.friendList[action.payload.sender].push(action.payload.receiver);
-      state.friendList[action.payload.receiver].push(action.payload.sender);
+      state.friendList.push(action.payload);
     },
     handleFriendRequest: (state, action) => {
       const { sender, receiver, status } = action.payload;

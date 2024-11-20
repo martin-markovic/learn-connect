@@ -5,7 +5,6 @@ import {
   joinClassroom,
   leaveClassroom,
 } from "../../features/classroom/classroomSlice.js";
-import { useSocketContext } from "../../features/socket/socketContext.js";
 import { toast } from "react-toastify";
 
 function Classroom() {

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { useSocketContext } from "../features/socket/socketContext";
 import { getNotifications } from "../features/notifications/notificationSlice.js";
 import handleNotificationSetup from "../features/notifications/handleNotifications.js";
 import {
@@ -8,9 +7,8 @@ import {
   emitMarkAsRead,
 } from "../features/socket/controller/notificationHandlers.js";
 
-function UserNotifications() {
+function UserNotifications({ socketInstance }) {
   const [newsOpen, setNewsOpen] = useState(false);
-  const { socketInstance } = useSocketContext();
   const { userNotifications } = useSelector((state) => state.notifications);
 
   const dispatch = useDispatch();

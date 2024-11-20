@@ -7,6 +7,7 @@ import {
   getFriendList,
   handleFriendRequest,
 } from "../features/friend/friendSlice.js";
+import handleSocialEvent from "../features/socket/controller/handleSocialEvent.js";
 
 function UserProfile({ socketInstance }) {
   const [userInfo, setUserInfo] = useState(null);
@@ -32,7 +33,9 @@ function UserProfile({ socketInstance }) {
   }, [userList, userId]);
 
   useEffect(() => {
-    const isFriend = friendList.includes(userId);
+    const isFriend = friendList.forEach(
+      (item) => item.sender_id === userId || item.receiver._id === userId
+    );
 
     setFriendshipStatus(isFriend || null);
   }, [friendList, userId]);
@@ -70,7 +73,7 @@ function UserProfile({ socketInstance }) {
   const handleSend = () => {
     try {
       if (!userId) {
-        throw new Error("Invalid user requested");
+        throw new Error("Invalid user id");
       }
 
       if (friendshipStatus === "sent" || friendshipStatus === "accepted") {
@@ -82,7 +85,18 @@ function UserProfile({ socketInstance }) {
         throw new Error(errorString);
       }
 
-      dispatch(sendFriendRequest(userId));
+      const eventData = {
+        senderId: user._id,
+        receiverId: userId,
+        currentStatus: "pending",
+      };
+      const clientData = {
+        socketInstance,
+        eventName: "send friend request",
+        eventData,
+      };
+
+      handleSocialEvent(clientData);
     } catch (error) {
       console.error(error.message);
     }
