@@ -1,10 +1,11 @@
 import Friend from "../../models/users/friendModel.js";
 
-const handleSocialEvents = (socket, io) => {
+const handleSocialEvents = (socket, io, userSocketMap) => {
   socket.on("send friend request", async (data) => {
     let errorMessage = null;
+
     try {
-      const { senderId, receiverId } = data.roomData;
+      const { senderId, receiverId, currentStatus } = data;
 
       if (!senderId || !receiverId) {
         errorMessage = "Please provide valid friend request data";
@@ -16,8 +17,8 @@ const handleSocialEvents = (socket, io) => {
 
       const existingRequest = await Friend.findOne({
         $or: [
-          { sender: senderId, receiver: receiverId, status: "pending" },
-          { sender: receiverId, receiver: senderId, status: "pending" },
+          { sender: senderId, receiver: receiverId, status: currentStatus },
+          { sender: receiverId, receiver: senderId, status: currentStatus },
         ],
       });
 
@@ -39,12 +40,16 @@ const handleSocialEvents = (socket, io) => {
 
       socket.emit("friend request sent", newRequest);
 
-      io.to(receiverId).emit("new friend request", newFriendRequest);
+      const targetSocketId = userSocketMap.get(receiverId);
+      if (targetSocketId) {
+        io.to(targetSocketId).emit("new friend request", newRequest);
+        console.log(`Friend request sent to userId ${targetSocketId}`);
+      } else {
+        console.error(`No active socket for userId: ${targetSocketId}`);
+      }
     } catch (error) {
-      errorMessage = "Error processing friend request";
-
-      console.error(errorMessage);
-      socket.emit("error", errorMessage);
+      console.error(error.message);
+      socket.emit("error", error.message);
     }
   });
 
