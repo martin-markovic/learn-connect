@@ -56,9 +56,9 @@ const handleSocialEvents = (socket, io, userSocketMap) => {
   socket.on("process friend request", async (data) => {
     let errorMessage = null;
     try {
-      const { sender, friendReqResponse } = data.roomData;
+      const { senderId, receiverId, userResponse } = data;
 
-      if (!friendReqResponse) {
+      if (!userResponse) {
         errorMessage = "Please provide valid room data";
         console.error(errorMessage);
         socket.emit("error", { message: errorMessage });
@@ -67,16 +67,16 @@ const handleSocialEvents = (socket, io, userSocketMap) => {
 
       const validStatuses = ["pending", "accepted", "declined"];
 
-      if (!validStatuses.includes(friendReqResponse)) {
+      if (!validStatuses.includes(userResponse)) {
         errorMessage = "Invalid friend request status";
         console.error(errorMessage);
         socket.emit("error", { errorMessage });
         return;
       }
 
-      if (friendReqResponse === "declined") {
         const deletedRequest = await Friend.deleteOne({
-          sender,
+          sender: senderId,
+          receiver: receiverId,
           status: "pending",
         });
 
@@ -88,20 +88,29 @@ const handleSocialEvents = (socket, io, userSocketMap) => {
         }
 
         socket.emit("friend request processed", {
-          sender,
+          senderId,
+          receiverId,
           status: "declined",
         });
 
-        io.to(receiver).emit("friend request processed", {
-          sender,
-          status: "declined",
-        });
-        return;
+        const targetSocketId = userSocketMap.get(senderId);
+        if (targetSocketId) {
+          io.to(targetSocketId).emit("friend request processed", {
+            senderId,
+            receiverId,
+            status: "declined",
+          });
+
+          console.log(`Friend request declined for userId: '${targetSocketId}`);
+          return;
+        } else {
+          console.error(`No active socket for userId: ${targetSocketId}`);
+        }
       }
 
       const friendRequest = await Friend.findOneAndUpdate(
-        { sender, status: "pending" },
-        { status: friendReqResponse },
+        { sender: senderId, receiver: receiverId, status: "pending" },
+        { status: userResponse },
         { new: true }
       );
 
@@ -113,7 +122,13 @@ const handleSocialEvents = (socket, io, userSocketMap) => {
       }
 
       socket.emit("friend request processed", friendRequest);
-      io.to(receiver).emit("friend request processed", friendRequest);
+      const targetSocketId = userSocketMap.get(senderId);
+      if (targetSocketId) {
+        io.to(targetSocketId).emit("friend request processed", friendRequest);
+        console.log(`Friend request sent to userId ${targetSocketId}`);
+      } else {
+        console.log(`No active socket for userId: ${targetSocketId}`);
+      }
     } catch (error) {
       console.error("Error processing friend request: ", error.message);
       socket.emit("error", { error });
