@@ -5,7 +5,7 @@ import {
 } from "./helpers/socket.messages.js";
 
 const handleMessages = (socket, io) => {
-  socket.on("message room", async (data) => {
+  socket.on("send message", async (data) => {
     const roomData = data.roomData;
 
     return await sendMessage(socket, io, roomData);
@@ -14,13 +14,14 @@ const handleMessages = (socket, io) => {
   socket.on("user typing", (data) => {
     const roomData = data.roomData;
 
-    return handleTyping(socket, roomData);
+
+    return handleTyping(socket, io, roomData);
   });
 
   socket.on("open conversation", async (data) => {
     const roomData = data.roomData;
 
-    return handleChatOpen(socket, roomData);
+    return handleChatOpen(socket, io, roomData);
   });
 };
 
