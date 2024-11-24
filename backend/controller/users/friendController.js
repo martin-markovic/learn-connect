@@ -13,20 +13,7 @@ export const getFriendList = async (req, res) => {
       $or: [{ sender: userId }, { receiver: userId }],
     });
 
-    if (!friendList || friendList.length === 0) {
-      return res.status(200).json({});
-    }
-
-    const adjacencyList = friendList.reduce((acc, friend) => {
-      const { sender, receiver } = friend;
-      if (!acc[sender]) acc[sender] = [];
-      if (!acc[receiver]) acc[receiver] = [];
-      acc[sender].push(receiver);
-      acc[receiver].push(sender);
-      return acc;
-    }, {});
-
-    return res.status(200).json(adjacencyList);
+    return res.status(200).json(friendList || []);
   } catch (error) {
     console.error("Error fetching friend list", error);
     return res.status(500).json({ message: "Server error" });

@@ -18,19 +18,16 @@ const ChatDisplay = ({ socketInstance, selectedChat }) => {
   const { user } = useSelector((state) => state.auth);
   const { userClassrooms } = useSelector((state) => state.classroom);
   const messages = useSelector((state) => state.chat.messages);
-  const classroomId = userClassrooms.find(
-    (classroom) => classroom.name === selectedChat
-  )?._id;
 
   useEffect(() => {
-    if (classroomId) {
-      dispatch(getMessages(classroomId));
+    if (user?._id) {
+      dispatch(getMessages(user?._id));
     }
-  }, [dispatch, userClassrooms, classroomId]);
+  }, [dispatch, userClassrooms, user?._id]);
 
   useEffect(() => {
     if (socketInstance) {
-      socketInstance.on("message delivered", (data) => {
+      socketInstance.on("new message", (data) => {
         const messageData = data;
 
         dispatch(addMessage(messageData));
@@ -55,7 +52,7 @@ const ChatDisplay = ({ socketInstance, selectedChat }) => {
     return () => {
       if (socketInstance) {
         socketInstance.off("chat activity");
-        socketInstance.off("message delivered");
+        socketInstance.off("new message");
       }
     };
   }, [socketInstance, dispatch]);
@@ -63,22 +60,21 @@ const ChatDisplay = ({ socketInstance, selectedChat }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!selectedChat && socketInstance && classroomId) {
+    if (!selectedChat && socketInstance && user?._id) {
       console.error("Please select a chat and provide valid socket instance.");
       return;
     }
 
     try {
       const messageData = {
-        sender: { id: user?._id, name: user?.name },
+        sender: user?._id,
+        receiver: selectedChat,
         text: input,
-        classroom: classroomId,
-        status: "pending",
       };
 
       const clientData = {
         socketInstance,
-        eventName: "message room",
+        eventName: "send message",
         roomData: messageData,
       };
 
@@ -88,8 +84,8 @@ const ChatDisplay = ({ socketInstance, selectedChat }) => {
         setInput("");
 
         const notificationData = {
-          sender: { id: user?._id, name: user?.name },
-          classroom: classroomId,
+          sender: user?._id,
+          receiver: selectedChat,
           eventName: "new message",
         };
 
@@ -110,9 +106,9 @@ const ChatDisplay = ({ socketInstance, selectedChat }) => {
     try {
       if (selectedChat && socketInstance) {
         const roomData = {
-          roomNames: selectedChat,
-          senderId: user._id,
-          senderName: user.name,
+          senderId: user?._id,
+          receiver: selectedChat,
+          senderName: user?.name,
         };
 
         const clientData = {
@@ -139,14 +135,14 @@ const ChatDisplay = ({ socketInstance, selectedChat }) => {
   const handleRemove = () => {
     if (selectedChat) {
       try {
-        const messageIds = messages[classroomId].map((message) => message._id);
+        const messageIds = messages[selectedChat].map((message) => message._id);
 
         if (messageIds.length === 0 || !messageIds) {
           console.error("Chat history is already empty");
           return;
         }
 
-        const chatData = { classroomId, messageIds };
+        const chatData = { selectedChat, messageIds };
 
         const result = dispatch(removeMessages(chatData));
         if (result.type === "chat/removeMessages/fulfilled") {
@@ -167,10 +163,10 @@ const ChatDisplay = ({ socketInstance, selectedChat }) => {
       <h3>Chat with {selectedChat}</h3>
 
       <div className="conversation-display__chat">
-        {Object.keys(messages).map((classroomId) => (
-          <ul key={classroomId}>
-            {messages[classroomId] && messages[classroomId].length > 0 ? (
-              messages[classroomId].map((message) => (
+        {Object.keys(messages).map((friend) => (
+          <ul key={friend}>
+            {messages[friend] && messages[friend].length > 0 ? (
+              messages[friend].map((message) => (
                 <li key={message._id} style={{ marginRight: "1em" }}>
                   {message.sender.id === user?._id ? null : (
                     <span>
