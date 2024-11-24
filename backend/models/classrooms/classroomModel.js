@@ -30,13 +30,6 @@ const classroomSchema = new mongoose.Schema({
       ref: "Score",
     },
   ],
-  chats: [
-    {
-      type: [mongoose.Schema.Types.ObjectId],
-      ref: "Chat",
-      default: [],
-    },
-  ],
 });
 
 const Classroom = mongoose.model("Classroom", classroomSchema);
