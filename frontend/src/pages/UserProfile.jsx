@@ -12,6 +12,7 @@ import handleSocialEvent from "../features/socket/controller/handleSocialEvent.j
 function UserProfile({ socketInstance }) {
   const [userInfo, setUserInfo] = useState(null);
   const [friendshipStatus, setFriendshipStatus] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false);
   const { userId } = useParams();
   const {
     isLoading,
@@ -48,9 +49,9 @@ function UserProfile({ socketInstance }) {
       });
 
       socketInstance.on("friend request processed", (data) => {
-        const { sender, status } = data;
+        const { senderId, status } = data;
 
-        if (user?._id === sender) {
+        if (user?._id === senderId) {
           dispatch(
             handleFriendRequest({ sender: user?._id, receiver: userId, status })
           );
@@ -99,6 +100,31 @@ function UserProfile({ socketInstance }) {
       handleSocialEvent(clientData);
     } catch (error) {
       console.error(error.message);
+  const handleProcessRequest = (e) => {
+    setIsProcessing(true);
+
+    const friendReqResponse = e.target.dataset.response;
+
+    try {
+      const eventData = {
+        senderId: userId,
+        receiverId: user._id,
+        userResponse: friendReqResponse === "accept" ? "accepted" : "declined",
+      };
+
+      const clientData = {
+        socketInstance,
+        eventName: "process friend request",
+        eventData,
+      };
+
+      handleSocialEvent(clientData);
+    } catch (error) {
+      console.error("Error processing request :", error.message);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
     }
   };
 
@@ -125,27 +151,17 @@ function UserProfile({ socketInstance }) {
               <div>
                 <button
                   type="button"
-                  onClick={() => {
-                    dispatch(
-                      handleFriendRequest({
-                        friendReqResponse: "accept",
-                        userId,
-                      })
-                    );
-                  }}
+                  data-response="accept"
+                  disabled={isProcessing}
+                  onClick={handleProcessRequest}
                 >
                   Accept
                 </button>
                 <button
                   type="button"
-                  onClick={() => {
-                    dispatch(
-                      handleFriendRequest({
-                        friendReqResponse: "decline",
-                        userId,
-                      })
-                    );
-                  }}
+                  data-response="decline"
+                  disabled={isProcessing}
+                  onClick={handleProcessRequest}
                 >
                   Decline
                 </button>
