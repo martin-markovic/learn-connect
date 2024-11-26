@@ -113,6 +113,41 @@ const handleSocialEvents = (socket, io, userSocketMap) => {
       socket.emit("error", { message: error.message });
     }
   });
+
+  socket.on("remove friend", async (data) => {
+    try {
+      const { senderId, receiverId } = data;
+
+      if (!senderId || !receiverId) {
+        throw new Error("Invalid user data");
+      }
+
+      const foundFriend = await Friend.findOne({
+        $or: [
+          { sender: senderId, receiver: receiverId },
+          { sender: receiverId, receiver: senderId },
+        ],
+      });
+
+      if (!foundFriend) {
+        throw new Error("Friend not found");
+      }
+
+      await Friend.deleteOne({ _id: foundFriend?._id });
+
+      socket.emit("friend removed", { payloadId: foundFriend?._id });
+      const targetSocketId = userSocketMap.get(receiverId);
+
+      if (!targetSocketId) {
+        throw new Error(`No active socket for userId: ${targetSocketId}`);
+      }
+
+      io.to(targetSocketId).emit("friend removed", {
+        payloadId: foundFriend?._id,
+      });
+    } catch (error) {
+      console.log("Error removing friend: ", error.message);
+      socket.emit("error", { message: error.message });
     }
   });
 };
