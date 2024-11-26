@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -14,6 +14,9 @@ function UserProfile({ socketInstance }) {
   const [userInfo, setUserInfo] = useState(null);
   const [friendshipStatus, setFriendshipStatus] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [actionToConfirm, setActionToConfirm] = useState("");
+  const selectRef = useRef(null);
   const { userId } = useParams();
   const {
     isLoading,
@@ -56,6 +59,10 @@ function UserProfile({ socketInstance }) {
       socketInstance.on("friend request accepted", (data) => {
         dispatch(handleAccept(data));
       });
+
+      socketInstance.on("friend removed", (data) => {
+        dispatch(handleRemove(data));
+      });
       });
     }
 
@@ -64,6 +71,7 @@ function UserProfile({ socketInstance }) {
         socketInstance.off("friend request sent");
         socketInstance.off("friend request accepted");
         socketInstance.off("friend request declined");
+        socketInstance.off("friend removed");
       }
     };
   }, [dispatch, socketInstance]);
@@ -124,6 +132,39 @@ function UserProfile({ socketInstance }) {
       setIsProcessing(false);
     }
   };
+
+  const handleStatusChange = (e) => {
+    const newStatus = e.target.value;
+
+    setModalOpen(true);
+    setActionToConfirm(newStatus);
+  };
+
+  const handleConfirmAction = () => {
+    try {
+      const eventData = {
+        senderId: user._id,
+        receiverId: userId,
+      };
+
+      const clientData = {
+        socketInstance,
+        eventName: "remove friend",
+        eventData,
+      };
+
+      handleSocialEvent(clientData);
+    } catch (error) {
+      console.error("Error removing friend: ", error.message);
+    }
+
+    setModalOpen(false);
+  };
+
+  const handleCancelAction = () => {
+    setModalOpen(false);
+    if (selectRef.current) {
+      selectRef.current.value = "friends";
     }
   };
 
@@ -167,10 +208,32 @@ function UserProfile({ socketInstance }) {
               </div>
             )}
           {friendshipStatus === "accepted" && (
-            <select name="friendshipStatus" id="friendshipStatus">
-              <label for="friendshipStatus">Friends</label>
-              <option value="unfriend">Unfriend</option>
-            </select>
+            <div>
+              <select
+                name="friendshipStatus"
+                id="friendshipStatus"
+                defaultValue="friends"
+                onChange={handleStatusChange}
+                ref={selectRef}
+              >
+                <option value="friends" hidden>
+                  Friends
+                </option>
+                <option value="unfriend">Unfriend</option>
+                <option value="block">Block</option>
+              </select>
+              {modalOpen && (
+                <div className="modal">
+                  <p>
+                    Are you sure you want to {actionToConfirm} {userInfo?.name}?
+                  </p>
+                  <div>
+                    <button onClick={handleConfirmAction}>Yes</button>
+                    <button onClick={handleCancelAction}>No</button>
+                  </div>
+                </div>
+              )}
+            </div>
           )}
           {!isLoading && friendshipStatus === null && (
             <button type="button" onClick={handleSend}>
