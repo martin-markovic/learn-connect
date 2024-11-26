@@ -57,23 +57,23 @@ const handleSocialEvents = (socket, io, userSocketMap) => {
         throw new Error("Invalid friend request status");
       }
 
-        const deletedRequest = await Friend.deleteOne({
+      if (userResponse === "declined") {
+        const foundRequest = await Friend.findOne({
           sender: senderId,
           receiver: receiverId,
           status: "pending",
         });
 
-        if (deletedRequest.deletedCount === 0) {
-          errorMessage = "Friend request not found";
-          console.error(errorMessage);
-          socket.emit("error", { message: errorMessage });
-          return;
+        if (!foundRequest) {
+          throw new Error("Friend request not found");
         }
 
-        socket.emit("friend request processed", {
-          senderId,
-          receiverId,
-          status: "declined",
+        const payloadId = foundRequest._id;
+
+        await Friend.deleteOne({ _id: payloadId });
+
+        socket.emit("friend request declined", {
+          payloadId,
         });
 
         const targetSocketId = userSocketMap.get(senderId);
@@ -81,6 +81,12 @@ const handleSocialEvents = (socket, io, userSocketMap) => {
         if (!targetSocketId) {
           throw new Error(`No active socket for userId: ${targetSocketId}`);
         }
+
+        io.to(targetSocketId).emit("friend request declined", {
+          payloadId,
+        });
+
+        return;
       }
 
       const friendRequest = await Friend.findOneAndUpdate(
@@ -93,12 +99,15 @@ const handleSocialEvents = (socket, io, userSocketMap) => {
         throw new Error("Friend request not found");
       }
 
-      socket.emit("friend request processed", friendRequest);
+      socket.emit("friend request accepted", friendRequest);
+
       const targetSocketId = userSocketMap.get(senderId);
 
       if (!targetSocketId) {
         throw new Error(`No active socket for user: ${targetSocketId}`);
       }
+
+      io.to(targetSocketId).emit("friend request accepted", friendRequest);
     } catch (error) {
       console.error("Error processing friend request: ", error.message);
       socket.emit("error", { message: error.message });
