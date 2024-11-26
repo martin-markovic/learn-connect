@@ -60,17 +60,23 @@ const friendSlice = createSlice({
       state.errorMessage = "";
       state.friendList.push(action.payload);
     },
-    handleFriendRequest: (state, action) => {
-      const { sender, receiver, status } = action.payload;
-      if (status === "declined") {
-        state.friendList = state.friendList.filter(
-          (item) => item.sender !== sender && item.receiver !== receiver
-        );
-      } else {
-        state.friendList.push(action.payload);
+    handleAccept: (state, action) => {
+      const matchingIndex = state.friendList.findIndex(
+        (item) => item._id === action.payload._id
+      );
+
+      if (matchingIndex !== -1) {
+        state.friendList[matchingIndex].status = action.payload.status;
       }
     },
     removeFriend: (state, action) => {
+    handleDecline: (state, action) => {
+      const { payloadId } = action.payload;
+
+      state.friendList = state.friendList.filter(
+        (item) => item._id !== payloadId
+      );
+    },
       state.friendList = state.friendList.filter(
         (friend) => friend._id !== action.payload._id
       );
@@ -122,8 +128,9 @@ const friendSlice = createSlice({
 export const {
   resetUserList,
   sendFriendRequest,
-  handleFriendRequest,
   removeFriend,
+  handleAccept,
+  handleDecline,
 } = friendSlice.actions;
 
 export default friendSlice.reducer;

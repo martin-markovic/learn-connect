@@ -5,7 +5,8 @@ import {
   sendFriendRequest,
   getUserList,
   getFriendList,
-  handleFriendRequest,
+  handleAccept,
+  handleDecline,
 } from "../features/friend/friendSlice.js";
 import handleSocialEvent from "../features/socket/controller/handleSocialEvent.js";
 
@@ -48,25 +49,21 @@ function UserProfile({ socketInstance }) {
         dispatch(sendFriendRequest(data));
       });
 
-      socketInstance.on("friend request processed", (data) => {
-        const { senderId, status } = data;
+      socketInstance.on("friend request declined", (data) => {
+        dispatch(handleDecline(data));
+      });
 
-        if (user?._id === senderId) {
-          dispatch(
-            handleFriendRequest({ sender: user?._id, receiver: userId, status })
-          );
-        } else {
-          dispatch(
-            handleFriendRequest({ sender: userId, receiver: user?._id, status })
-          );
-        }
+      socketInstance.on("friend request accepted", (data) => {
+        dispatch(handleAccept(data));
+      });
       });
     }
 
     return () => {
       if (socketInstance) {
         socketInstance.off("friend request sent");
-        socketInstance.off("friend request processed");
+        socketInstance.off("friend request accepted");
+        socketInstance.off("friend request declined");
       }
     };
   }, [dispatch, socketInstance]);
@@ -91,6 +88,7 @@ function UserProfile({ socketInstance }) {
         receiverId: userId,
         currentStatus: "pending",
       };
+
       const clientData = {
         socketInstance,
         eventName: "send friend request",
@@ -100,6 +98,7 @@ function UserProfile({ socketInstance }) {
       handleSocialEvent(clientData);
     } catch (error) {
       console.error(error.message);
+
   const handleProcessRequest = (e) => {
     setIsProcessing(true);
 
