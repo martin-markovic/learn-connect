@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  sendFriendRequest,
+  newFriendRequest,
   getUserList,
   getFriendList,
   handleAccept,
@@ -40,9 +40,9 @@ function UserProfile({ socketInstance }) {
   }, [userList, userId]);
 
   useEffect(() => {
-    const isFriend = friendList.forEach(
-      (item) => item.sender_id === userId || item.receiver._id === userId
-    );
+    const isFriend = friendList.find(
+      (item) => item.sender === userId || item.receiver === userId
+    )?.status;
 
     setFriendshipStatus(isFriend || null);
   }, [friendList, userId]);
@@ -50,8 +50,11 @@ function UserProfile({ socketInstance }) {
   useEffect(() => {
     if (socketInstance) {
       socketInstance.on("friend request sent", (data) => {
-        console.log("friend request data: ", data);
-        dispatch(sendFriendRequest(data));
+        dispatch(newFriendRequest(data));
+      });
+
+      socketInstance.on("new friend request", (data) => {
+        dispatch(newFriendRequest(data));
       });
 
       socketInstance.on("friend request declined", (data) => {
@@ -80,6 +83,7 @@ function UserProfile({ socketInstance }) {
     return () => {
       if (socketInstance) {
         socketInstance.off("friend request sent");
+        socketInstance.off("new friend request");
         socketInstance.off("friend request accepted");
         socketInstance.off("friend request declined");
         socketInstance.off("friend removed");
@@ -117,7 +121,9 @@ function UserProfile({ socketInstance }) {
 
       handleSocialEvent(clientData);
     } catch (error) {
-      console.error(error.message);
+      console.error("Error sending request: ", error.message);
+    }
+  };
 
   const handleProcessRequest = (e) => {
     setIsProcessing(true);
@@ -159,9 +165,18 @@ function UserProfile({ socketInstance }) {
         receiverId: userId,
       };
 
+      const validActions = ["unfriend", "block"];
+
+      if (!validActions.includes(actionToConfirm)) {
+        throw new Error(`Invalid action ${actionToConfirm}`);
+      }
+
+      const actionName =
+        actionToConfirm === "unfriend" ? "remove friend" : "block user";
+
       const clientData = {
         socketInstance,
-        eventName: "remove friend",
+        eventName: actionName,
         eventData,
       };
 
@@ -179,6 +194,10 @@ function UserProfile({ socketInstance }) {
       selectRef.current.value = "friends";
     }
   };
+
+  if (!isLoading && friendshipStatus === "blocked") {
+    return <p>You cannot interact with this user.</p>;
+  }
 
   if (!isLoading && !userInfo) {
     return <p>User not found.</p>;
@@ -234,23 +253,34 @@ function UserProfile({ socketInstance }) {
                 <option value="unfriend">Unfriend</option>
                 <option value="block">Block</option>
               </select>
-              {modalOpen && (
-                <div className="modal">
-                  <p>
-                    Are you sure you want to {actionToConfirm} {userInfo?.name}?
-                  </p>
-                  <div>
-                    <button onClick={handleConfirmAction}>Yes</button>
-                    <button onClick={handleCancelAction}>No</button>
-                  </div>
-                </div>
-              )}
             </div>
           )}
-          {!isLoading && friendshipStatus === null && (
-            <button type="button" onClick={handleSend}>
-              Add Friend
-            </button>
+          {modalOpen && (
+            <div className="modal">
+              <p>
+                Are you sure you want to {actionToConfirm} {userInfo?.name}?
+              </p>
+              <div>
+                <button onClick={handleConfirmAction}>Yes</button>
+                <button onClick={handleCancelAction}>No</button>
+              </div>
+            </div>
+          )}
+          {!isLoading && friendshipStatus === null && !modalOpen && (
+            <div>
+              <button type="button" onClick={handleSend}>
+                Add Friend
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setModalOpen(true);
+                  setActionToConfirm("block");
+                }}
+              >
+                Block User
+              </button>
+            </div>
           )}
         </>
       )}

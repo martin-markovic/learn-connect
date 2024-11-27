@@ -53,7 +53,7 @@ const friendSlice = createSlice({
   initialState,
   reducers: {
     resetUserList: (state) => initialState,
-    sendFriendRequest: (state, action) => {
+    newFriendRequest: (state, action) => {
       state.isLoading = false;
       state.isSuccess = true;
       state.isError = false;
@@ -135,7 +135,7 @@ const friendSlice = createSlice({
 
 export const {
   resetUserList,
-  sendFriendRequest,
+  newFriendRequest,
   handleAccept,
   handleDecline,
   handleRemove,
