@@ -9,9 +9,12 @@ export const getFriendList = async (req, res) => {
       return res.status(401).json({ message: "User not authenticated" });
     }
 
-    const friendList = await Friend.find({
-      $or: [{ sender: userId }, { receiver: userId }],
-    });
+    const friendList = await Friend.find(
+      {
+        $or: [{ sender: userId }, { receiver: userId }],
+      },
+      "sender receiver status"
+    );
 
     return res.status(200).json(friendList || []);
   } catch (error) {
@@ -22,21 +25,26 @@ export const getFriendList = async (req, res) => {
 
 export const getUserList = async (req, res) => {
   try {
-    const userList = await User.find().select("-password -email -classrooms");
+    const userId = req.user?._id;
 
-    if (!userList || userList.length === 0) {
-      return res.status(200).json([]);
+    if (!userId) {
+      return res.status(401).json({ message: "User not authorized" });
     }
 
-    return res.status(200).json(userList);
-  } catch (error) {
-    console.error("Error fetching list of users", error);
-    return res.status(500).json({ message: "Server error" });
-  }
-};
+    const blockedUsers = await Friend.find({
+      $or: [
+        { sender: userId, status: "blocked" },
+        { receiver: userId, status: "blocked" },
+      ],
+    });
 
-export const removeFriend = (req, res) => {
-  try {
+    const blockedUserIds = blockedUsers.map((rel) =>
+      String(rel.sender) === String(userId) ? rel.receiver : rel.sender
+    );
+
+    const userList = await User.find({ _id: { $nin: blockedUserIds } });
+
+    return res.status(200).json(userList);
   } catch (error) {
     console.error("Error fetching list of users", error);
     return res.status(500).json({ message: "Server error" });
