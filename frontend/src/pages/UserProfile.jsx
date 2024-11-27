@@ -7,6 +7,8 @@ import {
   getFriendList,
   handleAccept,
   handleDecline,
+  handleRemove,
+  handleBlock,
 } from "../features/friend/friendSlice.js";
 import handleSocialEvent from "../features/socket/controller/handleSocialEvent.js";
 
@@ -63,6 +65,15 @@ function UserProfile({ socketInstance }) {
       socketInstance.on("friend removed", (data) => {
         dispatch(handleRemove(data));
       });
+
+      socketInstance.on("user blocked", (data) => {
+        dispatch(handleBlock(data));
+
+        setUserInfo((prev) => (prev._id === data ? null : prev));
+        setFriendshipStatus("blocked");
+
+        dispatch(getUserList());
+        dispatch(getFriendList());
       });
     }
 
@@ -72,6 +83,7 @@ function UserProfile({ socketInstance }) {
         socketInstance.off("friend request accepted");
         socketInstance.off("friend request declined");
         socketInstance.off("friend removed");
+        socketInstance.off("user blocked");
       }
     };
   }, [dispatch, socketInstance]);
