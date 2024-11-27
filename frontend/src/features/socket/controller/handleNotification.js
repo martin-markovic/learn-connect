@@ -1,4 +1,4 @@
-import emitRoomEvent from "./roomHandlers.js";
+import emitRoomEvent from "./handleRoom.js";
 
 export const emitMarkAsRead = async (socketInstance, notificationId) => {
   if (!socketInstance) {
