@@ -14,7 +14,7 @@ const friendSchema = mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "accepted", "declined"],
+      enum: ["pending", "accepted", "declined", "blocked"],
       default: "pending",
     },
   },

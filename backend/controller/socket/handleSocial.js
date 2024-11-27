@@ -1,4 +1,5 @@
 import Friend from "../../models/users/friendModel.js";
+import User from "../../models/users/userModel.js";
 
 const handleSocialEvents = (socket, io, userSocketMap) => {
   socket.on("send friend request", async (data) => {
@@ -51,7 +52,7 @@ const handleSocialEvents = (socket, io, userSocketMap) => {
         throw new Error("Please provide valid room data");
       }
 
-      const validStatuses = ["pending", "accepted", "declined"];
+      const validStatuses = ["accepted", "declined"];
 
       if (!validStatuses.includes(userResponse)) {
         throw new Error("Invalid friend request status");
@@ -113,6 +114,100 @@ const handleSocialEvents = (socket, io, userSocketMap) => {
       socket.emit("error", { message: error.message });
     }
   });
+
+  socket.on("remove friend", async (data) => {
+    try {
+      const { senderId, receiverId } = data;
+
+      if (!senderId || !receiverId) {
+        throw new Error("Invalid user data");
+      }
+
+      const foundFriend = await Friend.findOne({
+        $or: [
+          { sender: senderId, receiver: receiverId },
+          { sender: receiverId, receiver: senderId },
+        ],
+      });
+
+      if (!foundFriend) {
+        throw new Error("Friend not found");
+      }
+
+      await Friend.deleteOne({ _id: foundFriend?._id });
+
+      socket.emit("friend removed", { payloadId: foundFriend?._id });
+      const targetSocketId = userSocketMap.get(receiverId);
+
+      if (!targetSocketId) {
+        throw new Error(`No active socket for userId: ${targetSocketId}`);
+      }
+
+      io.to(targetSocketId).emit("friend removed", {
+        payloadId: foundFriend?._id,
+      });
+    } catch (error) {
+      console.log("Error removing friend: ", error.message);
+      socket.emit("error", { message: error.message });
+    }
+  });
+
+  socket.on("block user", async (data) => {
+    try {
+      const { senderId, receiverId } = data;
+
+      if (!senderId || !receiverId) {
+        throw new Error("Please provide valid client data");
+      }
+
+      const userFound = await User.findOne({ _id: receiverId });
+
+      if (!userFound) {
+        throw new Error("User not found");
+      }
+
+      const payloadId = userFound?._id;
+
+      const friendFound = await Friend.findOne({
+        $or: [
+          { sender: senderId, receiver: receiverId },
+          { sender: receiverId, receiver: senderId },
+        ],
+      });
+
+      if (friendFound) {
+        await Friend.findOneAndUpdate(
+          {
+            $or: [
+              { sender: senderId, receiver: receiverId },
+              { sender: receiverId, receiver: senderId },
+            ],
+          },
+          { $set: { status: "blocked" } },
+          { new: true }
+        );
+      } else {
+        const blockedUser = new Friend({
+          sender: senderId,
+          receiver: receiverId,
+          status: "blocked",
+        });
+
+        await blockedUser.save();
+      }
+
+      socket.emit("user blocked", { payloadId });
+
+      const targetSocketId = userSocketMap.get(receiverId);
+
+      if (!targetSocketId) {
+        throw new Error(`No active socket for user: ${targetSocketId}`);
+      }
+
+      io.to(targetSocketId).emit("user blocked", { payloadId });
+    } catch (error) {
+      console.error("Error processing friend request: ", error.message);
+      socket.emit("error", { message: error.message });
     }
   });
 };
