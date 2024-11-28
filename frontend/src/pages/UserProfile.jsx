@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getUserList, getFriendList } from "../features/friend/friendSlice.js";
 import initSocialEvents from "../features/socket/controller/social/initSocial.js";
+import emitEvent from "../features/socket/socket.emitEvent.js";
 
 function UserProfile({ socketInstance }) {
   const [userInfo, setUserInfo] = useState(null);
@@ -47,12 +48,8 @@ function UserProfile({ socketInstance }) {
         callbackHandlers: [setUserInfo, setFriendshipStatus],
       };
 
-        setUserInfo((prev) => (prev._id === data ? null : prev));
-        setFriendshipStatus("blocked");
+      const cleanup = initSocialEvents(initData);
 
-        dispatch(getUserList());
-        dispatch(getFriendList());
-      });
       return cleanup();
     }
   }, [dispatch, socketInstance]);
@@ -61,6 +58,10 @@ function UserProfile({ socketInstance }) {
     try {
       if (!userId) {
         throw new Error("Invalid user id");
+      }
+
+      if (!user?._id) {
+        throw new Error("User not authorized");
       }
 
       if (friendshipStatus === "sent" || friendshipStatus === "accepted") {
@@ -84,9 +85,9 @@ function UserProfile({ socketInstance }) {
         eventData,
       };
 
-      handleSocialEvent(clientData);
+      emitEvent(clientData);
     } catch (error) {
-      console.error("Error sending request: ", error.message);
+      console.error("Error sending friend request: ", error.message);
     }
   };
 
@@ -108,7 +109,7 @@ function UserProfile({ socketInstance }) {
         eventData,
       };
 
-      handleSocialEvent(clientData);
+      emitEvent(clientData);
     } catch (error) {
       console.error("Error processing request :", error.message);
     } finally {
@@ -145,7 +146,7 @@ function UserProfile({ socketInstance }) {
         eventData,
       };
 
-      handleSocialEvent(clientData);
+      emitEvent(clientData);
     } catch (error) {
       console.error("Error removing friend: ", error.message);
     }
