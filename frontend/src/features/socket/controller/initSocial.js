@@ -6,7 +6,7 @@ import {
   handleDecline,
   handleRemove,
   handleBlock,
-} from "../../../friend/friendSlice.js";
+} from "../../friend/friendSlice.js";
 
 const initSocialEvents = (initData) => {
   const { socketInstance, dispatch, callbackHandlers } = initData;

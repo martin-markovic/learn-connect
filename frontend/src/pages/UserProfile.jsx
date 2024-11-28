@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getUserList, getFriendList } from "../features/friend/friendSlice.js";
-import initSocialEvents from "../features/socket/controller/social/initSocial.js";
+import initSocialEvents from "../features/socket/controller/initSocial.js";
 import emitEvent from "../features/socket/socket.emitEvent.js";
 
 function UserProfile({ socketInstance }) {
