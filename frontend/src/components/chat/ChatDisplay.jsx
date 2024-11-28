@@ -1,11 +1,11 @@
 import { useState, useRef, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import emitRoomEvent from "../../features/socket/controller/roomHandlers.js";
 import {
   addMessage,
   getMessages,
   removeMessages,
 } from "../../features/chat/chatSlice.js";
+import emitEvent from "../../features/socket/socket.emitEvent.js";
 
 const ChatDisplay = ({ socketInstance, selectedChat }) => {
   const [input, setInput] = useState("");
@@ -78,24 +78,24 @@ const ChatDisplay = ({ socketInstance, selectedChat }) => {
         roomData: messageData,
       };
 
-      const response = await emitRoomEvent(clientData);
+      const response = await emitEvent(clientData);
 
       if (response.success) {
         setInput("");
 
-        const notificationData = {
+        const eventData = {
           sender: user?._id,
           receiver: selectedChat,
           eventName: "new message",
         };
 
-        const userData = {
+        const clientData = {
           socketInstance,
           eventName: "new notification",
-          roomData: notificationData,
+          roomData: eventData,
         };
 
-        await emitRoomEvent(userData);
+        await emitEvent(clientData);
       }
     } catch (error) {
       console.error("Error:", error.message);
@@ -105,7 +105,7 @@ const ChatDisplay = ({ socketInstance, selectedChat }) => {
   const handleKeyPress = async () => {
     try {
       if (selectedChat && socketInstance) {
-        const roomData = {
+        const eventData = {
           senderId: user?._id,
           receiver: selectedChat,
           senderName: user?.name,
@@ -114,10 +114,12 @@ const ChatDisplay = ({ socketInstance, selectedChat }) => {
         const clientData = {
           socketInstance,
           eventName: "user typing",
-          roomData,
+          eventData,
         };
 
-        const response = await emitRoomEvent(clientData);
+        const response = await emitEvent(clientData);
+
+        console.log("response: ", response);
 
         if (!response.success) {
           throw new Error("Failed to emit typing event");

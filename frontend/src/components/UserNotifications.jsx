@@ -2,10 +2,7 @@ import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { getNotifications } from "../features/notifications/notificationSlice.js";
 import handleNotificationSetup from "../features/notifications/handleNotifications.js";
-import {
-  emitMarkAllAsRead,
-  emitMarkAsRead,
-} from "../features/socket/controller/notificationHandlers.js";
+import emitEvent from "../features/socket/socket.emitEvent.js";
 
 function UserNotifications({ socketInstance }) {
   const [newsOpen, setNewsOpen] = useState(false);
@@ -31,22 +28,39 @@ function UserNotifications({ socketInstance }) {
 
   const handleMark = async (notificationId) => {
     try {
-      await emitMarkAsRead(socketInstance, notificationId);
+      if (!socketInstance) {
+        console.error("Please provide a valid socket instance");
+        return;
+      }
+
+      const clientData = {
+        socketInstance,
+        eventName: "mark as read",
+        roomData: { notificationId },
+      };
+
+      await emitEvent(clientData);
     } catch (error) {
       console.error(error.message);
     }
   };
 
-  const handleMarkAll = async () => {
+  const handleMarkAll = () => {
     try {
-      await emitMarkAllAsRead(socketInstance);
+      const clientData = {
+        socketInstance,
+        eventName: "mark all as read",
+        roomData: {},
+      };
+
+      emitEvent(clientData);
     } catch (error) {
-      console.error(error.message);
+      console.error("Error marking all notifications as read: ", error.message);
     }
   };
 
   return (
-    <>
+    <div className="content__scrollable-wrapper">
       <div>
         <span onClick={handleOpen}>Notifications</span>
         {userNotifications.length > 0 ? (
@@ -54,7 +68,7 @@ function UserNotifications({ socketInstance }) {
         ) : null}
         <button onClick={handleMarkAll}>Mark all as read</button>
       </div>
-      <div>
+      <div className="content__scrollable">
         {newsOpen ? (
           <ul>
             {userNotifications && userNotifications.length > 0 ? (
@@ -85,7 +99,7 @@ function UserNotifications({ socketInstance }) {
           </ul>
         ) : null}
       </div>
-    </>
+    </div>
   );
 }
 

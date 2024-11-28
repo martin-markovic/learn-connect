@@ -4,7 +4,7 @@ import {
   handleNewNotification,
 } from "./helpers/socket.notification.js";
 
-const handleNotificationEvents = (socket, io) => {
+const handleNotificationEvents = (socket, io, userSocketMap) => {
   socket.on("mark as read", async (data) => {
     const { notificationId } = data.roomData;
 
