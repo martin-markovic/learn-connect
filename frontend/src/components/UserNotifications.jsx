@@ -60,7 +60,7 @@ function UserNotifications({ socketInstance }) {
   };
 
   return (
-    <>
+    <div className="content__scrollable-wrapper">
       <div>
         <span onClick={handleOpen}>Notifications</span>
         {userNotifications.length > 0 ? (
@@ -68,7 +68,7 @@ function UserNotifications({ socketInstance }) {
         ) : null}
         <button onClick={handleMarkAll}>Mark all as read</button>
       </div>
-      <div>
+      <div className="content__scrollable">
         {newsOpen ? (
           <ul>
             {userNotifications && userNotifications.length > 0 ? (
@@ -99,7 +99,7 @@ function UserNotifications({ socketInstance }) {
           </ul>
         ) : null}
       </div>
-    </>
+    </div>
   );
 }
 
