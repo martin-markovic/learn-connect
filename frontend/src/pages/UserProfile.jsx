@@ -40,9 +40,7 @@ function UserProfile({ socketInstance }) {
   }, [userList, userId]);
 
   useEffect(() => {
-    const isFriend = friendList.find(
-      (item) => item.sender === userId || item.receiver === userId
-    )?.status;
+    const isFriend = friendList.find((item) => item.id === userId)?.status;
 
     setFriendshipStatus(isFriend || null);
   }, [friendList, userId]);
@@ -216,13 +214,12 @@ function UserProfile({ socketInstance }) {
         <>
           {friendshipStatus === "pending" &&
             userId ===
-              friendList.find((item) => item.receiver === userId)?.receiver && (
+              friendList.find((item) => item.id === userId)?.receiver && (
               <button disabled={true}>Request Sent</button>
             )}
 
           {friendshipStatus === "pending" &&
-            userId ===
-              friendList.find((item) => item.sender === userId)?.sender && (
+            userId === friendList.find((item) => item.id === userId) && (
               <div>
                 <button
                   type="button"
@@ -288,15 +285,6 @@ function UserProfile({ socketInstance }) {
           )}
         </>
       )}
-
-      <button
-        type="button"
-        onClick={() => {
-          console.log("friendList: ", friendList);
-        }}
-      >
-        Log friend list
-      </button>
     </div>
   );
 }
