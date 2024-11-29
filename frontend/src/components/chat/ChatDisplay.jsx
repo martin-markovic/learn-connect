@@ -16,14 +16,13 @@ const ChatDisplay = ({ socketInstance, selectedChat }) => {
   const dispatch = useDispatch();
 
   const { user } = useSelector((state) => state.auth);
-  const { userClassrooms } = useSelector((state) => state.classroom);
   const messages = useSelector((state) => state.chat.messages);
 
   useEffect(() => {
     if (user?._id) {
       dispatch(getMessages(user?._id));
     }
-  }, [dispatch, userClassrooms, user?._id]);
+  }, [dispatch, user?._id]);
 
   useEffect(() => {
     if (socketInstance) {
@@ -66,37 +65,36 @@ const ChatDisplay = ({ socketInstance, selectedChat }) => {
     }
 
     try {
-      const messageData = {
-        sender: user?._id,
-        receiver: selectedChat,
+      const eventData = {
+        senderId: user?._id,
+        receiverId: selectedChat?.id,
         text: input,
       };
 
       const clientData = {
         socketInstance,
         eventName: "send message",
-        roomData: messageData,
+        eventData,
       };
 
-      const response = await emitEvent(clientData);
+      emitEvent(clientData);
 
-      if (response.success) {
-        setInput("");
+      setInput("");
 
-        const eventData = {
-          sender: user?._id,
-          receiver: selectedChat,
-          eventName: "new message",
-        };
+      // const eventData = {
+      //   senderId: user?._id,
+      //   receiverId: selectedChat?.id,
+      //   eventName: "new message",
+      // };
 
-        const clientData = {
-          socketInstance,
-          eventName: "new notification",
-          roomData: eventData,
-        };
+      // const clientData = {
+      //   socketInstance,
+      //   eventName: "new notification",
+      //   eventData,
+      // };
 
-        await emitEvent(clientData);
-      }
+      // emitEvent(clientData);
+      // }
     } catch (error) {
       console.error("Error:", error.message);
     }
@@ -107,7 +105,7 @@ const ChatDisplay = ({ socketInstance, selectedChat }) => {
       if (selectedChat && socketInstance) {
         const eventData = {
           senderId: user?._id,
-          receiver: selectedChat,
+          receiverId: selectedChat?.id,
           senderName: user?.name,
         };
 
@@ -117,13 +115,7 @@ const ChatDisplay = ({ socketInstance, selectedChat }) => {
           eventData,
         };
 
-        const response = await emitEvent(clientData);
-
-        console.log("response: ", response);
-
-        if (!response.success) {
-          throw new Error("Failed to emit typing event");
-        }
+        emitEvent(clientData);
       } else {
         console.error(
           "Please select a chat and provide valid socket instance."
@@ -140,8 +132,7 @@ const ChatDisplay = ({ socketInstance, selectedChat }) => {
         const messageIds = messages[selectedChat].map((message) => message._id);
 
         if (messageIds.length === 0 || !messageIds) {
-          console.error("Chat history is already empty");
-          return;
+          throw new Error("Chat history is already empty");
         }
 
         const chatData = { selectedChat, messageIds };
