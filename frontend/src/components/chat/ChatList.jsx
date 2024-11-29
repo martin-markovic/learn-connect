@@ -12,91 +12,58 @@ function ChatList({ selectedChat, setSelectedChat }) {
 
   const dispatch = useDispatch();
 
-  const handleOpen = () => {
-    if (userClassrooms.length > 0) {
-      const roomNames = userClassrooms.map((classroom) => classroom.name);
-
-      const roomData = {
-        roomNames,
-      };
-
-      const clientData = {
-        socketInstance,
-        roomData,
-        eventName: "join room",
-      };
-
-      emitRoomEvent(clientData);
-    }
-
-    setListOpen(!listOpen);
-  };
-
-  const handleClose = () => {
-    if (userClassrooms.length > 0) {
-      const roomNames = userClassrooms.map((classroom) => classroom.name);
-
-      console.log("handleClose room data: ", { roomNames });
-
-      const roomData = {
-        roomNames,
-      };
-
-      const clientData = {
-        socketInstance,
-        eventName: "leave room",
-        roomData,
-      };
-
-      emitRoomEvent(clientData);
-    }
-
-    setListOpen(!listOpen);
-  };
-
   const handleSelect = (receiver) => {
     setSelectedChat(receiver);
   };
 
   useEffect(() => {
-    dispatch(getUserClassrooms());
+    dispatch(getFriendList());
   }, [dispatch]);
 
   return (
     <div>
-      {!listOpen ? (
-        <button onClick={handleOpen}>Open</button>
-      ) : (
+      <>
+        <button
+          onClick={() => {
+            setListOpen(!listOpen);
+            if (listOpen) {
+              setSelectedChat(null);
+            }
+          }}
+        >
+          {listOpen ? "Close" : "Open"}
+        </button>
+      </>
+      {listOpen && (
         <div>
-          <button onClick={handleClose}>Close</button>
           {isError ? (
             <p>
-              An error occurred while fetching your classrooms. Please try again
-              later.
+              An error occurred while fetching your friend list. Please try
+              again later.
             </p>
-          ) : userClassrooms && userClassrooms.length > 0 ? (
+          ) : friendList && friendList.length > 0 ? (
             <div>
-              <h3>Your Classrooms:</h3>
+              <h3>Your Friends:</h3>
               <ul>
-                {userClassrooms.map((classroom) => (
-                  <li
-                    key={`chat-${classroom?._id}`}
-                    style={{
-                      cursor: "pointer",
-                      fontWeight:
-                        classroom === selectedChat ? "bold" : "normal",
-                    }}
-                    onClick={() => handleSelect(classroom.name)}
-                  >
-                    {classroom.name || "Unnamed Classroom"}
-                  </li>
-                ))}
+                {friendList.map((friend) => {
+                  return (
+                    <li
+                      key={`chat-${friend?._id}`}
+                      style={{
+                        cursor: "pointer",
+                        fontWeight:
+                          friend?.name === selectedChat ? "bold" : "normal",
+                      }}
+                      onClick={() => handleSelect(friend)}
+                    >
+                      {friend?.name || "Unnamed friend"}
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           ) : (
-            !isLoading && (
-              <p>You are not currently enrolled in any classroom.</p>
-            )
+            !isLoading && <p>There are no online friends.</p>
           )}
         </div>
       )}
