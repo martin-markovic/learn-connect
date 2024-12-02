@@ -16,21 +16,19 @@ const ChatDisplay = ({ socketInstance, selectedChat }) => {
   const dispatch = useDispatch();
 
   const { user } = useSelector((state) => state.auth);
-  const { userClassrooms } = useSelector((state) => state.classroom);
-  const messages = useSelector((state) => state.chat.messages);
+  const chat = useSelector((state) => state.chat.chat);
 
   useEffect(() => {
     if (user?._id) {
       dispatch(getMessages(user?._id));
     }
-  }, [dispatch, userClassrooms, user?._id]);
+  }, [dispatch, user?._id]);
 
   useEffect(() => {
     if (socketInstance) {
       socketInstance.on("new message", (data) => {
-        const messageData = data;
-
-        dispatch(addMessage(messageData));
+        console.log("new message data: ", data);
+        dispatch(addMessage(data));
 
         if (chatEndRef.current) {
           chatEndRef.current.scrollIntoView({ behavior: "smooth" });
@@ -66,37 +64,37 @@ const ChatDisplay = ({ socketInstance, selectedChat }) => {
     }
 
     try {
-      const messageData = {
-        sender: user?._id,
-        receiver: selectedChat,
+      const eventData = {
+        senderId: user?._id,
+        receiverId: selectedChat?.id,
+        senderName: user?.name,
         text: input,
       };
 
       const clientData = {
         socketInstance,
         eventName: "send message",
-        roomData: messageData,
+        eventData,
       };
 
-      const response = await emitEvent(clientData);
+      emitEvent(clientData);
 
-      if (response.success) {
-        setInput("");
+      setInput("");
 
-        const eventData = {
-          sender: user?._id,
-          receiver: selectedChat,
-          eventName: "new message",
-        };
+      // const eventData = {
+      //   senderId: user?._id,
+      //   receiverId: selectedChat?.id,
+      //   eventName: "new message",
+      // };
 
-        const clientData = {
-          socketInstance,
-          eventName: "new notification",
-          roomData: eventData,
-        };
+      // const clientData = {
+      //   socketInstance,
+      //   eventName: "new notification",
+      //   eventData,
+      // };
 
-        await emitEvent(clientData);
-      }
+      // emitEvent(clientData);
+      // }
     } catch (error) {
       console.error("Error:", error.message);
     }
@@ -107,7 +105,7 @@ const ChatDisplay = ({ socketInstance, selectedChat }) => {
       if (selectedChat && socketInstance) {
         const eventData = {
           senderId: user?._id,
-          receiver: selectedChat,
+          receiverId: selectedChat?.id,
           senderName: user?.name,
         };
 
@@ -117,13 +115,7 @@ const ChatDisplay = ({ socketInstance, selectedChat }) => {
           eventData,
         };
 
-        const response = await emitEvent(clientData);
-
-        console.log("response: ", response);
-
-        if (!response.success) {
-          throw new Error("Failed to emit typing event");
-        }
+        emitEvent(clientData);
       } else {
         console.error(
           "Please select a chat and provide valid socket instance."
@@ -137,11 +129,10 @@ const ChatDisplay = ({ socketInstance, selectedChat }) => {
   const handleRemove = () => {
     if (selectedChat) {
       try {
-        const messageIds = messages[selectedChat].map((message) => message._id);
+        const messageIds = chat[selectedChat].map((message) => message._id);
 
         if (messageIds.length === 0 || !messageIds) {
-          console.error("Chat history is already empty");
-          return;
+          throw new Error("Chat history is already empty");
         }
 
         const chatData = { selectedChat, messageIds };
@@ -161,38 +152,38 @@ const ChatDisplay = ({ socketInstance, selectedChat }) => {
   return !selectedChat ? (
     <div></div>
   ) : (
-    <div className="conversation-display">
-      <h3>Chat with {selectedChat}</h3>
+    <div className="content__scrollable-wrapper">
+      <h3>Chat with {selectedChat.name}</h3>
 
-      <div className="conversation-display__chat">
-        {Object.keys(messages).map((friend) => (
-          <ul key={friend}>
-            {messages[friend] && messages[friend].length > 0 ? (
-              messages[friend].map((message) => (
-                <li key={message._id} style={{ marginRight: "1em" }}>
-                  {message.sender.id === user?._id ? null : (
-                    <span>
-                      <strong>{message.sender.name}</strong>
-                      <span>:</span>
-                    </span>
-                  )}
-                  <p
+      <div className="content__scrollable">
+        {Object.keys(chat || {}).map((chatId) => {
+          return (
+            <ul key={chatId}>
+              {chat[chatId] && chat[chatId]?.length > 0 ? (
+                chat[chatId]?.map((message) => (
+                  <li
+                    key={message?._id}
                     style={{
+                      marginRight: "1em",
                       textAlign:
-                        message.sender.id === user?._id ? "right" : "left",
+                        message.sender?._id === user?._id ? "right" : "left",
                     }}
                   >
-                    {message.text}
-                  </p>
-
-                  {message.status && <span>{message.status}</span>}
-                </li>
-              ))
-            ) : (
-              <div>No messages yet.</div>
-            )}
-          </ul>
-        ))}
+                    {message.sender?._id !== user?._id && (
+                      <span>
+                        <strong>{message?.sender?.name}</strong>:{" "}
+                      </span>
+                    )}
+                    <p>{message.text}</p>
+                    <span>{message.isRead ? "read" : "sent"}</span>
+                  </li>
+                ))
+              ) : (
+                <div>No messages yet.</div>
+              )}
+            </ul>
+          );
+        })}
         <div ref={chatEndRef} />
       </div>
       <button onClick={handleRemove}>Delete Conversation</button>

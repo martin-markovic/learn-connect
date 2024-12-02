@@ -1,8 +1,15 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { getUserList, getFriendList } from "../features/friend/friendSlice.js";
-import initSocialEvents from "../features/socket/controller/initSocial.js";
+import {
+  getUserList,
+  getFriendList,
+  newFriendRequest,
+  handleDecline,
+  handleAccept,
+  handleRemove,
+  handleBlock,
+} from "../features/friend/friendSlice.js";
 import emitEvent from "../features/socket/socket.emitEvent.js";
 
 function UserProfile({ socketInstance }) {
@@ -33,25 +40,54 @@ function UserProfile({ socketInstance }) {
   }, [userList, userId]);
 
   useEffect(() => {
-    const isFriend = friendList.find(
-      (item) => item.sender === userId || item.receiver === userId
-    )?.status;
+    const isFriend = friendList.find((item) => item.id === userId)?.status;
 
     setFriendshipStatus(isFriend || null);
   }, [friendList, userId]);
 
   useEffect(() => {
-    if (socketInstance && dispatch) {
-      const initData = {
-        socketInstance,
-        dispatch,
-        callbackHandlers: [setUserInfo, setFriendshipStatus],
-      };
+    if (socketInstance) {
+      socketInstance.on("friend request sent", (data) => {
+        dispatch(newFriendRequest(data));
+      });
 
-      const cleanup = initSocialEvents(initData);
+      socketInstance.on("new friend request", (data) => {
+        dispatch(newFriendRequest(data));
+      });
 
-      return cleanup();
+      socketInstance.on("friend request declined", (data) => {
+        dispatch(handleDecline(data));
+      });
+
+      socketInstance.on("friend request accepted", (data) => {
+        dispatch(handleAccept(data));
+      });
+
+      socketInstance.on("friend removed", (data) => {
+        dispatch(handleRemove(data));
+      });
+
+      socketInstance.on("user blocked", (data) => {
+        dispatch(handleBlock(data));
+
+        setUserInfo((prev) => (prev._id === data ? null : prev));
+        setFriendshipStatus("blocked");
+
+        dispatch(getUserList());
+        dispatch(getFriendList());
+      });
     }
+
+    return () => {
+      if (socketInstance) {
+        socketInstance.off("friend request sent");
+        socketInstance.off("new friend request");
+        socketInstance.off("friend request accepted");
+        socketInstance.off("friend request declined");
+        socketInstance.off("friend removed");
+        socketInstance.off("user blocked");
+      }
+    };
   }, [dispatch, socketInstance]);
 
   const handleSend = () => {
@@ -178,13 +214,12 @@ function UserProfile({ socketInstance }) {
         <>
           {friendshipStatus === "pending" &&
             userId ===
-              friendList.find((item) => item.receiver === userId)?.receiver && (
+              friendList.find((item) => item.id === userId)?.receiver && (
               <button disabled={true}>Request Sent</button>
             )}
 
           {friendshipStatus === "pending" &&
-            userId ===
-              friendList.find((item) => item.sender === userId)?.sender && (
+            userId === friendList.find((item) => item.id === userId) && (
               <div>
                 <button
                   type="button"
@@ -250,15 +285,6 @@ function UserProfile({ socketInstance }) {
           )}
         </>
       )}
-
-      <button
-        type="button"
-        onClick={() => {
-          console.log("friendList: ", friendList);
-        }}
-      >
-        Log friend list
-      </button>
     </div>
   );
 }

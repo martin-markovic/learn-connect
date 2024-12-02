@@ -12,11 +12,23 @@ export const getFriendList = async (req, res) => {
     const friendList = await Friend.find(
       {
         $or: [{ sender: userId }, { receiver: userId }],
+        status: { $ne: "blocked" },
       },
       "sender receiver status"
-    );
+    )
+      .populate("sender", "name")
+      .populate("receiver", "name");
 
-    return res.status(200).json(friendList || []);
+    const formattedFriendList = friendList.map((item) => {
+      const isSender = String(item.sender._id) === String(userId);
+      return {
+        id: isSender ? item.receiver._id : item.sender._id,
+        name: isSender ? item.receiver.name : item.sender.name,
+        status: item.status,
+      };
+    });
+
+    return res.status(200).json(formattedFriendList || []);
   } catch (error) {
     console.error("Error fetching friend list", error);
     return res.status(500).json({ message: "Server error" });
@@ -42,7 +54,9 @@ export const getUserList = async (req, res) => {
       String(rel.sender) === String(userId) ? rel.receiver : rel.sender
     );
 
-    const userList = await User.find({ _id: { $nin: blockedUserIds } });
+    const userList = await User.find({ _id: { $nin: blockedUserIds } }).select(
+      "name"
+    );
 
     return res.status(200).json(userList);
   } catch (error) {

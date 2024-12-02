@@ -7,7 +7,7 @@ const initialState = {
   isSuccess: false,
   isError: false,
   errorMessage: "",
-  messages: {},
+  chat: {},
 };
 
 export const getMessages = createAsyncThunk(
@@ -60,12 +60,13 @@ const chatSlice = createSlice({
   reducers: {
     resetChat: (state) => initialState,
     addMessage: (state, action) => {
-      const classroom = action.payload.classroom;
-      if (!state.messages[classroom]) {
-        state.messages[classroom] = [];
+      const { chatId, ...messageData } = action.payload;
+
+      if (!state.chat[chatId]) {
+        state.chat[chatId] = [];
       }
 
-      state.messages[classroom].push(action.payload);
+      state.chat[chatId].push(messageData);
     },
   },
   extraReducers: (builder) => {
@@ -78,19 +79,14 @@ const chatSlice = createSlice({
         state.isLoading = false;
         state.isSuccess = true;
         state.errorMessage = "";
-
-        const messages = action.payload;
-        if (messages.length > 0) {
-          const classroomId = messages[0].classroom;
-
-          state.messages[classroomId] = messages;
-        }
+        action.payload.forEach(({ chatId, messages }) => {
+          state.chat = { ...state.chat, [chatId]: messages };
+        });
       })
       .addCase(getMessages.rejected, (state, action) => {
         state.isSuccess = false;
         state.isError = true;
-        state.errorMessage =
-          action.payload || "Failed to get classroom messages";
+        state.errorMessage = action.payload || "Failed to fetch user messages";
       })
       .addCase(removeMessages.pending, (state) => {
         state.isLoading = true;
@@ -100,9 +96,8 @@ const chatSlice = createSlice({
         state.isLoading = false;
         state.isSuccess = true;
         state.errorMessage = "";
-        const classroom = action.payload;
+        const chatId = action.payload;
 
-        state.messages[classroom] = [];
       })
       .addCase(removeMessages.rejected, (state, action) => {
         state.isSuccess = false;
