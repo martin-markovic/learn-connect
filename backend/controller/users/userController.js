@@ -52,7 +52,7 @@ export const loginUser = async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      res.status(400).json({ message: "Please add all fields" });
+      return res.status(400).json({ message: "Please add all fields" });
     }
 
     const user = await User.findOne({ email });
