@@ -98,6 +98,7 @@ const chatSlice = createSlice({
         state.errorMessage = "";
         const chatId = action.payload;
 
+        state.chat[chatId] = [];
       })
       .addCase(removeMessages.rejected, (state, action) => {
         state.isSuccess = false;
