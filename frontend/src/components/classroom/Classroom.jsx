@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
-  getAllClassrooms,
+  getClassroomList,
   joinClassroom,
   leaveClassroom,
 } from "../../features/classroom/classroomSlice.js";
@@ -13,17 +13,17 @@ function Classroom() {
   const dispatch = useDispatch();
 
   const {
-    allClassrooms = [],
+    classroomList = [],
     isLoading,
     isError,
     errorMessage,
   } = useSelector((state) => state.classroom);
 
   useEffect(() => {
-    if (allClassrooms.length === 0) {
-      dispatch(getAllClassrooms());
+    if (classroomList.length === 0) {
+      dispatch(getClassroomList());
     }
-  }, [dispatch, allClassrooms.length]);
+  }, [dispatch, classroomList.length]);
 
   useEffect(() => {
     if (isError && errorMessage) {
@@ -35,16 +35,16 @@ function Classroom() {
     setSelectedClassroom(e.target.value);
   };
 
-  const handleJoinClassroom = async () => {
+  const handleJoinClassroom = () => {
     try {
       if (selectedClassroom) {
-        const result = await dispatch(joinClassroom(selectedClassroom));
+        const result = dispatch(joinClassroom(selectedClassroom));
 
         if (result.error) {
           console.error("Error:", result.error.message);
         } else {
           toast.success("Successfully joined classroom:", result.payload);
-          dispatch(getAllClassrooms());
+          dispatch(getClassroomList());
           setSelectedClassroom("");
         }
       } else {
@@ -56,17 +56,17 @@ function Classroom() {
     }
   };
 
-  const handleLeaveClassroom = async () => {
+  const handleLeaveClassroom = () => {
     try {
       if (selectedClassroom) {
-        const result = await dispatch(leaveClassroom(selectedClassroom));
+        const result = dispatch(leaveClassroom(selectedClassroom));
 
         if (result.error) {
           console.error("Error:", result.error.message);
         } else {
           toast.success(`Successfully left the classroom: ${result.payload}`);
 
-          await dispatch(getAllClassrooms());
+          dispatch(getClassroomList());
         }
       } else {
         toast.error("Please select a classroom");
@@ -82,7 +82,7 @@ function Classroom() {
       <div>
         {isLoading ? (
           <p>Loading classrooms...</p>
-        ) : allClassrooms.length === 0 ? (
+        ) : classroomList.length === 0 ? (
           <p>No classrooms available.</p>
         ) : (
           <div>
@@ -93,7 +93,7 @@ function Classroom() {
               onChange={handleChange}
             >
               <option value="" disabled></option>
-              {allClassrooms.map((classroom) => (
+              {classroomList.map((classroom) => (
                 <option
                   key={`classroom-${classroom._id}`}
                   value={classroom._id}
