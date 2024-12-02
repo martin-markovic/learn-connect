@@ -16,7 +16,7 @@ const ChatDisplay = ({ socketInstance, selectedChat }) => {
   const dispatch = useDispatch();
 
   const { user } = useSelector((state) => state.auth);
-  const messages = useSelector((state) => state.chat.messages);
+  const chat = useSelector((state) => state.chat.chat);
 
   useEffect(() => {
     if (user?._id) {
@@ -27,9 +27,8 @@ const ChatDisplay = ({ socketInstance, selectedChat }) => {
   useEffect(() => {
     if (socketInstance) {
       socketInstance.on("new message", (data) => {
-        const messageData = data;
-
-        dispatch(addMessage(messageData));
+        console.log("new message data: ", data);
+        dispatch(addMessage(data));
 
         if (chatEndRef.current) {
           chatEndRef.current.scrollIntoView({ behavior: "smooth" });
@@ -68,6 +67,7 @@ const ChatDisplay = ({ socketInstance, selectedChat }) => {
       const eventData = {
         senderId: user?._id,
         receiverId: selectedChat?.id,
+        senderName: user?.name,
         text: input,
       };
 
@@ -129,7 +129,7 @@ const ChatDisplay = ({ socketInstance, selectedChat }) => {
   const handleRemove = () => {
     if (selectedChat) {
       try {
-        const messageIds = messages[selectedChat].map((message) => message._id);
+        const messageIds = chat[selectedChat].map((message) => message._id);
 
         if (messageIds.length === 0 || !messageIds) {
           throw new Error("Chat history is already empty");
@@ -152,38 +152,38 @@ const ChatDisplay = ({ socketInstance, selectedChat }) => {
   return !selectedChat ? (
     <div></div>
   ) : (
-    <div className="conversation-display">
-      <h3>Chat with {selectedChat}</h3>
+    <div className="content__scrollable-wrapper">
+      <h3>Chat with {selectedChat.name}</h3>
 
-      <div className="conversation-display__chat">
-        {Object.keys(messages).map((friend) => (
-          <ul key={friend}>
-            {messages[friend] && messages[friend].length > 0 ? (
-              messages[friend].map((message) => (
-                <li key={message._id} style={{ marginRight: "1em" }}>
-                  {message.sender.id === user?._id ? null : (
-                    <span>
-                      <strong>{message.sender.name}</strong>
-                      <span>:</span>
-                    </span>
-                  )}
-                  <p
+      <div className="content__scrollable">
+        {Object.keys(chat || {}).map((chatId) => {
+          return (
+            <ul key={chatId}>
+              {chat[chatId] && chat[chatId]?.length > 0 ? (
+                chat[chatId]?.map((message) => (
+                  <li
+                    key={message?._id}
                     style={{
+                      marginRight: "1em",
                       textAlign:
-                        message.sender.id === user?._id ? "right" : "left",
+                        message.sender?._id === user?._id ? "right" : "left",
                     }}
                   >
-                    {message.text}
-                  </p>
-
-                  {message.status && <span>{message.status}</span>}
-                </li>
-              ))
-            ) : (
-              <div>No messages yet.</div>
-            )}
-          </ul>
-        ))}
+                    {message.sender?._id !== user?._id && (
+                      <span>
+                        <strong>{message?.sender?.name}</strong>:{" "}
+                      </span>
+                    )}
+                    <p>{message.text}</p>
+                    <span>{message.isRead ? "read" : "sent"}</span>
+                  </li>
+                ))
+              ) : (
+                <div>No messages yet.</div>
+              )}
+            </ul>
+          );
+        })}
         <div ref={chatEndRef} />
       </div>
       <button onClick={handleRemove}>Delete Conversation</button>
