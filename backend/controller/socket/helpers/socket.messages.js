@@ -1,5 +1,7 @@
 import Chat from "../../../models/chat/chatModel.js";
 import Conversation from "../../../models/chat/conversationModel.js";
+import emitWithRetry from "../handleEmitEvent.js";
+import deleteEventForUser from "./socket.deleteEvent.js";
 
 export const sendMessage = async (socket, io, data, userSocketMap) => {
   try {
@@ -53,36 +55,105 @@ export const sendMessage = async (socket, io, data, userSocketMap) => {
         .populate("receiver", "name");
     }
 
-  }
+    const senderOnline = userSocketMap.get(senderId);
+    const receiverOnline = userSocketMap.get(receiverId);
 
+    if (senderOnline) {
+      socket.emit("new message", messagePayload, async (ack) => {
+        if (ack) {
+          deleteEventForUser(senderId, "new message", messagePayload);
+        } else {
+          console.log(
+            `New message event successfully emitted for user ${senderId}`
+          );
+        }
+      });
+    } else {
+      const eventData = {
+        eventName: "new message",
+        userId: senderId,
+        payload: messagePayload,
+      };
 
+      emitWithRetry(socket, eventData);
+    }
 
+    if (receiverOnline) {
+      io.to(receiverOnline).emit("new message", messagePayload, async (ack) => {
+        if (ack) {
+          await deleteEventForUser(receiverId, "new message", messagePayload);
+        } else {
+          console.log(
+            `New message event successfully emitted for user ${receiverId}`
+          );
+        }
+      });
+    } else {
+      const eventData = {
+        eventName: "new message",
+        userId: receiverId,
+        payload: messagePayload,
+      };
 
-  io.emit("message delivered", savedMessage);
-
-
-
+      emitWithRetry(io, eventData);
+    }
+  } catch (error) {
+    console.error("Error sending message: ", error.message);
   }
 };
 
-  const message = await Chat.findByIdAndUpdate(
-    messageId,
-    { status: "seen" },
-    { new: true }
-  );
-  if (!message) {
-    socket.emit("error", {
-      message: "Message not found",
+export const handleChatOpen = async (socket, io, data, userSocketMap) => {
+  try {
+    const { senderId, messageId } = data;
+
+    if (!senderId || !messageId) {
+      throw new Error("Invalid chat data");
+    }
+
+    const message = await Conversation.findByIdAndUpdate(
+      messageId,
+      { isRead: true },
+      { new: true }
+    );
+
+    if (!message) {
+      throw new Error("Message not found");
+    }
+
+    const targetedId = userSocketMap.get(receiverId);
+
+    if (!targetedId) {
+      throw new Error("User is currently offline");
+    }
+
+    socket.emit("conversation read", messageId);
+    io.to(targetedId).emit("conversation read", messageId);
+  } catch (error) {
+    console.log("Error emitting conversation read: ", error.message);
+    socket.emit("error", { message: error.message });
+  }
+};
+
+export const handleTyping = async (socket, io, data, userSocketMap) => {
+  try {
+    const { senderId, receiverId, senderName } = data;
+
+    if (!senderId || !receiverId || !senderName) {
+      throw new Error("Please provide valid client data");
+    }
+
+    const targetedId = userSocketMap.get(receiverId);
+
+    if (!targetedId) {
+      console.log("targetedId: ", targetedId);
+      throw new Error("User is currently offline");
+    }
+
+    io.to(targetedId).emit("chat activity", {
+      senderName,
     });
-
-    return;
-  }
-
-  socket.emit("message seen", messageId);
-};
-
-
-
-    return;
+  } catch (error) {
+    console.log("Error emitting chat activity", error.message);
+    socket.emit("error", { message: error.message });
   }
 };
