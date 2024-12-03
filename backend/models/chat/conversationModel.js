@@ -24,3 +24,7 @@ const conversationSchema = new mongoose.Schema({
     default: Date.now,
   },
 });
+
+const Conversation = mongoose.model("Conversation", conversationSchema);
+
+export default Conversation;

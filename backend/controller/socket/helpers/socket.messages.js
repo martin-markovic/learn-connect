@@ -1,80 +1,159 @@
 import Chat from "../../../models/chat/chatModel.js";
-import Classroom from "../../../models/classrooms/classroomModel.js";
+import Conversation from "../../../models/chat/conversationModel.js";
+import emitWithRetry from "../handleEmitEvent.js";
+import deleteEventForUser from "./socket.deleteEvent.js";
 
-export const sendMessage = async (socket, io, roomData) => {
-  const { sender, text, classroom } = roomData;
+export const sendMessage = async (socket, io, data, userSocketMap) => {
+  try {
+    const { senderId, receiverId, text } = data;
 
-  const userClassroom = await Classroom.findOne({ _id: classroom });
+    if (!senderId || !text || !receiverId) {
+      throw new Error("Please provide required message data");
+    }
 
-  if (!userClassroom) {
-    socket.emit("error", { message: "Classroom not found" });
-    return;
-  }
-
-  const isMember = userClassroom.students.includes(sender?.id);
-  if (!isMember) {
-    socket.emit("error", {
-      message: "You are not a member of this classroom",
+    const conversationFound = await Chat.findOne({
+      participants: { $all: [senderId, receiverId] },
     });
 
-    return;
+    let messagePayload;
+
+    if (!conversationFound) {
+      const newMessage = new Conversation({
+        sender: senderId,
+        receiver: receiverId,
+        text,
+      });
+
+      await newMessage.save();
+
+      const populatedMessage = await Conversation.findById(newMessage._id)
+        .populate("sender", "name _id")
+        .populate("receiver", "name _id");
+
+      const newChat = new Chat({
+        participants: [senderId, receiverId],
+        conversation: [newMessage._id],
+      });
+
+      await newChat.save();
+
+      messagePayload = populatedMessage;
+    } else {
+      const newMessage = new Conversation({
+        sender: senderId,
+        receiver: receiverId,
+        text,
+      });
+
+      await newMessage.save();
+      conversationFound.conversation.push(newMessage._id);
+
+      await conversationFound.save();
+
+      messagePayload = await Conversation.findById(newMessage._id)
+        .populate("sender", "name")
+        .populate("receiver", "name");
+    }
+
+    const senderOnline = userSocketMap.get(senderId);
+    const receiverOnline = userSocketMap.get(receiverId);
+
+    if (senderOnline) {
+      socket.emit("new message", messagePayload, async (ack) => {
+        if (ack) {
+          deleteEventForUser(senderId, "new message", messagePayload);
+        } else {
+          console.log(
+            `New message event successfully emitted for user ${senderId}`
+          );
+        }
+      });
+    } else {
+      const eventData = {
+        eventName: "new message",
+        userId: senderId,
+        payload: messagePayload,
+      };
+
+      emitWithRetry(socket, eventData);
+    }
+
+    if (receiverOnline) {
+      io.to(receiverOnline).emit("new message", messagePayload, async (ack) => {
+        if (ack) {
+          await deleteEventForUser(receiverId, "new message", messagePayload);
+        } else {
+          console.log(
+            `New message event successfully emitted for user ${receiverId}`
+          );
+        }
+      });
+    } else {
+      const eventData = {
+        eventName: "new message",
+        userId: receiverId,
+        payload: messagePayload,
+      };
+
+      emitWithRetry(io, eventData);
+    }
+  } catch (error) {
+    console.error("Error sending message: ", error.message);
   }
-
-  const newMessage = new Chat({
-    classroom,
-    sender,
-    text,
-    status: "delivered",
-  });
-
-  const savedMessage = await newMessage.save();
-
-  await Classroom.findByIdAndUpdate(
-    classroom,
-    { $push: { chats: savedMessage._id } },
-    { new: true }
-  );
-
-  // io.to(classroom).emit("message delivered", savedMessage);
-
-  io.emit("message delivered", savedMessage);
-
-  socket.broadcast.to(classroom).emit("message delivered", savedMessage);
 };
 
-export const handleChatOpen = async (socket, roomData) => {
-  const { classroomId, messageId } = roomData;
+export const handleChatOpen = async (socket, io, data, userSocketMap) => {
+  try {
+    const { senderId, messageId } = data;
 
-  if (!classroomId || !messageId) {
-    socket.emit("error", { message: "Missing classroomId or messageId" });
+    if (!senderId || !messageId) {
+      throw new Error("Invalid chat data");
+    }
+
+    const message = await Conversation.findByIdAndUpdate(
+      messageId,
+      { isRead: true },
+      { new: true }
+    );
+
+    if (!message) {
+      throw new Error("Message not found");
+    }
+
+    const targetedId = userSocketMap.get(receiverId);
+
+    if (!targetedId) {
+      throw new Error("User is currently offline");
+    }
+
+    socket.emit("conversation read", messageId);
+    io.to(targetedId).emit("conversation read", messageId);
+  } catch (error) {
+    console.log("Error emitting conversation read: ", error.message);
+    socket.emit("error", { message: error.message });
   }
+};
 
-  const message = await Chat.findByIdAndUpdate(
-    messageId,
-    { status: "seen" },
-    { new: true }
-  );
-  if (!message) {
-    socket.emit("error", {
-      message: "Message not found",
+export const handleTyping = async (socket, io, data, userSocketMap) => {
+  try {
+    const { senderId, receiverId, senderName } = data;
+
+    if (!senderId || !receiverId || !senderName) {
+      throw new Error("Please provide valid client data");
+    }
+
+    const targetedId = userSocketMap.get(receiverId);
+
+    if (!targetedId) {
+      console.log("targetedId: ", targetedId);
+      throw new Error("User is currently offline");
+    }
+
+    io.to(targetedId).emit("chat activity", {
+      senderName,
     });
-
-    return;
+  } catch (error) {
+    console.log("Error emitting chat activity", error.message);
+    socket.emit("error", { message: error.message });
   }
-
-  socket.emit("message seen", messageId);
-};
-
-export const handleTyping = async (socket, roomData) => {
-  const { roomNames, senderName } = roomData;
-
-  if (!roomNames || !senderName) {
-    socket.emit("error", { message: "Please provide valid client data" });
-
-    return;
-  }
-
-  socket.broadcast.to(roomNames).emit("chat activity", {
-    senderName,
-  });
 };

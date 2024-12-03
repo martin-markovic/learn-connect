@@ -1,9 +1,9 @@
 import axios from "axios";
 import { handleServiceError } from "../redux.errorHandler.js";
 
-const API_URL = "http://127.0.0.1:8000/api/chat/";
+const API_URL = "http://127.0.0.1:8000/api/chat";
 
-const getMessages = async (classroomId, token) => {
+const getMessages = async (_, token) => {
   try {
     const config = {
       headers: {
@@ -11,7 +11,7 @@ const getMessages = async (classroomId, token) => {
       },
     };
 
-    const response = await axios.get(`${API_URL}${classroomId}/chat`, config);
+    const response = await axios.get(API_URL, config);
 
     return response;
   } catch (error) {
@@ -20,22 +20,16 @@ const getMessages = async (classroomId, token) => {
   }
 };
 
-const removeMessages = async (chatData, token) => {
+const removeMessages = async (selectedChat, token) => {
   try {
-    const { classroomId, messageIds } = chatData;
-
     const config = {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-      data: { messageIds },
+      data: { selectedChat },
     };
 
-    const response = await axios.delete(
-      `${API_URL}${classroomId}/chat`,
-
-      config
-    );
+    const response = await axios.delete(API_URL, selectedChat, config);
 
     return response.data;
   } catch (error) {

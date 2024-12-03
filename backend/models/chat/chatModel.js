@@ -8,10 +8,12 @@ const chatSchema = new mongoose.Schema({
       required: true,
     },
   ],
-  conversation: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Conversation",
-  },
+  conversation: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Conversation",
+    },
+  ],
 });
 
 const Chat = mongoose.model("Chat", chatSchema);
