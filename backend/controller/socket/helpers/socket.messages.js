@@ -1,53 +1,69 @@
 import Chat from "../../../models/chat/chatModel.js";
-import Classroom from "../../../models/classrooms/classroomModel.js";
+import Conversation from "../../../models/chat/conversationModel.js";
 
-export const sendMessage = async (socket, io, roomData) => {
-  const { sender, text, classroom } = roomData;
+export const sendMessage = async (socket, io, data, userSocketMap) => {
+  try {
+    const { senderId, receiverId, text } = data;
 
-  const userClassroom = await Classroom.findOne({ _id: classroom });
+    if (!senderId || !text || !receiverId) {
+      throw new Error("Please provide required message data");
+    }
 
-  if (!userClassroom) {
-    socket.emit("error", { message: "Classroom not found" });
-    return;
-  }
-
-  const isMember = userClassroom.students.includes(sender?.id);
-  if (!isMember) {
-    socket.emit("error", {
-      message: "You are not a member of this classroom",
+    const conversationFound = await Chat.findOne({
+      participants: { $all: [senderId, receiverId] },
     });
 
-    return;
+    let messagePayload;
+
+    if (!conversationFound) {
+      const newMessage = new Conversation({
+        sender: senderId,
+        receiver: receiverId,
+        text,
+      });
+
+      await newMessage.save();
+
+      const populatedMessage = await Conversation.findById(newMessage._id)
+        .populate("sender", "name _id")
+        .populate("receiver", "name _id");
+
+      const newChat = new Chat({
+        participants: [senderId, receiverId],
+        conversation: [newMessage._id],
+      });
+
+      await newChat.save();
+
+      messagePayload = populatedMessage;
+    } else {
+      const newMessage = new Conversation({
+        sender: senderId,
+        receiver: receiverId,
+        text,
+      });
+
+      await newMessage.save();
+      conversationFound.conversation.push(newMessage._id);
+
+      await conversationFound.save();
+
+      messagePayload = await Conversation.findById(newMessage._id)
+        .populate("sender", "name")
+        .populate("receiver", "name");
+    }
+
   }
 
-  const newMessage = new Chat({
-    classroom,
-    sender,
-    text,
-    status: "delivered",
-  });
 
-  const savedMessage = await newMessage.save();
 
-  await Classroom.findByIdAndUpdate(
-    classroom,
-    { $push: { chats: savedMessage._id } },
-    { new: true }
-  );
-
-  // io.to(classroom).emit("message delivered", savedMessage);
 
   io.emit("message delivered", savedMessage);
 
-  socket.broadcast.to(classroom).emit("message delivered", savedMessage);
-};
 
-export const handleChatOpen = async (socket, roomData) => {
-  const { classroomId, messageId } = roomData;
 
-  if (!classroomId || !messageId) {
-    socket.emit("error", { message: "Missing classroomId or messageId" });
   }
+};
 
   const message = await Chat.findByIdAndUpdate(
     messageId,
@@ -65,16 +81,8 @@ export const handleChatOpen = async (socket, roomData) => {
   socket.emit("message seen", messageId);
 };
 
-export const handleTyping = async (socket, roomData) => {
-  const { roomNames, senderName } = roomData;
 
-  if (!roomNames || !senderName) {
-    socket.emit("error", { message: "Please provide valid client data" });
 
     return;
   }
-
-  socket.broadcast.to(roomNames).emit("chat activity", {
-    senderName,
-  });
 };
