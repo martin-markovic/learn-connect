@@ -1,29 +1,51 @@
 import mongoose from "mongoose";
 import Chat from "../../models/chat/chatModel.js";
-import Classroom from "../../models/classrooms/classroomModel.js";
 
 export const getMessages = async (req, res) => {
+  const userId = req.user._id;
+
+  if (!userId) {
+    return res.status(401).json({ message: "User not authorized" });
+  }
+
   try {
-    const { classroom } = req.params;
-    const userId = req.user._id;
+    const userChats = await Chat.find({ participants: userId })
+      .populate({
+        path: "conversation",
+        populate: {
+          path: "sender receiver",
+          select: "name",
+        },
+      })
+      .exec();
 
-    const userClassroom = await Classroom.findOne({ _id: classroom });
-
-    if (!userClassroom) {
-      return res.status(404).json({ message: "Classroom not found" });
+    if (!userChats || userChats.length === 0) {
+      return res.status(200).json([]);
     }
 
-    if (!userClassroom.students.includes(userId)) {
-      return res
-        .status(403)
-        .json({ message: "You are not a member of this classroom" });
-    }
+    const formattedChats = userChats.map((chat) => {
+      const formattedMessages = chat.conversation.map((message) => ({
+        _id: message._id,
+        text: message.text,
+        sender: {
+          id: message.sender?._id,
+          name: message.sender?.name,
+        },
+        receiver: {
+          id: message.receiver?._id,
+          name: message.receiver?.name,
+        },
+        timestamp: message.timestamp,
+        isRead: message.isRead,
+      }));
 
-    const classroomMessages = await Chat.find({ classroom: classroom })
-      .populate("sender")
-      .sort({ createdAt: -1 });
+      return {
+        chatId: chat._id.toString(),
+        messages: formattedMessages,
+      };
+    });
 
-    return res.status(200).json(classroomMessages);
+    return res.status(200).json(formattedChats);
   } catch (error) {
     return res.status(500).json({
       message: error.message,
@@ -32,7 +54,7 @@ export const getMessages = async (req, res) => {
 };
 
 export const removeMessages = async (req, res) => {
-  const classroomId = req.params.classroom;
+  const chatId = req.params.chatId;
   const { messageIds } = req.body;
 
   const session = await mongoose.startSession();
@@ -43,13 +65,13 @@ export const removeMessages = async (req, res) => {
       return res.status(400).json({ message: "Invalid message IDs provided." });
     }
 
-    await Classroom.updateOne(
-      { _id: classroomId },
+    await Chat.updateOne(
+      { _id: chatId },
       { $pull: { chats: { $in: messageIds } } },
       { session }
     );
 
-    console.log(`Removed references to messages from classroom ${classroomId}`);
+    console.log(`Removed references to messages from classroom ${chatId}`);
 
     console.log(`Deleted messages from chats collection: ${messageIds}`);
 
@@ -57,7 +79,7 @@ export const removeMessages = async (req, res) => {
 
     await Chat.deleteMany({ _id: { $in: messageIds } }, { session });
 
-    return res.status(200).json(classroomId);
+    return res.status(200).json(chatId);
   } catch (error) {
     await session.abortTrainsaction();
     console.error("Error removing message references:", error);
