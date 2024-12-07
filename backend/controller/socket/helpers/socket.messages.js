@@ -1,7 +1,7 @@
 import Chat from "../../../models/chat/chatModel.js";
 import Conversation from "../../../models/chat/conversationModel.js";
+import Event from "../../../models/socket/eventModel.js";
 import emitWithRetry from "../handleEmitEvent.js";
-import deleteEventForUser from "./socket.deleteEvent.js";
 
 export const sendMessage = async (socket, io, data, userSocketMap) => {
   try {
@@ -61,7 +61,11 @@ export const sendMessage = async (socket, io, data, userSocketMap) => {
     if (senderOnline) {
       socket.emit("new message", messagePayload, async (ack) => {
         if (ack) {
-          deleteEventForUser(senderId, "new message", messagePayload);
+          await Event.findOneAndDelete({
+            user: senderId,
+            eventName: "new message",
+            payload: messagePayload,
+          });
         } else {
           console.log(
             `New message event successfully emitted for user ${senderId}`
@@ -81,7 +85,11 @@ export const sendMessage = async (socket, io, data, userSocketMap) => {
     if (receiverOnline) {
       io.to(receiverOnline).emit("new message", messagePayload, async (ack) => {
         if (ack) {
-          await deleteEventForUser(receiverId, "new message", messagePayload);
+          await Event.findOneAndDelete({
+            user: receiverId,
+            eventName: "new message",
+            payload: messagePayload,
+          });
         } else {
           console.log(
             `New message event successfully emitted for user ${receiverId}`
