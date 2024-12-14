@@ -3,7 +3,7 @@ import Conversation from "../../../models/chat/conversationModel.js";
 import Event from "../../../models/socket/eventModel.js";
 import emitWithRetry from "../handleEmitEvent.js";
 
-export const sendMessage = async (socket, io, data, userSocketMap) => {
+export const sendMessage = async (context, data) => {
   try {
     const { senderId, receiverId, text } = data;
 
@@ -110,7 +110,7 @@ export const sendMessage = async (socket, io, data, userSocketMap) => {
   }
 };
 
-export const handleChatOpen = async (socket, io, data, userSocketMap) => {
+export const handleChatOpen = async (context, data) => {
   try {
     const { senderId, messageId } = data;
 
@@ -142,7 +142,7 @@ export const handleChatOpen = async (socket, io, data, userSocketMap) => {
   }
 };
 
-export const handleTyping = async (socket, io, data, userSocketMap) => {
+export const handleTyping = async (context, data) => {
   try {
     const { senderId, receiverId, senderName } = data;
 

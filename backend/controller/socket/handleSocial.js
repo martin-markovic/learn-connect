@@ -1,8 +1,8 @@
 import Friend from "../../models/users/friendModel.js";
 import User from "../../models/users/userModel.js";
 
-const handleSocialEvents = (socket, io, userSocketMap) => {
-  socket.on("send friend request", async (data) => {
+const handleSocialEvents = (context) => {
+  context.socket.on("send friend request", async (data) => {
     try {
       const { senderId, receiverId, currentStatus } = data;
 
@@ -44,7 +44,7 @@ const handleSocialEvents = (socket, io, userSocketMap) => {
     }
   });
 
-  socket.on("process friend request", async (data) => {
+  context.socket.on("process friend request", async (data) => {
     try {
       const { senderId, receiverId, userResponse } = data;
 
@@ -115,7 +115,7 @@ const handleSocialEvents = (socket, io, userSocketMap) => {
     }
   });
 
-  socket.on("remove friend", async (data) => {
+  context.socket.on("remove friend", async (data) => {
     try {
       const { senderId, receiverId } = data;
 
@@ -152,7 +152,7 @@ const handleSocialEvents = (socket, io, userSocketMap) => {
     }
   });
 
-  socket.on("block user", async (data) => {
+  context.socket.on("block user", async (data) => {
     try {
       const { senderId, receiverId } = data;
 
