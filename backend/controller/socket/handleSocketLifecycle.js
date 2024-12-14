@@ -1,12 +1,14 @@
+import {
+  setUserSocket,
+  removeUserSocket,
+  createSocketContext,
+} from "./helpers/socket.init.js";
 import handleMessages from "./messageController.js";
-
 import handleNotificationEvents from "./handleNotifications.js";
 import handleSocialEvents from "./handleSocial.js";
 import handleErrorEvents from "./helpers/socket.errorController.js";
 
 const handleSocketLifeCycle = (io) => {
-  const userSocketMap = new Map();
-
   io.on("connection", (socket) => {
     console.log(`New connection: Socket ID ${socket.id}`);
 
@@ -21,17 +23,17 @@ const handleSocketLifeCycle = (io) => {
       return;
     }
 
-    userSocketMap.set(userId, socket.id);
-    console.log(`Mapped userId ${userId} to socketId ${socket.id}`);
+    setUserSocket(userId, socket.id);
 
-    handleMessages(socket, io, userSocketMap);
-    handleNotificationEvents(socket, io, userSocketMap);
-    handleSocialEvents(socket, io, userSocketMap);
+    const context = createSocketContext(socket, io);
+
+    handleMessages(context);
+    handleNotificationEvents(context);
+    handleSocialEvents(context);
     handleErrorEvents(socket);
 
     socket.on("disconnect", () => {
-      userSocketMap.delete(userId);
-      console.log(`Removed mapping for userId ${userId}`);
+      removeUserSocket(userId);
     });
   });
 };

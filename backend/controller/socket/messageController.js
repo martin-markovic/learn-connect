@@ -3,25 +3,29 @@ import {
   handleChatOpen,
   handleTyping,
 } from "./helpers/socket.messages.js";
+import validateFriendship from "../../middleware/socialMiddleware.js";
 
-const handleMessages = (socket, io) => {
+const handleMessages = (socket, io, userSocketMap) => {
   socket.on("send message", async (data) => {
-    const roomData = data.roomData;
-
-    return await sendMessage(socket, io, roomData);
+    socket.data = data;
+    validateFriendship(socket, async () => {
+      await sendMessage(socket, io, data, userSocketMap);
+    });
   });
 
   socket.on("user typing", (data) => {
-    const roomData = data.roomData;
+    socket.data = data;
 
-
-    return handleTyping(socket, io, roomData);
+    validateFriendship(socket, async () => {
+      await handleTyping(socket, io, data, userSocketMap);
+    });
   });
 
   socket.on("open conversation", async (data) => {
-    const roomData = data.roomData;
-
-    return handleChatOpen(socket, io, roomData);
+    socket.data = data;
+    validateFriendship(socket, async () => {
+      await handleChatOpen(socket, io, data, userSocketMap);
+    });
   });
 };
 

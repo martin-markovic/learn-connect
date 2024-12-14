@@ -1,4 +1,4 @@
-import deleteEventForUser from "./helpers/socket.deleteEvent.js";
+import Event from "../../models/socket/eventModel.js";
 
 const MAX_RETRIES = 3;
 
@@ -20,13 +20,19 @@ const emitWithRetry = async (context, eventData, retries = 0) => {
     emitFunction(eventName, payload, async (ack) => {
       if (!ack && retries < MAX_RETRIES) {
         timeout = setTimeout(
+      if (ack) {
+        await Event.findOneAndDelete({
+          user: userId,
+          eventName,
+          payload,
+        });
+
+        return;
+      }
+
           () => emitWithRetry(context, eventData, retries + 1),
           2000
         );
-      } else if (ack) {
-        clearTimeout(timeout);
-
-        await deleteEventForUser(userId, eventName, payload);
       }
     });
   } catch (error) {

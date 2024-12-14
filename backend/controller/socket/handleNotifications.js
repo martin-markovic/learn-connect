@@ -4,8 +4,8 @@ import {
   handleNewNotification,
 } from "./helpers/socket.notification.js";
 
-const handleNotificationEvents = (socket, io, userSocketMap) => {
-  socket.on("mark as read", async (data) => {
+const handleNotificationEvents = (context) => {
+  context.socket.on("mark as read", async (data) => {
     const { notificationId } = data.roomData;
 
     const userId = socket.user?.id;
@@ -13,13 +13,13 @@ const handleNotificationEvents = (socket, io, userSocketMap) => {
     await markNotificationAsRead(socket, notificationId, userId);
   });
 
-  socket.on("mark all as read", async () => {
+  context.socket.on("mark all as read", async () => {
     const userId = socket.user?.id;
 
     await markAllNotificationsAsRead(socket, userId);
   });
 
-  socket.on("new notification", async (data) => {
+  context.socket.on("new notification", async (data) => {
     const { classroom, eventName } = data.roomData;
 
     const notificationData = {
