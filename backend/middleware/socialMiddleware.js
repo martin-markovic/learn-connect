@@ -1,7 +1,7 @@
 import Friend from "../models/users/friendModel.js";
 
-const validateFriendship = async (socket, eventHandler) => {
-  const { senderId, receiverId } = socket.data;
+const validateFriendship = async (data, eventHandler) => {
+  const { senderId, receiverId } = data;
 
   try {
     const isFriend = await Friend.findOne({
@@ -21,8 +21,7 @@ const validateFriendship = async (socket, eventHandler) => {
 
     eventHandler();
   } catch (error) {
-    console.log("Friendship validation failed: ", error.message);
-    socket.emit("error", { message: error.message });
+    console.log("Unable to verify friendship: ", error.message);
   }
 };
 
