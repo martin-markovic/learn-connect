@@ -1,55 +1,74 @@
 import Event from "../../models/socket/eventModel.js";
 import { getUserSocket } from "./helpers/socket.init.js";
 
-const handleEmitEvent = async (data) => {
+const handleAck = async (data, ack, ackResult) => {
   try {
-    const { emitHandler, userId, eventName, payload } = data;
+    const { userId, eventName, payload } = data;
 
-    console.log("data received: ", data);
-
-    if (!emitHandler || !userId || !eventName || !payload) {
+    if (!userId || !eventName || !payload) {
       throw new Error("Please provide valid event data");
     }
 
-    emitHandler(eventName, payload, async (ack) => {
-      if (ack) {
-        await Event.findOneAndDelete({
-          user: userId,
-          eventName,
-          payload,
-        });
-      } else {
-        const newEvent = new Event({
-          user: userId,
-          eventName,
-          payload,
-        });
+    if (ackResult === true) {
+      await Event.findOneAndDelete({
+        user: userId,
+        eventName,
+        payload,
+      });
+    } else {
+      const newEvent = new Event({
+        user: userId,
+        eventName,
+        payload,
+      });
+      await newEvent.save();
+    }
 
-        await newEvent.save();
-      }
+    if (ack && typeof ack === "function") {
+      ack(ackResult);
+    }
+  } catch (error) {
+    console.error("Error handling acknowledgment: ", error.message);
+  }
+};
+
+const handleEmitEvent = async (data, ack) => {
+  try {
+    const { emitHandler, targetId, eventName, payload } = data;
+
+    if (!emitHandler || !targetId || !eventName || !payload) {
+      throw new Error("Please provide valid event emission data");
+    }
+
+    emitHandler(targetId, eventName, payload, async (ackResult) => {
+      await handleAck(data, ack, ackResult);
     });
   } catch (error) {
     console.error("Error emitting event: ", error.message);
   }
 };
 
-const handleUserPresence = async (id, data) => {
+const handleUserPresence = async (id, data, ack) => {
   try {
-    console.log(`received id ${id} and data ${data}`);
     const userOnline = getUserSocket(id);
 
     if (!userOnline) {
       const newEvent = new Event({
-        user: userId,
-        eventName,
+        user: data?.userId,
+        eventName: data?.eventName,
         payload: data?.payload,
       });
 
       await newEvent.save();
+
+      if (ack && typeof ack === "function") {
+        ack(null);
+      }
+
       return;
     }
 
-    await handleEmitEvent(data);
+    await handleEmitEvent(data, ack);
   } catch (error) {
     console.error("Error handling user presence: ", error.message);
   }
