@@ -16,6 +16,26 @@ export const getUserSocket = (userId) => userSocketMap.get(userId);
 
 export const createSocketContext = (socket, io) => ({
   socket,
-  emitToSender: (event, data) => socket.emit(event, data),
-  emitToReceiver: (id, event, data) => io.to(id).emit(event, data),
+  emitEvent: (targetId, event, data, ack) => {
+    if (targetId === "sender") {
+      socket.emit(event, data, ack);
+    } else {
+      const targetSocketId = getUserSocket(data?.receiverId);
+      const targetSocket = io.sockets.sockets.get(targetSocketId);
+
+      if (targetSocket) {
+        targetSocket.emit(event, data, (ackResult) => {
+          if (ack && typeof ack === "function") {
+            ack(ackResult);
+          }
+        });
+      } else {
+        console.log(`Receiver with ID ${data.receiverId} is not connected.`);
+
+        if (ack && typeof ack === "function") {
+          ack(null);
+        }
+      }
+    }
+  },
 });

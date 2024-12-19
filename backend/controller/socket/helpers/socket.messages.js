@@ -1,10 +1,11 @@
 import Chat from "../../../models/chat/chatModel.js";
 import Conversation from "../../../models/chat/conversationModel.js";
-import Event from "../../../models/socket/eventModel.js";
-import emitWithRetry from "../handleEmitEvent.js";
+import handleUserPresence from "../handleUserPresence.js";
 
-export const sendMessage = async (context, data) => {
+export const sendMessage = async (context, data, ack) => {
   try {
+    let messagePayload;
+
     const { senderId, receiverId, text } = data;
 
     if (!senderId || !text || !receiverId) {
@@ -14,8 +15,6 @@ export const sendMessage = async (context, data) => {
     const conversationFound = await Chat.findOne({
       participants: { $all: [senderId, receiverId] },
     });
-
-    let messagePayload;
 
     if (!conversationFound) {
       const newMessage = new Conversation({
@@ -55,56 +54,29 @@ export const sendMessage = async (context, data) => {
         .populate("receiver", "name");
     }
 
-    const senderOnline = userSocketMap.get(senderId);
-    const receiverOnline = userSocketMap.get(receiverId);
-
-    if (senderOnline) {
-      socket.emit("new message", messagePayload, async (ack) => {
-        if (ack) {
-          await Event.findOneAndDelete({
-            user: senderId,
-            eventName: "new message",
-            payload: messagePayload,
-          });
-        } else {
-          console.log(
-            `New message event successfully emitted for user ${senderId}`
-          );
-        }
-      });
-    } else {
-      const eventData = {
-        eventName: "new message",
+    await handleUserPresence(
+      senderId,
+      {
+        targetId: "sender",
+        emitHandler: context.emitEvent,
         userId: senderId,
-        payload: messagePayload,
-      };
-
-      emitWithRetry(socket, eventData);
-    }
-
-    if (receiverOnline) {
-      io.to(receiverOnline).emit("new message", messagePayload, async (ack) => {
-        if (ack) {
-          await Event.findOneAndDelete({
-            user: receiverId,
-            eventName: "new message",
-            payload: messagePayload,
-          });
-        } else {
-          console.log(
-            `New message event successfully emitted for user ${receiverId}`
-          );
-        }
-      });
-    } else {
-      const eventData = {
         eventName: "new message",
-        userId: receiverId,
         payload: messagePayload,
-      };
+      },
+      ack
+    );
 
-      emitWithRetry(io, eventData);
-    }
+    await handleUserPresence(
+      receiverId,
+      {
+        targetId: "receiver",
+        emitHandler: context.emitEvent,
+        userId: senderId,
+        eventName: "new message",
+        payload: messagePayload,
+      },
+      ack
+    );
   } catch (error) {
     console.error("Error sending message: ", error.message);
   }
@@ -128,21 +100,26 @@ export const handleChatOpen = async (context, data) => {
       throw new Error("Message not found");
     }
 
-    const targetedId = userSocketMap.get(receiverId);
+    await handleUserPresence(senderId, {
+      emitHandler: context.emitToReceiver,
+      userId: senderId,
+      eventName: "conversation read",
+      payload: messageId,
+    });
 
-    if (!targetedId) {
-      throw new Error("User is currently offline");
-    }
-
-    socket.emit("conversation read", messageId);
-    io.to(targetedId).emit("conversation read", messageId);
+    await handleUserPresence(receiverId, {
+      emitHandler: context.emitToReceiver,
+      userId: receiverId,
+      eventName: "conversation read",
+      payload: messageId,
+    });
   } catch (error) {
     console.log("Error emitting conversation read: ", error.message);
-    socket.emit("error", { message: error.message });
+    context.socket.emit("error", { message: error.message });
   }
 };
 
-export const handleTyping = async (context, data) => {
+export const handleTyping = async (context, data, ack) => {
   try {
     const { senderId, receiverId, senderName } = data;
 
@@ -150,18 +127,17 @@ export const handleTyping = async (context, data) => {
       throw new Error("Please provide valid client data");
     }
 
-    const targetedId = userSocketMap.get(receiverId);
+    const eventData = {
+      targetId: "receiver",
+      emitHandler: context.emitEvent,
+      userId: receiverId,
+      eventName: "chat activity",
+      payload: data,
+    };
 
-    if (!targetedId) {
-      console.log("targetedId: ", targetedId);
-      throw new Error("User is currently offline");
-    }
-
-    io.to(targetedId).emit("chat activity", {
-      senderName,
-    });
+    await handleUserPresence(receiverId, eventData, ack);
   } catch (error) {
     console.log("Error emitting chat activity", error.message);
-    socket.emit("error", { message: error.message });
+    context.socket.emit("error", { message: error.message });
   }
 };
