@@ -5,26 +5,42 @@ import {
 } from "./helpers/socket.messages.js";
 import validateFriendship from "../../middleware/socialMiddleware.js";
 
-const handleMessages = (socket, io, userSocketMap) => {
-  socket.on("send message", async (data) => {
-    socket.data = data;
-    validateFriendship(socket, async () => {
-      await sendMessage(socket, io, data, userSocketMap);
-    });
+const handleMessages = (context) => {
+  context.socket.on("send message", (data, ack) => {
+    try {
+      validateFriendship(data, async () => {
+        await sendMessage(context, data, ack);
+      });
+
+      if (ack && typeof ack === "function") {
+        ack(true);
+      } else {
+        throw new Error("Please provide acknowledgement function");
+      }
+    } catch (error) {
+      console.error("Error emitting send message event: ", error.message);
+    }
   });
 
-  socket.on("user typing", (data) => {
-    socket.data = data;
+  context.socket.on("user typing", (data, ack) => {
+    try {
+      validateFriendship(data, async () => {
+        await handleTyping(context, data, ack);
+      });
 
-    validateFriendship(socket, async () => {
-      await handleTyping(socket, io, data, userSocketMap);
-    });
+      if (ack && typeof ack === "function") {
+        ack(true);
+      } else {
+        throw new Error("Please provide acknowledgement function");
+      }
+    } catch (error) {
+      console.error("Error emitting user typing event: ", error.message);
+    }
   });
 
-  socket.on("open conversation", async (data) => {
-    socket.data = data;
-    validateFriendship(socket, async () => {
-      await handleChatOpen(socket, io, data, userSocketMap);
+  context.socket.on("open conversation", async (data, ack) => {
+    validateFriendship(context, data, async () => {
+      await handleChatOpen(context, data);
     });
   });
 };

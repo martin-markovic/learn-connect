@@ -10,7 +10,9 @@ const emitEvent = (clientData) => {
 
   const { socketInstance, eventName, eventData } = clientData;
 
-  socketInstance.emit(eventName, eventData);
+  socketInstance.emit(eventName, eventData, (ackResult) => {
+    console.log("Ack received: ", ackResult);
+  });
 };
 
 export default emitEvent;

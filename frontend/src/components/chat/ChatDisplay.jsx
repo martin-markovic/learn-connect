@@ -26,16 +26,20 @@ const ChatDisplay = ({ socketInstance, selectedChat }) => {
 
   useEffect(() => {
     if (socketInstance) {
-      socketInstance.on("new message", (data) => {
+      socketInstance.on("new message", (data, ack) => {
         console.log("new message data: ", data);
         dispatch(addMessage(data));
 
         if (chatEndRef.current) {
           chatEndRef.current.scrollIntoView({ behavior: "smooth" });
         }
+
+        if (ack && typeof ack === "function") {
+          ack(true);
+        }
       });
 
-      socketInstance.on("chat activity", (data) => {
+      socketInstance.on("chat activity", (data, ack) => {
         const { senderName } = data;
 
         setActivity(`${senderName} is typing...`);
@@ -44,6 +48,10 @@ const ChatDisplay = ({ socketInstance, selectedChat }) => {
         activityTimer.current = setTimeout(() => {
           setActivity("");
         }, 3000);
+
+        if (ack && typeof ack === "function") {
+          ack(true);
+        }
       });
     }
 

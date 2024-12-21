@@ -18,11 +18,6 @@ const handleSocketLifeCycle = (io) => {
       return;
     }
 
-    if (!socket.user || !socket.user.id) {
-      console.log("User ID is undefined, aborting socket event handlers");
-      return;
-    }
-
     setUserSocket(userId, socket.id);
 
     const context = createSocketContext(socket, io);
@@ -33,6 +28,7 @@ const handleSocketLifeCycle = (io) => {
     handleErrorEvents(socket);
 
     socket.on("disconnect", () => {
+      console.log("User disconnected: ", userId);
       removeUserSocket(userId);
     });
   });
