@@ -166,12 +166,12 @@ const ChatDisplay = ({ socketInstance, selectedChat }) => {
                     style={{
                       marginRight: "1em",
                       textAlign:
-                        message.sender?._id === user?._id ? "right" : "left",
+                        message.senderId === user?._id ? "right" : "left",
                     }}
                   >
-                    {message.sender?._id !== user?._id && (
+                    {message.senderId !== user?._id && (
                       <span>
-                        <strong>{message?.sender?.name}</strong>:{" "}
+                        <strong>{message?.senderName}</strong>:{" "}
                       </span>
                     )}
                     <p>{message.text}</p>

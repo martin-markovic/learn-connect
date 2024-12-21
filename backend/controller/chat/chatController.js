@@ -27,14 +27,10 @@ export const getMessages = async (req, res) => {
       const formattedMessages = chat.conversation.map((message) => ({
         _id: message._id,
         text: message.text,
-        sender: {
-          id: message.sender?._id,
-          name: message.sender?.name,
-        },
-        receiver: {
-          id: message.receiver?._id,
-          name: message.receiver?.name,
-        },
+        senderId: message.sender?._id,
+        senderName: message.sender?.name,
+        receiverId: message.receiver?._id,
+        receiverName: message.receiver?.name,
         timestamp: message.timestamp,
         isRead: message.isRead,
       }));
