@@ -22,17 +22,11 @@ const handleMessages = (context) => {
     }
   });
 
-  context.socket.on("user typing", (data, ack) => {
+  context.socket.on("user typing", (data) => {
     try {
       validateFriendship(data, async () => {
-        await handleTyping(context, data, ack);
+        await handleTyping(context, data);
       });
-
-      if (ack && typeof ack === "function") {
-        ack(true);
-      } else {
-        throw new Error("Please provide acknowledgement function");
-      }
     } catch (error) {
       console.error("Error emitting user typing event: ", error.message);
     }

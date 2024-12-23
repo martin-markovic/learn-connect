@@ -28,7 +28,6 @@ const ChatDisplay = ({ socketInstance, selectedChat }) => {
   useEffect(() => {
     if (socketInstance) {
       socketInstance.on("new message", (data, ack) => {
-        console.log("new message data: ", data);
         dispatch(addMessage(data));
 
         if (chatEndRef.current) {
@@ -59,7 +58,7 @@ const ChatDisplay = ({ socketInstance, selectedChat }) => {
         }
       });
 
-      socketInstance.on("chat activity", (data, ack) => {
+      socketInstance.on("chat activity", (data) => {
         const { senderName } = data;
 
         setActivity(`${senderName} is typing...`);
@@ -68,10 +67,8 @@ const ChatDisplay = ({ socketInstance, selectedChat }) => {
         activityTimer.current = setTimeout(() => {
           setActivity("");
         }, 3000);
+      });
 
-        if (ack && typeof ack === "function") {
-          ack(true);
-        }
       socketInstance.on("messages read", (data) => {
 
         dispatch(
@@ -91,7 +88,7 @@ const ChatDisplay = ({ socketInstance, selectedChat }) => {
     };
   }, [socketInstance, dispatch, selectedChat, user?._id]);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
 
     if (!selectedChat && socketInstance && user?._id) {
@@ -136,7 +133,7 @@ const ChatDisplay = ({ socketInstance, selectedChat }) => {
     }
   };
 
-  const handleKeyPress = async () => {
+  const handleKeyPress = () => {
     try {
       if (selectedChat && socketInstance) {
         const eventData = {
