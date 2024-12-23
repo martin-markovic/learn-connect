@@ -7,7 +7,11 @@ const Chat = ({ socketInstance }) => {
 
   return (
     <div className="conversation">
-      <ChatList selectedChat={selectedChat} setSelectedChat={setSelectedChat} />
+      <ChatList
+        socketInstance={socketInstance}
+        selectedChat={selectedChat}
+        setSelectedChat={setSelectedChat}
+      />
       <ChatDisplay
         selectedChat={selectedChat}
         socketInstance={socketInstance}
