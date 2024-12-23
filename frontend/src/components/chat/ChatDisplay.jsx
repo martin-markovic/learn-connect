@@ -4,6 +4,7 @@ import {
   addMessage,
   getMessages,
   removeMessages,
+  updateMessageStatus,
 } from "../../features/chat/chatSlice.js";
 import emitEvent from "../../features/socket/socket.emitEvent.js";
 
@@ -37,6 +38,25 @@ const ChatDisplay = ({ socketInstance, selectedChat }) => {
         if (ack && typeof ack === "function") {
           ack(true);
         }
+
+        if (selectedChat && selectedChat.id === data.senderId) {
+          try {
+            const eventData = {
+              senderId: data?.senderId,
+              receiverId: data?.receiverId,
+            };
+
+            const clientData = {
+              socketInstance,
+              eventName: "status update",
+              eventData,
+            };
+
+            emitEvent(clientData);
+          } catch (error) {
+            console.error("Error updating message status: ", error.message);
+          }
+        }
       });
 
       socketInstance.on("chat activity", (data, ack) => {
@@ -52,6 +72,14 @@ const ChatDisplay = ({ socketInstance, selectedChat }) => {
         if (ack && typeof ack === "function") {
           ack(true);
         }
+      socketInstance.on("messages read", (data) => {
+
+        dispatch(
+          updateMessageStatus({
+            chatId: data?.chatId,
+            messageIds: data?.messageIds,
+          })
+        );
       });
     }
 
@@ -61,7 +89,7 @@ const ChatDisplay = ({ socketInstance, selectedChat }) => {
         socketInstance.off("new message");
       }
     };
-  }, [socketInstance, dispatch]);
+  }, [socketInstance, dispatch, selectedChat, user?._id]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
