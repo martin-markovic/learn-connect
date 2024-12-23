@@ -68,6 +68,18 @@ const chatSlice = createSlice({
 
       state.chat[chatId].push(messageData);
     },
+    updateMessageStatus: (state, action) => {
+      const { chatId, messageIds } = action.payload;
+
+      if (state.chat[chatId]) {
+        state.chat[chatId] = state.chat[chatId].map((message) => {
+          if (messageIds.includes(message._id)) {
+            return { ...message, isRead: true };
+          }
+          return message;
+        });
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -97,7 +109,6 @@ const chatSlice = createSlice({
         state.isSuccess = true;
         state.errorMessage = "";
         const chatId = action.payload;
-
         state.chat[chatId] = [];
       })
       .addCase(removeMessages.rejected, (state, action) => {
@@ -108,6 +119,6 @@ const chatSlice = createSlice({
   },
 });
 
-export const { resetChat, addMessage } = chatSlice.actions;
+export const { resetChat, addMessage, updateMessageStatus } = chatSlice.actions;
 
 export default chatSlice.reducer;
