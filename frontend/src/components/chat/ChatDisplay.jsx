@@ -4,6 +4,7 @@ import {
   addMessage,
   getMessages,
   removeMessages,
+  updateMessageStatus,
 } from "../../features/chat/chatSlice.js";
 import emitEvent from "../../features/socket/socket.emitEvent.js";
 
@@ -27,7 +28,6 @@ const ChatDisplay = ({ socketInstance, selectedChat }) => {
   useEffect(() => {
     if (socketInstance) {
       socketInstance.on("new message", (data, ack) => {
-        console.log("new message data: ", data);
         dispatch(addMessage(data));
 
         if (chatEndRef.current) {
@@ -37,9 +37,28 @@ const ChatDisplay = ({ socketInstance, selectedChat }) => {
         if (ack && typeof ack === "function") {
           ack(true);
         }
+
+        if (selectedChat && selectedChat.id === data.senderId) {
+          try {
+            const eventData = {
+              senderId: data?.senderId,
+              receiverId: data?.receiverId,
+            };
+
+            const clientData = {
+              socketInstance,
+              eventName: "status update",
+              eventData,
+            };
+
+            emitEvent(clientData);
+          } catch (error) {
+            console.error("Error updating message status: ", error.message);
+          }
+        }
       });
 
-      socketInstance.on("chat activity", (data, ack) => {
+      socketInstance.on("chat activity", (data) => {
         const { senderName } = data;
 
         setActivity(`${senderName} is typing...`);
@@ -48,10 +67,16 @@ const ChatDisplay = ({ socketInstance, selectedChat }) => {
         activityTimer.current = setTimeout(() => {
           setActivity("");
         }, 3000);
+      });
 
-        if (ack && typeof ack === "function") {
-          ack(true);
-        }
+      socketInstance.on("messages read", (data) => {
+
+        dispatch(
+          updateMessageStatus({
+            chatId: data?.chatId,
+            messageIds: data?.messageIds,
+          })
+        );
       });
     }
 
@@ -61,9 +86,9 @@ const ChatDisplay = ({ socketInstance, selectedChat }) => {
         socketInstance.off("new message");
       }
     };
-  }, [socketInstance, dispatch]);
+  }, [socketInstance, dispatch, selectedChat, user?._id]);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
 
     if (!selectedChat && socketInstance && user?._id) {
@@ -108,7 +133,7 @@ const ChatDisplay = ({ socketInstance, selectedChat }) => {
     }
   };
 
-  const handleKeyPress = async () => {
+  const handleKeyPress = () => {
     try {
       if (selectedChat && socketInstance) {
         const eventData = {
