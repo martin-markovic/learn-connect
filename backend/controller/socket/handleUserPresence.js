@@ -28,7 +28,6 @@ const handleAck = async (data, ack, ackResult) => {
       ack(ackResult);
     }
   } catch (error) {
-    console.error("Error handling acknowledgment: ", error.message);
   }
 };
 
