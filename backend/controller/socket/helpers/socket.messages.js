@@ -165,7 +165,7 @@ export const handleStatusUpdate = async (context, data) => {
   }
 };
 
-export const handleTyping = async (context, data, ack) => {
+export const handleTyping = async (context, data) => {
   try {
     const { senderId, receiverId, senderName } = data;
 
@@ -181,7 +181,7 @@ export const handleTyping = async (context, data, ack) => {
       payload: data,
     };
 
-    await handleUserPresence(receiverId, eventData, ack);
+    await handleUserPresence(receiverId, eventData);
   } catch (error) {
     console.log("Error emitting chat activity", error.message);
     context.socket.emit("error", { message: error.message });

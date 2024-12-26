@@ -43,6 +43,7 @@ const ChatDisplay = ({ socketInstance, selectedChat }) => {
             const eventData = {
               senderId: data?.senderId,
               receiverId: data?.receiverId,
+              messageId: data?._id,
             };
 
             const clientData = {
@@ -84,6 +85,7 @@ const ChatDisplay = ({ socketInstance, selectedChat }) => {
       if (socketInstance) {
         socketInstance.off("chat activity");
         socketInstance.off("new message");
+        socketInstance.off("messages read");
       }
     };
   }, [socketInstance, dispatch, selectedChat, user?._id]);
