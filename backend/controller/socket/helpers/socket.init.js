@@ -18,23 +18,25 @@ export const createSocketContext = (socket, io) => ({
   socket,
   emitEvent: (targetId, event, data, ack) => {
     if (targetId === "sender") {
-      socket.emit(event, data, ack);
+      socket.emit(
+        event,
+        data,
+        ack && typeof ack === "function" ? ack : undefined
+      );
     } else {
       const targetSocketId = getUserSocket(data?.receiverId);
       const targetSocket = io.sockets.sockets.get(targetSocketId);
 
       if (targetSocket) {
-        targetSocket.emit(event, data, (ackResult) => {
-          if (ack && typeof ack === "function") {
-            ack(ackResult);
-          }
-        });
-      } else {
+        targetSocket.emit(
+          event,
+          data,
+          ack && typeof ack === "function" ? ack : undefined
+        );
+      } else if (ack && typeof ack === "function") {
         console.log(`Receiver with ID ${data.receiverId} is not connected.`);
 
-        if (ack && typeof ack === "function") {
-          ack(null);
-        }
+        ack(null);
       }
     }
   },
