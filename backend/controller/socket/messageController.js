@@ -1,6 +1,6 @@
 import {
   sendMessage,
-  handleChatOpen,
+  handleStatusUpdate,
   handleTyping,
 } from "./helpers/socket.messages.js";
 import validateFriendship from "../../middleware/socialMiddleware.js";
@@ -32,10 +32,15 @@ const handleMessages = (context) => {
     }
   });
 
-  context.socket.on("open conversation", async (data, ack) => {
-    validateFriendship(context, data, async () => {
-      await handleChatOpen(context, data);
-    });
+  context.socket.on("status update", async (data) => {
+    try {
+      console.log("passing on data: ", data);
+      validateFriendship(data, async () => {
+        await handleStatusUpdate(context, data);
+      });
+    } catch (error) {
+      console.error("Error emitting user typing event: ", error.message);
+    }
   });
 };
 
