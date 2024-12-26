@@ -12,11 +12,11 @@ export const sendMessage = async (context, data, ack) => {
       throw new Error("Please provide required message data");
     }
 
-    const conversationFound = await Chat.findOne({
+    const chatFound = await Chat.findOne({
       participants: { $all: [senderId, receiverId] },
     });
 
-    if (!conversationFound) {
+    if (!chatFound) {
       const newMessage = new Conversation({
         sender: senderId,
         receiver: receiverId,
@@ -37,11 +37,14 @@ export const sendMessage = async (context, data, ack) => {
       await newChat.save();
 
       messagePayload = {
-        senderId: populatedMessage.sender._id,
+        chatId: newChat._id,
+        _id: populatedMessage?._id.toString(),
+        senderId: populatedMessage.sender._id.toString(),
         senderName: populatedMessage.sender.name,
-        receiverId: populatedMessage.receiver._id,
+        receiverId: populatedMessage.receiver._id.toString(),
         receiverName: populatedMessage.receiver.name,
         text: populatedMessage.text,
+        isRead: populatedMessage.isRead,
         timestamp: populatedMessage.createdAt,
       };
     } else {
@@ -52,20 +55,22 @@ export const sendMessage = async (context, data, ack) => {
       });
 
       await newMessage.save();
-      conversationFound.conversation.push(newMessage._id);
+      chatFound.conversation.push(newMessage._id);
 
-      await conversationFound.save();
+      await chatFound.save();
 
       const populatedMessage = await Conversation.findById(newMessage._id)
         .populate("sender", "name")
         .populate("receiver", "name");
 
       messagePayload = {
+        chatId: chatFound._id,
         senderId: populatedMessage.sender._id.toString(),
         senderName: populatedMessage.sender.name,
         receiverId: populatedMessage.receiver._id.toString(),
         receiverName: populatedMessage.receiver.name,
         text: populatedMessage.text,
+        isRead: populatedMessage.isRead,
         timestamp: populatedMessage.timestamp,
       };
     }
