@@ -27,16 +27,14 @@ const ChatDisplay = ({ socketInstance, selectedChat }) => {
 
   useEffect(() => {
     if (socketInstance) {
-      socketInstance.on("new message", (data, ack) => {
+      socketInstance.on("new message", (data) => {
         dispatch(addMessage(data));
 
         if (chatEndRef.current) {
           chatEndRef.current.scrollIntoView({ behavior: "smooth" });
         }
 
-        if (ack && typeof ack === "function") {
-          ack(true);
-        }
+        setActivity("");
 
         if (selectedChat && selectedChat.id === data.senderId) {
           try {
@@ -71,7 +69,6 @@ const ChatDisplay = ({ socketInstance, selectedChat }) => {
       });
 
       socketInstance.on("messages read", (data) => {
-
         dispatch(
           updateMessageStatus({
             chatId: data?.chatId,
@@ -115,6 +112,7 @@ const ChatDisplay = ({ socketInstance, selectedChat }) => {
       emitEvent(clientData);
 
       setInput("");
+      setActivity("");
 
       // const eventData = {
       //   senderId: user?._id,
@@ -184,11 +182,9 @@ const ChatDisplay = ({ socketInstance, selectedChat }) => {
     }
   };
 
-  return !selectedChat ? (
-    <div></div>
-  ) : (
+  return (
     <div className="content__scrollable-wrapper">
-      <h3>Chat with {selectedChat.name}</h3>
+      <h3>Chat with {selectedChat?.name}</h3>
 
       <div className="content__scrollable">
         {Object.keys(chat || {}).map((chatId) => {
