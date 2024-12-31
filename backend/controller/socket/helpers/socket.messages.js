@@ -1,8 +1,7 @@
 import Chat from "../../../models/chat/chatModel.js";
 import Conversation from "../../../models/chat/conversationModel.js";
-import handleUserPresence from "../handleUserPresence.js";
 
-export const sendMessage = async (context, data, ack) => {
+export const sendMessage = async (context, data) => {
   try {
     let messagePayload;
 
@@ -76,29 +75,9 @@ export const sendMessage = async (context, data, ack) => {
       };
     }
 
-    await handleUserPresence(
-      senderId,
-      {
-        targetId: "sender",
-        emitHandler: context.emitEvent,
-        userId: senderId,
-        eventName: "new message",
-        payload: messagePayload,
-      },
-      ack
-    );
+    context.emitEvent("sender", "new message", messagePayload);
 
-    await handleUserPresence(
-      receiverId,
-      {
-        targetId: "receiver",
-        emitHandler: context.emitEvent,
-        userId: receiverId,
-        eventName: "new message",
-        payload: messagePayload,
-      },
-      ack
-    );
+    context.emitEvent("receiver", "new message", messagePayload);
   } catch (error) {
     console.error("Error sending message: ", error.message);
   }
@@ -128,7 +107,6 @@ export const handleStatusUpdate = async (context, data) => {
       });
     }
 
-
     const messageIds = unreadMessages.map((msg) => msg._id.toString());
 
     await Conversation.updateMany(
@@ -136,36 +114,24 @@ export const handleStatusUpdate = async (context, data) => {
       { $set: { isRead: true } }
     );
 
-    await handleUserPresence(receiverId, {
-      targetId: messageId ? "sender" : "receiver",
-      emitHandler: context.emitEvent,
-      userId: receiverId.toString(),
-      eventName: "messages read",
-      payload: {
-        receiverId: receiverId.toString(),
-        chatId: chatFound?._id.toString(),
-        messageIds,
-      },
+    context.emitEvent(messageId ? "sender" : "receiver", "messages read", {
+      receiverId: receiverId.toString(),
+      chatId: chatFound?._id.toString(),
+      messageIds,
     });
 
-    await handleUserPresence(senderId, {
-      targetId: messageId ? "receiver" : "sender",
-      emitHandler: context.emitEvent,
-      userId: senderId.toString(),
-      eventName: "messages read",
-      payload: {
-        receiverId: senderId.toString(),
-        chatId: chatFound?._id.toString(),
-        messageIds,
-      },
+    context.emitEvent(messageId ? "receiver" : "sender", "messages read", {
+      receiverId: senderId.toString(),
+      chatId: chatFound?._id.toString(),
+      messageIds,
     });
   } catch (error) {
     console.log("Error emitting conversation read: ", error.message);
-    context.socket.emit("error", { message: error.message });
+    context.socket.emit("sender", "error", { message: error.message });
   }
 };
 
-export const handleTyping = async (context, data) => {
+export const handleTyping = (context, data) => {
   try {
     const { senderId, receiverId, senderName } = data;
 
@@ -173,15 +139,7 @@ export const handleTyping = async (context, data) => {
       throw new Error("Please provide valid client data");
     }
 
-    const eventData = {
-      targetId: "receiver",
-      emitHandler: context.emitEvent,
-      userId: receiverId,
-      eventName: "chat activity",
-      payload: data,
-    };
-
-    await handleUserPresence(receiverId, eventData);
+    context.emitEvent("receiver", "chat activity", data);
   } catch (error) {
     console.log("Error emitting chat activity", error.message);
     context.socket.emit("error", { message: error.message });

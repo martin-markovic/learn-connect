@@ -6,17 +6,11 @@ import {
 import validateFriendship from "../../middleware/socialMiddleware.js";
 
 const handleMessages = (context) => {
-  context.socket.on("send message", (data, ack) => {
+  context.socket.on("send message", (data) => {
     try {
       validateFriendship(data, async () => {
-        await sendMessage(context, data, ack);
+        await sendMessage(context, data);
       });
-
-      if (ack && typeof ack === "function") {
-        ack(true);
-      } else {
-        throw new Error("Please provide acknowledgement function");
-      }
     } catch (error) {
       console.error("Error emitting send message event: ", error.message);
     }
@@ -24,8 +18,8 @@ const handleMessages = (context) => {
 
   context.socket.on("user typing", (data) => {
     try {
-      validateFriendship(data, async () => {
-        await handleTyping(context, data);
+      validateFriendship(data, () => {
+        handleTyping(context, data);
       });
     } catch (error) {
       console.error("Error emitting user typing event: ", error.message);
@@ -34,7 +28,6 @@ const handleMessages = (context) => {
 
   context.socket.on("status update", async (data) => {
     try {
-      console.log("passing on data: ", data);
       validateFriendship(data, async () => {
         await handleStatusUpdate(context, data);
       });

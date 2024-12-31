@@ -12,10 +12,12 @@ const Chat = ({ socketInstance }) => {
         selectedChat={selectedChat}
         setSelectedChat={setSelectedChat}
       />
-      <ChatDisplay
-        selectedChat={selectedChat}
-        socketInstance={socketInstance}
-      />
+      {selectedChat && (
+        <ChatDisplay
+          selectedChat={selectedChat}
+          socketInstance={socketInstance}
+        />
+      )}
     </div>
   );
 };

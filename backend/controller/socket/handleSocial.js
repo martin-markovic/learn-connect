@@ -1,6 +1,5 @@
 import Friend from "../../models/users/friendModel.js";
 import User from "../../models/users/userModel.js";
-import handleUserPresence from "./handleUserPresence.js";
 
 const handleSocialEvents = (context) => {
   context.socket.on("send friend request", async (data) => {
@@ -30,24 +29,12 @@ const handleSocialEvents = (context) => {
 
       await newRequest.save();
 
-      await handleUserPresence(senderId, {
-        targetId: "sender",
-        emitHandler: context.emitEvent,
-        userId: senderId,
-        eventName: "friend request sent",
-        payload: newRequest,
-      });
+      context.emitEvent("sender", "friend request sent", newRequest);
 
-      await handleUserPresence(receiverId, {
-        targetId: "receiver",
-        emitHandler: context.emitEvent,
-        userId: receiverId,
-        eventName: "friend request sent",
-        payload: newRequest,
-      });
+      context.emitEvent("receiver", "friend request sent", newRequest);
     } catch (error) {
       console.error(error.message);
-      socket.emit("error", error.message);
+      context.socket.emit("error", error.message);
     }
   });
 
@@ -80,25 +67,11 @@ const handleSocialEvents = (context) => {
 
         await Friend.deleteOne({ _id: payloadId });
 
-        socket.emit("friend request declined", {
-          payloadId,
-        });
+        context.emitEvent("sender", "friend request declined", payloadId);
 
-        await handleUserPresence(senderId, {
-          targetId: "sender",
-          emitHandler: context.emitEvent,
-          userId: senderId,
-          eventName: "friend request declined",
-          payload: newRequest,
-        });
+        context.emitEvent("sender", "friend request declined", newRequest);
 
-        await handleUserPresence(receiverId, {
-          targetId: "receiver",
-          emitHandler: context.emitEvent,
-          userId: receiverId,
-          eventName: "friend request declined",
-          payload: newRequest,
-        });
+        context.emitEvent("receiver", "friend request declined", newRequest);
 
         return;
       }
@@ -113,21 +86,9 @@ const handleSocialEvents = (context) => {
         throw new Error("Friend request not found");
       }
 
-      await handleUserPresence(senderId, {
-        targetId: "sender",
-        emitHandler: context.emitEvent,
-        userId: senderId,
-        eventName: "friend request accepted",
-        payload: friendRequest,
-      });
+      context.emitEvent("sender", "friend request accepted", friendRequest);
 
-      await handleUserPresence(receiverId, {
-        targetId: "receiver",
-        emitHandler: context.emitEvent,
-        userId: receiverId,
-        eventName: "friend request accepted",
-        payload: friendRequest,
-      });
+      context.emitEvent("receiver", "friend request accepted", friendRequest);
     } catch (error) {
       console.error("Error processing friend request: ", error.message);
       socket.emit("error", { message: error.message });
@@ -155,24 +116,12 @@ const handleSocialEvents = (context) => {
 
       await Friend.deleteOne({ _id: foundFriend?._id });
 
-      await handleUserPresence(senderId, {
-        targetId: "sender",
-        emitHandler: context.emitEvent,
-        userId: senderId,
-        eventName: "friend request accepted",
-        payload: receiverId,
-      });
+      context.emitEvent("sender", "friend request accepted", receiverId);
 
-      await handleUserPresence(receiverId, {
-        targetId: "receiver",
-        emitHandler: context.emitEvent,
-        userId: receiverId,
-        eventName: "friend request accepted",
-        payload: senderId,
-      });
+      context.emitEvent("receiver", "friend request accepted", senderId);
     } catch (error) {
       console.log("Error removing friend: ", error.message);
-      socket.emit("error", { message: error.message });
+      context.emitEvent("sender", "error", error.message);
     }
   });
 
@@ -220,24 +169,12 @@ const handleSocialEvents = (context) => {
         await blockedUser.save();
       }
 
-      await handleUserPresence(senderId, {
-        targetId: "sender",
-        emitHandler: context.emitEvent,
-        userId: senderId,
-        eventName: "user blocked",
-        payload: payloadId,
-      });
+      context.emitEvent("sender", "user blocked", payloadId);
 
-      await handleUserPresence(receiverId, {
-        targetId: "receiver",
-        emitHandler: context.emitEvent,
-        userId: receiverId,
-        eventName: "user blocked",
-        payload: payloadId,
-      });
+      context.emitEvent("receiver", "user blocked", payloadId);
     } catch (error) {
       console.error("Error processing friend request: ", error.message);
-      socket.emit("error", { message: error.message });
+      context.emitEvent("sender", "error", error.message);
     }
   });
 };
