@@ -26,7 +26,7 @@ function UserNotifications({ socketInstance }) {
     setNewsOpen((prev) => !prev);
   };
 
-  const handleMark = async (notificationId) => {
+  const handleMark = (notificationId) => {
     try {
       if (!socketInstance) {
         console.error("Please provide a valid socket instance");
@@ -39,7 +39,7 @@ function UserNotifications({ socketInstance }) {
         roomData: { notificationId },
       };
 
-      await emitEvent(clientData);
+      emitEvent(clientData);
     } catch (error) {
       console.error(error.message);
     }

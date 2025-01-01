@@ -8,7 +8,6 @@ const initialState = {
   isError: false,
   errorMessage: "",
   userNotifications: [],
-  newNotifications: false,
 };
 
 export const getNotifications = createAsyncThunk(
