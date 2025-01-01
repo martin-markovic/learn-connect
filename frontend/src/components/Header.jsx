@@ -27,34 +27,29 @@ function Header() {
     <header>
       <ul>
         {user ? (
-          <>
+          <div className="nav-buttons">
             <li>
               <button onClick={handleLogout}>
                 <FaSignOutAlt /> Logout
               </button>
             </li>
-            {location.pathname === "/quizzes" ? (
-              <li>
-                <button
-                  onClick={() => {
-                    navigate("/");
-                  }}
-                >
-                  <FaHome /> Home
-                </button>
-              </li>
-            ) : (
-              <li>
-                <button
-                  onClick={() => {
-                    navigate("/quizzes");
-                  }}
-                >
-                  <FaClipboard /> Quizzes
-                </button>
-              </li>
-            )}
-          </>
+            <li>
+              <button
+                onClick={() => {
+                  navigate("/");
+                }}
+              >
+                <FaHome /> Home
+              </button>
+              <button
+                onClick={() => {
+                  navigate("/quizzes");
+                }}
+              >
+                <FaClipboard /> Quizzes
+              </button>
+            </li>
+          </div>
         ) : (
           <>
             {location.pathname === "/register" ? (
