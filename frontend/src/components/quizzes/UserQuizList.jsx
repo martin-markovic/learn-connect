@@ -7,7 +7,6 @@ import {
   resetQuizzes,
 } from "../../features/quizzes/quizSlice.js";
 import QuizForm from "./QuizForm.jsx";
-import { setNewNotifications } from "../../features/notifications/notificationSlice.js";
 
 function UserQuizList() {
   const [localQuizzes, setLocalQuizzes] = useState([]);

@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { getNotifications } from "../features/notifications/notificationSlice.js";
-import handleNotificationSetup from "../features/notifications/handleNotifications.js";
-import emitEvent from "../features/socket/socket.emitEvent.js";
+import socketEventManager from "../features/socket/socket.eventManager.js";
+import {
+  resetNotifications,
+  addNewNotification,
+  getNotifications,
+  markNotificationAsRead,
+} from "../features/notifications/notificationSlice.js";
 
-function UserNotifications({ socketInstance }) {
+function UserNotifications() {
   const [newsOpen, setNewsOpen] = useState(false);
   const { userNotifications } = useSelector((state) => state.notifications);
 
@@ -15,48 +19,50 @@ function UserNotifications({ socketInstance }) {
   }, [dispatch]);
 
   useEffect(() => {
-    if (socketInstance) {
-      return handleNotificationSetup(socketInstance, dispatch);
-    }
+    socketEventManager.subscribe("notification received", (data) => {
+      const newNotification = data;
 
-    return () => {};
-  }, [socketInstance, dispatch]);
+      if (!newNotification) {
+        console.error("New notification not found");
+        return;
+      }
+
+      dispatch(addNewNotification(data));
+    });
+
+    socketEventManager.subscribe("notification marked as read", (data) => {
+      const notificationId = data;
+
+      if (!notificationId) {
+        console.error("Notification id not found");
+        return;
+      }
+
+      dispatch(markNotificationAsRead(data));
+    });
+
+    socketEventManager.subscribe("marked all as read", () => {
+      dispatch(resetNotifications());
+    });
+
+    return () => {
+      dispatch(resetNotifications());
+      socketEventManager.unsubscribe("notification received");
+      socketEventManager.unsubscribe("notification marked as read");
+      socketEventManager.unsubscribe("marked all as read");
+    };
+  }, [dispatch]);
 
   const handleOpen = () => {
     setNewsOpen((prev) => !prev);
   };
 
   const handleMark = (notificationId) => {
-    try {
-      if (!socketInstance) {
-        console.error("Please provide a valid socket instance");
-        return;
-      }
-
-      const clientData = {
-        socketInstance,
-        eventName: "mark as read",
-        roomData: { notificationId },
-      };
-
-      emitEvent(clientData);
-    } catch (error) {
-      console.error(error.message);
-    }
+    socketEventManager.handleEmitEvent("mark as read", notificationId);
   };
 
   const handleMarkAll = () => {
-    try {
-      const clientData = {
-        socketInstance,
-        eventName: "mark all as read",
-        roomData: {},
-      };
-
-      emitEvent(clientData);
-    } catch (error) {
-      console.error("Error marking all notifications as read: ", error.message);
-    }
+    socketEventManager.handleEmitEvent("mark all as read", {});
   };
 
   return (

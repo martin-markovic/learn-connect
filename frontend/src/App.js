@@ -9,6 +9,7 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
+import socketEventManager from "./features/socket/socket.eventManager.js";
 
 import Dashboard from "./pages/Dashboard.jsx";
 import Login from "./pages/Login.jsx";
@@ -23,6 +24,12 @@ function App() {
   const user = useSelector((state) => state.auth.user);
   const token = user?.token;
   const socketInstance = useSocket(token);
+
+  useEffect(() => {
+    if (socketInstance) {
+      socketEventManager.setSocketInstance(socketInstance);
+    }
+  }, [socketInstance]);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -51,12 +58,6 @@ function App() {
     }
   }, [dispatch, user, token]);
 
-  useEffect(() => {
-    if (socketInstance) {
-      socketInstance.emit("initialize", { userId: user?._id });
-    }
-  }, [socketInstance, user]);
-
   return (
     <>
       <Router>
@@ -72,33 +73,15 @@ function App() {
           />
           <Route
             path="/"
-            element={
-              token ? (
-                <Dashboard socketInstance={socketInstance} />
-              ) : (
-                <Navigate to="/login" />
-              )
-            }
+            element={token ? <Dashboard /> : <Navigate to="/login" />}
           />
           <Route
             path="/profile/:userId"
-            element={
-              token ? (
-                <UserProfile socketInstance={socketInstance} />
-              ) : (
-                <Navigate to="/login" />
-              )
-            }
+            element={token ? <UserProfile /> : <Navigate to="/login" />}
           />
           <Route
             path="/quizzes"
-            element={
-              token ? (
-                <Quizzes socketInstance={socketInstance} />
-              ) : (
-                <Navigate to="/login" />
-              )
-            }
+            element={token ? <Quizzes /> : <Navigate to="/login" />}
           />
         </Routes>
       </Router>

@@ -1,14 +1,15 @@
 import { useState, useRef, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
+  resetChat,
   addMessage,
   getMessages,
   removeMessages,
   updateMessageStatus,
 } from "../../features/chat/chatSlice.js";
-import emitEvent from "../../features/socket/socket.emitEvent.js";
+import socketEventManager from "../../features/socket/socket.eventManager.js";
 
-const ChatDisplay = ({ socketInstance, selectedChat }) => {
+const ChatDisplay = ({ selectedChat }) => {
   const [input, setInput] = useState("");
   const [activity, setActivity] = useState("");
   const activityTimer = useRef(null);
@@ -26,137 +27,86 @@ const ChatDisplay = ({ socketInstance, selectedChat }) => {
   }, [dispatch, user?._id]);
 
   useEffect(() => {
-    if (socketInstance) {
-      socketInstance.on("new message", (data) => {
-        dispatch(addMessage(data));
+    socketEventManager.subscribe("new message", (data) => {
+      dispatch(addMessage(data));
 
-        if (chatEndRef.current) {
-          chatEndRef.current.scrollIntoView({ behavior: "smooth" });
-        }
+      if (chatEndRef.current) {
+        chatEndRef.current.scrollIntoView({ behavior: "smooth" });
+      }
 
+      setActivity("");
+
+      if (selectedChat && selectedChat.id === data.senderId) {
+        socketEventManager.handleEmitEvent("status update", {
+          senderId: data?.senderId,
+          receiverId: data?.receiverId,
+          messageId: data?._id,
+        });
+      }
+    });
+
+    socketEventManager.subscribe("chat activity", (data) => {
+      const { senderName } = data;
+
+      setActivity(`${senderName} is typing...`);
+
+      if (activityTimer.current) clearTimeout(activityTimer.current);
+      activityTimer.current = setTimeout(() => {
         setActivity("");
+      }, 3000);
+    });
 
-        if (selectedChat && selectedChat.id === data.senderId) {
-          try {
-            const eventData = {
-              senderId: data?.senderId,
-              receiverId: data?.receiverId,
-              messageId: data?._id,
-            };
-
-            const clientData = {
-              socketInstance,
-              eventName: "status update",
-              eventData,
-            };
-
-            emitEvent(clientData);
-          } catch (error) {
-            console.error("Error updating message status: ", error.message);
-          }
-        }
-      });
-
-      socketInstance.on("chat activity", (data) => {
-        const { senderName } = data;
-
-        setActivity(`${senderName} is typing...`);
-
-        if (activityTimer.current) clearTimeout(activityTimer.current);
-        activityTimer.current = setTimeout(() => {
-          setActivity("");
-        }, 3000);
-      });
-
-      socketInstance.on("messages read", (data) => {
-        dispatch(
-          updateMessageStatus({
-            chatId: data?.chatId,
-            messageIds: data?.messageIds,
-          })
-        );
-      });
-    }
+    socketEventManager.subscribe("messages read", (data) => {
+      dispatch(
+        updateMessageStatus({
+          chatId: data?.chatId,
+          messageIds: data?.messageIds,
+        })
+      );
+    });
 
     return () => {
-      if (socketInstance) {
-        socketInstance.off("chat activity");
-        socketInstance.off("new message");
-        socketInstance.off("messages read");
-      }
+      dispatch(resetChat());
+      socketEventManager.unsubscribe("chat activity");
+      socketEventManager.unsubscribe("new message");
+      socketEventManager.unsubscribe("messages read");
     };
-  }, [socketInstance, dispatch, selectedChat, user?._id]);
+  }, [dispatch, selectedChat, user?._id]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!selectedChat && socketInstance && user?._id) {
+    if (!selectedChat && user?._id) {
       console.error("Please select a chat and provide valid socket instance.");
       return;
     }
 
-    try {
-      const eventData = {
-        senderId: user?._id,
-        receiverId: selectedChat?.id,
-        senderName: user?.name,
-        text: input,
-      };
+    const eventData = {
+      senderId: user?._id,
+      receiverId: selectedChat?.id,
+      senderName: user?.name,
+      text: input,
+    };
 
-      const clientData = {
-        socketInstance,
-        eventName: "send message",
-        eventData,
-      };
+    socketEventManager.handleEmitEvent("send message", eventData);
 
-      emitEvent(clientData);
-
-      setInput("");
-      setActivity("");
-
-      // const eventData = {
-      //   senderId: user?._id,
-      //   receiverId: selectedChat?.id,
-      //   eventName: "new message",
-      // };
-
-      // const clientData = {
-      //   socketInstance,
-      //   eventName: "new notification",
-      //   eventData,
-      // };
-
-      // emitEvent(clientData);
-      // }
-    } catch (error) {
-      console.error("Error:", error.message);
-    }
+    setInput("");
+    setActivity("");
   };
 
   const handleKeyPress = () => {
-    try {
-      if (selectedChat && socketInstance) {
-        const eventData = {
-          senderId: user?._id,
-          receiverId: selectedChat?.id,
-          senderName: user?.name,
-        };
-
-        const clientData = {
-          socketInstance,
-          eventName: "user typing",
-          eventData,
-        };
-
-        emitEvent(clientData);
-      } else {
-        console.error(
-          "Please select a chat and provide valid socket instance."
-        );
-      }
-    } catch (error) {
-      console.error("Error:", error.message);
+    if (!selectedChat) {
+      console.error("Please select a chat and provide valid socket instance.");
+      return;
     }
+
+    const eventData = {
+      senderId: user?._id,
+      receiverId: selectedChat?.id,
+      senderName: user?.name,
+    };
+
+    socketEventManager.handleEmitEvent("user typing", eventData);
   };
 
   const handleRemove = () => {

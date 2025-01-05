@@ -52,31 +52,6 @@ export const getNotifications = createAsyncThunk(
   }
 );
 
-export const markAllAsRead = createAsyncThunk(
-  "notifications/markAllAsRead",
-  async (notificationId, thunkAPI) => {
-    try {
-      const token = JSON.parse(localStorage.getItem("user")).token;
-
-      if (!token) {
-        throw new Error("Token not found");
-      }
-
-      return await notificationService.markAllAsRead(notificationId, token);
-    } catch (error) {
-      const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-
-      handleSliceError(error, thunkAPI);
-      return thunkAPI.rejectWithValue(message);
-    }
-  }
-);
-
 const notificationSlice = createSlice({
   name: "notifications",
   initialState,

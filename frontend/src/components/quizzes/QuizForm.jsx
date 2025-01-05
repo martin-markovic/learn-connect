@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { createQuiz, updateQuiz } from "../../features/quizzes/quizSlice.js";
 import { toast } from "react-toastify";
-import { setNewNotifications } from "../../features/notifications/notificationSlice.js";
+import socketEventManager from "../../features/socket/socket.eventManager.js";
 
 const initialQuestionState = {
   question: "",
@@ -141,25 +141,22 @@ function QuizForm({ quiz, onClose }) {
       }
     }
 
-    try {
-      const quizData = {
-        title,
-        subject,
-        classroomId,
-        questions,
-        timeLimit,
-      };
+    const quizData = {
+      title,
+      subject,
+      classroomId,
+      questions,
+      timeLimit,
+    };
 
-      if (quizState.isEditing) {
-        dispatch(updateQuiz({ id: editQuizId, quizData }));
-      } else {
-        dispatch(createQuiz(quizData));
-      }
-
-      onClose();
-    } catch (error) {
-      toast.error(error.message);
+    if (quizState.isEditing) {
+      dispatch(updateQuiz({ id: editQuizId, quizData }));
+    } else {
+      dispatch(createQuiz(quizData));
+      socketEventManager.handleEmitEvent("quiz created", quizData);
     }
+
+    onClose();
   };
 
   const handleCancel = () => {

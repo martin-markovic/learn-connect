@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { getFriendList } from "../../features/friend/friendSlice.js";
-import emitEvent from "../../features/socket/socket.emitEvent.js";
+import socketEventManager from "../../features/socket/socket.eventManager.js";
 
-function ChatList({ socketInstance, selectedChat, setSelectedChat }) {
+function ChatList({ selectedChat, setSelectedChat }) {
   const [listOpen, setListOpen] = useState(false);
   const {
     isError,
@@ -17,22 +17,10 @@ function ChatList({ socketInstance, selectedChat, setSelectedChat }) {
   const handleSelect = (receiver) => {
     setSelectedChat(receiver);
 
-    try {
-      const eventData = {
-        senderId: user?._id,
-        receiverId: receiver.id,
-      };
-
-      const clientData = {
-        socketInstance,
-        eventName: "status update",
-        eventData,
-      };
-
-      emitEvent(clientData);
-    } catch (error) {
-      console.error("Error updating message status: ", error.message);
-    }
+    socketEventManager.handleEmitEvent("status update", {
+      senderId: user?._id,
+      receiverId: receiver.id,
+    });
   };
 
   useEffect(() => {
