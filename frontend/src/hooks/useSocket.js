@@ -24,26 +24,13 @@ const useSocket = (token) => {
       setSocketInstance(socket);
     });
 
-    socket.on("initialize", () => {
-      console.log("Socket successfully initialized");
-    });
-
-    socket.on("reconnection attempt", () => {
-      console.log("Attempting to reconnect");
-    });
-
-    socket.on("reconnected", () => {
-      console.log("Attempting to reconnect");
-    });
-
     socket.on("disconnect", () => {
       console.log("Socket disconnected");
+      setSocketInstance(null);
     });
 
     return () => {
       socket.off("connect");
-      socket.off("reconnection attempt");
-      socket.off("reconnected");
       socket.off("disconnect");
       socket.close();
     };
