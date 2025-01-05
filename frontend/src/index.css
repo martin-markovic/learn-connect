@@ -24,6 +24,18 @@ header {
   width: 80%;
 }
 
+header ul {
+  width: 100%;
+}
+
+.nav-buttons {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+}
+
 .container {
   margin-top: 5rem;
   display: inherit;

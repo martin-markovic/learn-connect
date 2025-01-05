@@ -7,7 +7,7 @@ function Newsfeed({ socketInstance }) {
       <FriendSearch />
       <div>News filter</div>
       <div className="conversation">
-        <UserNotifications />
+        <UserNotifications socketInstance={socketInstance} />
       </div>
     </div>
   );
