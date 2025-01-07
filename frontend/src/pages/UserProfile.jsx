@@ -10,9 +10,9 @@ import {
   handleRemove,
   handleBlock,
 } from "../features/friend/friendSlice.js";
-import emitEvent from "../features/socket/socket.emitEvent.js";
+import socketEventManager from "../features/socket/socket.eventManager.js";
 
-function UserProfile({ socketInstance }) {
+function UserProfile() {
   const [userInfo, setUserInfo] = useState(null);
   const [friendshipStatus, setFriendshipStatus] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -46,49 +46,59 @@ function UserProfile({ socketInstance }) {
   }, [friendList, userId]);
 
   useEffect(() => {
-    if (socketInstance) {
-      socketInstance.on("friend request sent", (data) => {
-        dispatch(newFriendRequest(data));
+    socketEventManager.subscribe("friend request sent", (data) => {
+      console.log("FRQ sent event data: ", data);
+      dispatch(newFriendRequest(data));
+    });
+
+    socketEventManager.subscribe("friend request received", (data) => {
+      console.log("FRQ received event data: ", data);
+      dispatch(newFriendRequest(data));
+
+      socketEventManager.handleEmitEvent("new notification", {
+        senderId: data?.sender,
+        receiverId: data?.receiver,
+        notificationName: "new friend request",
       });
 
-      socketInstance.on("new friend request", (data) => {
-        dispatch(newFriendRequest(data));
+    socketEventManager.subscribe("friend request declined", (data) => {
+      dispatch(handleDecline(data));
+    });
+
+    socketEventManager.subscribe("friend request accepted", (data) => {
+      dispatch(handleAccept(data));
+
+      socketEventManager.handleEmitEvent("new notification", {
+        senderId: data?.sender,
+        receiverId: data?.receiver,
+        notificationName: "friend request accepted",
       });
+    });
 
-      socketInstance.on("friend request declined", (data) => {
-        dispatch(handleDecline(data));
-      });
+    socketEventManager.subscribe("friend removed", (data) => {
+      dispatch(handleRemove(data));
+    });
 
-      socketInstance.on("friend request accepted", (data) => {
-        dispatch(handleAccept(data));
-      });
+    socketEventManager.subscribe("user blocked", (data) => {
+      dispatch(handleBlock(data));
 
-      socketInstance.on("friend removed", (data) => {
-        dispatch(handleRemove(data));
-      });
+      setUserInfo((prev) => (prev._id === data ? null : prev));
+      setFriendshipStatus("blocked");
 
-      socketInstance.on("user blocked", (data) => {
-        dispatch(handleBlock(data));
-
-        setUserInfo((prev) => (prev._id === data ? null : prev));
-        setFriendshipStatus("blocked");
-
-        dispatch(getUserList());
-        dispatch(getFriendList());
-      });
-    }
+      dispatch(getUserList());
+      dispatch(getFriendList());
+    });
 
     return () => {
-      if (socketInstance) {
-        socketInstance.off("friend request sent");
-        socketInstance.off("new friend request");
-        socketInstance.off("friend request accepted");
-        socketInstance.off("friend request declined");
-        socketInstance.off("friend removed");
-        socketInstance.off("user blocked");
-      }
+      socketEventManager.unsubscribe("friend request sent");
+      socketEventManager.unsubscribe("friend request received");
+      socketEventManager.unsubscribe("friend request accepted");
+      socketEventManager.unsubscribe("friend request declined");
+      socketEventManager.unsubscribe("friend removed");
+      socketEventManager.unsubscribe("user blocked");
+      dispatch(resetUserList());
     };
-  }, [dispatch, socketInstance]);
+  }, [dispatch]);
 
   const handleSend = () => {
     try {
@@ -109,19 +119,11 @@ function UserProfile({ socketInstance }) {
         throw new Error(errorString);
       }
 
-      const eventData = {
+      socketEventManager.handleEmitEvent("send friend request", {
         senderId: user._id,
         receiverId: userId,
         currentStatus: "pending",
-      };
-
-      const clientData = {
-        socketInstance,
-        eventName: "send friend request",
-        eventData,
-      };
-
-      emitEvent(clientData);
+      });
     } catch (error) {
       console.error("Error sending friend request: ", error.message);
     }
