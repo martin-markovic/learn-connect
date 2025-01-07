@@ -40,7 +40,9 @@ function UserProfile() {
   }, [userList, userId]);
 
   useEffect(() => {
-    const isFriend = friendList.find((item) => item.id === userId)?.status;
+    const isFriend = friendList.find(
+      (item) => item.receiverId === userId || item.senderId === userId
+    )?.status;
 
     setFriendshipStatus(isFriend || null);
   }, [friendList, userId]);
@@ -60,6 +62,7 @@ function UserProfile() {
         receiverId: data?.receiver,
         notificationName: "new friend request",
       });
+    });
 
     socketEventManager.subscribe("friend request declined", (data) => {
       dispatch(handleDecline(data));
@@ -215,13 +218,11 @@ function UserProfile() {
       {String(user?._id) !== String(userId) && (
         <>
           {friendshipStatus === "pending" &&
-            userId ===
-              friendList.find((item) => item.id === userId)?.receiver && (
+            friendList.find((item) => item.senderId === user._id) && (
               <button disabled={true}>Request Sent</button>
             )}
-
           {friendshipStatus === "pending" &&
-            userId === friendList.find((item) => item.id === userId) && (
+            friendList.find((item) => item.receiverId === user?._id) && (
               <div>
                 <button
                   type="button"

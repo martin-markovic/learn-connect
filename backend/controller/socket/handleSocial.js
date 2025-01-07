@@ -29,9 +29,27 @@ const handleSocialEvents = (context) => {
 
       await newRequest.save();
 
-      context.emitEvent("sender", "friend request sent", newRequest);
+      const populatedRequest = await Friend.findById(newRequest._id)
+        .populate("sender", "name _id")
+        .populate("receiver", "name _id");
 
-      context.emitEvent("receiver", "friend request sent", newRequest);
+      context.emitEvent("sender", "friend request sent", {
+        id: populatedRequest._id.toString(),
+        senderId,
+        senderName: populatedRequest.sender?.name,
+        receiverId,
+        receiverName: populatedRequest.receiver?.name,
+        status: populatedRequest.status,
+      });
+
+      context.emitEvent("receiver", "friend request received", {
+        id: populatedRequest._id.toString(),
+        senderId,
+        senderName: populatedRequest.sender?.name,
+        receiverId,
+        receiverName: populatedRequest.receiver?.name,
+        status: populatedRequest.status,
+      });
     } catch (error) {
       console.error(error.message);
       context.socket.emit("error", error.message);
