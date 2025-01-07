@@ -87,8 +87,6 @@ const handleSocialEvents = (context) => {
 
         context.emitEvent("sender", "friend request declined", payloadId);
 
-        context.emitEvent("sender", "friend request declined", newRequest);
-
         context.emitEvent("receiver", "friend request declined", newRequest);
 
         return;
@@ -104,12 +102,19 @@ const handleSocialEvents = (context) => {
         throw new Error("Friend request not found");
       }
 
-      context.emitEvent("sender", "friend request accepted", friendRequest);
+      context.emitEvent("sender", "friend request accepted", {
+        id: friendRequest?.id,
+        status: userResponse,
+      });
 
-      context.emitEvent("receiver", "friend request accepted", friendRequest);
+      context.emitEvent("receiver", "friend request accepted", {
+        id: friendRequest?.id,
+        receiverId: senderId,
+        status: userResponse,
+      });
     } catch (error) {
       console.error("Error processing friend request: ", error.message);
-      socket.emit("error", { message: error.message });
+      context.emitEvent("error", { message: error.message });
     }
   });
 

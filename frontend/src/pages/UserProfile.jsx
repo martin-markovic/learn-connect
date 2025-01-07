@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  resetUserList,
   getUserList,
   getFriendList,
   newFriendRequest,
@@ -69,6 +70,7 @@ function UserProfile() {
     });
 
     socketEventManager.subscribe("friend request accepted", (data) => {
+      console.log("accepted request: ", data);
       dispatch(handleAccept(data));
 
       socketEventManager.handleEmitEvent("new notification", {
@@ -140,17 +142,11 @@ function UserProfile() {
     try {
       const eventData = {
         senderId: userId,
-        receiverId: user._id,
+        receiverId: user?._id,
         userResponse: friendReqResponse === "accept" ? "accepted" : "declined",
       };
 
-      const clientData = {
-        socketInstance,
-        eventName: "process friend request",
-        eventData,
-      };
-
-      emitEvent(clientData);
+      socketEventManager.handleEmitEvent("process friend request", eventData);
     } catch (error) {
       console.error("Error processing request :", error.message);
     } finally {
