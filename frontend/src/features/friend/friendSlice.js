@@ -78,15 +78,15 @@ const friendSlice = createSlice({
     },
     handleRemove: (state, action) => {
       state.friendList = state.friendList.filter(
-        (item) => item._id !== action.payload.payloadId
+        (item) => item.id !== action.payload.id
       );
     },
     handleBlock: (state, action) => {
       state.userList = state.userList.filter(
-        (item) => item._id !== action.payload
+        (item) => item.id !== action.payload.id
       );
       state.friendList = state.friendList.filter(
-        (item) => item._id !== action.payload
+        (item) => item.id !== action.payload.id
       );
     },
   },
