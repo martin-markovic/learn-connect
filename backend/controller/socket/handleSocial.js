@@ -29,9 +29,27 @@ const handleSocialEvents = (context) => {
 
       await newRequest.save();
 
-      context.emitEvent("sender", "friend request sent", newRequest);
+      const populatedRequest = await Friend.findById(newRequest._id)
+        .populate("sender", "name _id")
+        .populate("receiver", "name _id");
 
-      context.emitEvent("receiver", "friend request sent", newRequest);
+      context.emitEvent("sender", "friend request sent", {
+        id: populatedRequest._id.toString(),
+        senderId,
+        senderName: populatedRequest.sender?.name,
+        receiverId,
+        receiverName: populatedRequest.receiver?.name,
+        status: populatedRequest.status,
+      });
+
+      context.emitEvent("receiver", "friend request received", {
+        id: populatedRequest._id.toString(),
+        senderId,
+        senderName: populatedRequest.sender?.name,
+        receiverId,
+        receiverName: populatedRequest.receiver?.name,
+        status: populatedRequest.status,
+      });
     } catch (error) {
       console.error(error.message);
       context.socket.emit("error", error.message);
@@ -63,15 +81,19 @@ const handleSocialEvents = (context) => {
           throw new Error("Friend request not found");
         }
 
-        const payloadId = foundRequest._id;
+        console.log("foundRequest: ", foundRequest);
+        const payloadId = foundRequest?._id;
 
         await Friend.deleteOne({ _id: payloadId });
 
-        context.emitEvent("sender", "friend request declined", payloadId);
+        context.emitEvent("sender", "friend request declined", {
+          id: payloadId,
+        });
 
-        context.emitEvent("sender", "friend request declined", newRequest);
-
-        context.emitEvent("receiver", "friend request declined", newRequest);
+        context.emitEvent("receiver", "friend request declined", {
+          id: payloadId,
+          receiverId: senderId,
+        });
 
         return;
       }
@@ -86,12 +108,19 @@ const handleSocialEvents = (context) => {
         throw new Error("Friend request not found");
       }
 
-      context.emitEvent("sender", "friend request accepted", friendRequest);
+      context.emitEvent("sender", "friend request accepted", {
+        id: friendRequest?.id,
+        status: userResponse,
+      });
 
-      context.emitEvent("receiver", "friend request accepted", friendRequest);
+      context.emitEvent("receiver", "friend request accepted", {
+        id: friendRequest?.id,
+        receiverId: senderId,
+        status: userResponse,
+      });
     } catch (error) {
       console.error("Error processing friend request: ", error.message);
-      socket.emit("error", { message: error.message });
+      context.emitEvent("error", { message: error.message });
     }
   });
 
@@ -114,11 +143,16 @@ const handleSocialEvents = (context) => {
         throw new Error("Friend not found");
       }
 
-      await Friend.deleteOne({ _id: foundFriend?._id });
+      const payloadId = foundFriend?.id;
 
-      context.emitEvent("sender", "friend request accepted", receiverId);
+      await Friend.deleteOne({ _id: payloadId });
 
-      context.emitEvent("receiver", "friend request accepted", senderId);
+      context.emitEvent("sender", "friend removed", { id: payloadId });
+
+      context.emitEvent("receiver", "friend removed", {
+        id: payloadId,
+        receiverId,
+      });
     } catch (error) {
       console.log("Error removing friend: ", error.message);
       context.emitEvent("sender", "error", error.message);
@@ -169,9 +203,12 @@ const handleSocialEvents = (context) => {
         await blockedUser.save();
       }
 
-      context.emitEvent("sender", "user blocked", payloadId);
+      context.emitEvent("sender", "user blocked", { id: payloadId });
 
-      context.emitEvent("receiver", "user blocked", payloadId);
+      context.emitEvent("receiver", "user blocked", {
+        id: payloadId,
+        receiverId,
+      });
     } catch (error) {
       console.error("Error processing friend request: ", error.message);
       context.emitEvent("sender", "error", error.message);
