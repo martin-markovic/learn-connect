@@ -6,29 +6,19 @@ import {
 
 const handleNotificationEvents = (context) => {
   context.socket.on("mark as read", async (data) => {
-    const { notificationId } = data.roomData;
-
-    const userId = socket.user?.id;
-
-    await markNotificationAsRead(socket, notificationId, userId);
+    await markNotificationAsRead(context, data);
   });
 
   context.socket.on("mark all as read", async () => {
-    const userId = socket.user?.id;
-
-    await markAllNotificationsAsRead(socket, userId);
+    await markAllNotificationsAsRead(context);
   });
 
   context.socket.on("new notification", async (data) => {
-    const { classroom, eventName } = data.roomData;
+    await handleNewNotification(context, data);
+  });
 
-    const notificationData = {
-      sender: socket.user?.id,
-      receiver: classroom,
-      eventName,
-    };
-
-    await handleNewNotification(socket, notificationData);
+  context.socket.on("simple event", (data) => {
+    console.log("simple event data received: ", data);
   });
 };
 
