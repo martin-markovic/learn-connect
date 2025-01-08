@@ -81,13 +81,19 @@ const handleSocialEvents = (context) => {
           throw new Error("Friend request not found");
         }
 
-        const payloadId = foundRequest._id;
+        console.log("foundRequest: ", foundRequest);
+        const payloadId = foundRequest?._id;
 
         await Friend.deleteOne({ _id: payloadId });
 
-        context.emitEvent("sender", "friend request declined", payloadId);
+        context.emitEvent("sender", "friend request declined", {
+          id: payloadId,
+        });
 
-        context.emitEvent("receiver", "friend request declined", newRequest);
+        context.emitEvent("receiver", "friend request declined", {
+          id: payloadId,
+          receiverId: senderId,
+        });
 
         return;
       }
@@ -137,11 +143,16 @@ const handleSocialEvents = (context) => {
         throw new Error("Friend not found");
       }
 
-      await Friend.deleteOne({ _id: foundFriend?._id });
+      const payloadId = foundFriend?.id;
 
-      context.emitEvent("sender", "friend request accepted", receiverId);
+      await Friend.deleteOne({ _id: payloadId });
 
-      context.emitEvent("receiver", "friend request accepted", senderId);
+      context.emitEvent("sender", "friend removed", { id: payloadId });
+
+      context.emitEvent("receiver", "friend removed", {
+        id: payloadId,
+        receiverId,
+      });
     } catch (error) {
       console.log("Error removing friend: ", error.message);
       context.emitEvent("sender", "error", error.message);
@@ -192,9 +203,12 @@ const handleSocialEvents = (context) => {
         await blockedUser.save();
       }
 
-      context.emitEvent("sender", "user blocked", payloadId);
+      context.emitEvent("sender", "user blocked", { id: payloadId });
 
-      context.emitEvent("receiver", "user blocked", payloadId);
+      context.emitEvent("receiver", "user blocked", {
+        id: payloadId,
+        receiverId,
+      });
     } catch (error) {
       console.error("Error processing friend request: ", error.message);
       context.emitEvent("sender", "error", error.message);

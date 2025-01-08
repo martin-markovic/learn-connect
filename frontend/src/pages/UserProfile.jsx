@@ -163,11 +163,6 @@ function UserProfile() {
 
   const handleConfirmAction = () => {
     try {
-      const eventData = {
-        senderId: user._id,
-        receiverId: userId,
-      };
-
       const validActions = ["unfriend", "block"];
 
       if (!validActions.includes(actionToConfirm)) {
@@ -177,13 +172,10 @@ function UserProfile() {
       const actionName =
         actionToConfirm === "unfriend" ? "remove friend" : "block user";
 
-      const clientData = {
-        socketInstance,
-        eventName: actionName,
-        eventData,
-      };
-
-      emitEvent(clientData);
+      socketEventManager.handleEmitEvent(actionName, {
+        senderId: user._id,
+        receiverId: userId,
+      });
     } catch (error) {
       console.error("Error removing friend: ", error.message);
     }
