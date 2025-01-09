@@ -70,23 +70,21 @@ const friendSlice = createSlice({
       }
     },
     handleDecline: (state, action) => {
-      const { payloadId } = action.payload;
-
       state.friendList = state.friendList.filter(
-        (item) => item._id !== payloadId
+        (item) => item._id !== action.payload._id
       );
     },
     handleRemove: (state, action) => {
       state.friendList = state.friendList.filter(
-        (item) => item._id !== action.payload.payloadId
+        (item) => item._id !== action.payload._id
       );
     },
     handleBlock: (state, action) => {
       state.userList = state.userList.filter(
-        (item) => item._id !== action.payload
+        (item) => item._id !== action.payload._id
       );
       state.friendList = state.friendList.filter(
-        (item) => item._id !== action.payload
+        (item) => item._id !== action.payload._id
       );
     },
   },
@@ -102,7 +100,19 @@ const friendSlice = createSlice({
         state.isSuccess = true;
         state.isError = false;
         state.errorMessage = "";
-        state.friendList = action.payload || [];
+
+        if (action.payload.length) {
+          action.payload.forEach((item) => {
+            state.friendList.push({
+              _id: item._id,
+              senderId: item.sender._id,
+              senderName: item.sender.name,
+              receiverId: item.receiver._id,
+              receiverName: item.receiver.name,
+              status: item.status,
+            });
+          });
+        }
       })
       .addCase(getFriendList.rejected, (state, action) => {
         state.isLoading = false;

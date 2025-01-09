@@ -19,16 +19,7 @@ export const getFriendList = async (req, res) => {
       .populate("sender", "name")
       .populate("receiver", "name");
 
-    const formattedFriendList = friendList.map((item) => {
-      const isSender = String(item.sender._id) === String(userId);
-      return {
-        id: isSender ? item.receiver._id : item.sender._id,
-        name: isSender ? item.receiver.name : item.sender.name,
-        status: item.status,
-      };
-    });
-
-    return res.status(200).json(formattedFriendList || []);
+    return res.status(200).json(friendList.length ? friendList : []);
   } catch (error) {
     console.error("Error fetching friend list", error);
     return res.status(500).json({ message: "Server error" });
