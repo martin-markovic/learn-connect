@@ -87,11 +87,11 @@ const handleSocialEvents = (context) => {
         await Friend.deleteOne({ _id: payloadId });
 
         context.emitEvent("sender", "friend request declined", {
-          id: payloadId,
+          _id: payloadId,
         });
 
         context.emitEvent("receiver", "friend request declined", {
-          id: payloadId,
+          _id: payloadId,
           receiverId: senderId,
         });
 
@@ -109,12 +109,12 @@ const handleSocialEvents = (context) => {
       }
 
       context.emitEvent("sender", "friend request accepted", {
-        id: friendRequest?.id,
+        _id: friendRequest?._id,
         status: userResponse,
       });
 
       context.emitEvent("receiver", "friend request accepted", {
-        id: friendRequest?.id,
+        _id: friendRequest?._id,
         receiverId: senderId,
         status: userResponse,
       });
@@ -143,14 +143,14 @@ const handleSocialEvents = (context) => {
         throw new Error("Friend not found");
       }
 
-      const payloadId = foundFriend?.id;
+      const payloadId = foundFriend?._id;
 
       await Friend.deleteOne({ _id: payloadId });
 
-      context.emitEvent("sender", "friend removed", { id: payloadId });
+      context.emitEvent("sender", "friend removed", { _id: payloadId });
 
       context.emitEvent("receiver", "friend removed", {
-        id: payloadId,
+        _id: payloadId,
         receiverId,
       });
     } catch (error) {

@@ -70,23 +70,21 @@ const friendSlice = createSlice({
       }
     },
     handleDecline: (state, action) => {
-      const { payloadId } = action.payload;
-
       state.friendList = state.friendList.filter(
-        (item) => item._id !== payloadId
+        (item) => item._id !== action.payload._id
       );
     },
     handleRemove: (state, action) => {
       state.friendList = state.friendList.filter(
-        (item) => item.id !== action.payload.id
+        (item) => item._id !== action.payload._id
       );
     },
     handleBlock: (state, action) => {
       state.userList = state.userList.filter(
-        (item) => item.id !== action.payload.id
+        (item) => item._id !== action.payload._id
       );
       state.friendList = state.friendList.filter(
-        (item) => item.id !== action.payload.id
+        (item) => item._id !== action.payload._id
       );
     },
   },
