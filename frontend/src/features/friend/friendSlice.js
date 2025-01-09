@@ -100,7 +100,19 @@ const friendSlice = createSlice({
         state.isSuccess = true;
         state.isError = false;
         state.errorMessage = "";
-        state.friendList = action.payload || [];
+
+        if (action.payload.length) {
+          action.payload.forEach((item) => {
+            state.friendList.push({
+              _id: item._id,
+              senderId: item.sender._id,
+              senderName: item.sender.name,
+              receiverId: item.receiver._id,
+              receiverName: item.receiver.name,
+              status: item.status,
+            });
+          });
+        }
       })
       .addCase(getFriendList.rejected, (state, action) => {
         state.isLoading = false;
