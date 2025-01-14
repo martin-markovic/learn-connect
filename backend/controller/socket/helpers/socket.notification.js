@@ -8,27 +8,30 @@ export const markNotificationAsRead = async (context, data) => {
       throw new Error("Invalid notification id");
     }
 
-    const notification = await Notification.findOne({ _id: notificationId });
+    const notificationFound = await Notification.findOne({
+      _id: notificationId,
+    });
 
-    if (!notification) {
+    if (!notificationFound) {
       console.log("Notification not found on server");
       throw new Error("Notification not found");
     }
 
-    if (notification.readBy.includes(senderId)) {
+    if (notificationFound.readBy.includes(senderId)) {
       console.log("User is already notified.");
       throw new Error("User is already notified");
     }
 
-    await Notification.updateOne(
-      { _id: notificationId },
-      { $push: { readBy: senderId } }
+    await Notification.findByIdAndUpdate(
+      notificationId,
+      { $addToSet: { readBy: senderId } },
+      { new: true }
     );
 
     context.emitEvent("sender", "notification marked as read", notificationId);
   } catch (error) {
     console.error("Error marking notification as read:", error.message);
-    context.emitEvent("error", {
+    context.emitEvent("sender", "error", {
       message: "Error updating notification status",
     });
   }
