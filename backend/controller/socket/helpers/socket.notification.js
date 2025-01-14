@@ -50,7 +50,6 @@ export const markAllNotificationsAsRead = async (context, data) => {
     }
 
     const response = {
-      message: "All notifications are marked as read.",
       success: true,
     };
 

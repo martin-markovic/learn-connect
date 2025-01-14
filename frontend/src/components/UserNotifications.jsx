@@ -35,8 +35,10 @@ function UserNotifications() {
       dispatch(markNotificationAsRead(data));
     });
 
-    socketEventManager.subscribe("marked all as read", () => {
-      dispatch(resetNotifications());
+    socketEventManager.subscribe("marked all as read", (data) => {
+      if (data.success) {
+        dispatch(resetNotifications());
+      }
     });
 
     return () => {
@@ -59,7 +61,9 @@ function UserNotifications() {
   };
 
   const handleMarkAll = () => {
-    socketEventManager.handleEmitEvent("mark all as read", {});
+    socketEventManager.handleEmitEvent("mark all as read", {
+      senderId: user?._id,
+    });
   };
 
   return (

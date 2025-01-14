@@ -9,8 +9,8 @@ const handleNotificationEvents = (context) => {
     await markNotificationAsRead(context, data);
   });
 
-  context.socket.on("mark all as read", async () => {
-    await markAllNotificationsAsRead(context);
+  context.socket.on("mark all as read", async (data) => {
+    await markAllNotificationsAsRead(context, data);
   });
 
   context.socket.on("new notification", async (data) => {
