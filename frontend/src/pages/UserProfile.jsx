@@ -42,7 +42,7 @@ function UserProfile() {
 
   useEffect(() => {
     const isFriend = friendList.find(
-      (item) => item.receiverId === userId || item.senderId === userId
+      (item) => item.senderId === userId || item.receiverId === userId
     )?.status;
 
     setFriendshipStatus(isFriend || null);
@@ -59,8 +59,8 @@ function UserProfile() {
       dispatch(newFriendRequest(data));
 
       socketEventManager.handleEmitEvent("new notification", {
-        senderId: data?.sender,
-        receiverId: data?.receiver,
+        senderId: data?.senderId,
+        receiverId: data?.receiverId,
         notificationName: "new friend request",
       });
     });
@@ -74,8 +74,8 @@ function UserProfile() {
       dispatch(handleAccept(data));
 
       socketEventManager.handleEmitEvent("new notification", {
-        senderId: data?.sender,
-        receiverId: data?.receiver,
+        senderId: data?.senderId,
+        receiverId: data?.receiverId,
         notificationName: "friend request accepted",
       });
     });

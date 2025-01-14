@@ -21,14 +21,14 @@ function UserNotifications() {
 
   useEffect(() => {
     socketEventManager.subscribe("notification received", (data) => {
-      const newNotification = data;
+      const { newNotification } = data;
 
       if (!newNotification) {
         console.error("New notification not found");
         return;
       }
 
-      dispatch(addNewNotification(data));
+      dispatch(addNewNotification(newNotification));
     });
 
     socketEventManager.subscribe("notification marked as read", (data) => {
