@@ -11,6 +11,7 @@ import {
 function UserNotifications() {
   const [newsOpen, setNewsOpen] = useState(false);
   const { userNotifications } = useSelector((state) => state.notifications);
+  const { user } = useSelector((state) => state.auth);
 
   const dispatch = useDispatch();
 
@@ -20,29 +21,24 @@ function UserNotifications() {
 
   useEffect(() => {
     socketEventManager.subscribe("notification received", (data) => {
-      const newNotification = data;
+      const { newNotification } = data;
 
       if (!newNotification) {
         console.error("New notification not found");
         return;
       }
 
-      dispatch(addNewNotification(data));
+      dispatch(addNewNotification(newNotification));
     });
 
     socketEventManager.subscribe("notification marked as read", (data) => {
-      const notificationId = data;
-
-      if (!notificationId) {
-        console.error("Notification id not found");
-        return;
-      }
-
       dispatch(markNotificationAsRead(data));
     });
 
-    socketEventManager.subscribe("marked all as read", () => {
-      dispatch(resetNotifications());
+    socketEventManager.subscribe("marked all as read", (data) => {
+      if (data.success) {
+        dispatch(resetNotifications());
+      }
     });
 
     return () => {
@@ -58,11 +54,16 @@ function UserNotifications() {
   };
 
   const handleMark = (notificationId) => {
-    socketEventManager.handleEmitEvent("mark as read", notificationId);
+    socketEventManager.handleEmitEvent("mark as read", {
+      senderId: user?._id,
+      notificationId,
+    });
   };
 
   const handleMarkAll = () => {
-    socketEventManager.handleEmitEvent("mark all as read", {});
+    socketEventManager.handleEmitEvent("mark all as read", {
+      senderId: user?._id,
+    });
   };
 
   return (

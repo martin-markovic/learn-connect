@@ -1,21 +1,17 @@
 import Notification from "../../models/users/notificationModel.js";
-import Classroom from "../../models/classrooms/classroomModel.js";
 
 export const getNotifications = async (req, res) => {
   try {
     const userId = req.params.userId;
 
-    const userClassrooms = await Classroom.find({ students: userId });
+    if (!userId) {
+      return response.status(401).json({ message: "User not authorized" });
+    }
 
-    const foundNotifications = await Promise.all(
-      userClassrooms.map(async (classroom) => {
-        return Notification.find({ receiver: classroom._id });
-      })
-    );
-
-    const unreadNotifications = foundNotifications
-      .flat()
-      .filter((notification) => !notification.readBy.includes(userId));
+    const unreadNotifications = await Notification.find({
+      receiver: userId,
+      readBy: { $nin: [userId] },
+    });
 
     if (!unreadNotifications.length) {
       console.log("No unreadNotifications fetched");
