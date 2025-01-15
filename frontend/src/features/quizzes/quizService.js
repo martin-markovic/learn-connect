@@ -2,32 +2,6 @@ import axios from "axios";
 
 const API_URL = "http://127.0.0.1:8000/api/quizzes/";
 
-const createQuiz = async (quizData, token) => {
-  try {
-    const config = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
-
-    const response = await axios.post(API_URL, quizData, config);
-
-    return response.data;
-  } catch (error) {
-    if (error.response) {
-      // Server responded with a status other than 2xx
-      console.error("Server Error:", error.response.data);
-    } else if (error.request) {
-      // No response received from the server
-      console.error("No response received:", error.request);
-    } else {
-      // Error setting up the request
-      console.error("Error setting up request:", error.message);
-    }
-    throw error;
-  }
-};
-
 const getUserQuizzes = async (token) => {
   try {
     const config = {
@@ -143,7 +117,6 @@ const deleteQuiz = async (id, token) => {
 };
 
 const quizService = {
-  createQuiz,
   getUserQuizzes,
   getClassQuizzes,
   getQuizById,
