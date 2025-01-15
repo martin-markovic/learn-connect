@@ -49,36 +49,6 @@ export const getQuizzesByClassroom = async (req, res) => {
   }
 };
 
-export const accessQuiz = async (req, res) => {
-  const { quizId, userId } = req.params;
-  try {
-    const quiz = Quiz.findById(quizId).populate("classroom");
-    if (!quiz) {
-      return res.status(404).json({ message: "Quiz not found" });
-    }
-
-    const user = User.findById(userId).populate("classroom");
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    const isEnrolled = user.classrooms.some(
-      (classroom) => classroom._id.toString() === quiz.classroom._id.toString()
-    );
-
-    if (!isEnrolled) {
-      return res
-        .status(403)
-        .json({ message: "Please enroll in the required classroom" });
-    }
-    return res.status(200).json(quiz);
-  } catch (error) {
-    return res.status(500).json({
-      message: `${error.message}`,
-    });
-  }
-};
-
 export const updateQuiz = async (req, res) => {
   try {
     const quizToUpdate = await Quiz.findById(req.params.id);
