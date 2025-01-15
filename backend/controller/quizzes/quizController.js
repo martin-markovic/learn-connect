@@ -1,58 +1,5 @@
 import Quiz from "../../models/quizzes/quizModel.js";
 import User from "../../models/users/userModel.js";
-import Classroom from "../../models/classrooms/classroomModel.js";
-
-export const createQuiz = async (req, res) => {
-  try {
-    const { title, questions, timeLimit, classroomId } = req.body;
-
-    if (
-      !title ||
-      !classroomId ||
-      questions.length < 5 ||
-      timeLimit < 3 ||
-      timeLimit > 10
-    ) {
-      return res.status(400).json({
-        message: "Please add all fields",
-      });
-    }
-
-    const user = await User.findById(req.user.id).populate("classrooms");
-
-    if (!user) {
-      return res.status(401).json({ message: "User not found" });
-    }
-
-    const classroom = user.classrooms.find(
-      (c) => c._id.toString() === classroomId
-    );
-    if (!classroom) {
-      return res
-        .status(403)
-        .json({ message: "User not enrolled in the specified classroom" });
-    }
-
-    const classroomExists = await Classroom.findById(classroomId);
-    if (!classroomExists) {
-      return res.status(400).json({ message: "Classroom not found" });
-    }
-
-    const quiz = await Quiz.create({
-      title,
-      questions,
-      timeLimit,
-      user: req.user.id,
-      classroom: classroomId,
-    });
-
-    return res.status(201).json(quiz);
-  } catch (error) {
-    return res.status(500).json({
-      message: `${error.message}`,
-    });
-  }
-};
 
 export const getAllQuizzes = async (req, res) => {
   try {
