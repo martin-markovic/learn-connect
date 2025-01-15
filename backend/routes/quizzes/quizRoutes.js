@@ -2,7 +2,6 @@ import { Router } from "express";
 const quizRoutes = Router();
 
 import {
-  createQuiz,
   getAllQuizzes,
   getQuizzesByClassroom,
   getQuiz,
@@ -11,7 +10,7 @@ import {
 } from "../../controller/quizzes/quizController.js";
 import { protect } from "../../middleware/authMiddleware.js";
 
-quizRoutes.route("/").post(protect, createQuiz).get(protect, getAllQuizzes);
+quizRoutes.get("/", protect, getAllQuizzes);
 quizRoutes
   .route("/:id")
   .get(protect, getQuiz)

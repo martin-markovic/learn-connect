@@ -152,8 +152,7 @@ function QuizForm({ quiz, onClose }) {
     if (quizState.isEditing) {
       dispatch(updateQuiz({ id: editQuizId, quizData }));
     } else {
-      dispatch(createQuiz(quizData));
-      socketEventManager.handleEmitEvent("quiz created", quizData);
+      socketEventManager.handleEmitEvent("submit quiz", quizData);
     }
 
     onClose();

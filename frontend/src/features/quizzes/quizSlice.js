@@ -111,22 +111,13 @@ export const quizSlice = createSlice({
   initialState,
   reducers: {
     resetQuizzes: (state) => initialState,
+    addNewQuiz: (state, action) => {
+      state.classQuizzes.push(action.payload);
+      state.userQuizzes.push(action.payload);
+    },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(createQuiz.pending, (state) => {
-        state.isLoading = true;
-      })
-      .addCase(createQuiz.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.isSuccess = true;
-        state.userQuizzes.push(action.payload);
-      })
-      .addCase(createQuiz.rejected, (state, action) => {
-        state.isError = true;
-        state.isSuccess = false;
-        state.errorMessage = action.payload;
-      })
       .addCase(getUserQuizzes.pending, (state) => {
         state.isLoading = true;
       })
