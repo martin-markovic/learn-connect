@@ -2,7 +2,7 @@ import { Router } from "express";
 const quizRoutes = Router();
 
 import {
-  getAllQuizzes,
+  getUserQuizzes,
   getQuizzesByClassroom,
   getQuiz,
   updateQuiz,
@@ -10,7 +10,7 @@ import {
 } from "../../controller/quizzes/quizController.js";
 import { protect } from "../../middleware/authMiddleware.js";
 
-quizRoutes.get("/", protect, getAllQuizzes);
+quizRoutes.get("/", protect, getUserQuizzes);
 quizRoutes
   .route("/:id")
   .get(protect, getQuiz)
@@ -18,4 +18,5 @@ quizRoutes
   .delete(protect, deleteQuiz);
 
 quizRoutes.get("/:classroomId", getQuizzesByClassroom);
+
 export default quizRoutes;

@@ -23,7 +23,7 @@ const questionSchema = new mongoose.Schema({
 
 const quizSchema = mongoose.Schema(
   {
-    user: {
+    createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
       ref: "User",
