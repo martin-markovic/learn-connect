@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { createQuiz, updateQuiz } from "../../features/quizzes/quizSlice.js";
+import { updateQuiz } from "../../features/quizzes/quizSlice.js";
 import { toast } from "react-toastify";
+import { getClassroomList } from "../../features/classroom/classroomSlice.js";
 import socketEventManager from "../../features/socket/socket.eventManager.js";
 
 const initialQuestionState = {
@@ -12,7 +13,6 @@ const initialQuestionState = {
 
 const initialQuizState = {
   title: "",
-  subject: "",
   classroomId: "",
   questions: [],
   timeLimit: 3,
@@ -27,9 +27,10 @@ function QuizForm({ quiz, onClose }) {
 
   const dispatch = useDispatch();
 
-  const { title, timeLimit, isEditing } = quizState;
-  const { question, choices, answer, classroomId } = questionState;
-  const { classrooms = [] } = useSelector((state) => state.auth.user);
+  const { title, timeLimit, isEditing, classroomId } = quizState;
+  const { question, choices, answer } = questionState;
+  const { classroomList } = useSelector((state) => state.classroom);
+  const { user } = useSelector((state) => state.auth);
 
   useEffect(() => {
     if (quiz) {
@@ -54,15 +55,14 @@ function QuizForm({ quiz, onClose }) {
     }
   }, [quiz]);
 
+  useEffect(() => {
+    dispatch(getClassroomList());
+  }, [dispatch]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    if (name === "subject") {
-      setQuizState((prevState) => ({
-        ...prevState,
-        subject: value || "",
-      }));
-    } else if (name === "classroom") {
+    if (name === "classroom") {
       setQuizState((prevState) => ({
         ...prevState,
         classroomId: value || "",
@@ -106,10 +106,10 @@ function QuizForm({ quiz, onClose }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const { title, subject, classroom, timeLimit, questions, editQuizId } =
-      quizState;
+    const { title, classroomId, timeLimit, questions, editQuizId } = quizState;
 
-    if (!title || !subject || !classroom) {
+
+    if (!title || !classroomId) {
       toast.error("Please add all fields");
       return;
     }
@@ -143,7 +143,6 @@ function QuizForm({ quiz, onClose }) {
 
     const quizData = {
       title,
-      subject,
       classroomId,
       questions,
       timeLimit,
@@ -152,7 +151,10 @@ function QuizForm({ quiz, onClose }) {
     if (quizState.isEditing) {
       dispatch(updateQuiz({ id: editQuizId, quizData }));
     } else {
-      socketEventManager.handleEmitEvent("submit quiz", quizData);
+      socketEventManager.handleEmitEvent("submit quiz", {
+        senderId: user?._id,
+        quizData,
+      });
     }
 
     onClose();
@@ -228,17 +230,6 @@ function QuizForm({ quiz, onClose }) {
         </div>
 
         <div>
-          <label htmlFor="subject">Add subject:</label>
-          <input
-            type="text"
-            id="subject"
-            name="subject"
-            value={quizState.subject || ""}
-            onChange={handleChange}
-          />
-        </div>
-
-        <div>
           <label htmlFor="classroom">Select Classroom:</label>
           <select
             id="classroom"
@@ -246,9 +237,9 @@ function QuizForm({ quiz, onClose }) {
             value={quizState.classroomId || ""}
             onChange={handleChange}
           >
-            <option value="">Select a classroom</option>
-            {classrooms.length > 0 ? (
-              classrooms.map((classroom) => (
+            <option value="" disabled="true"></option>
+            {classroomList.length > 0 ? (
+              classroomList.map((classroom) => (
                 <option key={classroom._id} value={classroom._id}>
                   {classroom.name}
                 </option>
