@@ -1,10 +1,20 @@
+import Classroom from "../../models/classrooms/classroomModel.js";
 import Quiz from "../../models/quizzes/quizModel.js";
 import User from "../../models/users/userModel.js";
 
 export const getAllQuizzes = async (req, res) => {
   try {
-    const quizzes = await Quiz.find({ user: req.user });
-    return res.status(200).json(quizzes);
+    const userId = req.user._id;
+
+    const userFound = User.findById(userId);
+
+    if (!userFound) {
+      return res.status(401).json({ message: "User is not authenticated" });
+    }
+
+    const quizzes = await Quiz.find({ createdBy: userId });
+
+    return res.status(200).json(quizzes || []);
   } catch (error) {
     return res.status(500).json({
       message: `${error.message}`,
@@ -14,22 +24,23 @@ export const getAllQuizzes = async (req, res) => {
 
 export const getQuiz = async (req, res) => {
   try {
-    const quiz = await Quiz.findById(req.params.id);
-
-    if (!quiz) {
-      return res.status(400).json({ message: "quiz not found" });
-    }
-
     const user = await User.findById(req.user.id);
 
     if (!user) {
-      return res.status(401).json({ message: "User not found" });
+      return res.status(401).json({ message: "User is not authenticated" });
     }
 
-    if (quiz.user.toString() !== user.id) {
+    const quizFound = await Quiz.findById(req.params.id);
+
+    if (!quizFound) {
+      return res.status(400).json({ message: "Quiz not found" });
+    }
+
+    if (quizFound.createdBy.toString() !== user.id) {
       return res.status(401).json({ message: "User not authorized" });
     }
-    return res.status(200).json(quiz);
+
+    return res.status(200).json(quizFound);
   } catch (error) {
     return res.status(500).json({
       message: `${error.message}`,
@@ -41,8 +52,33 @@ export const getQuizzesByClassroom = async (req, res) => {
   const classroomId = req.params.classroomId;
 
   try {
-    const quizzes = await Quiz.find({ classroom: classroomId });
-    return res.json(quizzes);
+    const userId = req.user?._id;
+
+    const userFound = User.findById(userId);
+
+    if (!userFound) {
+      return res.status(401).json({ message: "User is not authenticated" });
+    }
+
+    const classroomFound = Classroom.findOne({ _id: classroomId });
+
+    if (!classroomFound) {
+      return res.status(404).json({ message: "Classroom not found" });
+    }
+
+    const isEnrolled = classroomFound.studends.some(
+      (student) => student._id === userId
+    );
+
+    if (!isEnrolled) {
+      return res
+        .status(401)
+        .json({ message: "User is not enrolled in this classroom" });
+    }
+
+    const quizzes = await Quiz.find({ classroom: classroomFound?._id });
+
+    return res.json(quizzes || []);
   } catch (error) {
     console.error("Error in getQuizzesByClassroom:", error);
     res.status(500).json({ message: "Server error" });
