@@ -5,6 +5,7 @@ import chatReducer from "../features/chat/chatSlice.js";
 import classroomReducer from "../features/classroom/classroomSlice.js";
 import notificationReducer from "../features/notifications/notificationSlice.js";
 import friendReducer from "../features/friend/friendSlice.js";
+import examReducer from "../features/quizzes/exam/examSlice.js";
 
 const store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ const store = configureStore({
     classroom: classroomReducer,
     notifications: notificationReducer,
     friends: friendReducer,
+    exam: examReducer,
   },
   devTools: process.env.NODE_ENV !== "production",
 });
