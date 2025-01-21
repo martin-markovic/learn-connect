@@ -37,11 +37,30 @@ export const getExam = createAsyncThunk("exam/get", async (_, thunkAPI) => {
   }
 });
 
+export const finishExam = createAsyncThunk(
+  "exam/finish",
+  async (_, thunkAPI) => {
+    try {
+      const token = thunkAPI.getState().auth.user.token;
+
+      const response = await examService.finishExam(token);
+      return response.data;
+    } catch (error) {
+      handleSliceError(error);
+    }
+  }
+);
+
 export const examSlice = createSlice({
   name: "exam",
   initialState,
   reducers: {
     resetExam: (state) => initialState,
+    updateExam: (state, action) => {
+      const { questionIndex, answer } = action.payload;
+
+      state.answers[questionIndex] = answer;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -83,8 +102,28 @@ export const examSlice = createSlice({
         state.isError = false;
         state.errorMessage = action.payload;
       })
+      .addCase(finishExam.pending, (state) => {
+        state.isLoading = true;
+        state.isSuccess = false;
+        state.isError = false;
+        state.errorMessage = "";
+      })
+      .addCase(finishExam.fulfilled, (state) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.isError = false;
+        state.errorMessage = "";
+        state.examData = {};
+      })
+      .addCase(finishExam.rejected, (state, action) => {
+        state.isLoading = true;
+        state.isSuccess = false;
+        state.isError = false;
+        state.errorMessage = action.payload;
+      });
   },
 });
 
+// const { resetExam, updateExam } = examSlice.actions;
 const { resetExam } = examSlice.actions;
 export default examSlice.reducer;
