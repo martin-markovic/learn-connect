@@ -11,9 +11,9 @@ const scoreSchema = new mongoose.Schema({
     ref: "Quiz",
     required: true,
   },
-  score: {
+  highScore: {
     type: Number,
-    required: true,
+    default: 0,
   },
 });
 

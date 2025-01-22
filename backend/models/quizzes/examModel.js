@@ -12,7 +12,7 @@ const examSchema = new mongoose.Schema({
     ref: "User",
   },
   examStart: {
-    type: Data,
+    type: Date,
     default: Date.now(),
   },
   examFinish: {
@@ -31,24 +31,6 @@ const examSchema = new mongoose.Schema({
 });
 
 examSchema.pre("save", async function (next) {
-  if (!this.isModified("examStart")) {
-    return next();
-  }
-
-  const Quiz = mongoose.model("Quiz");
-  const quiz = await Quiz.findById(this.quizId);
-
-  if (!quiz) {
-    return next(new Error("Quiz not found"));
-  }
-
-  this.examFinish = new Date(
-    this.examStart.getTime() + quiz.timeLimit * 60 * 1000
-  );
-  next();
-});
-
-examSchema.pre("save", async function (next) {
   if (this.isNew) {
     const Quiz = mongoose.model("Quiz");
     const quizFound = await Quiz.findById(this.quizId);
@@ -58,9 +40,12 @@ examSchema.pre("save", async function (next) {
     }
 
     this.shuffledQuestions = quizFound.questions.map((question) => {
+      const choicesWithAnswer = [...question.choices, question.answer];
+      const shuffledChoices = choicesWithAnswer.sort(() => Math.random() - 0.5);
+
       return {
-        ...question,
-        choices: question.choices.sort(() => Math.random() - 0.5),
+        question: question.question,
+        choices: shuffledChoices,
       };
     });
   }
