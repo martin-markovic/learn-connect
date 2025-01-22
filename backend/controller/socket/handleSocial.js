@@ -81,7 +81,6 @@ const handleSocialEvents = (context) => {
           throw new Error("Friend request not found");
         }
 
-        console.log("foundRequest: ", foundRequest);
         const payloadId = foundRequest?._id;
 
         await Friend.deleteOne({ _id: payloadId });
@@ -120,7 +119,7 @@ const handleSocialEvents = (context) => {
       });
     } catch (error) {
       console.error("Error processing friend request: ", error.message);
-      context.emitEvent("error", { message: error.message });
+      context.emitEvent("sender", "error", { message: error.message });
     }
   });
 

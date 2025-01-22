@@ -26,35 +26,7 @@ export const getUserQuizzes = async (req, res) => {
   }
 };
 
-export const getQuiz = async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id);
-
-    if (!user) {
-      return res.status(401).json({ message: "User is not authenticated" });
-    }
-
-    const quizFound = await Quiz.findById(req.params.id);
-
-    if (!quizFound) {
-      return res.status(400).json({ message: "Quiz not found" });
-    }
-
-    if (quizFound.createdBy.toString() !== user.id) {
-      return res.status(401).json({ message: "User not authorized" });
-    }
-
-    return res.status(200).json(quizFound);
-  } catch (error) {
-    console.error(`Error fetching quiz ${req.params.id}: ${error.message}`);
-
-    return res.status(500).json({
-      message: `Error fetching quiz ${req.params.id}: ${error.message}`,
-    });
-  }
-};
-
-export const getQuizzesByClassroom = async (req, res) => {
+export const getClassroomQuizzes = async (req, res) => {
   const classroomId = req.params.classroomId;
 
   try {
