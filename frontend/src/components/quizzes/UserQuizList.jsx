@@ -2,11 +2,13 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import {
+  addNewQuiz,
   getUserQuizzes,
   deleteQuiz,
   resetQuizzes,
 } from "../../features/quizzes/quizSlice.js";
 import QuizForm from "./QuizForm.jsx";
+import socketEventManager from "../../features/socket/socket.eventManager.js";
 
 function UserQuizList() {
   const [localQuizzes, setLocalQuizzes] = useState([]);
@@ -17,6 +19,7 @@ function UserQuizList() {
   const dispatch = useDispatch();
 
   const { userQuizzes = [], isLoading } = useSelector((state) => state.quizzes);
+  const { user } = useSelector((state) => state.auth);
 
   useEffect(() => {
     dispatch(getUserQuizzes());
@@ -33,6 +36,18 @@ function UserQuizList() {
       setLocalQuizzes([]);
     }
   }, [userQuizzes]);
+
+  useEffect(() => {
+    socketEventManager.subscribe("new quiz created", (data) => {
+      if (data.createdBy === user?._id) {
+        dispatch(addNewQuiz(data));
+      }
+    });
+
+    return () => {
+      socketEventManager.unsubscribe("new quiz created");
+    };
+  }, [user, dispatch]);
 
   const handleEdit = (quiz) => {
     setEditQuiz(quiz);
@@ -68,7 +83,7 @@ function UserQuizList() {
               <p>{quiz.title}</p>
               <button
                 onClick={() => {
-                  navigate(`/${quiz._id}`);
+                  navigate(`/quizzes/${quiz._id}`);
                 }}
               >
                 Open
