@@ -7,6 +7,7 @@ import handleMessages from "./messageController.js";
 import handleNotificationEvents from "./handleNotifications.js";
 import handleSocialEvents from "./handleSocial.js";
 import handleQuizEvents from "./handleQuiz.js";
+import handleExamEvents from "./handleExam.js";
 import handleErrorEvents from "./helpers/socket.errorController.js";
 
 const handleSocketLifeCycle = (io) => {
@@ -27,6 +28,7 @@ const handleSocketLifeCycle = (io) => {
     handleNotificationEvents(context);
     handleSocialEvents(context);
     handleQuizEvents(context);
+    handleExamEvents(context);
     handleErrorEvents(socket);
 
     socket.on("disconnect", () => {

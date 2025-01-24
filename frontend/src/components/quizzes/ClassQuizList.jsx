@@ -20,8 +20,8 @@ function ClassQuizList() {
     };
   }, [dispatch]);
 
-  const handleClick = (id) => {
-    navigate(`/${id}`);
+  const handleClick = (quizId) => {
+    navigate(`/exam/${quizId}`);
   };
 
   const handleFilter = useCallback(
@@ -65,7 +65,7 @@ function ClassQuizList() {
           <div key={index}>
             <p>{quiz.title}</p>
             <p>{quiz.subject}</p>
-            <button type="button" onClick={() => handleClick(quiz._id)}>
+            <button type="button" onClick={() => handleClick(quiz?._id)}>
               Open
             </button>
           </div>
