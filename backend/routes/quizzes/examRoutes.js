@@ -8,6 +8,6 @@ import {
 import { protect } from "../../middleware/authMiddleware.js";
 
 examRoutes.get("/", protect, getExam);
-examRoutes.get("/:examId", protect, getExamFeedback);
+examRoutes.get("/feedback/:quizId", protect, getExamFeedback);
 
 export default examRoutes;

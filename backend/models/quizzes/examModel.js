@@ -28,6 +28,10 @@ const examSchema = new mongoose.Schema({
     required: true,
     default: [],
   },
+  isInProgress: {
+    type: Boolean,
+    default: true,
+  },
 });
 
 examSchema.pre("save", async function (next) {

@@ -96,7 +96,7 @@ export const updateExam = async (context, data) => {
     );
 
     if (!updatedExam) {
-      throw new Error("Exam not found");
+      throw new Error("Updated exam not found");
     }
 
     context.emitEvent("sender", "exam updated", updatedExam);
@@ -124,6 +124,12 @@ export const finishExam = async (context, data) => {
     if (!examIsValid) {
       throw new Error("Exam has expired");
     }
+
+    await Exam.findByIdAndUpdate(
+      examFound?._id,
+      { isInProgress: false },
+      { new: true }
+    );
 
     const quizFound = await Quiz.findOne({ quizId: receiverId });
 
