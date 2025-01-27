@@ -1,4 +1,5 @@
 import Exam from "../../models/quizzes/examModel.js";
+import Score from "../../models/quizzes/scoreModel.js";
 
 export const getExam = async (req, res) => {
   try {
@@ -8,13 +9,12 @@ export const getExam = async (req, res) => {
       return res.status(401).json({ message: "User not authorized" });
     }
 
-    const examFound = await Exam.findOne({ studentId: userId });
+    const examFound = await Exam.findOne({
+      studentId: userId.toString(),
+      isInProgress: true,
+    });
 
-    if (!examFound) {
-      return res.status(404).json({ message: "Exam not found" });
-    }
-
-    return res.status(200).json(examFound);
+    return res.status(200).json(examFound || {});
   } catch (error) {
     console.error(`Error fetching exam: ${error.message}`);
     return res.status(500).json({
@@ -31,23 +31,23 @@ export const getExamFeedback = async (req, res) => {
       return res.status(401).json({ message: "User not authorized" });
     }
 
-    const { examId } = req.params;
+    const { quizId } = req.params;
 
-    if (!examId) {
-      return res.status(400).json({ message: "Missing exam id" });
+    if (!quizId) {
+      return res.status(400).json({ message: "Missing quiz id" });
     }
 
-    const examFound = await Exam.findOne({ _id: examId });
+    const scoreFound = await Score.findOne({ quiz: quizId, user: userId });
 
-    if (!examFound) {
-      return res.status(404).json({ message: "Exam not found" });
+    if (!scoreFound) {
+      return res.status(404).json({ message: "Exam score not found" });
     }
 
-    return res.status(200).json(examFound);
+    return res.status(200).json(scoreFound);
   } catch (error) {
-    console.error(`Error fetching exam: ${error.message}`);
+    console.error(`Error fetching exam feedback: ${error.message}`);
     return res.status(500).json({
-      message: `Error fetching exam: ${error.message}`,
+      message: `Error fetching exam feedback: ${error.message}`,
     });
   }
 };
