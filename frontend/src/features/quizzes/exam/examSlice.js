@@ -3,48 +3,35 @@ import { handleSliceError } from "../../redux.errorHandler.js";
 import examService from "./examService.js";
 
 const initialState = {
-  isLoading: false,
+  isLoading: true,
   isError: false,
   isSuccess: false,
   errorMessage: "",
   examData: {},
-  answers: [],
+  quizFeedback: {},
 };
-
-export const createExam = createAsyncThunk(
-  "exam/create",
-  async (quizId, thunkAPI) => {
-    try {
-      const token = thunkAPI.getState().auth.user.token;
-
-      const response = await examService.createExam(quizId, token);
-
-      return response.data;
-    } catch (error) {
-      handleSliceError(error);
-    }
-  }
-);
 
 export const getExam = createAsyncThunk("exam/get", async (_, thunkAPI) => {
   try {
     const token = thunkAPI.getState().auth.user.token;
 
     const response = await examService.getExam(token);
-    return response.data;
+
+    return response;
   } catch (error) {
     handleSliceError(error);
   }
 });
 
-export const finishExam = createAsyncThunk(
-  "exam/finish",
-  async (_, thunkAPI) => {
+export const getExamFeedback = createAsyncThunk(
+  "exam/getFeedback",
+  async (quizId, thunkAPI) => {
     try {
       const token = thunkAPI.getState().auth.user.token;
 
-      const response = await examService.finishExam(token);
-      return response.data;
+      const response = await examService.getExamFeedback(quizId, token);
+
+      return response;
     } catch (error) {
       handleSliceError(error);
     }
@@ -56,33 +43,20 @@ export const examSlice = createSlice({
   initialState,
   reducers: {
     resetExam: (state) => initialState,
+    createExam: (state, action) => {
+      state.examData = action.payload;
+    },
     updateExam: (state, action) => {
-      const { questionIndex, answer } = action.payload;
-
-      state.answers[questionIndex] = answer;
+      if (state.examData._id === action.payload._id) {
+        state.examData.answers = action.payload.answers;
+      }
+    },
+    finishExam: (state, action) => {
+      state.quizFeedback = action.payload;
     },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(createExam.pending, (state) => {
-        state.isLoading = true;
-        state.isSuccess = false;
-        state.isError = false;
-        state.errorMessage = "";
-      })
-      .addCase(createExam.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.isSuccess = true;
-        state.isError = false;
-        state.errorMessage = "";
-        state.examData = action.payload;
-      })
-      .addCase(createExam.rejected, (state, action) => {
-        state.isLoading = true;
-        state.isSuccess = false;
-        state.isError = false;
-        state.errorMessage = action.payload;
-      })
       .addCase(getExam.pending, (state) => {
         state.isLoading = true;
         state.isSuccess = false;
@@ -97,33 +71,34 @@ export const examSlice = createSlice({
         state.examData = action.payload;
       })
       .addCase(getExam.rejected, (state, action) => {
-        state.isLoading = true;
+        state.isLoading = false;
         state.isSuccess = false;
-        state.isError = false;
+        state.isError = true;
         state.errorMessage = action.payload;
       })
-      .addCase(finishExam.pending, (state) => {
+      .addCase(getExamFeedback.pending, (state) => {
         state.isLoading = true;
         state.isSuccess = false;
         state.isError = false;
         state.errorMessage = "";
       })
-      .addCase(finishExam.fulfilled, (state) => {
+      .addCase(getExamFeedback.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
         state.isError = false;
         state.errorMessage = "";
-        state.examData = {};
+        state.quizFeedback = action.payload;
       })
-      .addCase(finishExam.rejected, (state, action) => {
-        state.isLoading = true;
+      .addCase(getExamFeedback.rejected, (state, action) => {
+        state.isLoading = false;
         state.isSuccess = false;
-        state.isError = false;
+        state.isError = true;
         state.errorMessage = action.payload;
       });
   },
 });
 
-// const { resetExam, updateExam } = examSlice.actions;
-const { resetExam } = examSlice.actions;
+export const { resetExam, createExam, updateExam, finishExam } =
+  examSlice.actions;
+
 export default examSlice.reducer;

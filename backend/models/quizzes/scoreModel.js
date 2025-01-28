@@ -16,8 +16,19 @@ const scoreSchema = new mongoose.Schema({
     default: 0,
   },
   examFeedback: {
-    type: Array,
-    default: [],
+    type: {
+      randomizedQuestions: {
+        type: [{ question: String, choices: [String] }],
+        default: [],
+      },
+      userChoices: {
+        type: [
+          { userAnswer: { type: String }, correctAnswer: { type: String } },
+        ],
+        default: [],
+      },
+    },
+    default: {},
   },
 });
 
