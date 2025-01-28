@@ -3,35 +3,21 @@ import { handleSliceError } from "../../redux.errorHandler.js";
 import examService from "./examService.js";
 
 const initialState = {
-  isLoading: false,
+  isLoading: true,
   isError: false,
   isSuccess: false,
   errorMessage: "",
   examData: {},
-  answers: [],
+  quizFeedback: {},
 };
-
-export const createExam = createAsyncThunk(
-  "exam/create",
-  async (quizId, thunkAPI) => {
-    try {
-      const token = thunkAPI.getState().auth.user.token;
-
-      const response = await examService.createExam(quizId, token);
-
-      return response.data;
-    } catch (error) {
-      handleSliceError(error);
-    }
-  }
-);
 
 export const getExam = createAsyncThunk("exam/get", async (_, thunkAPI) => {
   try {
     const token = thunkAPI.getState().auth.user.token;
 
     const response = await examService.getExam(token);
-    return response.data;
+
+    return response;
   } catch (error) {
     handleSliceError(error);
   }
@@ -56,6 +42,9 @@ export const examSlice = createSlice({
   initialState,
   reducers: {
     resetExam: (state) => initialState,
+    createExam: (state, action) => {
+      state.examData = action.payload;
+    },
     updateExam: (state, action) => {
       const { questionIndex, answer } = action.payload;
 
@@ -64,25 +53,6 @@ export const examSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(createExam.pending, (state) => {
-        state.isLoading = true;
-        state.isSuccess = false;
-        state.isError = false;
-        state.errorMessage = "";
-      })
-      .addCase(createExam.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.isSuccess = true;
-        state.isError = false;
-        state.errorMessage = "";
-        state.examData = action.payload;
-      })
-      .addCase(createExam.rejected, (state, action) => {
-        state.isLoading = true;
-        state.isSuccess = false;
-        state.isError = false;
-        state.errorMessage = action.payload;
-      })
       .addCase(getExam.pending, (state) => {
         state.isLoading = true;
         state.isSuccess = false;
@@ -124,6 +94,7 @@ export const examSlice = createSlice({
   },
 });
 
-// const { resetExam, updateExam } = examSlice.actions;
-const { resetExam } = examSlice.actions;
+
+export const { resetExam, createExam, updateExam } = examSlice.actions;
+
 export default examSlice.reducer;
