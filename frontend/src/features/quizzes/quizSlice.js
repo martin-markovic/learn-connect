@@ -1,30 +1,15 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import quizService from "./quizService.js";
+import { handleSliceError } from "../redux.errorHandler.js";
 
 const initialState = {
   userQuizzes: [],
   classQuizzes: [],
+  userScores: {},
   isError: false,
   isLoading: false,
   isSuccess: false,
 };
-
-export const createQuiz = createAsyncThunk(
-  "quizzes/create",
-  async (quizData, thunkAPI) => {
-    try {
-      const token = thunkAPI.getState().auth.user.token;
-      return await quizService.createQuiz(quizData, token);
-    } catch (error) {
-      const message =
-        (error.response && error.response && error.response.data.message) ||
-        error.message ||
-        error.toString();
-
-      return thunkAPI.rejectWithValue(message);
-    }
-  }
-);
 
 export const getUserQuizzes = createAsyncThunk(
   "quizzes/getUser",
@@ -33,12 +18,7 @@ export const getUserQuizzes = createAsyncThunk(
       const token = thunkAPI.getState().auth.user.token;
       return await quizService.getUserQuizzes(token);
     } catch (error) {
-      const message =
-        (error.response && error.response && error.response.data.message) ||
-        error.message ||
-        error.toString();
-
-      return thunkAPI.rejectWithValue(message);
+      handleSliceError(error);
     }
   }
 );
@@ -50,12 +30,7 @@ export const getClassQuizzes = createAsyncThunk(
       const token = thunkAPI.getState().auth.user.token;
       return await quizService.getClassQuizzes(token);
     } catch (error) {
-      const message =
-        (error.response && error.response && error.response.data.message) ||
-        error.message ||
-        error.toString();
-
-      return thunkAPI.rejectWithValue(message);
+      handleSliceError(error);
     }
   }
 );
@@ -114,6 +89,13 @@ export const quizSlice = createSlice({
     addNewQuiz: (state, action) => {
       state.classQuizzes.push(action.payload);
       state.userQuizzes.push(action.payload);
+    },
+    addQuizScore: (state, action) => {
+      const { quizId, quizScore } = action.payload;
+
+      if (state.userScores[quizId] < quizScore) {
+        state.userScores[quizId] = quizScore;
+      }
     },
   },
   extraReducers: (builder) => {
@@ -174,5 +156,5 @@ export const quizSlice = createSlice({
   },
 });
 
-export const { resetQuizzes } = quizSlice.actions;
+export const { resetQuizzes, addNewQuiz, addQuizScore } = quizSlice.actions;
 export default quizSlice.reducer;
