@@ -119,7 +119,9 @@ export const finishExam = async (context, data) => {
       throw new Error("Exam not found");
     }
 
-    const examIsValid = examFound?.examFinish.getTime() - Date.now();
+    const examQuestions = examFound?.shuffledQuestions;
+
+    const examIsValid = examFound?.examFinish?.getTime() - Date.now();
 
     if (!examIsValid) {
       throw new Error("Exam has expired");
@@ -139,7 +141,7 @@ export const finishExam = async (context, data) => {
 
     let payloadScore = 0;
 
-    const examFeedback = [];
+    let userChoices = [];
 
     for (let i = 0; i < quizFound.questions.length; i++) {
       const q = quizFound.questions[i];
@@ -148,8 +150,8 @@ export const finishExam = async (context, data) => {
         payloadScore += 1;
       }
 
-      examFeedback[i] = {
-        userAnswer: examFound.answers[i],
+      userChoices[i] = {
+        userAnswer: examFound?.answers?.[i],
         correctAnswer: q.answer,
       };
     }
@@ -162,21 +164,27 @@ export const finishExam = async (context, data) => {
     let scorePayload;
 
     if (scoreFound) {
-      scorePayload = await Score.findByIdAndUpdate(
+      const updatedScore = await Score.findByIdAndUpdate(
         scoreFound?._id,
         {
           $set: {
-            examFeedback,
+            "examFeedback.userChoices": userChoices,
+            "examFeedback.randomizedQuestions": examQuestions,
             highScore: Math.max(scoreFound.highScore, payloadScore),
           },
         },
         { new: true }
       );
+
+      scorePayload = updatedScore;
     } else {
       const newScore = new Score({
         user: senderId,
         quiz: quizFound?._id,
-        examFeedback,
+        examFeedback: {
+          userChoices,
+          randomizedQuestions: examQuestions,
+        },
         highScore: payloadScore,
       });
 
