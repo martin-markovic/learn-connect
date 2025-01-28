@@ -33,7 +33,27 @@ const getExam = async (token) => {
       },
     };
 
-    const response = await axios.get(API_URL, config);
+    const response = await axios.get(API_URL + "/", config);
+
+    return response.data;
+  } catch (error) {
+    handleServiceError(error);
+  }
+};
+
+const getExamFeedback = async (quizId, token) => {
+  try {
+    if (!token) {
+      throw new Error("User is not authenticated, no token");
+    }
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    const response = await axios.get(`${API_URL}/feedback/${quizId}`, config);
 
     return response.data;
   } catch (error) {
@@ -44,6 +64,7 @@ const getExam = async (token) => {
 const examService = {
   createExam,
   getExam,
+  getExamFeedback,
 };
 
 export default examService;
