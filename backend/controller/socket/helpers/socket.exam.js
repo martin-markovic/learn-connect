@@ -188,10 +188,15 @@ export const finishExam = async (context, data) => {
         highScore: payloadScore,
       });
 
-      payloadScore = await newScore.save();
+      const updatedScore = await newScore.save();
+      scorePayload = updatedScore;
     }
 
-    context.emitEvent("sender", "exam finished", scorePayload);
+    const examPayload = { examId: examFound?._id, scorePayload };
+
+    await Exam.findByIdAndDelete({ _id: examFound?._id });
+
+    context.emitEvent("sender", "exam finished", examPayload);
   } catch (error) {
     console.error(
       `Error finishing exam ${data?.receiverId}:  ${error.message}`

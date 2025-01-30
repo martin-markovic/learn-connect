@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Exam from "../../models/quizzes/examModel.js";
 import Score from "../../models/quizzes/scoreModel.js";
 
@@ -37,7 +38,10 @@ export const getExamFeedback = async (req, res) => {
       return res.status(400).json({ message: "Missing quiz id" });
     }
 
-    const scoreFound = await Score.findOne({ quiz: quizId, user: userId });
+    const scoreFound = await Score.findOne({
+      quiz: new mongoose.Types.ObjectId(quizId),
+      user: new mongoose.Types.ObjectId(userId),
+    });
 
     if (!scoreFound) {
       return res.status(404).json({ message: "Exam score not found" });

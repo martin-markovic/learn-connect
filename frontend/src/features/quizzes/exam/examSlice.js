@@ -52,7 +52,10 @@ export const examSlice = createSlice({
       }
     },
     finishExam: (state, action) => {
-      state.quizFeedback = action.payload;
+      state.quizFeedback = action.payload?.scorePayload;
+      if (state.examData?._id === action.payload?.examId) {
+        state.examData = {};
+      }
     },
   },
   extraReducers: (builder) => {
