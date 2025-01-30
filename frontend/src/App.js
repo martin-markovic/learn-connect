@@ -19,6 +19,7 @@ import Quizzes from "./pages/Quizzes.jsx";
 import UserProfile from "./pages/UserProfile.jsx";
 import { setUser } from "./features/auth/authSlice.js";
 import Quiz from "./pages/Quiz.jsx";
+import Exam from "./components/quizzes/Exam.jsx";
 
 function App() {
   const dispatch = useDispatch();
@@ -87,6 +88,10 @@ function App() {
           <Route
             path="/quizzes/:quizId"
             element={token ? <Quiz /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/exam/:examId"
+            element={token ? <Exam /> : <Navigate to="/login" />}
           />
         </Routes>
       </Router>

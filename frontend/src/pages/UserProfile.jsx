@@ -50,12 +50,10 @@ function UserProfile() {
 
   useEffect(() => {
     socketEventManager.subscribe("friend request sent", (data) => {
-      console.log("FRQ sent event data: ", data);
       dispatch(newFriendRequest(data));
     });
 
     socketEventManager.subscribe("friend request received", (data) => {
-      console.log("FRQ received event data: ", data);
       dispatch(newFriendRequest(data));
 
       socketEventManager.handleEmitEvent("new notification", {
@@ -70,7 +68,6 @@ function UserProfile() {
     });
 
     socketEventManager.subscribe("friend request accepted", (data) => {
-      console.log("accepted request: ", data);
       dispatch(handleAccept(data));
 
       socketEventManager.handleEmitEvent("new notification", {
