@@ -1,73 +1,136 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { getClassQuizzes } from "../features/quizzes/quizSlice";
-import { createExam } from "../features/quizzes/exam/examSlice.js";
-import Exam from "../components/quizzes/Exam.jsx";
+import { getClassQuizzes, resetQuizzes } from "../features/quizzes/quizSlice";
+import {
+  createExam,
+  getExam,
+  getExamFeedback,
+  resetExam,
+} from "../features/quizzes/exam/examSlice.js";
+import QuizScore from "../components/quizzes/QuizScore.jsx";
+import socketEventManager from "../features/socket/socket.eventManager.js";
 
 function Quiz() {
-  const [quizData, setQuizData] = useState(null);
   const [isInProgress, setIsInProgress] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
   const { classQuizzes = [] } = useSelector((state) => state.quizzes);
+  const { user } = useSelector((state) => state.auth);
   const { quizId } = useParams();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  const { userScores = {} } = useSelector((state) => state.quizzes);
-
-  const { examData = {} } = useSelector((state) => state.exam);
-
-  useEffect(() => {
-    if (!quizData) {
-      dispatch(getClassQuizzes());
-    }
-  }, [dispatch, quizData]);
+  const { examData, quizFeedback } = useSelector((state) => state.exam);
 
   useEffect(() => {
-    const selectedQuiz = classQuizzes.find((quiz) => quiz._id === quizId);
+    socketEventManager.subscribe("exam created", (data) => {
+      dispatch(createExam(data));
+      if (data?._id) {
+        navigate(`/exam/${data?._id}`);
+      }
+    });
 
-    setQuizData(selectedQuiz);
-  }, [classQuizzes, quizId]);
+    return () => {
+      socketEventManager.unsubscribe("exam created");
+      dispatch(resetQuizzes());
+    };
+  }, [dispatch, navigate]);
 
   useEffect(() => {
-    if (examData._id) {
-      console.log("examdata found: ", examData);
-      setIsInProgress(true);
-    } else {
-      console.log("exam not found");
-      setIsInProgress(false);
+    dispatch(getClassQuizzes());
+
+    dispatch(getExamFeedback(quizId));
+
+    dispatch(getExam());
+
+    return () => {
+      dispatch(resetExam());
+    };
+  }, [dispatch, quizId]);
+
+  useEffect(() => {
+    if (examData?._id) {
+      setIsInProgress(examData?.isInProgress);
     }
   }, [examData]);
 
+  const handleStartQuiz = () => {
+    socketEventManager.handleEmitEvent("create exam", {
+      senderId: user?._id,
+      quizId,
+    });
+  };
+
   return (
     <div>
-      {quizData ? (
-        <div>
-          {isInProgress ? (
-            <Exam />
-          ) : (
+      {quizFeedback?._id ? (
+        showFeedback ? (
+          <QuizScore setShowFeedback={setShowFeedback} />
+        ) : (
+          <div>
             <div>
-              <h1>{quizData?.title}</h1>
-              <p>
-                {userScores[quizId]
-                  ? `Your highest score on this quiz: ${userScores[quizId]}`
-                  : "You have not taken this quiz yet"}
-              </p>
+              {classQuizzes?.length > 0 ? (
+                classQuizzes
+                  ?.filter((quiz) => quiz._id === quizId)
+                  .map((item, index) => (
+                    <div key={`quiz__description-${index}`}>
+                      <h1>{item.title}</h1>
+                      <span>{`time limit: ${item.timeLimit} minutes`}</span>
+                      <span>{`${item.questions.length} questions`}</span>
+                    </div>
+                  ))
+              ) : (
+                <p>Loading quizzes, please wait...</p>
+              )}
+            </div>
+            <div>
+              <span>
+                Your highest score: {quizFeedback?.highScore}{" "}
+                {quizFeedback?.highScore > 1 ? "points" : "point"}
+              </span>
+              <span>See the latest result</span>
               <button
                 type="button"
-                disabled={isInProgress}
                 onClick={() => {
-                  dispatch(createExam(quizId));
-                  setIsInProgress(true);
+                  setShowFeedback(true);
                 }}
               >
-                Start Exam
+                Show
               </button>
             </div>
-          )}
-        </div>
+          </div>
+        )
       ) : (
-        <p>No quiz data available</p>
+        <p>You have not taken this quiz yet</p>
       )}
+      {!showFeedback &&
+        (isInProgress ? (
+          <div>
+            <p>
+              Exam is currently in progress{" "}
+              <span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigate(`/exam/${examData?._id}`);
+                  }}
+                  disabled={!isInProgress}
+                >
+                  Click
+                </button>
+              </span>{" "}
+              to navigate to the exam page
+            </p>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={handleStartQuiz}
+            disabled={isInProgress}
+          >
+            Start Quiz
+          </button>
+        ))}
     </div>
   );
 }

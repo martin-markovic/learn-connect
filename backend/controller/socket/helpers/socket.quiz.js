@@ -4,7 +4,8 @@ import Quiz from "../../../models/quizzes/quizModel.js";
 
 export const createQuiz = async (context, data) => {
   try {
-    const { title, questions, timeLimit, classroomId } = data;
+    const { senderId, receiverId, quizData } = data;
+    const { title, questions, timeLimit, classroomId } = quizData;
 
     if (
       !title ||
@@ -16,22 +17,23 @@ export const createQuiz = async (context, data) => {
       throw new Error("Please add all fields");
     }
 
-    const user = await User.findById(req.user.id).populate("classrooms");
+    const userFound = await User.findById(senderId).populate("classrooms");
 
-    if (!user) {
+    if (!userFound) {
       throw new Error("User not found");
     }
 
-    const classroom = user.classrooms.find(
-      (c) => c._id.toString() === classroomId
+    const isEnrolled = userFound?.classrooms.find(
+      (c) => c._id.toString() === receiverId
     );
 
-    if (!classroom) {
-      throw new Error("User not enrolled in the specified classroom");
+    if (!isEnrolled) {
+      throw new Error(`User is not enrolled in the classroom ${receiverId}`);
     }
 
-    const classroomExists = await Classroom.findById(classroomId);
-    if (!classroomExists) {
+    const classroomFound = await Classroom.findById(receiverId);
+
+    if (!classroomFound) {
       throw new Error("Classroom not found");
     }
 
@@ -39,8 +41,8 @@ export const createQuiz = async (context, data) => {
       title,
       questions,
       timeLimit,
-      user: req.user.id,
-      classroom: classroomId,
+      createdBy: senderId,
+      classroom: receiverId,
     });
 
     context.emitEvent("sender", "new quiz created", quiz);
