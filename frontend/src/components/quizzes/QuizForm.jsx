@@ -104,60 +104,62 @@ function QuizForm({ quiz, onClose }) {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    try {
+      e.preventDefault();
 
-    const { title, classroomId, timeLimit, questions, editQuizId } = quizState;
+      const { title, classroomId, timeLimit, questions, editQuizId } =
+        quizState;
 
-
-    if (!title || !classroomId) {
-      toast.error("Please add all fields");
-      return;
-    }
-
-    if (!timeLimit || timeLimit < 3 || timeLimit > 10) {
-      toast.error(
-        "Please provide a valid time limit (between 3 and 10 minutes)."
-      );
-      return;
-    }
-
-    const quizLen = questions.length;
-
-    if (quizLen < 5 || quizLen > 20) {
-      toast.error("Please provide between 5 and 20 questions");
-      return;
-    }
-
-    for (let question of questions) {
-      if (
-        !question.question ||
-        question.choices.some((choice) => !choice) ||
-        !question.answer
-      ) {
-        toast.error(
-          "Please ensure all questions have a question text, choices, and an answer."
-        );
-        return;
+      if (!title || !classroomId) {
+        throw new Error("Please add all fields");
       }
+
+      if (!timeLimit || timeLimit < 3 || timeLimit > 10) {
+        throw new Error(
+          "Please provide a valid time limit (between 3 and 10 minutes)."
+        );
+      }
+
+      const quizLen = questions.length;
+
+      if (quizLen < 5 || quizLen > 20) {
+        throw new Error("Please provide between 5 and 20 questions");
+      }
+
+      for (let question of questions) {
+        if (
+          !question.question ||
+          question.choices.some((choice) => !choice) ||
+          !question.answer
+        ) {
+          throw new Error(
+            "Please ensure all questions have a question text, choices, and an answer."
+          );
+        }
+      }
+
+      const quizData = {
+        title,
+        classroomId,
+        questions,
+        timeLimit,
+      };
+
+      if (quizState.isEditing) {
+        dispatch(updateQuiz({ id: editQuizId, quizData }));
+      } else {
+        socketEventManager.handleEmitEvent("submit quiz", {
+          senderId: user?._id,
+          receiverId: classroomId,
+          quizData,
+        });
+      }
+
+      onClose();
+    } catch (error) {
+      console.error("Error submitting new quiz: ", error.message);
+      toast.error(`Error subbmitting new quiz: ${error.message}`);
     }
-
-    const quizData = {
-      title,
-      classroomId,
-      questions,
-      timeLimit,
-    };
-
-    if (quizState.isEditing) {
-      dispatch(updateQuiz({ id: editQuizId, quizData }));
-    } else {
-      socketEventManager.handleEmitEvent("submit quiz", {
-        senderId: user?._id,
-        quizData,
-      });
-    }
-
-    onClose();
   };
 
   const handleCancel = () => {
@@ -237,7 +239,7 @@ function QuizForm({ quiz, onClose }) {
             value={quizState.classroomId || ""}
             onChange={handleChange}
           >
-            <option value="" disabled="true"></option>
+            <option value="" disabled={true}></option>
             {classroomList.length > 0 ? (
               classroomList.map((classroom) => (
                 <option key={classroom._id} value={classroom._id}>
