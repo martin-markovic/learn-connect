@@ -70,11 +70,18 @@ function UserProfile() {
     socketEventManager.subscribe("friend request accepted", (data) => {
       dispatch(handleAccept(data));
 
-      socketEventManager.handleEmitEvent("new notification", {
-        senderId: data?.senderId,
-        receiverId: data?.receiverId,
-        notificationName: "friend request accepted",
-      });
+      if (data?.receiverId === user?._id) {
+        const notificationData = {
+          senderId: data?.receiverId,
+          receiverId: data?.senderId,
+          notificationName: "friend request accepted",
+        };
+
+        socketEventManager.handleEmitEvent(
+          "new notification",
+          notificationData
+        );
+      }
     });
 
     socketEventManager.subscribe("friend removed", (data) => {

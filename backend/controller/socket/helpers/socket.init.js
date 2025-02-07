@@ -28,7 +28,4 @@ export const createSocketContext = (socket, io) => ({
       }
     }
   },
-  broadcastEvent: (roomId, eventName, data) => {
-    socket.broadcast.to(roomId).emit(eventName, data);
-  },
 });

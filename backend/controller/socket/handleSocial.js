@@ -61,7 +61,7 @@ const handleSocialEvents = (context) => {
       const { senderId, receiverId, userResponse } = data;
 
       if (!senderId || !receiverId || !userResponse) {
-        throw new Error("Please provide valid room data");
+        throw new Error("Please provide valid request data");
       }
 
       const validStatuses = ["accepted", "declined"];
@@ -110,11 +110,14 @@ const handleSocialEvents = (context) => {
       context.emitEvent("sender", "friend request accepted", {
         _id: friendRequest?._id,
         status: userResponse,
+        receiverId: senderId,
+        senderId: receiverId,
       });
 
       context.emitEvent("receiver", "friend request accepted", {
         _id: friendRequest?._id,
-        receiverId: senderId,
+        senderId,
+        receiverId,
         status: userResponse,
       });
     } catch (error) {

@@ -1,3 +1,4 @@
+import Quiz from "../../../models/quizzes/quizModel.js";
 import Notification from "../../../models/users/notificationModel.js";
 import User from "../../../models/users/userModel.js";
 
@@ -25,7 +26,10 @@ export const markNotificationAsRead = async (context, data) => {
 
     await Notification.findByIdAndUpdate(
       notificationId,
-      { $addToSet: { readBy: senderId } },
+      {
+        $addToSet: { readBy: senderId },
+        $set: { expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) },
+      },
       { new: true }
     );
 
@@ -44,7 +48,10 @@ export const markAllNotificationsAsRead = async (context, data) => {
 
     const result = await Notification.updateMany(
       { readBy: { $ne: senderId } },
-      { $push: { readBy: senderId } }
+      {
+        $push: { readBy: senderId },
+        $set: { expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) },
+      }
     );
 
     if (result.nModified === 0) {
@@ -65,16 +72,27 @@ export const markAllNotificationsAsRead = async (context, data) => {
 };
 
 export const handleNewNotification = async (context, data) => {
-  const { senderId, receiverId, notificationName, quizScore, quizName } = data;
+  const { senderId, receiverId, notificationName, quizScore, quizId } = data;
 
   try {
-    const { name: senderName } = await User.findOne({
-      _id:
-        notificationName === "friend request accepted" ? receiverId : senderId,
+    const user = await User.findOne({
+      _id: senderId,
     }).select("name");
 
-    if (!senderName) {
+    if (!user) {
       throw new Error("User does not exist");
+    }
+
+    const { name: senderName } = user;
+    let quizName;
+
+    if (notificationName === "quiz graded") {
+      const quizFound = await Quiz.findOne({ _id: quizId });
+
+      if (!quizFound) {
+        throw new Error("Quiz not found");
+      }
+      quizName = quizFound?.title;
     }
 
     const notificationData = {
@@ -119,10 +137,6 @@ const generateNotificationMessage = (data) => {
 
   if (evtName === "friend request accepted") {
     return `${userName} accepted your friend request`;
-  }
-
-  if (evtName === "new quiz created") {
-    return `${userName} created a new quiz`;
   }
 
   if (evtName === "quiz graded") {

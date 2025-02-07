@@ -18,6 +18,11 @@ const notificationSchema = new mongoose.Schema({
     ref: "User",
     default: [],
   },
+  expiresAt: {
+    type: Date,
+    default: () => new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+    index: { expires: 0 },
+  },
 });
 
 const Notification = mongoose.model("Notification", notificationSchema);
