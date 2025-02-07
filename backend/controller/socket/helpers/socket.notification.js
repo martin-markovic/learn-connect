@@ -74,12 +74,11 @@ export const handleNewNotification = async (context, data) => {
   const { senderId, receiverId, notificationName, quizScore, quizName } = data;
 
   try {
-    const { name: senderName } = await User.findOne({
-      _id:
-        notificationName === "friend request accepted" ? receiverId : senderId,
+    const user = await User.findOne({
+      _id: senderId,
     }).select("name");
 
-    if (!senderName) {
+    if (!user) {
       throw new Error("User does not exist");
     }
 
