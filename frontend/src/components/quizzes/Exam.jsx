@@ -70,6 +70,13 @@ function Exam() {
     socketEventManager.subscribe("exam finished", (data) => {
       dispatch(finishExam(data));
 
+      socketEventManager.handleEmitEvent("new notification", {
+        senderId: data?.scorePayload?.user,
+        quizScore: data?.scorePayload?.highScore,
+        quizId: data?.scorePayload?.quiz,
+        notificationName: "quiz graded",
+      });
+
       navigate(`/quizzes/${data?.scorePayload?.quiz}`);
     });
 
