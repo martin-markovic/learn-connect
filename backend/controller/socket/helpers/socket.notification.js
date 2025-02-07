@@ -25,7 +25,10 @@ export const markNotificationAsRead = async (context, data) => {
 
     await Notification.findByIdAndUpdate(
       notificationId,
-      { $addToSet: { readBy: senderId } },
+      {
+        $addToSet: { readBy: senderId },
+        $set: { expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) },
+      },
       { new: true }
     );
 
@@ -44,7 +47,10 @@ export const markAllNotificationsAsRead = async (context, data) => {
 
     const result = await Notification.updateMany(
       { readBy: { $ne: senderId } },
-      { $push: { readBy: senderId } }
+      {
+        $push: { readBy: senderId },
+        $set: { expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) },
+      }
     );
 
     if (result.nModified === 0) {
