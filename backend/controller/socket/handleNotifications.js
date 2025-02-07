@@ -16,10 +16,6 @@ const handleNotificationEvents = (context) => {
   context.socket.on("new notification", async (data) => {
     await handleNewNotification(context, data);
   });
-
-  context.socket.on("simple event", (data) => {
-    console.log("simple event data received: ", data);
-  });
 };
 
 export default handleNotificationEvents;

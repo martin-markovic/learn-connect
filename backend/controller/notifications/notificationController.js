@@ -13,12 +13,7 @@ export const getNotifications = async (req, res) => {
       readBy: { $nin: [userId] },
     });
 
-    if (!unreadNotifications.length) {
-      console.log("No unreadNotifications fetched");
-      return res.status(200).json([]);
-    }
-
-    return res.status(200).json(unreadNotifications);
+    return res.status(200).json(unreadNotifications || []);
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
