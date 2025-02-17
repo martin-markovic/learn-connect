@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import socketEventManager from "../../features/socket/socket.eventManager.js";
+import { ChatContext } from "../../context/chatContext.js";
 
   const [listOpen, setListOpen] = useState(false);
   const {
@@ -10,6 +11,7 @@ import socketEventManager from "../../features/socket/socket.eventManager.js";
   } = useSelector((state) => state.friends);
   const { user } = useSelector((state) => state.auth);
 
+  const { setSelectedChat } = useContext(ChatContext);
   const dispatch = useDispatch();
 
   const handleSelect = (receiver) => {

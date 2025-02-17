@@ -1,5 +1,6 @@
-import { useState, useRef, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { ChatContext } from "../../context/chatContext.js";
+
 import socketEventManager from "../../features/socket/socket.eventManager.js";
 import {
   removeMessages,
@@ -10,6 +11,14 @@ import {
 
   const dispatch = useDispatch();
 
+  const {
+    selectedChat,
+    activity,
+    setActivity,
+    scrollToBottom,
+    setScrollToBottom,
+  } = useContext(ChatContext);
+
   const { user } = useSelector((state) => state.auth);
   const chat = useSelector((state) => state.chat.chat);
 
@@ -19,7 +28,14 @@ import {
 
       }
 
+  useEffect(() => {
+    if (scrollToBottom) {
+      if (chatEndRef.current) {
+        chatEndRef.current.scrollIntoView({ behavior: "smooth" });
       }
+      setScrollToBottom(false);
+    }
+  }, [scrollToBottom]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
