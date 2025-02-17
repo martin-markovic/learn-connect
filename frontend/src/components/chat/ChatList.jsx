@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { getFriendList } from "../../features/friend/friendSlice.js";
 import socketEventManager from "../../features/socket/socket.eventManager.js";
 
-function ChatList({ selectedChat, setSelectedChat }) {
   const [listOpen, setListOpen] = useState(false);
   const {
     isError,
@@ -22,10 +20,6 @@ function ChatList({ selectedChat, setSelectedChat }) {
       receiverId: receiver.id,
     });
   };
-
-  useEffect(() => {
-    dispatch(getFriendList());
-  }, [dispatch]);
 
   return (
     <div>
