@@ -1,77 +1,41 @@
-import { useState, useRef, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import {
-  resetChat,
-  addMessage,
-  getMessages,
-  removeMessages,
-  updateMessageStatus,
-} from "../../features/chat/chatSlice.js";
-import socketEventManager from "../../features/socket/socket.eventManager.js";
+import { ChatContext } from "../../context/chatContext.js";
 
-const ChatDisplay = ({ selectedChat }) => {
+import socketEventManager from "../../features/socket/socket.eventManager.js";
+import {
+  removeMessages,
+} from "../../features/chat/chatSlice.js";
+
   const [input, setInput] = useState("");
-  const [activity, setActivity] = useState("");
-  const activityTimer = useRef(null);
   const chatEndRef = useRef(null);
 
   const dispatch = useDispatch();
+
+  const {
+    selectedChat,
+    activity,
+    setActivity,
+    scrollToBottom,
+    setScrollToBottom,
+  } = useContext(ChatContext);
 
   const { user } = useSelector((state) => state.auth);
   const chat = useSelector((state) => state.chat.chat);
 
   useEffect(() => {
-    if (user?._id) {
-      dispatch(getMessages(user?._id));
-    }
-  }, [dispatch, user?._id]);
+    if (!isUnmounting.current) return;
+
+
+      }
 
   useEffect(() => {
-    socketEventManager.subscribe("new message", (data) => {
-      dispatch(addMessage(data));
-
+    if (scrollToBottom) {
       if (chatEndRef.current) {
         chatEndRef.current.scrollIntoView({ behavior: "smooth" });
       }
-
-      setActivity("");
-
-      if (selectedChat && selectedChat.id === data.senderId) {
-        socketEventManager.handleEmitEvent("status update", {
-          senderId: data?.senderId,
-          receiverId: data?.receiverId,
-          messageId: data?._id,
-        });
-      }
-    });
-
-    socketEventManager.subscribe("chat activity", (data) => {
-      const { senderName } = data;
-
-      setActivity(`${senderName} is typing...`);
-
-      if (activityTimer.current) clearTimeout(activityTimer.current);
-      activityTimer.current = setTimeout(() => {
-        setActivity("");
-      }, 3000);
-    });
-
-    socketEventManager.subscribe("messages read", (data) => {
-      dispatch(
-        updateMessageStatus({
-          chatId: data?.chatId,
-          messageIds: data?.messageIds,
-        })
-      );
-    });
-
-    return () => {
-      dispatch(resetChat());
-      socketEventManager.unsubscribe("chat activity");
-      socketEventManager.unsubscribe("new message");
-      socketEventManager.unsubscribe("messages read");
-    };
-  }, [dispatch, selectedChat, user?._id]);
+      setScrollToBottom(false);
+    }
+  }, [scrollToBottom]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
