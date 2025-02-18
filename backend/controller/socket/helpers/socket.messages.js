@@ -63,7 +63,6 @@ export const sendMessage = async (context, data) => {
         .populate("receiver", "name");
 
       messagePayload = {
-        chatId: chatFound._id,
         _id: populatedMessage?._id.toString(),
         senderId: populatedMessage.sender._id.toString(),
         senderName: populatedMessage.sender.name,
@@ -83,35 +82,33 @@ export const sendMessage = async (context, data) => {
   }
 };
 
-export const handleStatusUpdate = async (context, data) => {
+export const handleChatOpen = async (context, data) => {
   try {
-    const { senderId, receiverId, messageId } = data;
+    const { senderId, receiverId } = data;
 
     const chatFound = await Chat.findOne({
       participants: { $all: [senderId, receiverId] },
     });
 
-    if (!chatFound) {
+    if (!chatFound || !chatFound?.conversation?.length) {
       throw new Error("Chat not found");
     }
 
-    let unreadMessages;
-
-    if (messageId) {
-      unreadMessages = await Conversation.find({ _id: messageId });
-    } else {
-      unreadMessages = await Conversation.find({
-        sender: receiverId,
-        receiver: senderId,
-        isRead: false,
-      });
-    }
-
-    const messageIds = unreadMessages.map((msg) => msg._id.toString());
-
     await Conversation.updateMany(
-      { _id: { $in: messageIds } },
+      { _id: { $in: chatFound.conversation }, isRead: false },
       { $set: { isRead: true } }
+    );
+
+
+    context.emitEvent("sender", "messages read", { friendId: receiverId });
+
+    context.emitEvent("receiver", "messages read", {
+      friendId: senderId,
+      receiverId,
+    });
+  } catch (error) {
+    console.log("Error emitting conversation read: ", error.message);
+    context.socket.emit("sender", "error", { message: error.message });
     );
 
     context.emitEvent(messageId ? "sender" : "receiver", "messages read", {
