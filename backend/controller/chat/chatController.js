@@ -19,11 +19,11 @@ export const getMessages = async (req, res) => {
       })
       .exec();
 
-    if (!userChats || userChats.length === 0) {
+    if (!userChats) {
       return res.status(200).json([]);
     }
 
-    const formattedChats = userChats.map((chat) => {
+    const formattedPayload = userChats.map((chat) => {
       const formattedMessages = chat.conversation.map((message) => ({
         _id: message._id,
         text: message.text,
@@ -35,13 +35,19 @@ export const getMessages = async (req, res) => {
         isRead: message.isRead,
       }));
 
+      const firstMessage = chat.conversation[0];
+      const friendId =
+        String(userId) === String(firstMessage?.sender?._id)
+          ? firstMessage?.receiver?._id
+          : firstMessage?.sender?._id;
+
       return {
-        chatId: chat._id.toString(),
+        friendId,
         messages: formattedMessages,
       };
     });
 
-    return res.status(200).json(formattedChats);
+    return res.status(200).json(formattedPayload);
   } catch (error) {
     return res.status(500).json({
       message: error.message,
