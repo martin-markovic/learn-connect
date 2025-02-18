@@ -109,18 +109,33 @@ export const handleChatOpen = async (context, data) => {
   } catch (error) {
     console.log("Error emitting conversation read: ", error.message);
     context.socket.emit("sender", "error", { message: error.message });
+  }
+};
+
+export const handleMarkAsRead = async (context, data) => {
+  try {
+    const { senderId, receiverId, messageId } = data;
+
+    if (!messageId) {
+      throw new Error("Invalid message id");
+    }
+
+    const updatedMessage = await Conversation.findByIdAndUpdate(
+      messageId,
+      { isRead: true },
+      { new: true }
     );
 
-    context.emitEvent(messageId ? "sender" : "receiver", "messages read", {
-      receiverId: receiverId.toString(),
-      chatId: chatFound?._id.toString(),
-      messageIds,
+    context.emitEvent("sender", "message seen", {
+      messageId: updatedMessage?._id,
+      senderId,
+      receiverId,
     });
 
-    context.emitEvent(messageId ? "receiver" : "sender", "messages read", {
-      receiverId: senderId.toString(),
-      chatId: chatFound?._id.toString(),
-      messageIds,
+    context.emitEvent("receiver", "message seen", {
+      messageId: updatedMessage?._id,
+      senderId,
+      receiverId,
     });
   } catch (error) {
     console.log("Error emitting conversation read: ", error.message);

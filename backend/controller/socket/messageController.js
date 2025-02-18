@@ -1,6 +1,7 @@
 import {
   sendMessage,
-  handleStatusUpdate,
+  handleMarkAsRead,
+  handleChatOpen,
   handleTyping,
 } from "./helpers/socket.messages.js";
 import validateFriendship from "../../middleware/socialMiddleware.js";
@@ -26,10 +27,20 @@ const handleMessages = (context) => {
     }
   });
 
-  context.socket.on("status update", async (data) => {
+  context.socket.on("message read", async (data) => {
     try {
       validateFriendship(data, async () => {
-        await handleStatusUpdate(context, data);
+        await handleMarkAsRead(context, data);
+      });
+    } catch (error) {
+      console.error("Error emitting user typing event: ", error.message);
+    }
+  });
+
+  context.socket.on("open chat", async (data) => {
+    try {
+      validateFriendship(data, async () => {
+        await handleChatOpen(context, data);
       });
     } catch (error) {
       console.error("Error emitting user typing event: ", error.message);
