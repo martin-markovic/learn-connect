@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { getUserList } from "../../features/friend/friendSlice";
+import { getUserList, resetUserList } from "../../features/friend/friendSlice";
 
 export default function FriendSearch() {
   const [input, setInput] = useState("");
@@ -14,6 +14,10 @@ export default function FriendSearch() {
 
   useEffect(() => {
     dispatch(getUserList());
+
+    return () => {
+      dispatch(resetUserList());
+    };
   }, [dispatch]);
 
   const handleChange = (e) => {

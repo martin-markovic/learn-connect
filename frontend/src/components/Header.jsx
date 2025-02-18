@@ -9,6 +9,10 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logoutUser, resetUser } from "../features/auth/authSlice.js";
 import { resetQuizzes } from "../features/quizzes/quizSlice.js";
+import { resetClassroom } from "../features/classroom/classroomSlice.js";
+import { resetChat } from "../features/chat/chatSlice.js";
+import { resetUserList } from "../features/friend/friendSlice.js";
+import { resetExam } from "../features/quizzes/exam/examSlice.js";
 
 function Header() {
   const navigate = useNavigate();
@@ -20,6 +24,10 @@ function Header() {
     dispatch(logoutUser());
     dispatch(resetQuizzes());
     dispatch(resetUser());
+    dispatch(resetChat());
+    dispatch(resetClassroom());
+    dispatch(resetUserList());
+    dispatch(resetExam());
     navigate("/login");
   };
 

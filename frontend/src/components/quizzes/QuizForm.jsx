@@ -2,7 +2,10 @@ import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { updateQuiz } from "../../features/quizzes/quizSlice.js";
 import { toast } from "react-toastify";
-import { getClassroomList } from "../../features/classroom/classroomSlice.js";
+import {
+  resetClassroom,
+  getClassroomList,
+} from "../../features/classroom/classroomSlice.js";
 import socketEventManager from "../../features/socket/socket.eventManager.js";
 
 const initialQuestionState = {
@@ -57,6 +60,10 @@ function QuizForm({ quiz, onClose }) {
 
   useEffect(() => {
     dispatch(getClassroomList());
+
+    return () => {
+      dispatch(resetClassroom());
+    };
   }, [dispatch]);
 
   const handleChange = (e) => {
