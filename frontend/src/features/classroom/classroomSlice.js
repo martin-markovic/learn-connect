@@ -143,4 +143,6 @@ const classroomSlice = createSlice({
   },
 });
 
+export const { resetClassroom } = classroomSlice.actions;
+
 export default classroomSlice.reducer;

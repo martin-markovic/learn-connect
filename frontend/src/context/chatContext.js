@@ -1,9 +1,8 @@
-import { createContext, useState, useEffect, useRef } from "react";
+import { createContext, useState, useEffect, useRef, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
 
 import socketEventManager from "../features/socket/socket.eventManager.js";
 import {
-  resetChat,
   addMessage,
   markAsRead,
   markAllAsRead,
@@ -13,10 +12,10 @@ const ChatContext = createContext();
 
 const ChatProvider = ({ children }) => {
   const [selectedChat, setSelectedChat] = useState(null);
-
   const [activity, setActivity] = useState("");
   const [scrollToBottom, setScrollToBottom] = useState(false);
 
+  const selectedChatRef = useRef(null);
   const activityTimer = useRef(null);
   const isInitialized = useRef(false);
 
@@ -24,9 +23,11 @@ const ChatProvider = ({ children }) => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if (isInitialized.current) return;
+    selectedChatRef.current = selectedChat;
+  }, [selectedChat]);
 
-    socketEventManager.subscribe("new message", (data) => {
+  const handleNewMessage = useCallback(
+    (data) => {
       const messagePayload = {
         friendId:
           data?.senderId === user?._id ? data?.receiverId : data?.senderId,
@@ -35,20 +36,26 @@ const ChatProvider = ({ children }) => {
 
       dispatch(addMessage(messagePayload));
 
-      setScrollToBottom(true);
+      setScrollToBottom((prevState) => !prevState);
 
       setActivity("");
 
-      if (selectedChat && data?.senderId === selectedChat) {
+      if (
+        selectedChatRef.current &&
+        data?.senderId === selectedChatRef.current
+      ) {
         socketEventManager.handleEmitEvent("message read", {
           senderId: user?._id,
           receiverId: data?.senderId,
           messageId: data?._id,
         });
       }
-    });
+    },
+    [dispatch]
+  );
 
-    socketEventManager.subscribe("message seen", (data) => {
+  const handleMarkAsRead = useCallback(
+    (data) => {
       dispatch(
         markAsRead({
           messageId: data?.messageId,
@@ -56,35 +63,69 @@ const ChatProvider = ({ children }) => {
             data?.senderId === user?._id ? data?.receiverId : data?.senderId,
         })
       );
-    });
+    },
+    [dispatch]
+  );
 
-    socketEventManager.subscribe("chat activity", (data) => {
-      const { senderName } = data;
+  const handleChatActivity = useCallback((data) => {
+    const { senderName } = data;
 
-      setActivity(`${senderName} is typing...`);
+    setActivity(`${senderName} is typing...`);
 
-      if (activityTimer.current) clearTimeout(activityTimer.current);
-      activityTimer.current = setTimeout(() => {
-        setActivity("");
-      }, 3000);
-    });
+    if (activityTimer.current) clearTimeout(activityTimer.current);
+    activityTimer.current = setTimeout(() => {
+      setActivity("");
+    }, 3000);
+  }, []);
 
-    socketEventManager.subscribe("messages read", (data) => {
+  const handleMarkAllAsRead = useCallback(
+    (data) => {
       dispatch(markAllAsRead(data));
+    },
+    [dispatch]
+  );
+
+  useEffect(() => {
+    if (!user?._id) {
+      isInitialized.current = false;
+      return;
+    }
+
+    if (isInitialized.current || !user?._id) return;
+
+    const subscriptions = [
+      { event: "new message", handler: handleNewMessage },
+      { event: "message seen", handler: handleMarkAsRead },
+      { event: "chat activity", handler: handleChatActivity },
+      { event: "messages read", handler: handleMarkAllAsRead },
+    ];
+
+    subscriptions.forEach(({ event, handler }) => {
+      socketEventManager.subscribe(event, handler);
     });
 
     isInitialized.current = true;
 
     return () => {
-      socketEventManager.unsubscribe("new message");
-      socketEventManager.unsubscribe("message seen");
-      socketEventManager.unsubscribe("chat activity");
-      socketEventManager.unsubscribe("messages read");
-
+      subscriptions.forEach(({ event }) => {
+        socketEventManager.unsubscribe(event);
+      });
       isInitialized.current = false;
     };
-  }, [dispatch, user?._id]);
+  }, [
+    dispatch,
+    user?._id,
+    handleNewMessage,
+    handleMarkAsRead,
+    handleChatActivity,
+    handleMarkAllAsRead,
+  ]);
 
+  useEffect(() => {
+    if (!user?._id) {
+      isInitialized.current = false;
+    }
+  }, [user?._id]);
 
   const chatState = {
     selectedChat,

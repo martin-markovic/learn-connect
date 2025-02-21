@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import {
   getExam,
   getExamFeedback,
+  resetExam,
 } from "../../features/quizzes/exam/examSlice";
 
 function QuizScore({ setShowFeedback }) {
@@ -16,6 +17,10 @@ function QuizScore({ setShowFeedback }) {
   useEffect(() => {
     dispatch(getExamFeedback(quizId));
     dispatch(getExam());
+
+    return () => {
+      dispatch(resetExam);
+    };
   }, [dispatch, quizId]);
 
   return (

@@ -4,6 +4,7 @@ import {
   getClassroomList,
   joinClassroom,
   leaveClassroom,
+  resetClassroom,
 } from "../../features/classroom/classroomSlice.js";
 import { toast } from "react-toastify";
 
@@ -20,10 +21,12 @@ function Classroom() {
   } = useSelector((state) => state.classroom);
 
   useEffect(() => {
-    if (classroomList.length === 0) {
-      dispatch(getClassroomList());
-    }
-  }, [dispatch, classroomList.length]);
+    dispatch(getClassroomList());
+
+    return () => {
+      dispatch(resetClassroom());
+    };
+  }, [dispatch]);
 
   useEffect(() => {
     if (isError && errorMessage) {

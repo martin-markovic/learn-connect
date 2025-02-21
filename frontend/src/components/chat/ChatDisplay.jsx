@@ -33,7 +33,7 @@ import {
       if (chatEndRef.current) {
         chatEndRef.current.scrollIntoView({ behavior: "smooth" });
       }
-      setScrollToBottom(false);
+      setScrollToBottom((prevState) => !prevState);
     }
   }, [scrollToBottom]);
 
