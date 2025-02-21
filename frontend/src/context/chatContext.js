@@ -23,7 +23,8 @@ const ChatProvider = ({ children }) => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if (isInitialized.current) return;
+    selectedChatRef.current = selectedChat;
+  }, [selectedChat]);
 
   const handleNewMessage = useCallback(
     (data) => {
@@ -35,7 +36,7 @@ const ChatProvider = ({ children }) => {
 
       dispatch(addMessage(messagePayload));
 
-      setScrollToBottom(true);
+      setScrollToBottom((prevState) => !prevState);
 
       setActivity("");
 
@@ -120,6 +121,11 @@ const ChatProvider = ({ children }) => {
     handleMarkAllAsRead,
   ]);
 
+  useEffect(() => {
+    if (!user?._id) {
+      isInitialized.current = false;
+    }
+  }, [user?._id]);
 
   const chatState = {
     selectedChat,
