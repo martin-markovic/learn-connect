@@ -8,6 +8,7 @@ class EventManager {
   setSocketInstance(socketInstance) {
     if (!socketInstance) {
       console.error("Socket instance is not available");
+      this.socket = null;
       return;
     }
 
@@ -25,12 +26,25 @@ class EventManager {
         `Socket not initialized. Queuing subscription for event: ${event}`
       );
 
-      this.pendingSubscriptions.push({ event, listener });
+      if (
+        !this.pendingSubscriptions.some(
+          (sub) => sub.event === event && sub.listener === listener
+        )
+      ) {
+        this.pendingSubscriptions.push({ event, listener });
+      }
       return;
     }
 
-    this.socket.on(event, listener);
+    if (this.events[event] === listener) {
+      console.log(`Listener for event ${event} is already subscribed.`);
+      return;
+    }
+
+    this.unsubscribe(event);
+
     this.events[event] = listener;
+    this.socket.on(event, listener);
   }
 
   unsubscribe(event) {

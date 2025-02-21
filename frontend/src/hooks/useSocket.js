@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import io from "socket.io-client";
+import socketEventManager from "../features/socket/socket.eventManager.js";
 
 const useSocket = (token) => {
   const [socketInstance, setSocketInstance] = useState(null);
@@ -20,19 +21,23 @@ const useSocket = (token) => {
     });
 
     socket.on("connect", () => {
-      console.log("Client connected to socket");
       setSocketInstance(socket);
+      socketEventManager.setSocketInstance(socket);
     });
 
     socket.on("disconnect", () => {
-      console.log("Socket disconnected");
       setSocketInstance(null);
+      socketEventManager.setSocketInstance(null);
     });
 
     return () => {
-      socket.off("connect");
-      socket.off("disconnect");
-      socket.close();
+      if (socket) {
+        socket.off("connect");
+        socket.off("disconnect");
+        socket.close();
+      }
+      setSocketInstance(null);
+      socketEventManager.setSocketInstance(null);
     };
   }, [token]);
 
