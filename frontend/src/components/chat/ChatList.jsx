@@ -65,9 +65,17 @@ function ChatList() {
                       style={{
                         cursor: "pointer",
                       }}
-                      onClick={() => handleSelect(friend)}
+                      onClick={() =>
+                        handleSelect(
+                          entry.senderId === user?._id
+                            ? entry.receiverId
+                            : entry.senderId
+                        )
+                      }
                     >
-                      {friend?.name || "Unnamed friend"}
+                      {entry.senderId === user?._id
+                        ? entry.receiverName
+                        : entry.senderName}
                     </li>
                   );
                 })}

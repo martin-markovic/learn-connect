@@ -101,35 +101,29 @@ import {
       <h3>Chat with {selectedChat?.name}</h3>
 
       <div className="content__scrollable">
-        {Object.keys(chat || {}).map((chatId) => {
-          return (
-            <ul key={chatId}>
-              {chat[chatId] && chat[chatId]?.length > 0 ? (
-                chat[chatId]?.map((message) => (
-                  <li
-                    key={message?._id}
-                    style={{
-                      marginRight: "1em",
-                      textAlign:
-                        message.senderId === user?._id ? "right" : "left",
-                    }}
-                  >
-                    {message.senderId !== user?._id && (
-                      <span>
-                        <strong>{message?.senderName}</strong>:{" "}
-                      </span>
-                    )}
-                    <p>{message.text}</p>
-                    <span>{message.isRead ? "read" : "sent"}</span>
-                  </li>
-                ))
-              ) : (
-                <div>No messages yet.</div>
-              )}
-            </ul>
-          );
-        })}
-        <div ref={chatEndRef} />
+        <ul>
+          {chat[selectedChat] && chat[selectedChat]?.length > 0 ? (
+            chat[selectedChat]?.map((message) => (
+              <li
+                key={message?._id}
+                style={{
+                  marginRight: "1em",
+                  textAlign: message?.senderId === user?._id ? "right" : "left",
+                }}
+              >
+                {message?.senderId !== user?._id && (
+                  <span>
+                    <strong>{message?.senderName}</strong>:{" "}
+                  </span>
+                )}
+                <p>{message?.text}</p>
+                <span>{message?.isRead ? "read" : "sent"}</span>
+              </li>
+            ))
+          ) : (
+            <div>No messages yet.</div>
+          )}
+        </ul>
       </div>
       <button onClick={handleRemove}>Delete Conversation</button>
       <form onSubmit={handleSubmit}>
