@@ -3,7 +3,7 @@ import { handleSliceError } from "../../redux.errorHandler.js";
 import examService from "./examService.js";
 
 const initialState = {
-  isLoading: true,
+  isLoading: false,
   isError: false,
   isSuccess: false,
   errorMessage: "",

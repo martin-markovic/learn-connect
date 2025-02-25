@@ -40,8 +40,6 @@ export default function FriendSearch() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    console.log("user list: ", userList);
   };
 
   const handleVisit = (userId) => {
