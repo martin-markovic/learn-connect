@@ -98,10 +98,10 @@ function Classroom() {
               <option value="" disabled></option>
               {classroomList.map((classroom) => (
                 <option
-                  key={`classroom-${classroom._id}`}
-                  value={classroom._id}
+                  key={`classroom-${classroom?._id}`}
+                  value={classroom?._id}
                 >
-                  {classroom.name}
+                  {classroom?.name}?
                 </option>
               ))}
             </select>
