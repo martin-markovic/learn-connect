@@ -60,25 +60,27 @@ const chatSlice = createSlice({
   reducers: {
     resetChat: (state) => initialState,
     addMessage: (state, action) => {
-      const { chatId, ...messageData } = action.payload;
+      const { friendId, data } = action.payload;
 
-      if (!state.chat[chatId]) {
-        state.chat[chatId] = [];
+      if (!state.chat[friendId]) {
+        state.chat[friendId] = [];
       }
 
-      state.chat[chatId].push(messageData);
+      state.chat[friendId].push(data);
     },
-    updateMessageStatus: (state, action) => {
-      const { chatId, messageIds } = action.payload;
+    markAsRead: (state, action) => {
+      const { messageId, friendId } = action.payload;
 
-      if (state.chat[chatId]) {
-        state.chat[chatId] = state.chat[chatId].map((message) => {
-          if (messageIds.includes(message._id)) {
-            return { ...message, isRead: true };
-          }
-          return message;
-        });
-      }
+      state.chat[friendId] = state.chat[friendId].map((message) =>
+        message._id === messageId ? { ...message, isRead: true } : message
+      );
+    },
+    markAllAsRead: (state, action) => {
+      state.chat[action.payload.friendId] = state.chat[
+        action.payload.friendId
+      ].map((message) =>
+        message.isRead !== true ? { ...message, isRead: true } : message
+      );
     },
   },
   extraReducers: (builder) => {
@@ -88,12 +90,14 @@ const chatSlice = createSlice({
         state.errorMessage = "";
       })
       .addCase(getMessages.fulfilled, (state, action) => {
+        state.errorMessage = "";
+        action.payload.forEach(({ friendId, messages }) => {
+          if (friendId) {
+            state.chat[friendId] = messages;
+          }
+        });
         state.isLoading = false;
         state.isSuccess = true;
-        state.errorMessage = "";
-        action.payload.forEach(({ chatId, messages }) => {
-          state.chat = { ...state.chat, [chatId]: messages };
-        });
       })
       .addCase(getMessages.rejected, (state, action) => {
         state.isSuccess = false;
@@ -108,8 +112,7 @@ const chatSlice = createSlice({
         state.isLoading = false;
         state.isSuccess = true;
         state.errorMessage = "";
-        const chatId = action.payload;
-        state.chat[chatId] = [];
+        state.chat[action.payload.chatId] = [];
       })
       .addCase(removeMessages.rejected, (state, action) => {
         state.isSuccess = false;
@@ -119,6 +122,7 @@ const chatSlice = createSlice({
   },
 });
 
-export const { resetChat, addMessage, updateMessageStatus } = chatSlice.actions;
+export const { resetChat, addMessage, markAsRead, markAllAsRead } =
+  chatSlice.actions;
 
 export default chatSlice.reducer;
