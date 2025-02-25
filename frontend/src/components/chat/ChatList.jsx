@@ -1,8 +1,12 @@
 import { useContext, useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
+
 import socketEventManager from "../../features/socket/socket.eventManager.js";
+import { getFriendList } from "../../features/friend/friendSlice.js";
+import { getMessages } from "../../features/chat/chatSlice.js";
 import { ChatContext } from "../../context/chatContext.js";
 
+function ChatList() {
   const [listOpen, setListOpen] = useState(false);
   const {
     isError,
@@ -12,14 +16,20 @@ import { ChatContext } from "../../context/chatContext.js";
   const { user } = useSelector((state) => state.auth);
 
   const { setSelectedChat } = useContext(ChatContext);
+
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(getFriendList());
+    dispatch(getMessages());
+  }, [dispatch, friendList]);
 
   const handleSelect = (receiver) => {
     setSelectedChat(receiver);
 
-    socketEventManager.handleEmitEvent("status update", {
+    socketEventManager.handleEmitEvent("open chat", {
       senderId: user?._id,
-      receiverId: receiver.id,
+      receiverId: receiver,
     });
   };
 
@@ -48,14 +58,12 @@ import { ChatContext } from "../../context/chatContext.js";
             <div>
               <h3>Your Friends:</h3>
               <ul>
-                {friendList.map((friend) => {
+                {friendList.map((entry, index) => {
                   return (
                     <li
-                      key={`chat-${friend?._id}`}
+                      key={`chat-${index}`}
                       style={{
                         cursor: "pointer",
-                        fontWeight:
-                          friend?.name === selectedChat ? "bold" : "normal",
                       }}
                       onClick={() => handleSelect(friend)}
                     >
