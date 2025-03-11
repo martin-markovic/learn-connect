@@ -67,16 +67,19 @@ const ChatProvider = ({ children }) => {
     [dispatch]
   );
 
-  const handleChatActivity = useCallback((data) => {
-    const { senderName } = data;
+  const handleChatActivity = useCallback(
+    (data) => {
+      const { senderName } = data;
 
-    setActivity(`${senderName} is typing...`);
+      setActivity(`${senderName} is typing...`);
 
-    if (activityTimer.current) clearTimeout(activityTimer.current);
-    activityTimer.current = setTimeout(() => {
-      setActivity("");
-    }, 3000);
-  }, []);
+      if (activityTimer.current) clearTimeout(activityTimer.current);
+      activityTimer.current = setTimeout(() => {
+        setActivity("");
+      }, 2000);
+    },
+    [activityTimer]
+  );
 
   const handleMarkAllAsRead = useCallback(
     (data) => {

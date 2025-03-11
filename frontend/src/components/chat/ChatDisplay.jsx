@@ -8,6 +8,8 @@ import {
 
   const [input, setInput] = useState("");
   const chatEndRef = useRef(null);
+  const typingTimeoutRef = useRef(null);
+  const isTyping = useRef(false);
 
   const dispatch = useDispatch();
 
@@ -58,7 +60,7 @@ import {
     setActivity("");
   };
 
-  const handleKeyPress = () => {
+  const handleEmitTyping = () => {
     if (!selectedChat) {
       console.error("Please select a chat and provide valid socket instance.");
       return;
@@ -66,11 +68,31 @@ import {
 
     const eventData = {
       senderId: user?._id,
-      receiverId: selectedChat?.id,
+      receiverId: selectedChat,
       senderName: user?.name,
     };
 
     socketEventManager.handleEmitEvent("user typing", eventData);
+    isTyping.current = true;
+  };
+
+  const handleKeyPress = () => {
+    if (!selectedChat) {
+      console.error("Please select a chat and provide valid socket instance.");
+      return;
+    }
+
+    if (!isTyping.current) {
+      handleEmitTyping();
+    }
+
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+
+    typingTimeoutRef.current = setTimeout(() => {
+      isTyping.current = false;
+    }, 700);
   };
 
   const handleRemove = () => {
