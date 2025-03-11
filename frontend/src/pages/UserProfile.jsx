@@ -1,17 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  resetUserList,
-  getUserList,
-  getFriendList,
-  newFriendRequest,
-  handleDecline,
-  handleAccept,
-  handleRemove,
-  handleBlock,
-} from "../features/friend/friendSlice.js";
+import { getUserList, getFriendList } from "../features/friend/friendSlice.js";
 import socketEventManager from "../features/socket/socket.eventManager.js";
+import useSocial from "../hooks/useSocial.js";
 
 function UserProfile() {
   const [userInfo, setUserInfo] = useState(null);
@@ -48,66 +40,7 @@ function UserProfile() {
     setFriendshipStatus(isFriend || null);
   }, [friendList, userId]);
 
-  useEffect(() => {
-    socketEventManager.subscribe("friend request sent", (data) => {
-      dispatch(newFriendRequest(data));
-    });
-
-    socketEventManager.subscribe("friend request received", (data) => {
-      dispatch(newFriendRequest(data));
-
-      socketEventManager.handleEmitEvent("new notification", {
-        senderId: data?.senderId,
-        receiverId: data?.receiverId,
-        notificationName: "new friend request",
-      });
-    });
-
-    socketEventManager.subscribe("friend request declined", (data) => {
-      dispatch(handleDecline(data));
-    });
-
-    socketEventManager.subscribe("friend request accepted", (data) => {
-      dispatch(handleAccept(data));
-
-      if (data?.receiverId === user?._id) {
-        const notificationData = {
-          senderId: data?.receiverId,
-          receiverId: data?.senderId,
-          notificationName: "friend request accepted",
-        };
-
-        socketEventManager.handleEmitEvent(
-          "new notification",
-          notificationData
-        );
-      }
-    });
-
-    socketEventManager.subscribe("friend removed", (data) => {
-      dispatch(handleRemove(data));
-    });
-
-    socketEventManager.subscribe("user blocked", (data) => {
-      dispatch(handleBlock(data));
-
-      setUserInfo((prev) => (prev._id === data ? null : prev));
-      setFriendshipStatus("blocked");
-
-      dispatch(getUserList());
-      dispatch(getFriendList());
-    });
-
-    return () => {
-      socketEventManager.unsubscribe("friend request sent");
-      socketEventManager.unsubscribe("friend request received");
-      socketEventManager.unsubscribe("friend request accepted");
-      socketEventManager.unsubscribe("friend request declined");
-      socketEventManager.unsubscribe("friend removed");
-      socketEventManager.unsubscribe("user blocked");
-      dispatch(resetUserList());
-    };
-  }, [dispatch]);
+  useSocial(user, setUserInfo, setFriendshipStatus);
 
   const handleSend = () => {
     try {
