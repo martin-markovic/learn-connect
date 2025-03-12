@@ -14,7 +14,7 @@ const handleSocketLifeCycle = (io) => {
   io.on("connection", (socket) => {
     console.log(`New connection: Socket ID ${socket.id}`);
 
-    const userId = socket.user?.id;
+    const userId = socket?.user?.id;
     if (!userId) {
       console.log("User ID is undefined, aborting socket event handlers");
       return;

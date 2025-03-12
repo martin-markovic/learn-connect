@@ -51,7 +51,7 @@ const ChatProvider = ({ children }) => {
         });
       }
     },
-    [dispatch]
+    [dispatch, user?._id]
   );
 
   const handleMarkAsRead = useCallback(
@@ -64,19 +64,22 @@ const ChatProvider = ({ children }) => {
         })
       );
     },
-    [dispatch]
+    [dispatch, user?._id]
   );
 
-  const handleChatActivity = useCallback((data) => {
-    const { senderName } = data;
+  const handleChatActivity = useCallback(
+    (data) => {
+      const { senderName } = data;
 
-    setActivity(`${senderName} is typing...`);
+      setActivity(`${senderName} is typing...`);
 
-    if (activityTimer.current) clearTimeout(activityTimer.current);
-    activityTimer.current = setTimeout(() => {
-      setActivity("");
-    }, 3000);
-  }, []);
+      if (activityTimer.current) clearTimeout(activityTimer.current);
+      activityTimer.current = setTimeout(() => {
+        setActivity("");
+      }, 2000);
+    },
+    [activityTimer]
+  );
 
   const handleMarkAllAsRead = useCallback(
     (data) => {

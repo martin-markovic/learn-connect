@@ -34,7 +34,7 @@ const handleSocialEvents = (context) => {
         .populate("receiver", "name _id");
 
       context.emitEvent("sender", "friend request sent", {
-        id: populatedRequest._id.toString(),
+        _id: populatedRequest._id.toString(),
         senderId,
         senderName: populatedRequest.sender?.name,
         receiverId,
@@ -43,7 +43,7 @@ const handleSocialEvents = (context) => {
       });
 
       context.emitEvent("receiver", "friend request received", {
-        id: populatedRequest._id.toString(),
+        _id: populatedRequest._id.toString(),
         senderId,
         senderName: populatedRequest.sender?.name,
         receiverId,
@@ -116,8 +116,8 @@ const handleSocialEvents = (context) => {
 
       context.emitEvent("receiver", "friend request accepted", {
         _id: friendRequest?._id,
-        senderId,
-        receiverId,
+        senderId: receiverId,
+        receiverId: senderId,
         status: userResponse,
       });
     } catch (error) {
@@ -205,10 +205,10 @@ const handleSocialEvents = (context) => {
         await blockedUser.save();
       }
 
-      context.emitEvent("sender", "user blocked", { id: payloadId });
+      context.emitEvent("sender", "user blocked", { _id: payloadId });
 
       context.emitEvent("receiver", "user blocked", {
-        id: payloadId,
+        _id: payloadId,
         receiverId,
       });
     } catch (error) {

@@ -57,7 +57,6 @@ function Exam() {
   useEffect(() => {
     if (errorMessage) {
       console.error(errorMessage);
-      setErrorMessage(null);
       navigate("/quizzes");
     }
   }, [errorMessage, navigate]);
