@@ -43,7 +43,7 @@ import {
 
     const eventData = {
       senderId: user?._id,
-      receiverId: selectedChat?.id,
+      receiverId: selectedChat,
       senderName: user?.name,
       text: input,
     };

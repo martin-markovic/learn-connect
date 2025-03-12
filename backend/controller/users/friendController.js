@@ -19,7 +19,7 @@ export const getFriendList = async (req, res) => {
       .populate("sender", "name")
       .populate("receiver", "name");
 
-    return res.status(200).json(friendList.length ? friendList : []);
+    return res.status(200).json(friendList || []);
   } catch (error) {
     console.error("Error fetching friend list", error);
     return res.status(500).json({ message: "Server error" });

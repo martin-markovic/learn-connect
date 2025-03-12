@@ -51,7 +51,7 @@ const ChatProvider = ({ children }) => {
         });
       }
     },
-    [dispatch]
+    [dispatch, user?._id]
   );
 
   const handleMarkAsRead = useCallback(
@@ -64,7 +64,7 @@ const ChatProvider = ({ children }) => {
         })
       );
     },
-    [dispatch]
+    [dispatch, user?._id]
   );
 
   const handleChatActivity = useCallback(
