@@ -25,12 +25,6 @@ import {
   const chat = useSelector((state) => state.chat.chat);
 
   useEffect(() => {
-    if (!isUnmounting.current) return;
-
-
-      }
-
-  useEffect(() => {
     if (scrollToBottom) {
       if (chatEndRef.current) {
         chatEndRef.current.scrollIntoView({ behavior: "smooth" });
