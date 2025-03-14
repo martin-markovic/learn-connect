@@ -78,8 +78,8 @@ function UserProfile() {
 
     try {
       const eventData = {
-        senderId: userId,
-        receiverId: user?._id,
+        senderId: user?._id,
+        receiverId: userId,
         userResponse: friendReqResponse === "accept" ? "accepted" : "declined",
       };
 
