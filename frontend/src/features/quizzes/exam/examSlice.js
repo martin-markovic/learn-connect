@@ -9,6 +9,7 @@ const initialState = {
   errorMessage: "",
   examData: {},
   quizFeedback: {},
+  examFeedback: {},
 };
 
 export const getExam = createAsyncThunk("exam/get", async (_, thunkAPI) => {
@@ -120,6 +121,7 @@ export const examSlice = createSlice({
         state.isError = false;
         state.errorMessage = "";
         state.quizFeedback = action.payload?.scorePayload;
+        state.examFeedback = action.payload;
         if (state.examData?._id === action.payload?.examId) {
           state.examData = {};
         }

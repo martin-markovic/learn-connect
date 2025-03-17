@@ -11,8 +11,11 @@ import socketEventManager from "../../features/socket/socket.eventManager.js";
 
 function Exam() {
   const [currQuestion, setCurrQuestion] = useState(0);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
-  const { isLoading, examData } = useSelector((state) => state.exam);
+  const { isLoading, examData, examFeedback } = useSelector(
+    (state) => state.exam
+  );
   const { user } = useSelector((state) => state.auth);
 
   const dispatch = useDispatch();
@@ -66,24 +69,26 @@ function Exam() {
       dispatch(updateExam(data));
     });
 
-    socketEventManager.subscribe("exam finished", (data) => {
-      dispatch(finishExam(data));
+    return () => {
+      socketEventManager.unsubscribe("exam updated");
+    };
+  }, [dispatch, navigate]);
+
+  useEffect(() => {
+    if (examFeedback?.quizId && !isProcessing) {
+      setIsProcessing(true);
 
       socketEventManager.handleEmitEvent("new notification", {
-        senderId: data?.scorePayload?.user,
-        quizScore: data?.scorePayload?.highScore,
-        quizId: data?.scorePayload?.quiz,
+        senderId: examFeedback?.scorePayload?.user,
+        quizScore: examFeedback?.scorePayload?.highScore,
+        quizId: examFeedback?.scorePayload?.quiz,
         notificationName: "quiz graded",
       });
 
-      navigate(`/quizzes/${data?.scorePayload?.quiz}`);
-    });
-
-    return () => {
-      socketEventManager.unsubscribe("exam updated");
-      socketEventManager.unsubscribe("exam finished");
-    };
-  }, [dispatch, navigate]);
+      setIsProcessing(false);
+      navigate("/");
+    }
+  }, [isProcessing, navigate, examFeedback?.quizId]);
 
   const handleChange = (e) => {
     try {
@@ -104,9 +109,7 @@ function Exam() {
 
   const handleSubmit = () => {
     try {
-      socketEventManager.handleEmitEvent("finish exam", {
-        senderId: user?._id,
-      });
+      dispatch(finishExam(examData?.quizId));
     } catch (error) {
       console.error("Error finishing exam: ", error.message);
     }
