@@ -48,8 +48,8 @@ const useSocial = (user, setUserInfo, setFriendshipStatus) => {
 
       if (data?.receiverId === user?._id) {
         const notificationData = {
-          senderId: data?.receiverId,
-          receiverId: data?.senderId,
+          senderId: data?.senderId,
+          receiverId: data?.receiverId,
           notificationName: "friend request accepted",
         };
 

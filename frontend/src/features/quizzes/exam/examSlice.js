@@ -9,6 +9,7 @@ const initialState = {
   errorMessage: "",
   examData: {},
   quizFeedback: {},
+  examFeedback: {},
 };
 
 export const getExam = createAsyncThunk("exam/get", async (_, thunkAPI) => {
@@ -38,6 +39,21 @@ export const getExamFeedback = createAsyncThunk(
   }
 );
 
+export const finishExam = createAsyncThunk(
+  "exam/finish",
+  async (quizId, thunkAPI) => {
+    try {
+      const token = thunkAPI.getState().auth.user.token;
+
+      const response = await examService.finishExam(quizId, token);
+
+      return response;
+    } catch (error) {
+      handleSliceError(error);
+    }
+  }
+);
+
 export const examSlice = createSlice({
   name: "exam",
   initialState,
@@ -49,12 +65,6 @@ export const examSlice = createSlice({
     updateExam: (state, action) => {
       if (state.examData._id === action.payload._id) {
         state.examData.answers = action.payload.answers;
-      }
-    },
-    finishExam: (state, action) => {
-      state.quizFeedback = action.payload?.scorePayload;
-      if (state.examData?._id === action.payload?.examId) {
-        state.examData = {};
       }
     },
   },
@@ -97,11 +107,34 @@ export const examSlice = createSlice({
         state.isSuccess = false;
         state.isError = true;
         state.errorMessage = action.payload;
+      })
+      .addCase(finishExam.pending, (state) => {
+        state.isLoading = true;
+        state.isSuccess = false;
+        state.isError = false;
+        state.errorMessage = "";
+      })
+      .addCase(finishExam.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.isExamFinished = true;
+        state.isError = false;
+        state.errorMessage = "";
+        state.quizFeedback = action.payload?.scorePayload;
+        state.examFeedback = action.payload;
+        if (state.examData?._id === action.payload?.examId) {
+          state.examData = {};
+        }
+      })
+      .addCase(finishExam.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = false;
+        state.isError = true;
+        state.errorMessage = action.payload;
       });
   },
 });
 
-export const { resetExam, createExam, updateExam, finishExam } =
-  examSlice.actions;
+export const { resetExam, createExam, updateExam } = examSlice.actions;
 
 export default examSlice.reducer;

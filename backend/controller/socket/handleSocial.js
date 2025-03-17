@@ -72,8 +72,8 @@ const handleSocialEvents = (context) => {
 
       if (userResponse === "declined") {
         const foundRequest = await Friend.findOne({
-          sender: senderId,
-          receiver: receiverId,
+          sender: receiverId,
+          receiver: senderId,
           status: "pending",
         });
 
@@ -91,14 +91,14 @@ const handleSocialEvents = (context) => {
 
         context.emitEvent("receiver", "friend request declined", {
           _id: payloadId,
-          receiverId: senderId,
+          receiverId,
         });
 
         return;
       }
 
       const friendRequest = await Friend.findOneAndUpdate(
-        { sender: senderId, receiver: receiverId, status: "pending" },
+        { sender: receiverId, receiver: senderId, status: "pending" },
         { status: userResponse },
         { new: true }
       );
@@ -110,14 +110,14 @@ const handleSocialEvents = (context) => {
       context.emitEvent("sender", "friend request accepted", {
         _id: friendRequest?._id,
         status: userResponse,
-        receiverId: senderId,
-        senderId: receiverId,
+        receiverId,
+        senderId,
       });
 
       context.emitEvent("receiver", "friend request accepted", {
         _id: friendRequest?._id,
-        senderId: receiverId,
-        receiverId: senderId,
+        senderId,
+        receiverId,
         status: userResponse,
       });
     } catch (error) {
