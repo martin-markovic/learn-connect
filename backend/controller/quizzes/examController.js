@@ -16,6 +16,14 @@ export const getExam = async (req, res) => {
       isInProgress: true,
     });
 
+    const examIsValid = examFound?.examFinish?.getTime() - Date.now() > 0;
+
+    if (!examIsValid) {
+      await Exam.findByIdAndDelete(examFound?._id);
+
+      return res.status(200).json({});
+    }
+
     return res.status(200).json(examFound || {});
   } catch (error) {
     console.error(`Error fetching exam: ${error.message}`);
