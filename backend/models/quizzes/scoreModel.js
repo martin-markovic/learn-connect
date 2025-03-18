@@ -15,6 +15,10 @@ const scoreSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  latestScore: {
+    type: Number,
+    default: 0,
+  },
   examFeedback: {
     type: {
       randomizedQuestions: {
