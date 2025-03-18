@@ -4,6 +4,8 @@ import {
   FaUser,
   FaClipboard,
   FaHome,
+  FaHourglassHalf,
+  FaExclamationCircle,
 } from "react-icons/fa";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
@@ -12,13 +14,15 @@ import { resetQuizzes } from "../features/quizzes/quizSlice.js";
 import { resetClassroom } from "../features/classroom/classroomSlice.js";
 import { resetChat } from "../features/chat/chatSlice.js";
 import { resetUserList } from "../features/friend/friendSlice.js";
-import { resetExam } from "../features/quizzes/exam/examSlice.js";
+import { getExam, resetExam } from "../features/quizzes/exam/examSlice.js";
+import { useEffect } from "react";
 
 function Header() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const location = useLocation();
   const { user } = useSelector((state) => state.auth);
+  const examId = useSelector((state) => state.exam.examData?._id);
 
   const handleLogout = () => {
     dispatch(logoutUser());
@@ -30,6 +34,12 @@ function Header() {
     dispatch(resetExam());
     navigate("/login");
   };
+
+  useEffect(() => {
+    if (location.pathname !== "/register" || location.pathname !== "/login") {
+      dispatch(getExam());
+    }
+  }, [dispatch, location.pathname]);
 
   return (
     <header>
@@ -55,6 +65,34 @@ function Header() {
                 }}
               >
                 <FaClipboard /> Quizzes
+              </button>
+              <button
+                onClick={() => {
+                  if (examId) {
+                    try {
+                      navigate(`/exam/${examId}`);
+                    } catch (error) {
+                      console.log("Error navigating to exam", error.message);
+                      dispatch(getExam());
+                    }
+                  }
+                }}
+                style={{ position: "relative" }}
+              >
+                Exam <FaHourglassHalf />
+                {examId && location.pathname !== `/exam/${examId}` && (
+                  <span
+                    style={{
+                      position: "absolute",
+                      top: -7,
+                      right: -7,
+                      color: "red",
+                      fontSize: "1.4em",
+                    }}
+                  >
+                    <FaExclamationCircle />
+                  </span>
+                )}
               </button>
             </li>
           </div>
