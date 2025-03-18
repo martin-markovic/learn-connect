@@ -27,9 +27,13 @@ function QuizScore({ setShowFeedback }) {
     <>
       <div>
         <h1>
-          {quizFeedback?.highScore}{" "}
-          {quizFeedback?.highScore > 1 ? "points" : "point"}
+          Highscore: {quizFeedback?.highScore}{" "}
+          {quizFeedback?.highScore !== 1 ? "points" : "point"}
         </h1>
+        <h2>
+          Latest score: {quizFeedback?.latestScore}{" "}
+          {quizFeedback?.latestScore !== 1 ? "points" : "point"}
+        </h2>
         <div>
           {quizFeedback &&
             quizFeedback?.examFeedback?.randomizedQuestions?.length > 0 &&

@@ -91,7 +91,7 @@ export const finishExam = async (req, res) => {
         .json({ message: "Cannot evaluate exam, no matching quiz found" });
     }
 
-    let payloadScore = 0;
+    let currentScore = 0;
 
     let userChoices = [];
 
@@ -99,7 +99,7 @@ export const finishExam = async (req, res) => {
       const q = quizFound.questions[i];
 
       if (q.answer === examFound.answers[i]) {
-        payloadScore += 1;
+        currentScore += 1;
       }
 
       userChoices[i] = {
@@ -122,7 +122,8 @@ export const finishExam = async (req, res) => {
           $set: {
             "examFeedback.userChoices": userChoices,
             "examFeedback.randomizedQuestions": examQuestions,
-            highScore: Math.max(scoreFound.highScore, payloadScore),
+            highScore: Math.max(scoreFound.highScore, currentScore),
+            latestScore: currentScore,
           },
         },
         { new: true }
@@ -137,7 +138,8 @@ export const finishExam = async (req, res) => {
           userChoices,
           randomizedQuestions: examQuestions,
         },
-        highScore: payloadScore,
+        highScore: currentScore,
+        latestScore: currentScore,
       });
 
       const updatedScore = await newScore.save();
