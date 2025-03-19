@@ -73,7 +73,7 @@ const finishExam = async (quizId, token) => {
       },
     };
 
-    const response = await axios.post(API_URL, config, { quizId });
+    const response = await axios.post(`${API_URL}/`, { quizId }, config);
 
     return response.data;
   } catch (error) {
