@@ -1,49 +1,44 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { resetQuizzes } from "../../features/quizzes/quizSlice";
+import {
+  getClassQuizzes,
+  resetQuizzes,
+} from "../../features/quizzes/quizSlice";
 
 function ClassQuizList() {
-  const [quizList, setQuizList] = useState([]);
-  const { classQuizzes } = useSelector((state) => state.quizzes);
+  const [searchQuery, setSearchQuery] = useState("");
+  const { classQuizzes = [] } = useSelector((state) => state.quizzes);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   useEffect(() => {
-    setQuizList(classQuizzes);
-  }, [classQuizzes]);
+    dispatch(getClassQuizzes());
 
-  useEffect(() => {
     return () => {
       dispatch(resetQuizzes());
     };
   }, [dispatch]);
 
   const handleClick = (quizId) => {
-    navigate(`/exam/${quizId}`);
+    navigate(`/quizzes/${quizId}`);
   };
 
-  const handleFilter = useCallback(
-    (quizQuery) => {
-      const formattedQuery = quizQuery.toLowerCase();
+  const filteredQuizzes = useMemo(() => {
+    const query = (searchQuery || "").trim().toLowerCase();
 
-      return classQuizzes.filter((item) => {
-        const formattedTitle = item.title.toLowerCase();
-        const formattedSubject = item.subject.toLowerCase();
-        return (
-          formattedTitle.includes(formattedQuery) ||
-          formattedSubject.includes(formattedQuery)
-        );
-      });
-    },
-    [classQuizzes]
-  );
+    if (!query) return classQuizzes;
+
+    return classQuizzes.filter((quiz) => {
+      const title = quiz.title?.toLowerCase() || "";
+      const subject = quiz.subject?.toLowerCase() || "";
+      return title.includes(query) || subject.includes(query);
+    });
+  }, [searchQuery, classQuizzes]);
 
   const handleChange = (e) => {
-    const newFilter = e.target.value;
-
-    setQuizList(handleFilter(newFilter));
+    setSearchQuery(e.target.value || "");
   };
 
   return (
@@ -54,14 +49,15 @@ function ClassQuizList() {
           type="search"
           id="quiz-search"
           name="quiz-search"
+          value={searchQuery}
           onChange={handleChange}
           autoComplete="off"
         />
       </div>
-      {quizList.length === 0 ? (
+      {filteredQuizzes.length === 0 ? (
         <p>No quizzes found</p>
       ) : (
-        quizList.map((quiz, index) => (
+        filteredQuizzes.map((quiz, index) => (
           <div key={index}>
             <p>{quiz.title}</p>
             <p>{quiz.subject}</p>

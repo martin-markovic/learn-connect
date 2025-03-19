@@ -48,7 +48,7 @@ function Header() {
           <div className="nav-buttons">
             <li>
               <button onClick={handleLogout}>
-                <FaSignOutAlt /> Logout
+                Logout <FaSignOutAlt />
               </button>
             </li>
             <li>
@@ -57,14 +57,14 @@ function Header() {
                   navigate("/");
                 }}
               >
-                <FaHome /> Home
+                Home <FaHome />
               </button>
               <button
                 onClick={() => {
                   navigate("/quizzes");
                 }}
               >
-                <FaClipboard /> Quizzes
+                Quizzes <FaClipboard />
               </button>
               <button
                 onClick={() => {
@@ -101,13 +101,13 @@ function Header() {
             {location.pathname === "/register" ? (
               <li>
                 <Link to="/login">
-                  <FaSignInAlt /> Login
+                  Login <FaSignInAlt />
                 </Link>
               </li>
             ) : (
               <li>
                 <Link to="/register">
-                  <FaUser /> Register
+                  Register <FaUser />
                 </Link>
               </li>
             )}

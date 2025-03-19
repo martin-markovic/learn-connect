@@ -61,45 +61,41 @@ function Quiz() {
     });
   };
 
-  return (
+  return showFeedback ? (
+    <QuizScore setShowFeedback={setShowFeedback} />
+  ) : (
     <div>
-      {quizFeedback?._id ? (
-        showFeedback ? (
-          <QuizScore setShowFeedback={setShowFeedback} />
+      <div>
+        {classQuizzes?.length > 0 ? (
+          classQuizzes
+            ?.filter((quiz) => quiz._id === quizId)
+            .map((item, index) => (
+              <div key={`quiz__description-${index}`}>
+                <h1>{item.title}</h1>
+                <span>{`time limit: ${item.timeLimit} minutes`}</span>
+                <span>{`${item.questions.length} questions`}</span>
+              </div>
+            ))
         ) : (
-          <div>
-            <div>
-              {classQuizzes?.length > 0 ? (
-                classQuizzes
-                  ?.filter((quiz) => quiz._id === quizId)
-                  .map((item, index) => (
-                    <div key={`quiz__description-${index}`}>
-                      <h1>{item.title}</h1>
-                      <span>{`time limit: ${item.timeLimit} minutes`}</span>
-                      <span>{`${item.questions.length} questions`}</span>
-                    </div>
-                  ))
-              ) : (
-                <p>Loading quizzes, please wait...</p>
-              )}
-            </div>
-            <div>
-              <span>
-                Your highest score: {quizFeedback?.highScore}{" "}
-                {quizFeedback?.highScore > 1 ? "points" : "point"}
-              </span>
-              <span>See the latest result</span>
-              <button
-                type="button"
-                onClick={() => {
-                  setShowFeedback(true);
-                }}
-              >
-                Show
-              </button>
-            </div>
-          </div>
-        )
+          <p>Loading quizzes, please wait...</p>
+        )}
+      </div>
+      {quizFeedback?._id ? (
+        <div>
+          <span>
+            Your highest score: {quizFeedback?.highScore}{" "}
+            {quizFeedback?.highScore > 1 ? "points" : "point"}
+          </span>
+          <span>See the latest result</span>
+          <button
+            type="button"
+            onClick={() => {
+              setShowFeedback(true);
+            }}
+          >
+            Show
+          </button>
+        </div>
       ) : (
         <p>You have not taken this quiz yet</p>
       )}

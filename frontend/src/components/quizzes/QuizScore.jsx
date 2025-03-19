@@ -19,7 +19,7 @@ function QuizScore({ setShowFeedback }) {
     dispatch(getExam());
 
     return () => {
-      dispatch(resetExam);
+      dispatch(resetExam());
     };
   }, [dispatch, quizId]);
 

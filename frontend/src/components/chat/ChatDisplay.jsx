@@ -1,11 +1,11 @@
+import { useState, useRef, useEffect, useContext } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { ChatContext } from "../../context/chatContext.js";
 
 import socketEventManager from "../../features/socket/socket.eventManager.js";
-import {
-  removeMessages,
-} from "../../features/chat/chatSlice.js";
+import { removeMessages } from "../../features/chat/chatSlice.js";
 
+const ChatDisplay = () => {
   const [input, setInput] = useState("");
   const chatEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
@@ -31,7 +31,7 @@ import {
       }
       setScrollToBottom((prevState) => !prevState);
     }
-  }, [scrollToBottom]);
+  }, [scrollToBottom, setScrollToBottom]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -141,6 +141,7 @@ import {
           )}
         </ul>
       </div>
+      <div ref={chatEndRef} />
       <button onClick={handleRemove}>Delete Conversation</button>
       <form onSubmit={handleSubmit}>
         <input
