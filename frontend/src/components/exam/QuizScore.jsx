@@ -1,27 +1,7 @@
-import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
-import {
-  getExam,
-  getExamFeedback,
-  resetExam,
-} from "../../features/quizzes/exam/examSlice";
+import { useState } from "react";
 
-function QuizScore({ setShowFeedback }) {
+function QuizScore({ quizFeedback, setShowFeedback }) {
   const [currPage, setCurrPage] = useState(0);
-  const { quizFeedback } = useSelector((state) => state.exam);
-
-  const dispatch = useDispatch();
-  const { quizId } = useParams();
-
-  useEffect(() => {
-    dispatch(getExamFeedback(quizId));
-    dispatch(getExam());
-
-    return () => {
-      dispatch(resetExam());
-    };
-  }, [dispatch, quizId]);
 
   return (
     <>

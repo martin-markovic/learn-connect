@@ -9,6 +9,8 @@ import {
 } from "../../features/quizzes/exam/examSlice.js";
 import socketEventManager from "../../features/socket/socket.eventManager.js";
 
+import ExamTimer from "./ExamTimer.jsx";
+
 function Exam() {
   const [currQuestion, setCurrQuestion] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -88,7 +90,14 @@ function Exam() {
       setIsProcessing(false);
       navigate("/");
     }
-  }, [isProcessing, navigate, examFeedback?.quizId]);
+  }, [
+    isProcessing,
+    navigate,
+    examFeedback?.quizId,
+    examFeedback?.scorePayload?.highScore,
+    examFeedback?.scorePayload?.quiz,
+    examFeedback?.scorePayload?.user,
+  ]);
 
   const handleChange = (e) => {
     try {
@@ -117,6 +126,7 @@ function Exam() {
 
   return (
     <div>
+      <ExamTimer examFinish={examData?.examFinish} />
       {examData ? (
         <div>
           {examData?.shuffledQuestions?.length &&

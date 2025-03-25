@@ -14,8 +14,13 @@ import { resetQuizzes } from "../features/quizzes/quizSlice.js";
 import { resetClassroom } from "../features/classroom/classroomSlice.js";
 import { resetChat } from "../features/chat/chatSlice.js";
 import { resetUserList } from "../features/friend/friendSlice.js";
-import { getExam, resetExam } from "../features/quizzes/exam/examSlice.js";
+import {
+  finishExam,
+  getExam,
+  resetExam,
+} from "../features/quizzes/exam/examSlice.js";
 import { useEffect } from "react";
+import socketEventManager from "../features/socket/socket.eventManager.js";
 
 function Header() {
   const navigate = useNavigate();
@@ -36,10 +41,24 @@ function Header() {
   };
 
   useEffect(() => {
-    if (location.pathname !== "/register" || location.pathname !== "/login") {
+    if (!["/register", "login"].includes(location.pathname)) {
       dispatch(getExam());
     }
   }, [dispatch, location.pathname]);
+
+  useEffect(() => {
+    socketEventManager.subscribe("exam finished", (data) => {
+      dispatch(finishExam(data));
+
+      if (location.pathname === `/exam/${data?.scorePayload?.quizId}`) {
+        navigate("/");
+      }
+    });
+
+    return () => {
+      socketEventManager.unsubscribe("exam finished");
+    };
+  }, []);
 
   return (
     <header>
