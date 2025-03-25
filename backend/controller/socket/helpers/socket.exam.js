@@ -1,3 +1,4 @@
+import schedule from "node-schedule";
 import Exam from "../../../models/quizzes/examModel.js";
 import Quiz from "../../../models/quizzes/quizModel.js";
 import Classroom from "../../../models/classrooms/classroomModel.js";
@@ -45,7 +46,7 @@ export const createExam = async (context, data) => {
 
     const examStart = new Date();
     const examFinish = new Date(
-      examStart.getTime() + quizFound.timeLimit * 60 * 1000
+      examStart.getTime() + quizFound?.timeLimit * 60 * 1000
     );
 
     const newExam = new Exam({
@@ -58,6 +59,26 @@ export const createExam = async (context, data) => {
     const payloadExam = await newExam.save();
 
     context.emitEvent("sender", "exam created", payloadExam);
+
+    const scheduledTime = examFinish - 1000;
+
+    schedule.scheduleJob(scheduledTime, async () => {
+      try {
+        const examEndPayload = await finishExam(data);
+
+        if (!examEndPayload.success) {
+          throw new Error(examEndPayload.message);
+        }
+
+        context.emitEvent(
+          "sender",
+          "exam finished",
+          examEndPayload.examPayload
+        );
+      } catch (error) {
+        console.error(error.message);
+      }
+    });
   } catch (error) {
     console.error(`Error creating exam:  ${error.message}`);
 
