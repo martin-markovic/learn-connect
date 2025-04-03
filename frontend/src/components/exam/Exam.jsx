@@ -2,10 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  getExam,
   updateExam,
   finishExam,
-  resetExam,
 } from "../../features/quizzes/exam/examSlice.js";
 import socketEventManager from "../../features/socket/socket.eventManager.js";
 
@@ -22,14 +20,6 @@ function Exam() {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    dispatch(getExam());
-
-    return () => {
-      dispatch(resetExam());
-    };
-  }, [dispatch]);
 
   useEffect(() => {
     if (!isLoading) {
@@ -118,7 +108,10 @@ function Exam() {
 
   const handleSubmit = () => {
     try {
-      dispatch(finishExam(examData?.quizId));
+      socketEventManager.handleEmitEvent("finish exam", {
+        senderId: user?._id,
+        quizId: examData?.quizId,
+      });
     } catch (error) {
       console.error("Error finishing exam: ", error.message);
     }
