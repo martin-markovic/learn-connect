@@ -62,22 +62,8 @@ export const createExam = async (context, data) => {
 
     const scheduledTime = examFinish - 1000;
 
-    schedule.scheduleJob(scheduledTime, async () => {
-      try {
-        const examEndPayload = await finishExam(data);
-
-        if (!examEndPayload.success) {
-          throw new Error(examEndPayload.message);
-        }
-
-        context.emitEvent(
-          "sender",
-          "exam finished",
-          examEndPayload.examPayload
-        );
-      } catch (error) {
-        console.error(error.message);
-      }
+    schedule.scheduleJob(senderId, scheduledTime, async () => {
+      await finishExam(context, data);
     });
   } catch (error) {
     console.error(`Error creating exam:  ${error.message}`);
@@ -130,7 +116,27 @@ export const updateExam = async (context, data) => {
   }
 };
 
-export const finishExam = async (data) => {
+export const finishExam = async (context, data) => {
+  try {
+    const examEndPayload = await createExamPayload(data);
+
+    if (!examEndPayload.success) {
+      throw new Error(examEndPayload.message);
+    }
+
+    const ongoingJob = schedule.scheduledJobs[data?.senderId];
+
+    if (ongoingJob) {
+      ongoingJob.cancel();
+    }
+
+    context.emitEvent("sender", "exam finished", examEndPayload.examPayload);
+  } catch (error) {
+    console.error(error.message);
+  }
+};
+
+export const createExamPayload = async (data) => {
   try {
     const { senderId, quizId } = data;
 
@@ -216,7 +222,7 @@ export const finishExam = async (data) => {
 
     return { success: true, examPayload };
   } catch (error) {
-    console.error(`Error fetching exam feedback: ${error.message}`);
+    console.error(`Error creating exam payload: ${error.message}`);
     return { success: false, message: `Error finishing exam ${error.message}` };
   }
 };
