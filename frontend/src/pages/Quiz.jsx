@@ -8,7 +8,7 @@ import {
   getExamFeedback,
   resetExam,
 } from "../features/quizzes/exam/examSlice.js";
-import QuizScore from "../components/quizzes/QuizScore.jsx";
+import QuizScore from "../components/exam/QuizScore.jsx";
 import socketEventManager from "../features/socket/socket.eventManager.js";
 
 function Quiz() {
@@ -62,7 +62,7 @@ function Quiz() {
   };
 
   return showFeedback ? (
-    <QuizScore setShowFeedback={setShowFeedback} />
+    <QuizScore quizFeedback={quizFeedback} setShowFeedback={setShowFeedback} />
   ) : (
     <div>
       <div>
