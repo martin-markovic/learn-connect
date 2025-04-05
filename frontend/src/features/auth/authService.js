@@ -10,7 +10,11 @@ const registerUser = async (userData) => {
       throw new Error("Email and password are required.");
     }
 
-    const response = await axios.post(API_URL, userData);
+    const response = await axios.post(API_URL, userData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
 
     if (response.data) {
       localStorage.setItem("user", JSON.stringify(response.data));
