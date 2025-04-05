@@ -38,6 +38,7 @@ const userSchema = mongoose.Schema({
     type: String,
     required: [true, "Please add your password"],
   },
+  avatar: { type: String },
   classrooms: [
     {
       type: mongoose.Schema.Types.ObjectId,

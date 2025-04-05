@@ -24,10 +24,13 @@ export const registerUser = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
+    const avatar = req.file?.path || null;
+
     const user = await User.create({
       name,
       email,
       password: hashedPassword,
+      avatar,
     });
 
     if (user) {
@@ -35,6 +38,7 @@ export const registerUser = async (req, res) => {
         _id: user.id,
         name: user.name,
         email: user.email,
+        avatar: user.avatar,
         token: generateToken(user._id),
       });
     } else {
@@ -59,10 +63,11 @@ export const loginUser = async (req, res) => {
 
     if (user && bcrypt.compare(password, user.password)) {
       return res.status(200).json({
-        _id: user.id,
-        name: user.name,
-        email: user.email,
-        token: generateToken(user._id),
+        _id: user?.id,
+        name: user?.name,
+        email: user?.email,
+        avatar: user?.avatar,
+        token: generateToken(user?._id),
       });
     } else {
       return res.status(400).json({ message: "Invalid credentials" });
