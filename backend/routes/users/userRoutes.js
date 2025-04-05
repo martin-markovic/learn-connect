@@ -1,3 +1,5 @@
+import multer from "multer";
+import storage from "../../config/multerStorage.js";
 import { Router } from "express";
 const userRouter = Router();
 
@@ -6,7 +8,9 @@ import {
   loginUser,
 } from "../../controller/users/userController.js";
 
-userRouter.post("/", registerUser);
+const upload = multer({ storage });
+
+userRouter.post("/", upload.single("avatar"), registerUser);
 userRouter.post("/login", loginUser);
 
 export default userRouter;

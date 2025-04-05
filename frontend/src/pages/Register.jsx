@@ -11,18 +11,15 @@ function Register() {
     email: "",
     password: "",
     password2: "",
-    // avatar: null,
+    avatar: null,
   });
 
-  const {
-    name,
-    email,
-    password,
-    password2,
-    // avatar
-  } = formData;
+  const { name, email, password, password2, avatar } = formData;
 
   const { isError, message } = useSelector((state) => state.auth);
+
+  const DEFAULT_AVATAR =
+    "https://res.cloudinary.com/dsgq6lvjq/image/upload/v1743887444/user-2517433_sum4yo.svg";
 
   if (isError) {
     toast.error(message);
@@ -33,7 +30,8 @@ function Register() {
 
     setFormData((prevState) => ({
       ...prevState,
-      [e.target.name]: e.target.value,
+      [e.target.name]:
+        e.target.name === "avatar" ? e.target.files[0] : e.target.value,
     }));
   };
 
@@ -48,7 +46,7 @@ function Register() {
         email,
         password,
         password2,
-        // avatar,
+        avatar,
       };
 
       dispatch(registerUser(userCredentials));
@@ -57,18 +55,38 @@ function Register() {
 
   return (
     <div className="container">
-      <form id="register-form" onSubmit={handleSubmit}>
-        {/* <label htmlFor="avatar" onClick={(e) => e.preventDefault()}>
-          Choose a profile picture
-        </label>
-        <input
-        type="file"
-          id="avatar"
-          name="avatar"
-          accept="image/png, image/jpeg"
-          autoComplete="off"
-          onChange={handleInput}
-        /> */}
+      <form
+        id="register-form"
+        onSubmit={handleSubmit}
+        encType="multipart/form-data"
+      >
+        <div className="avatar">
+          <span className="avatar-input">
+            <label htmlFor="avatar" onClick={(e) => e.preventDefault()}>
+              Add a profile picture
+            </label>
+            <input
+              type="file"
+              id="avatar"
+              name="avatar"
+              accept="image/png, image/jpeg"
+              autoComplete="off"
+              onChange={handleInput}
+            />
+          </span>
+          <span>
+            <img
+              src={
+                avatar instanceof File
+                  ? URL.createObjectURL(avatar)
+                  : DEFAULT_AVATAR
+              }
+              alt="User avatar"
+              width="64"
+              height="64"
+            />
+          </span>
+        </div>
         <label htmlFor="name">Name</label>
         <input
           type="text"
