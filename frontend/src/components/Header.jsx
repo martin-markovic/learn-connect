@@ -41,24 +41,26 @@ function Header() {
   };
 
   useEffect(() => {
-    if (!["/register", "login"].includes(location.pathname)) {
+    if (!["/register", "/login"].includes(location.pathname)) {
       dispatch(getExam());
     }
   }, [dispatch, location.pathname]);
 
   useEffect(() => {
-    socketEventManager.subscribe("exam finished", (data) => {
-      dispatch(finishExam(data));
+    if (!["/register", "/login"].includes(location.pathname)) {
+      socketEventManager.subscribe("exam finished", (data) => {
+        dispatch(finishExam(data));
 
-      if (location.pathname === `/exam/${data?.scorePayload?.quizId}`) {
-        navigate("/");
-      }
-    });
+        if (location.pathname === `/exam/${data?.scorePayload?.quizId}`) {
+          navigate("/");
+        }
+      });
 
-    return () => {
-      socketEventManager.unsubscribe("exam finished");
-    };
-  }, []);
+      return () => {
+        socketEventManager.unsubscribe("exam finished");
+      };
+    }
+  }, [location.pathname]);
 
   return (
     <header>
