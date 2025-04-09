@@ -1,9 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { getUserList, getFriendList } from "../features/friend/friendSlice.js";
+import {
+  getUserList,
+  getFriendList,
+  handleBlock,
+} from "../features/friend/friendSlice.js";
 import socketEventManager from "../features/socket/socket.eventManager.js";
-import useSocial from "../hooks/useSocial.js";
 
 function UserProfile() {
   const [userInfo, setUserInfo] = useState(null);
@@ -40,7 +43,20 @@ function UserProfile() {
     setFriendshipStatus(isFriend || null);
   }, [friendList, userId]);
 
-  useSocial(user, setUserInfo, setFriendshipStatus);
+  useEffect(() => {
+    socketEventManager.subscribe("user blocked", (data) => {
+      dispatch(handleBlock(data));
+
+      setUserInfo((prev) => (prev._id === data ? null : prev));
+      setFriendshipStatus("blocked");
+
+      dispatch(getUserList());
+      dispatch(getFriendList());
+    });
+    return () => {
+      socketEventManager.unsubscribe("user blocked");
+    };
+  }, [dispatch]);
 
   const handleSend = () => {
     try {
@@ -143,11 +159,17 @@ function UserProfile() {
       {String(user?._id) !== String(userId) && (
         <>
           {friendshipStatus === "pending" &&
-            friendList.find((item) => item.senderId === user._id) && (
-              <button disabled={true}>Request Sent</button>
-            )}
+            friendList.find(
+              (item) =>
+                String(item.senderId) === String(user._id) &&
+                String(item.receiverId) === String(userId)
+            ) && <button disabled={true}>Request Sent</button>}
           {friendshipStatus === "pending" &&
-            friendList.find((item) => item.receiverId === user?._id) && (
+            friendList.find(
+              (item) =>
+                String(item.receiverId) === String(user?._id) &&
+                String(item.senderId) === String(userId)
+            ) && (
               <div>
                 <button
                   type="button"

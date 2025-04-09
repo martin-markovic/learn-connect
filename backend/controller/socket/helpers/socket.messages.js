@@ -11,7 +11,7 @@ export const sendMessage = async (context, data) => {
       throw new Error("Please provide required message data");
     }
 
-    const chatFound = await Chat.findOne({
+    let chatFound = await Chat.findOne({
       participants: { $all: [senderId, receiverId] },
     });
 
@@ -33,10 +33,10 @@ export const sendMessage = async (context, data) => {
         conversation: [newMessage._id],
       });
 
-      await newChat.save();
+      chatFound = await newChat.save();
 
       messagePayload = {
-        chatId: newChat._id,
+        chatId: chatFound?._id.toString(),
         _id: populatedMessage?._id.toString(),
         senderId: populatedMessage.sender._id.toString(),
         senderName: populatedMessage.sender.name,
@@ -98,7 +98,6 @@ export const handleChatOpen = async (context, data) => {
       { _id: { $in: chatFound.conversation }, isRead: false },
       { $set: { isRead: true } }
     );
-
 
     context.emitEvent("sender", "messages read", { friendId: receiverId });
 

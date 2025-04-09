@@ -104,18 +104,18 @@ const friendSlice = createSlice({
         if (action.payload.length) {
           action.payload.forEach((item) => {
             const alreadyExists = state.friendList.some(
-              (friend) => friend._id === item._id
+              (friend) => friend?._id === item?._id
             );
 
             if (!alreadyExists) {
               action.payload.forEach((item) => {
                 state.friendList.push({
-                  _id: item._id,
-                  senderId: item.sender._id,
-                  senderName: item.sender.name,
-                  receiverId: item.receiver._id,
-                  receiverName: item.receiver.name,
-                  status: item.status,
+                  _id: item?._id,
+                  senderId: item?.sender?._id,
+                  senderName: item?.sender?.name,
+                  receiverId: item?.receiver?._id,
+                  receiverName: item?.receiver?.name,
+                  status: item?.status,
                 });
               });
             }
