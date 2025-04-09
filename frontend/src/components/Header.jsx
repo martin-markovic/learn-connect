@@ -20,7 +20,7 @@ import {
   resetExam,
 } from "../features/quizzes/exam/examSlice.js";
 import { useEffect } from "react";
-import socketEventManager from "../features/socket/socket.eventManager.js";
+import useGlobalEvents from "../hooks/useGlobalEvents.js";
 
 function Header() {
   const navigate = useNavigate();
@@ -40,27 +40,13 @@ function Header() {
     navigate("/login");
   };
 
+  useGlobalEvents(location.pathname, user);
+
   useEffect(() => {
     if (!["/register", "/login"].includes(location.pathname)) {
       dispatch(getExam());
     }
   }, [dispatch, location.pathname]);
-
-  useEffect(() => {
-    if (!["/register", "/login"].includes(location.pathname)) {
-      socketEventManager.subscribe("exam finished", (data) => {
-        dispatch(finishExam(data));
-
-        if (location.pathname === `/exam/${data?.scorePayload?.quizId}`) {
-          navigate("/");
-        }
-      });
-
-      return () => {
-        socketEventManager.unsubscribe("exam finished");
-      };
-    }
-  }, [location.pathname]);
 
   return (
     <header>
