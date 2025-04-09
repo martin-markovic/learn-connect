@@ -14,11 +14,7 @@ import { resetQuizzes } from "../features/quizzes/quizSlice.js";
 import { resetClassroom } from "../features/classroom/classroomSlice.js";
 import { resetChat } from "../features/chat/chatSlice.js";
 import { resetUserList } from "../features/friend/friendSlice.js";
-import {
-  finishExam,
-  getExam,
-  resetExam,
-} from "../features/quizzes/exam/examSlice.js";
+import { getExam, resetExam } from "../features/quizzes/exam/examSlice.js";
 import { useEffect } from "react";
 import useGlobalEvents from "../hooks/useGlobalEvents.js";
 
