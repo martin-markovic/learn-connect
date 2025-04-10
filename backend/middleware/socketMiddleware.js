@@ -4,7 +4,7 @@ const socketMiddleware = (socket, next) => {
   const token = socket.handshake.auth?.token;
 
   if (!token) {
-    console.log("Token is missing from handshake auth");
+    console.error("Token is missing from handshake auth");
     return next(new Error("Authentication error: Token is missing"));
   }
 
@@ -16,7 +16,7 @@ const socketMiddleware = (socket, next) => {
 
     next();
   } catch (error) {
-    console.log("Invalid token:", error.message);
+    console.error("Invalid token:", error.message);
     return next(new Error(`Authentication error: ${error.message}`));
   }
 };

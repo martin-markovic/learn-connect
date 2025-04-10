@@ -15,12 +15,12 @@ export const markNotificationAsRead = async (context, data) => {
     });
 
     if (!notificationFound) {
-      console.log("Notification not found on server");
+      console.error("Notification not found on server");
       throw new Error("Notification not found");
     }
 
     if (notificationFound.readBy.includes(senderId)) {
-      console.log("User is already notified.");
+      console.error("User is already notified.");
       throw new Error("User is already notified");
     }
 

@@ -73,10 +73,6 @@ export const removeMessages = async (req, res) => {
       { session }
     );
 
-    console.log(`Removed references to messages from classroom ${chatId}`);
-
-    console.log(`Deleted messages from chats collection: ${messageIds}`);
-
     await session.commitTransaction();
 
     await Chat.deleteMany({ _id: { $in: messageIds } }, { session });

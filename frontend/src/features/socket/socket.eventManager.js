@@ -37,7 +37,7 @@ class EventManager {
     }
 
     if (this.events[event] === listener) {
-      console.log(`Listener for event ${event} is already subscribed.`);
+      console.error(`Listener for event ${event} is already subscribed.`);
       return;
     }
 

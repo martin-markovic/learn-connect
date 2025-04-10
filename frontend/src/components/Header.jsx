@@ -75,7 +75,7 @@ function Header() {
                     try {
                       navigate(`/exam/${examId}`);
                     } catch (error) {
-                      console.log("Error navigating to exam", error.message);
+                      console.error("Error navigating to exam", error.message);
                       dispatch(getExam());
                     }
                   }
