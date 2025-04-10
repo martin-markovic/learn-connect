@@ -19,6 +19,13 @@ const useGlobalEvents = (currentLocation, user) => {
     (data) => {
       dispatch(finishExam(data));
 
+      socketEventManager.handleEmitEvent("new notification", {
+        senderId: data?.scorePayload?.user,
+        quizId: data?.scorePayload?.quiz,
+        quizScore: data?.scorePayload?.latestScore,
+        notificationName: "quiz graded",
+      });
+
       if (currentLocation.startsWith(`/exam/${data?.scorePayload?.quizId}`)) {
         navigate("/");
       }
@@ -41,16 +48,14 @@ const useGlobalEvents = (currentLocation, user) => {
 
   const handleNewNotification = useCallback(
     (data) => {
-      const { newNotification } = data;
+      const { savedNotification } = data;
 
-      console.log("new notification received with data: ", data);
-
-      if (!newNotification) {
+      if (!savedNotification) {
         console.error("New notification not found");
         return;
       }
 
-      dispatch(addNewNotification(newNotification));
+      dispatch(addNewNotification(savedNotification));
     },
     [dispatch]
   );

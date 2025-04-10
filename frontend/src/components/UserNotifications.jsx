@@ -3,7 +3,6 @@ import { useSelector, useDispatch } from "react-redux";
 import socketEventManager from "../features/socket/socket.eventManager.js";
 import {
   resetNotifications,
-  addNewNotification,
   getNotifications,
   markNotificationAsRead,
 } from "../features/notifications/notificationSlice.js";
@@ -20,17 +19,6 @@ function UserNotifications() {
   }, [dispatch]);
 
   useEffect(() => {
-    socketEventManager.subscribe("notification received", (data) => {
-      const { newNotification } = data;
-
-      if (!newNotification) {
-        console.error("New notification not found");
-        return;
-      }
-
-      dispatch(addNewNotification(newNotification));
-    });
-
     socketEventManager.subscribe("notification marked as read", (data) => {
       dispatch(markNotificationAsRead(data));
     });
@@ -43,7 +31,7 @@ function UserNotifications() {
 
     return () => {
       dispatch(resetNotifications());
-      socketEventManager.unsubscribe("notification received");
+
       socketEventManager.unsubscribe("notification marked as read");
       socketEventManager.unsubscribe("marked all as read");
     };

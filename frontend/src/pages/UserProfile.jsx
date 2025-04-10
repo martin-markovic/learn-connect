@@ -5,6 +5,7 @@ import {
   getUserList,
   getFriendList,
   handleBlock,
+  newFriendRequest,
 } from "../features/friend/friendSlice.js";
 import socketEventManager from "../features/socket/socket.eventManager.js";
 
@@ -53,8 +54,14 @@ function UserProfile() {
       dispatch(getUserList());
       dispatch(getFriendList());
     });
+
+    socketEventManager.subscribe("friend request sent", (data) => {
+      dispatch(newFriendRequest(data));
+    });
+
     return () => {
       socketEventManager.unsubscribe("user blocked");
+      socketEventManager.unsubscribe("friend request sent");
     };
   }, [dispatch]);
 

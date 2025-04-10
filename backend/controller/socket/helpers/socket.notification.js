@@ -118,8 +118,7 @@ export const handleNewNotification = async (context, data) => {
 
     context.emitEvent("receiver", "notification received", {
       savedNotification,
-      receiverId:
-        notificationName === "friend request accepted" ? receiverId : senderId,
+      receiverId: notificationName === "quiz graded" ? senderId : receiverId,
     });
   } catch (error) {
     console.error("Error generating new notification", error.message);
