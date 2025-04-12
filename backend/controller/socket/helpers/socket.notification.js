@@ -15,12 +15,10 @@ export const markNotificationAsRead = async (context, data) => {
     });
 
     if (!notificationFound) {
-      console.log("Notification not found on server");
-      throw new Error("Notification not found");
+      throw new Error("Notification not found on server");
     }
 
     if (notificationFound.readBy.includes(senderId)) {
-      console.log("User is already notified.");
       throw new Error("User is already notified");
     }
 
@@ -47,14 +45,14 @@ export const markAllNotificationsAsRead = async (context, data) => {
     const { senderId } = data;
 
     const result = await Notification.updateMany(
-      { readBy: { $ne: senderId } },
+      { receiver: senderId, readBy: { $ne: senderId } },
       {
         $push: { readBy: senderId },
         $set: { expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) },
       }
     );
 
-    if (result.nModified === 0) {
+    if (result.modifiedCount === 0) {
       throw new Error("All notifications are already read");
     }
 
@@ -98,7 +96,8 @@ export const handleNewNotification = async (context, data) => {
     const notificationData = {
       evtName: notificationName,
       userName: senderName,
-      quizScore: quizScore ? quizScore : undefined,
+      quizScore:
+        quizScore !== null && quizScore !== undefined ? quizScore : undefined,
       quizName: quizName ? quizName : undefined,
     };
 
@@ -140,7 +139,9 @@ const generateNotificationMessage = (data) => {
   }
 
   if (evtName === "quiz graded") {
-    return `You scored ${quizScore} points on quiz ${quizName}`;
+    return `You scored ${quizScore} ${
+      quizScore === 1 ? "point" : "points"
+    } on quiz ${quizName}`;
   }
 
   return "";

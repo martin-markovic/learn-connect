@@ -46,9 +46,8 @@ export const createQuiz = async (context, data) => {
     });
 
     context.emitEvent("sender", "new quiz created", quiz);
-
   } catch (error) {
-    console.log("Error creating new quiz: ", error.message);
+    console.error("Error creating new quiz: ", error.message);
     context.emitEvent("sender", "error", {
       message: `Error creating a new message: ${error.message}`,
     });

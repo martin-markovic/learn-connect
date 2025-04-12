@@ -21,7 +21,7 @@ const validateFriendship = async (data, eventHandler) => {
 
     eventHandler();
   } catch (error) {
-    console.log("Unable to verify friendship: ", error.message);
+    console.error("Unable to verify friendship: ", error.message);
   }
 };
 

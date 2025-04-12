@@ -156,7 +156,7 @@ const handleSocialEvents = (context) => {
         receiverId,
       });
     } catch (error) {
-      console.log("Error removing friend: ", error.message);
+      console.error("Error removing friend: ", error.message);
       context.emitEvent("sender", "error", error.message);
     }
   });

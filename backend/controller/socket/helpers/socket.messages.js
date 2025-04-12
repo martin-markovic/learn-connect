@@ -106,7 +106,7 @@ export const handleChatOpen = async (context, data) => {
       receiverId,
     });
   } catch (error) {
-    console.log("Error emitting conversation read: ", error.message);
+    console.error("Error emitting conversation read: ", error.message);
     context.socket.emit("sender", "error", { message: error.message });
   }
 };
@@ -137,7 +137,7 @@ export const handleMarkAsRead = async (context, data) => {
       receiverId,
     });
   } catch (error) {
-    console.log("Error emitting conversation read: ", error.message);
+    console.error("Error emitting conversation read: ", error.message);
     context.socket.emit("sender", "error", { message: error.message });
   }
 };
@@ -152,7 +152,7 @@ export const handleTyping = (context, data) => {
 
     context.emitEvent("receiver", "chat activity", data);
   } catch (error) {
-    console.log("Error emitting chat activity", error.message);
+    console.error("Error emitting chat activity", error.message);
     context.socket.emit("error", { message: error.message });
   }
 };

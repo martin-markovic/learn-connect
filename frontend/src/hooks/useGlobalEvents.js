@@ -48,14 +48,7 @@ const useGlobalEvents = (currentLocation, user) => {
 
   const handleNewNotification = useCallback(
     (data) => {
-      const { savedNotification } = data;
-
-      if (!savedNotification) {
-        console.error("New notification not found");
-        return;
-      }
-
-      dispatch(addNewNotification(savedNotification));
+      dispatch(addNewNotification(data));
     },
     [dispatch]
   );
