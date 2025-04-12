@@ -15,12 +15,10 @@ export const markNotificationAsRead = async (context, data) => {
     });
 
     if (!notificationFound) {
-      console.error("Notification not found on server");
-      throw new Error("Notification not found");
+      throw new Error("Notification not found on server");
     }
 
     if (notificationFound.readBy.includes(senderId)) {
-      console.error("User is already notified.");
       throw new Error("User is already notified");
     }
 
@@ -47,14 +45,14 @@ export const markAllNotificationsAsRead = async (context, data) => {
     const { senderId } = data;
 
     const result = await Notification.updateMany(
-      { readBy: { $ne: senderId } },
+      { receiver: senderId, readBy: { $ne: senderId } },
       {
         $push: { readBy: senderId },
         $set: { expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) },
       }
     );
 
-    if (result.nModified === 0) {
+    if (result.modifiedCount === 0) {
       throw new Error("All notifications are already read");
     }
 
