@@ -62,7 +62,7 @@ const notificationSlice = createSlice({
     },
     markNotificationAsRead: (state, action) => {
       state.userNotifications = state.userNotifications.filter(
-        (notification) => notification._id !== action.payload
+        (notification) => notification?.savedNotification._id !== action.payload
       );
     },
   },
