@@ -98,7 +98,8 @@ export const handleNewNotification = async (context, data) => {
     const notificationData = {
       evtName: notificationName,
       userName: senderName,
-      quizScore: quizScore ? quizScore : undefined,
+      quizScore:
+        quizScore !== null && quizScore !== undefined ? quizScore : undefined,
       quizName: quizName ? quizName : undefined,
     };
 
@@ -140,7 +141,9 @@ const generateNotificationMessage = (data) => {
   }
 
   if (evtName === "quiz graded") {
-    return `You scored ${quizScore} points on quiz ${quizName}`;
+    return `You scored ${quizScore} ${
+      quizScore === 1 ? "point" : "points"
+    } on quiz ${quizName}`;
   }
 
   return "";
