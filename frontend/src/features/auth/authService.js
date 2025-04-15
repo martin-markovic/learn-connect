@@ -40,9 +40,34 @@ const loginUser = async (userData) => {
   }
 };
 
+const updateUser = async (userData, token) => {
+  try {
+    if (!token) {
+      throw new Error("Invalid token");
+    }
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    const response = await axios.put(API_URL, userData, config);
+
+    if (response.data) {
+      localStorage.setItem("user", JSON.stringify(response.data));
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error(error.message);
+  }
+};
+
 const authService = {
   registerUser,
   loginUser,
+  updateUser,
 };
 
 export default authService;
