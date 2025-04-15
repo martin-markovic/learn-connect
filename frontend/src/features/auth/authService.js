@@ -36,22 +36,13 @@ const loginUser = async (userData) => {
 
     return response.data;
   } catch (error) {
-    console.error(error.message);
-  }
-};
-
-const logoutUser = async () => {
-  try {
-    localStorage.removeItem("user");
-  } catch (error) {
-    console.error(error);
+    console.error("Error logging user in: ", error.message);
   }
 };
 
 const authService = {
   registerUser,
   loginUser,
-  logoutUser,
 };
 
 export default authService;
