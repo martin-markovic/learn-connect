@@ -6,11 +6,15 @@ const userRouter = Router();
 import {
   registerUser,
   loginUser,
+  updateUser,
 } from "../../controller/users/userController.js";
+
+import { protect } from "../../middleware/authMiddleware.js";
 
 const upload = multer({ storage });
 
 userRouter.post("/", upload.single("avatar"), registerUser);
 userRouter.post("/login", loginUser);
+userRouter.put("/", protect, updateUser);
 
 export default userRouter;
