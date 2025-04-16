@@ -16,8 +16,8 @@ export const getFriendList = async (req, res) => {
       },
       "sender receiver status"
     )
-      .populate("sender", "name")
-      .populate("receiver", "name");
+      .populate("sender", "name avatar")
+      .populate("receiver", "name avatar");
 
     return res.status(200).json(friendList || []);
   } catch (error) {
@@ -45,8 +45,11 @@ export const getUserList = async (req, res) => {
       String(rel.sender) === String(userId) ? rel.receiver : rel.sender
     );
 
-    const userList = await User.find({ _id: { $nin: blockedUserIds } }).select(
-      "name"
+    const userList = await User.find(
+      {
+        _id: { $nin: blockedUserIds },
+      },
+      "name avatar"
     );
 
     return res.status(200).json(userList);

@@ -30,26 +30,27 @@ const handleSocialEvents = (context) => {
       await newRequest.save();
 
       const populatedRequest = await Friend.findById(newRequest._id)
-        .populate("sender", "name _id")
-        .populate("receiver", "name _id");
+        .populate("sender", "name _id avatar")
+        .populate("receiver", "name _id avatar");
 
-      context.emitEvent("sender", "friend request sent", {
+      const friendRequestPayload = {
         _id: populatedRequest._id.toString(),
         senderId,
         senderName: populatedRequest.sender?.name,
+        senderAvatar: populatedRequest?.sender?.avatar,
         receiverId,
         receiverName: populatedRequest.receiver?.name,
+        receiverAvatar: populatedRequest?.receiver?.avatar,
         status: populatedRequest.status,
-      });
+      };
 
-      context.emitEvent("receiver", "friend request received", {
-        _id: populatedRequest._id.toString(),
-        senderId,
-        senderName: populatedRequest.sender?.name,
-        receiverId,
-        receiverName: populatedRequest.receiver?.name,
-        status: populatedRequest.status,
-      });
+      context.emitEvent("sender", "friend request sent", friendRequestPayload);
+
+      context.emitEvent(
+        "receiver",
+        "friend request received",
+        friendRequestPayload
+      );
     } catch (error) {
       console.error(error.message);
       context.socket.emit("error", error.message);
@@ -107,19 +108,24 @@ const handleSocialEvents = (context) => {
         throw new Error("Friend request not found");
       }
 
-      context.emitEvent("sender", "friend request accepted", {
+      const friendRequestPayload = {
         _id: friendRequest?._id,
         status: userResponse,
         receiverId,
         senderId,
-      });
+      };
 
-      context.emitEvent("receiver", "friend request accepted", {
-        _id: friendRequest?._id,
-        senderId,
-        receiverId,
-        status: userResponse,
-      });
+      context.emitEvent(
+        "sender",
+        "friend request accepted",
+        friendRequestPayload
+      );
+
+      context.emitEvent(
+        "receiver",
+        "friend request accepted",
+        friendRequestPayload
+      );
     } catch (error) {
       console.error("Error processing friend request: ", error.message);
       context.emitEvent("sender", "error", { message: error.message });
