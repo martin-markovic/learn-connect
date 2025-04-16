@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getUserList,
@@ -8,6 +8,7 @@ import {
   newFriendRequest,
 } from "../features/friend/friendSlice.js";
 import socketEventManager from "../features/socket/socket.eventManager.js";
+import { FaCircleUser } from "react-icons/fa6";
 
 function UserProfile() {
   const [userInfo, setUserInfo] = useState(null);
@@ -23,6 +24,7 @@ function UserProfile() {
     friendList = [],
   } = useSelector((state) => state.friends);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const user = useSelector((state) => state.auth.user);
 
   useEffect(() => {
@@ -162,6 +164,22 @@ function UserProfile() {
     <p>Loading,please wait...</p>
   ) : (
     <div>
+      <div className="avatar-wrapper">
+        {userInfo?.avatar ? (
+          <img
+            src={userInfo?.avatar}
+            alt="user avatar"
+            style={{
+              width: "80px",
+              height: "80px",
+              borderRadius: "50%",
+              objectFit: "cover",
+            }}
+          />
+        ) : (
+          <FaCircleUser />
+        )}
+      </div>
       <h1>{userInfo.name}</h1>
       {String(user?._id) !== String(userId) && (
         <>
@@ -239,6 +257,70 @@ function UserProfile() {
                 Block User
               </button>
             </div>
+          )}
+        </>
+      )}
+      {String(user?._id) === String(userId) && (
+        <>
+          <button
+            type="button"
+            onClick={() => {
+              setIsEditing(true);
+            }}
+          >
+            Edit Account Info
+          </button>
+          {friendList.length ? (
+            <div>
+              <p>{user?.name.split(" ")[0]}&apos;s friends</p>
+              {friendList.map((friend, index) =>
+                friend?.status === "accepted" ? (
+                  <div
+                    key={`friend-${index}`}
+                    onClick={() => {
+                      navigate(
+                        `/profile/${
+                          friend?.senderId === user?._id
+                            ? friend?.receiverId
+                            : friend?.senderId
+                        }`
+                      );
+                    }}
+                    style={{ cursor: "pointer" }}
+                  >
+                    {(
+                      friend?.senderId === user?._id
+                        ? friend?.receiverAvatar
+                        : friend?.senderAvatar
+                    ) ? (
+                      <img
+                        alt="user avatar"
+                        src={
+                          friend?.senderId === user?._id
+                            ? friend?.receiverAvatar
+                            : friend?.senderAvatar
+                        }
+                        style={{
+                          width: "60px",
+                          height: "60px",
+                          borderRadius: "50%",
+                          objectFit: "cover",
+                        }}
+                      />
+                    ) : (
+                      <FaCircleUser />
+                    )}
+                    <p>
+                      {friend?.senderId === user?._id
+                        ? friend?.receiverName
+                        : friend?.senderName}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <p>Friend list is empty</p>
           )}
         </>
       )}

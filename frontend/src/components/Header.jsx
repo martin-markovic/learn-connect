@@ -9,7 +9,7 @@ import {
 } from "react-icons/fa";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { logoutUser, resetUser } from "../features/auth/authSlice.js";
+import { resetUser } from "../features/auth/authSlice.js";
 import { resetQuizzes } from "../features/quizzes/quizSlice.js";
 import { resetClassroom } from "../features/classroom/classroomSlice.js";
 import { resetChat } from "../features/chat/chatSlice.js";
@@ -26,13 +26,15 @@ function Header() {
   const examId = useSelector((state) => state.exam.examData?._id);
 
   const handleLogout = () => {
-    dispatch(logoutUser());
     dispatch(resetQuizzes());
     dispatch(resetUser());
     dispatch(resetChat());
     dispatch(resetClassroom());
     dispatch(resetUserList());
     dispatch(resetExam());
+
+    localStorage.removeItem("user");
+
     navigate("/login");
   };
 

@@ -70,13 +70,4 @@ describe("Auth Service Integration Tests", function () {
       }
     });
   });
-
-  describe("logoutUser", function () {
-    it("should remove user data from localStorage", function () {
-      localStorage.setItem("user", JSON.stringify({ token: "sample-token" }));
-      authService.logoutUser();
-
-      expect(localStorage.getItem("user")).to.be.null;
-    });
-  });
 });

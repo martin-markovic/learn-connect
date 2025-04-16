@@ -36,22 +36,38 @@ const loginUser = async (userData) => {
 
     return response.data;
   } catch (error) {
-    console.error(error.message);
+    console.error("Error logging user in: ", error.message);
   }
 };
 
-const logoutUser = async () => {
+const updateUser = async (userData, token) => {
   try {
-    localStorage.removeItem("user");
+    if (!token) {
+      throw new Error("Invalid token");
+    }
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    const response = await axios.put(API_URL, userData, config);
+
+    if (response.data) {
+      localStorage.setItem("user", JSON.stringify(response.data));
+    }
+
+    return response.data;
   } catch (error) {
-    console.error(error);
+    console.error(error.message);
   }
 };
 
 const authService = {
   registerUser,
   loginUser,
-  logoutUser,
+  updateUser,
 };
 
 export default authService;
