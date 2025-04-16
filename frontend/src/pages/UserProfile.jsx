@@ -166,7 +166,16 @@ function UserProfile() {
     <div>
       <div className="avatar-wrapper">
         {userInfo?.avatar ? (
-          <img src={userInfo?.avatar} alt="user avatar" />
+          <img
+            src={userInfo?.avatar}
+            alt="user avatar"
+            style={{
+              width: "80px",
+              height: "80px",
+              borderRadius: "50%",
+              objectFit: "cover",
+            }}
+          />
         ) : (
           <FaCircleUser />
         )}
@@ -264,8 +273,8 @@ function UserProfile() {
           {friendList.length ? (
             <div>
               <p>{user?.name.split(" ")[0]}&apos;s friends</p>
-              {friendList.map((friend, index) => {
-                return (
+              {friendList.map((friend, index) =>
+                friend?.status === "accepted" ? (
                   <div
                     key={`friend-${index}`}
                     onClick={() => {
@@ -273,14 +282,31 @@ function UserProfile() {
                         `/profile/${
                           friend?.senderId === user?._id
                             ? friend?.receiverId
-                            : friend?._senderId
+                            : friend?.senderId
                         }`
                       );
                     }}
                     style={{ cursor: "pointer" }}
                   >
-                    {friend?.avatar ? (
-                      <img alt="user avatar" src={friend?.avatar} />
+                    {(
+                      friend?.senderId === user?._id
+                        ? friend?.receiverAvatar
+                        : friend?.senderAvatar
+                    ) ? (
+                      <img
+                        alt="user avatar"
+                        src={
+                          friend?.senderId === user?._id
+                            ? friend?.receiverAvatar
+                            : friend?.senderAvatar
+                        }
+                        style={{
+                          width: "60px",
+                          height: "60px",
+                          borderRadius: "50%",
+                          objectFit: "cover",
+                        }}
+                      />
                     ) : (
                       <FaCircleUser />
                     )}
