@@ -113,7 +113,7 @@ const friendSlice = createSlice({
                   _id: item?._id,
                   senderId: item?.sender?._id,
                   senderName: item?.sender?.name,
-                  senderAvatar: item?.sender?.senderAvatar,
+                  senderAvatar: item?.sender?.avatar,
                   receiverId: item?.receiver?._id,
                   receiverName: item?.receiver?.name,
                   receiverAvatar: item?.receiver?.avatar,

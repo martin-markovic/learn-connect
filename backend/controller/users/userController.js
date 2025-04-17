@@ -85,7 +85,7 @@ export const updateUser = async (req, res) => {
       return res.status(401).json({ message: "User not authorized" });
     }
 
-    const { userData } = req.body;
+    const userData = req.body;
 
     const updatedData = await User.findByIdAndUpdate(userId, userData, {
       new: true,
@@ -96,7 +96,7 @@ export const updateUser = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    return res.status(200).json(updatedUser);
+    return res.status(200).json(updatedData);
   } catch (error) {
     return res.status(500).json({ message: "Server error" });
   }
