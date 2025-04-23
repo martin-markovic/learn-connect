@@ -87,6 +87,22 @@ const friendSlice = createSlice({
         (item) => item._id !== action.payload._id
       );
     },
+    updateUserList: (state, action) => {
+      const index = state.userList.findIndex(
+        (u) => u._id === action.payload._id
+      );
+      if (index !== -1) {
+        state.userList[index] = action.payload;
+      }
+    },
+    updateFriendList: (state, action) => {
+      const index = state.friendList.findIndex(
+        (u) => u._id === action.payload._id
+      );
+      if (index !== -1) {
+        state.friendList[index] = action.payload;
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -113,7 +129,7 @@ const friendSlice = createSlice({
                   _id: item?._id,
                   senderId: item?.sender?._id,
                   senderName: item?.sender?.name,
-                  senderAvatar: item?.sender?.senderAvatar,
+                  senderAvatar: item?.sender?.avatar,
                   receiverId: item?.receiver?._id,
                   receiverName: item?.receiver?.name,
                   receiverAvatar: item?.receiver?.avatar,
@@ -141,7 +157,19 @@ const friendSlice = createSlice({
         state.isSuccess = true;
         state.isError = false;
         state.errorMessage = "";
-        state.userList = action.payload;
+        if (action.payload.length) {
+          action.payload.forEach((item) => {
+            const alreadyExists = state.userList.some(
+              (user) => user?._id === item?._id
+            );
+
+            if (!alreadyExists) {
+              action.payload.forEach((item) => {
+                state.userList.push(item);
+              });
+            }
+          });
+        }
       })
       .addCase(getUserList.rejected, (state, action) => {
         state.isLoading = false;
@@ -160,6 +188,8 @@ export const {
   handleDecline,
   handleRemove,
   handleBlock,
+  updateUserList,
+  updateFriendList,
 } = friendSlice.actions;
 
 export default friendSlice.reducer;

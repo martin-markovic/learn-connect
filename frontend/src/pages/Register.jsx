@@ -38,9 +38,10 @@ function Register() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (password !== password2) {
-      toast.error("Passwords do not match");
-    } else {
+    try {
+      if (password !== password2) {
+        throw new Error("Passwords do not match");
+      }
       const userCredentials = {
         name,
         email,
@@ -50,6 +51,9 @@ function Register() {
       };
 
       dispatch(registerUser(userCredentials));
+    } catch (error) {
+      console.error("Error submitting user credentials: ", error.message);
+      toast.error("Error submitting user credentials: ", error.message);
     }
   };
 

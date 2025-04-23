@@ -10,11 +10,7 @@ const registerUser = async (userData) => {
       throw new Error("Email and password are required.");
     }
 
-    const response = await axios.post(API_URL, userData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
+    const response = await axios.post(API_URL, userData, {});
 
     if (response.data) {
       localStorage.setItem("user", JSON.stringify(response.data));
@@ -52,13 +48,17 @@ const updateUser = async (userData, token) => {
       },
     };
 
-    const response = await axios.put(API_URL, userData, config);
+    const response = await axios.put(`${API_URL}/`, userData, config);
 
-    if (response.data) {
-      localStorage.setItem("user", JSON.stringify(response.data));
+    if (!response.data) {
+      throw new Error("No response data received");
     }
 
-    return response.data;
+    const updatedUser = { ...response.data, token };
+
+    localStorage.setItem("user", JSON.stringify(updatedUser));
+
+    return updatedUser;
   } catch (error) {
     console.error(error.message);
   }

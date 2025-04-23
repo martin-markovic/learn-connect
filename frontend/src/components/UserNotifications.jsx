@@ -69,20 +69,19 @@ function UserNotifications() {
             {userNotifications && userNotifications.length > 0 ? (
               userNotifications.map((notification, index) => (
                 <li key={`notification-${index}`}>
-                  {notification?.savedNotification?.message &&
-                  notification?.savedNotification?.message.trim() ? (
-                    <p>{notification?.savedNotification?.message}</p>
+                  {notification?.message && notification?.message.trim() ? (
+                    <p>{notification?.message}</p>
                   ) : (
                     <p>No message available</p>
                   )}
-                  {notification?.savedNotification?.date ? (
-                    <span> {notification?.savedNotification?.date}</span>
+                  {notification?.date ? (
+                    <span> {notification?.date}</span>
                   ) : (
                     <span>No date available</span>
                   )}
                   <button
                     onClick={() => {
-                      handleMark(notification?.savedNotification?._id);
+                      handleMark(notification?._id);
                     }}
                   >
                     Mark as read

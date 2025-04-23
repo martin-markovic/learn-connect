@@ -47,7 +47,7 @@ function UserQuizList() {
     return () => {
       socketEventManager.unsubscribe("new quiz created");
     };
-  }, [user, dispatch]);
+  }, [user?._id, dispatch]);
 
   const handleEdit = (quiz) => {
     setEditQuiz(quiz);
