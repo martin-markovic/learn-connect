@@ -48,19 +48,37 @@ const updateUser = async (userData, token) => {
       },
     };
 
-    const response = await axios.put(`${API_URL}/`, userData, config);
+    let multiPartData;
+
+    if (userData.avatar) {
+      const formData = new FormData();
+      formData.append("avatar", userData.avatar);
+      Object.entries(userData).forEach(([key, value]) => {
+        if (key !== "avatar") formData.append(key, value);
+      });
+
+      multiPartData = formData;
+    }
+
+    const response = await axios.put(
+      `${API_URL}/`,
+      userData.avatar ? multiPartData : userData,
+      config
+    );
 
     if (!response.data) {
       throw new Error("No response data received");
     }
-
     const updatedUser = { ...response.data, token };
 
-    localStorage.setItem("user", JSON.stringify(updatedUser));
+    if (!updatedUser || !updatedUser._id) {
+      throw new Error("Invalid user data received from server");
+    }
 
+    localStorage.setItem("user", JSON.stringify(updatedUser));
     return updatedUser;
   } catch (error) {
-    console.error(error.message);
+    console.error("Error updating user: ", error.message);
   }
 };
 

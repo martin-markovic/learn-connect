@@ -85,12 +85,28 @@ export const updateUser = async (req, res) => {
       return res.status(401).json({ message: "User not authorized" });
     }
 
-    const userData = req.body;
+    const avatarUrl = req.file?.path || null;
 
-    const updatedData = await User.findByIdAndUpdate(userId, userData, {
+    const { name, email, password } = req.body;
+
+    const updateFields = { name, email, password, avatar: avatarUrl };
+
+    Object.keys(updateFields).forEach(
+      (key) => updateFields[key] == null && delete updateFields[key]
+    );
+
+    if (email) {
+      const existingUser = await User.findOne({ email });
+
+      if (existingUser && existingUser._id.toString() !== userId.toString()) {
+        return res.status(409).json({ message: "Email already in use" });
+      }
+    }
+
+    const updatedData = await User.findByIdAndUpdate(userId, updateFields, {
       new: true,
       runValidators: true,
-    });
+    }).select("-password -__v");
 
     if (!updatedData) {
       return res.status(404).json({ message: "User not found" });

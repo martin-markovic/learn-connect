@@ -15,6 +15,6 @@ const upload = multer({ storage });
 
 userRouter.post("/", upload.single("avatar"), registerUser);
 userRouter.post("/login", loginUser);
-userRouter.put("/", protect, updateUser);
+userRouter.put("/", protect, upload.single("avatar"), updateUser);
 
 export default userRouter;
