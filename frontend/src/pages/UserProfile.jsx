@@ -10,8 +10,11 @@ import {
 import socketEventManager from "../features/socket/socket.eventManager.js";
 import { FaCircleUser } from "react-icons/fa6";
 
+import UserForm from "../components/users/UserForm.jsx";
+
 function UserProfile() {
   const [userInfo, setUserInfo] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
   const [friendshipStatus, setFriendshipStatus] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
@@ -162,6 +165,15 @@ function UserProfile() {
 
   return isLoading ? (
     <p>Loading,please wait...</p>
+  ) : isEditing ? (
+    <UserForm
+      setIsEditing={setIsEditing}
+      userDetails={{
+        avatar: user?.avatar,
+        email: user?.email,
+        name: user?.name,
+      }}
+    />
   ) : (
     <div>
       <div className="avatar-wrapper">
@@ -180,7 +192,7 @@ function UserProfile() {
           <FaCircleUser />
         )}
       </div>
-      <h1>{userInfo.name}</h1>
+      <h1>{userInfo?.name}</h1>
       {String(user?._id) !== String(userId) && (
         <>
           {friendshipStatus === "pending" &&
@@ -316,8 +328,8 @@ function UserProfile() {
                         : friend?.senderName}
                     </p>
                   </div>
-                );
-              })}
+                ) : null
+              )}
             </div>
           ) : (
             <p>Friend list is empty</p>

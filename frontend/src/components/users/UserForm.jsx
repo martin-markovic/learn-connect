@@ -41,6 +41,21 @@ function UserForm({ setIsEditing, userDetails }) {
   }, [userDetails]);
 
   /**
+   * Cleans up the object URL for avatar preview when the component unmounts or dependencies change.
+   *
+   * This hook revokes the URL created for the avatar preview to prevent memory leaks if the avatarPreview is a valid string URL.
+   *
+   * @returns {void} - Nothing is returned from this effect
+   */
+  useEffect(() => {
+    return () => {
+      if (avatarPreview && typeof formData.avatar === "string") {
+        URL.revokeObjectURL(avatarPreview);
+      }
+    };
+  }, [avatarPreview, formData.avatar]);
+
+  /**
    * handleChange - Handles form input changes, specifically for file and text input fields.
    *
    * - Prevents default form submission behavior (e.preventDefault).
@@ -394,6 +409,12 @@ function UserForm({ setIsEditing, userDetails }) {
             type="submit"
             onClick={handleSubmit}
             value="Save changes"
+            disabled={
+              Object.values(pendingChanges).length === 0 ||
+              Object.keys(pendingChanges).every(
+                (key) => pendingChanges[key] === userDetails[key]
+              )
+            }
           />
           <button
             type="button"
