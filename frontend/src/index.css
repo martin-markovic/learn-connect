@@ -28,6 +28,10 @@ header ul {
   width: 100%;
 }
 
+.clickable {
+  cursor: pointer;
+}
+
 .nav-buttons {
   display: flex;
   flex-direction: row;
