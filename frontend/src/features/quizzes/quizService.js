@@ -27,7 +27,7 @@ const getClassQuizzes = async (token) => {
       },
     };
 
-    const response = await axios.get(API_URL, config);
+    const response = await axios.get(`${API_URL}classroom`, config);
 
     return response.data;
   } catch (error) {

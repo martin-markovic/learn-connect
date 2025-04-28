@@ -12,6 +12,6 @@ import { protect } from "../../middleware/authMiddleware.js";
 quizRoutes.get("/", protect, getUserQuizzes);
 quizRoutes.route("/:id").put(protect, updateQuiz).delete(protect, deleteQuiz);
 
-quizRoutes.get("/:classroomId", getClassroomQuizzes);
+quizRoutes.get("/classroom", protect, getClassroomQuizzes);
 
 export default quizRoutes;

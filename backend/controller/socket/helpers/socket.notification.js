@@ -111,7 +111,9 @@ export const handleNewNotification = async (context, data) => {
     const savedNotification = await newNotification.save();
 
     if (notificationName === "quiz graded") {
-      context.emitEvent("sender", "notification received", savedNotification);
+      context.emitEvent("sender", "notification received", {
+        savedNotification,
+      });
       return;
     }
 
