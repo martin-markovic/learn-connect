@@ -27,36 +27,26 @@ export const getUserQuizzes = async (req, res) => {
 };
 
 export const getClassroomQuizzes = async (req, res) => {
-  const classroomId = req.params.classroomId;
-
   try {
     const userId = req.user?._id;
 
-    const userFound = User.findById(userId);
+    const userFound = await User.findById(userId);
 
     if (!userFound) {
       return res.status(401).json({ message: "User is not authenticated" });
     }
 
-    const classroomFound = Classroom.findOne({ _id: classroomId });
+    const userClassrooms = userFound?.classrooms;
 
-    if (!classroomFound) {
-      return res.status(404).json({ message: "Classroom not found" });
+    if (!userClassrooms.length) {
+      return res.status(200).json([]);
     }
 
-    const isEnrolled = classroomFound.studends.some(
-      (student) => student._id === userId
-    );
+    const classroomIds = userClassrooms.map((classroom) => classroom._id);
 
-    if (!isEnrolled) {
-      return res
-        .status(401)
-        .json({ message: "User is not enrolled in this classroom" });
-    }
+    const quizPayload = await Quiz.find({ classroom: { $in: classroomIds } });
 
-    const quizzes = await Quiz.find({ classroom: classroomFound?._id });
-
-    return res.json(quizzes || []);
+    return res.json(quizPayload || []);
   } catch (error) {
     console.error("Error in getQuizzesByClassroom:", error);
     res.status(500).json({ message: `Server error: ${error.message}` });
