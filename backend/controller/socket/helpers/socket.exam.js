@@ -204,7 +204,7 @@ export const createExamPayload = async (data) => {
         { new: true }
       );
     } else {
-      scorePayload = new Score({
+      scorePayload = await new Score({
         user: senderId,
         quiz: quizFound?._id,
         examFeedback: {

@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   updateExam,
   finishExam,
+  getExam,
 } from "../../features/quizzes/exam/examSlice.js";
 import socketEventManager from "../../features/socket/socket.eventManager.js";
 
@@ -20,6 +21,10 @@ function Exam() {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    dispatch(getExam());
+  }, [dispatch]);
 
   useEffect(() => {
     if (!isLoading) {
