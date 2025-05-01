@@ -61,10 +61,8 @@ function ChatList() {
                 {friendList.map((entry, index) => {
                   return (
                     <li
+                      className="clickable"
                       key={`chat-${index}`}
-                      style={{
-                        cursor: "pointer",
-                      }}
                       onClick={() =>
                         handleSelect(
                           entry.senderId === user?._id

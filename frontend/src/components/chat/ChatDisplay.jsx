@@ -4,6 +4,7 @@ import { ChatContext } from "../../context/chatContext.js";
 
 import socketEventManager from "../../features/socket/socket.eventManager.js";
 import { removeMessages } from "../../features/chat/chatSlice.js";
+import { FaCircleUser } from "react-icons/fa6";
 
 const ChatDisplay = () => {
   const [input, setInput] = useState("");
@@ -127,6 +128,40 @@ const ChatDisplay = () => {
                   textAlign: message?.senderId === user?._id ? "right" : "left",
                 }}
               >
+                {message.senderAvatar ? (
+                  <img
+                    src={message?.senderAvatar}
+                    alt="user avatar"
+                    style={{
+                      width: "40px",
+                      height: "40px",
+                      borderRadius: "50%",
+                      objectFit: "cover",
+                    }}
+                  />
+                ) : (
+                  <div
+                    style={{
+                      width: "40px",
+                      height: "40px",
+                      borderRadius: "50%",
+                      border: "solid grey 1px",
+                      overflow: "hidden",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      backgroundColor: "grey",
+                    }}
+                  >
+                    <FaCircleUser
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        color: "white",
+                      }}
+                    />
+                  </div>
+                )}
                 {message?.senderId !== user?._id && (
                   <span>
                     <strong>{message?.senderName}</strong>:{" "}

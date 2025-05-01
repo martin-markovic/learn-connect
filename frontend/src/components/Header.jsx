@@ -52,11 +52,6 @@ function Header() {
         {user ? (
           <div className="nav-buttons">
             <li>
-              <button onClick={handleLogout}>
-                Logout <FaSignOutAlt />
-              </button>
-            </li>
-            <li>
               <button
                 onClick={() => {
                   navigate("/");
@@ -100,17 +95,22 @@ function Header() {
                 )}
               </button>
             </li>
+            <li>
+              <button onClick={handleLogout}>
+                Logout <FaSignOutAlt />
+              </button>
+            </li>
           </div>
         ) : (
           <>
             {location.pathname === "/register" ? (
-              <li>
+              <li style={{ display: "flex", justifyContent: "flex-end" }}>
                 <Link to="/login">
                   Login <FaSignInAlt />
                 </Link>
               </li>
             ) : (
-              <li>
+              <li style={{ display: "flex", justifyContent: "flex-end" }}>
                 <Link to="/register">
                   Register <FaUser />
                 </Link>

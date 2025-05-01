@@ -57,7 +57,9 @@ function UserNotifications() {
   return (
     <div className="content__scrollable-wrapper">
       <div>
-        <span onClick={handleOpen}>Notifications</span>
+        <span className="clickable" onClick={handleOpen}>
+          Notifications
+        </span>
         {userNotifications.length > 0 ? (
           <span>{userNotifications.length}</span>
         ) : null}

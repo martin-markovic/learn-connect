@@ -207,7 +207,7 @@ function UserForm({ setIsEditing, userDetails }) {
             <FaCircleUser />
           )}
 
-          <label className="upload-button">
+          <label className="upload-button clickable">
             <input
               type="file"
               style={{ display: "none" }}
