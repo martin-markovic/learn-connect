@@ -15,9 +15,17 @@ export default function Dashboard() {
   return (
     <main className="dashboard-container">
       <div className="dashboard-left__box">
-        <div className="left__box-top clickable">
+        <div className="left__box-top">
+          <UserNotifications />
+        </div>
+        <div className="left__box-bottom">
+          <FriendSearch />
+        </div>
+      </div>
+      <div className="dashboard-right__box">
+        <div className="right__box-top">
           <div
-            className="avatar-wrapper"
+            className="avatar-wrapper clickable"
             onClick={() => {
               navigate(`/profile/${user?._id}`);
             }}
@@ -41,18 +49,10 @@ export default function Dashboard() {
           <Classroom />
         </div>
         <ChatProvider>
-          <div className="left__box-bottom">
+          <div className="right__box-bottom">
             <Chat />
           </div>
         </ChatProvider>
-      </div>
-      <div className="dashboard-right__box">
-        <div className="right__box-top">
-          <UserNotifications />
-        </div>
-        <div className="right__box-bottom">
-          <FriendSearch />
-        </div>
       </div>
     </main>
   );

@@ -189,7 +189,27 @@ function UserProfile() {
             }}
           />
         ) : (
-          <FaCircleUser />
+          <div
+            style={{
+              width: "60px",
+              height: "60px",
+              borderRadius: "50%",
+              border: "solid grey 1px",
+              overflow: "hidden",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: "white",
+            }}
+          >
+            <FaCircleUser
+              style={{
+                width: "100%",
+                height: "100%",
+                color: "black",
+              }}
+            />
+          </div>
         )}
       </div>
       <h1>{userInfo?.name}</h1>
@@ -288,6 +308,7 @@ function UserProfile() {
               {friendList.map((friend, index) =>
                 friend?.status === "accepted" ? (
                   <div
+                    className="clickable"
                     key={`friend-${index}`}
                     onClick={() => {
                       navigate(
@@ -298,7 +319,6 @@ function UserProfile() {
                         }`
                       );
                     }}
-                    style={{ cursor: "pointer" }}
                   >
                     {(
                       friend?.senderId === user?._id
