@@ -37,8 +37,9 @@ function ChatList() {
 
   return (
     <div>
-      <>
+      <div style={{ display: "flex", flexDirection: "column" }}>
         <button
+          style={{ alignSelf: "flex-end" }}
           onClick={() => {
             setListOpen(!listOpen);
             if (listOpen) {
@@ -46,9 +47,9 @@ function ChatList() {
             }
           }}
         >
-          {listOpen ? "Close" : "Open"}
+          {listOpen ? "Close Chat" : "Open Chat"}
         </button>
-      </>
+      </div>
       {listOpen && (
         <div>
           {isError ? (

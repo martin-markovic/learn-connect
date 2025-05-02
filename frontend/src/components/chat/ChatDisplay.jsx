@@ -115,18 +115,22 @@ const ChatDisplay = () => {
 
   return (
     <div className="content__scrollable-wrapper">
-      <h3>Chat with {selectedChat?.name}</h3>
+      <h3 style={{ textAlign: "end" }}>Chat with {selectedChat?.name}</h3>
 
       <div className="content__scrollable">
         <ul>
           {chat[selectedChat?.id] && chat[selectedChat?.id]?.length > 0 ? (
             chat[selectedChat?.id]?.map((message) => (
               <li
-                key={message?._id}
                 style={{
-                  marginRight: "1em",
-                  textAlign: message?.senderId === user?._id ? "right" : "left",
+                  margin: "1em 0",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems:
+                    message?.senderId === user?._id ? "flex-end" : "flex-start",
+                  gap: "0.5em",
                 }}
+                key={message?._id}
               >
                 {message.senderAvatar ? (
                   <img
@@ -162,11 +166,16 @@ const ChatDisplay = () => {
                     />
                   </div>
                 )}
-                {message?.senderId !== user?._id && (
-                  <span>
-                    <strong>{message?.senderName}</strong>:{" "}
-                  </span>
-                )}
+
+                <span>
+                  <strong>
+                    {message?.senderId === user?._id
+                      ? "You"
+                      : message?.senderName}
+                  </strong>
+                  :{" "}
+                </span>
+
                 <p>{message?.text}</p>
                 <span>{message?.isRead ? "read" : "sent"}</span>
               </li>
