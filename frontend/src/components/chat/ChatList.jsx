@@ -24,12 +24,14 @@ function ChatList() {
     dispatch(getMessages());
   }, [dispatch, friendList]);
 
-  const handleSelect = (receiver) => {
-    setSelectedChat(receiver);
+  const handleSelect = (friend) => {
+    setSelectedChat(friend);
+
+    const { id } = friend;
 
     socketEventManager.handleEmitEvent("open chat", {
       senderId: user?._id,
-      receiverId: receiver,
+      receiverId: id,
     });
   };
 
@@ -66,8 +68,8 @@ function ChatList() {
                       onClick={() =>
                         handleSelect(
                           entry.senderId === user?._id
-                            ? entry.receiverId
-                            : entry.senderId
+                            ? { id: entry.receiverId, name: entry.receiverName }
+                            : { id: entry.senderId, name: entry.senderName }
                         )
                       }
                     >

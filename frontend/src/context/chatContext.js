@@ -41,8 +41,8 @@ const ChatProvider = ({ children }) => {
       setActivity("");
 
       if (
-        selectedChatRef.current &&
-        data?.senderId === selectedChatRef.current
+        selectedChatRef.current?.id &&
+        data?.senderId === selectedChatRef.current?.id
       ) {
         socketEventManager.handleEmitEvent("message read", {
           senderId: user?._id,

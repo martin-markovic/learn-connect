@@ -37,14 +37,14 @@ const ChatDisplay = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!selectedChat && user?._id) {
+    if (!selectedChat?.id && user?._id) {
       console.error("Please select a chat and provide valid socket instance.");
       return;
     }
 
     const eventData = {
       senderId: user?._id,
-      receiverId: selectedChat,
+      receiverId: selectedChat?.id,
       senderName: user?.name,
       text: input,
     };
@@ -56,14 +56,14 @@ const ChatDisplay = () => {
   };
 
   const handleEmitTyping = () => {
-    if (!selectedChat) {
+    if (!selectedChat?.id) {
       console.error("Please select a chat and provide valid socket instance.");
       return;
     }
 
     const eventData = {
       senderId: user?._id,
-      receiverId: selectedChat,
+      receiverId: selectedChat?.id,
       senderName: user?.name,
     };
 
@@ -91,15 +91,15 @@ const ChatDisplay = () => {
   };
 
   const handleRemove = () => {
-    if (selectedChat) {
+    if (selectedChat?.id) {
       try {
-        const messageIds = chat[selectedChat].map((message) => message._id);
+        const messageIds = chat[selectedChat?.id].map((message) => message._id);
 
         if (messageIds.length === 0 || !messageIds) {
           throw new Error("Chat history is already empty");
         }
 
-        const chatData = { selectedChat, messageIds };
+        const chatData = { id: selectedChat?.id, messageIds };
 
         const result = dispatch(removeMessages(chatData));
         if (result.type === "chat/removeMessages/fulfilled") {
@@ -119,8 +119,8 @@ const ChatDisplay = () => {
 
       <div className="content__scrollable">
         <ul>
-          {chat[selectedChat] && chat[selectedChat]?.length > 0 ? (
-            chat[selectedChat]?.map((message) => (
+          {chat[selectedChat?.id] && chat[selectedChat?.id]?.length > 0 ? (
+            chat[selectedChat?.id]?.map((message) => (
               <li
                 key={message?._id}
                 style={{
