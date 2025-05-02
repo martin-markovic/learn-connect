@@ -14,7 +14,7 @@ export const getMessages = async (req, res) => {
         path: "conversation",
         populate: {
           path: "sender receiver",
-          select: "name",
+          select: "name avatar",
         },
       })
       .exec();
@@ -29,8 +29,10 @@ export const getMessages = async (req, res) => {
         text: message.text,
         senderId: message.sender?._id,
         senderName: message.sender?.name,
+        senderAvatar: message.sender?.avatar,
         receiverId: message.receiver?._id,
         receiverName: message.receiver?.name,
+        receiverAvatar: message.sender?.avatar,
         timestamp: message.timestamp,
         isRead: message.isRead,
       }));
