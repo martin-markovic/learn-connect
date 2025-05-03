@@ -13,7 +13,6 @@ const ChatContext = createContext();
 const ChatProvider = ({ children }) => {
   const [selectedChat, setSelectedChat] = useState(null);
   const [activity, setActivity] = useState("");
-  const [scrollToBottom, setScrollToBottom] = useState(false);
 
   const selectedChatRef = useRef(null);
   const activityTimer = useRef(null);
@@ -35,8 +34,6 @@ const ChatProvider = ({ children }) => {
       };
 
       dispatch(addMessage(messagePayload));
-
-      setScrollToBottom((prevState) => !prevState);
 
       setActivity("");
 
@@ -135,8 +132,6 @@ const ChatProvider = ({ children }) => {
     setSelectedChat,
     activity,
     setActivity,
-    scrollToBottom,
-    setScrollToBottom,
   };
 
   return (

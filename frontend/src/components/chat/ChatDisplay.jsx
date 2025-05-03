@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useContext } from "react";
+import { useState, useRef, useLayoutEffect, useContext } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { ChatContext } from "../../context/chatContext.js";
 
@@ -25,14 +25,11 @@ const ChatDisplay = () => {
   const { user } = useSelector((state) => state.auth);
   const chat = useSelector((state) => state.chat.chat);
 
-  useEffect(() => {
-    if (scrollToBottom) {
-      if (chatEndRef.current) {
-        chatEndRef.current.scrollIntoView({ behavior: "smooth" });
-      }
-      setScrollToBottom((prevState) => !prevState);
+  useLayoutEffect(() => {
+    if (selectedChat?.id && chat[selectedChat.id]?.length > 0) {
+      chatEndRef.current?.scrollIntoView({ behavior: "instant" });
     }
-  }, [scrollToBottom, setScrollToBottom]);
+  }, [selectedChat?.id]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -184,8 +181,8 @@ const ChatDisplay = () => {
             <div>No messages yet.</div>
           )}
         </ul>
+        <div ref={chatEndRef} />
       </div>
-      <div ref={chatEndRef} />
       <button onClick={handleRemove}>Delete Conversation</button>
       <form onSubmit={handleSubmit}>
         <input
