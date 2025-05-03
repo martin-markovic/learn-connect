@@ -57,7 +57,11 @@ function UserNotifications() {
   return (
     <div className="content__scrollable-wrapper">
       <div>
-        <span className="clickable" onClick={handleOpen}>
+        <span
+          title={!newsOpen && "open notifications"}
+          className="clickable"
+          onClick={handleOpen}
+        >
           Notifications
         </span>
         {userNotifications.length > 0 ? (
@@ -77,7 +81,7 @@ function UserNotifications() {
                     <p>No message available</p>
                   )}
                   {notification?.date ? (
-                    <span> {notification?.date}</span>
+                    <span>{notification?.date}</span>
                   ) : (
                     <span>No date available</span>
                   )}

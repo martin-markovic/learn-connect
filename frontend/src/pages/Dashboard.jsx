@@ -32,6 +32,7 @@ export default function Dashboard() {
           >
             {user?.avatar ? (
               <img
+                title="visit your profile"
                 src={user?.avatar}
                 alt="user avatar"
                 style={{
@@ -42,7 +43,7 @@ export default function Dashboard() {
                 }}
               />
             ) : (
-              <FaCircleUser />
+              <FaCircleUser title="visit your profile" />
             )}
           </div>
           <span>{user?.name}</span>
