@@ -1,5 +1,6 @@
 import { useState, useRef, useLayoutEffect, useContext } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { ChatContext } from "../../context/chatContext.js";
 
 import socketEventManager from "../../features/socket/socket.eventManager.js";
@@ -13,14 +14,10 @@ const ChatDisplay = () => {
   const isTyping = useRef(false);
 
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  const {
-    selectedChat,
-    activity,
-    setActivity,
-    scrollToBottom,
-    setScrollToBottom,
-  } = useContext(ChatContext);
+  const { selectedChat, setSelectedChat, activity, setActivity } =
+    useContext(ChatContext);
 
   const { user } = useSelector((state) => state.auth);
   const chat = useSelector((state) => state.chat.chat);
@@ -87,35 +84,40 @@ const ChatDisplay = () => {
     }, 700);
   };
 
-  const handleRemove = () => {
-    if (selectedChat?.id) {
-      try {
-        const messageIds = chat[selectedChat?.id].map((message) => message._id);
-
-        if (messageIds.length === 0 || !messageIds) {
-          throw new Error("Chat history is already empty");
-        }
-
-        const chatData = { id: selectedChat?.id, messageIds };
-
-        const result = dispatch(removeMessages(chatData));
-        if (result.type === "chat/removeMessages/fulfilled") {
-          console.log("Messages removed successfully");
-        }
-      } catch (error) {
-        console.error("Error:", error.message);
-
-        // implement toasting  messages (not just error messages)
-      }
-    }
-  };
-
   return (
     <div className="content__scrollable-wrapper">
-      <h3 style={{ textAlign: "end" }}>Chat with {selectedChat?.name}</h3>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "space-between",
+        }}
+      >
+        <h3 style={{ paddingLeft: "0.8em" }}>
+          Chat with{" "}
+          <span
+            title={`visit ${selectedChat?.name.split(" ")[0]}'s profile`}
+            className="clickable"
+            onClick={() => {
+              navigate(`profile/${selectedChat?.id}`);
+            }}
+          >
+            {selectedChat?.name}
+          </span>
+        </h3>
+        <button
+          style={{ maxHeight: "30%" }}
+          type="button"
+          onClick={() => {
+            setSelectedChat(null);
+          }}
+        >
+          X
+        </button>
+      </div>
 
       <div className="content__scrollable">
-        <ul>
+        <ul style={{ padding: "0 1em" }}>
           {chat[selectedChat?.id] && chat[selectedChat?.id]?.length > 0 ? (
             chat[selectedChat?.id]?.map((message) => (
               <li
@@ -183,7 +185,7 @@ const ChatDisplay = () => {
         </ul>
         <div ref={chatEndRef} />
       </div>
-      <button onClick={handleRemove}>Delete Conversation</button>
+
       <form onSubmit={handleSubmit}>
         <input
           type="text"
