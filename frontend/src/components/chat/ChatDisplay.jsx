@@ -1,5 +1,6 @@
-import { useState, useRef, useEffect, useContext } from "react";
+import { useState, useRef, useLayoutEffect, useContext } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { ChatContext } from "../../context/chatContext.js";
 
 import socketEventManager from "../../features/socket/socket.eventManager.js";
@@ -13,38 +14,31 @@ const ChatDisplay = () => {
   const isTyping = useRef(false);
 
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  const {
-    selectedChat,
-    activity,
-    setActivity,
-    scrollToBottom,
-    setScrollToBottom,
-  } = useContext(ChatContext);
+  const { selectedChat, setSelectedChat, activity, setActivity } =
+    useContext(ChatContext);
 
   const { user } = useSelector((state) => state.auth);
   const chat = useSelector((state) => state.chat.chat);
 
-  useEffect(() => {
-    if (scrollToBottom) {
-      if (chatEndRef.current) {
-        chatEndRef.current.scrollIntoView({ behavior: "smooth" });
-      }
-      setScrollToBottom((prevState) => !prevState);
+  useLayoutEffect(() => {
+    if (selectedChat?.id && chat[selectedChat.id]?.length > 0) {
+      chatEndRef.current?.scrollIntoView({ behavior: "instant" });
     }
-  }, [scrollToBottom, setScrollToBottom]);
+  }, [selectedChat?.id]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!selectedChat && user?._id) {
+    if (!selectedChat?.id && user?._id) {
       console.error("Please select a chat and provide valid socket instance.");
       return;
     }
 
     const eventData = {
       senderId: user?._id,
-      receiverId: selectedChat,
+      receiverId: selectedChat?.id,
       senderName: user?.name,
       text: input,
     };
@@ -56,14 +50,14 @@ const ChatDisplay = () => {
   };
 
   const handleEmitTyping = () => {
-    if (!selectedChat) {
+    if (!selectedChat?.id) {
       console.error("Please select a chat and provide valid socket instance.");
       return;
     }
 
     const eventData = {
       senderId: user?._id,
-      receiverId: selectedChat,
+      receiverId: selectedChat?.id,
       senderName: user?.name,
     };
 
@@ -90,43 +84,52 @@ const ChatDisplay = () => {
     }, 700);
   };
 
-  const handleRemove = () => {
-    if (selectedChat) {
-      try {
-        const messageIds = chat[selectedChat].map((message) => message._id);
-
-        if (messageIds.length === 0 || !messageIds) {
-          throw new Error("Chat history is already empty");
-        }
-
-        const chatData = { selectedChat, messageIds };
-
-        const result = dispatch(removeMessages(chatData));
-        if (result.type === "chat/removeMessages/fulfilled") {
-          console.log("Messages removed successfully");
-        }
-      } catch (error) {
-        console.error("Error:", error.message);
-
-        // implement toasting  messages (not just error messages)
-      }
-    }
-  };
-
   return (
     <div className="content__scrollable-wrapper">
-      <h3>Chat with {selectedChat?.name}</h3>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "space-between",
+        }}
+      >
+        <h3 style={{ paddingLeft: "0.8em" }}>
+          Chat with{" "}
+          <span
+            title={`visit ${selectedChat?.name.split(" ")[0]}'s profile`}
+            className="clickable"
+            onClick={() => {
+              navigate(`profile/${selectedChat?.id}`);
+            }}
+          >
+            {selectedChat?.name}
+          </span>
+        </h3>
+        <button
+          style={{ maxHeight: "30%" }}
+          type="button"
+          onClick={() => {
+            setSelectedChat(null);
+          }}
+        >
+          X
+        </button>
+      </div>
 
       <div className="content__scrollable">
-        <ul>
-          {chat[selectedChat] && chat[selectedChat]?.length > 0 ? (
-            chat[selectedChat]?.map((message) => (
+        <ul style={{ padding: "0 1em" }}>
+          {chat[selectedChat?.id] && chat[selectedChat?.id]?.length > 0 ? (
+            chat[selectedChat?.id]?.map((message) => (
               <li
-                key={message?._id}
                 style={{
-                  marginRight: "1em",
-                  textAlign: message?.senderId === user?._id ? "right" : "left",
+                  margin: "1em 0",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems:
+                    message?.senderId === user?._id ? "flex-end" : "flex-start",
+                  gap: "0.5em",
                 }}
+                key={message?._id}
               >
                 {message.senderAvatar ? (
                   <img
@@ -162,11 +165,16 @@ const ChatDisplay = () => {
                     />
                   </div>
                 )}
-                {message?.senderId !== user?._id && (
-                  <span>
-                    <strong>{message?.senderName}</strong>:{" "}
-                  </span>
-                )}
+
+                <span>
+                  <strong>
+                    {message?.senderId === user?._id
+                      ? "You"
+                      : message?.senderName}
+                  </strong>
+                  :{" "}
+                </span>
+
                 <p>{message?.text}</p>
                 <span>{message?.isRead ? "read" : "sent"}</span>
               </li>
@@ -175,9 +183,9 @@ const ChatDisplay = () => {
             <div>No messages yet.</div>
           )}
         </ul>
+        <div ref={chatEndRef} />
       </div>
-      <div ref={chatEndRef} />
-      <button onClick={handleRemove}>Delete Conversation</button>
+
       <form onSubmit={handleSubmit}>
         <input
           type="text"

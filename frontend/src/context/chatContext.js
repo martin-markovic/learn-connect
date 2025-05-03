@@ -13,7 +13,6 @@ const ChatContext = createContext();
 const ChatProvider = ({ children }) => {
   const [selectedChat, setSelectedChat] = useState(null);
   const [activity, setActivity] = useState("");
-  const [scrollToBottom, setScrollToBottom] = useState(false);
 
   const selectedChatRef = useRef(null);
   const activityTimer = useRef(null);
@@ -36,13 +35,11 @@ const ChatProvider = ({ children }) => {
 
       dispatch(addMessage(messagePayload));
 
-      setScrollToBottom((prevState) => !prevState);
-
       setActivity("");
 
       if (
-        selectedChatRef.current &&
-        data?.senderId === selectedChatRef.current
+        selectedChatRef.current?.id &&
+        data?.senderId === selectedChatRef.current?.id
       ) {
         socketEventManager.handleEmitEvent("message read", {
           senderId: user?._id,
@@ -135,8 +132,6 @@ const ChatProvider = ({ children }) => {
     setSelectedChat,
     activity,
     setActivity,
-    scrollToBottom,
-    setScrollToBottom,
   };
 
   return (

@@ -308,6 +308,11 @@ function UserProfile() {
               {friendList.map((friend, index) =>
                 friend?.status === "accepted" ? (
                   <div
+                    title={`visit ${
+                      friend?.senderId === user?._id
+                        ? friend?.receiverName.split(" ")[0]
+                        : friend.senderName.spit(" ")[0]
+                    }'s profile`}
                     className="clickable"
                     key={`friend-${index}`}
                     onClick={() => {

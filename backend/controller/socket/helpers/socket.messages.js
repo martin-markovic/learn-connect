@@ -25,8 +25,8 @@ export const sendMessage = async (context, data) => {
       await newMessage.save();
 
       const populatedMessage = await Conversation.findById(newMessage._id)
-        .populate("sender", "name")
-        .populate("receiver", "name");
+        .populate("sender", "name avatar")
+        .populate("receiver", "name avatar");
 
       const newChat = new Chat({
         participants: [senderId, receiverId],
@@ -40,8 +40,10 @@ export const sendMessage = async (context, data) => {
         _id: populatedMessage?._id.toString(),
         senderId: populatedMessage.sender._id.toString(),
         senderName: populatedMessage.sender.name,
+        senderAvatar: populatedMessage.sender.avatar,
         receiverId: populatedMessage.receiver._id.toString(),
         receiverName: populatedMessage.receiver.name,
+        receiverAvatar: populatedMessage.receiver.avatar,
         text: populatedMessage.text,
         isRead: populatedMessage.isRead,
         timestamp: populatedMessage.createdAt,
@@ -59,15 +61,17 @@ export const sendMessage = async (context, data) => {
       await chatFound.save();
 
       const populatedMessage = await Conversation.findById(newMessage._id)
-        .populate("sender", "name")
-        .populate("receiver", "name");
+        .populate("sender", "name avatar")
+        .populate("receiver", "name avatar");
 
       messagePayload = {
         _id: populatedMessage?._id.toString(),
         senderId: populatedMessage.sender._id.toString(),
         senderName: populatedMessage.sender.name,
+        senderAvatar: populatedMessage.sender.avatar,
         receiverId: populatedMessage.receiver._id.toString(),
         receiverName: populatedMessage.receiver.name,
+        receiverAvatar: populatedMessage.receiver.avatar,
         text: populatedMessage.text,
         isRead: populatedMessage.isRead,
         timestamp: populatedMessage.timestamp,

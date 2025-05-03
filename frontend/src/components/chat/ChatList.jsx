@@ -24,19 +24,22 @@ function ChatList() {
     dispatch(getMessages());
   }, [dispatch, friendList]);
 
-  const handleSelect = (receiver) => {
-    setSelectedChat(receiver);
+  const handleSelect = (friend) => {
+    setSelectedChat(friend);
+
+    const { id } = friend;
 
     socketEventManager.handleEmitEvent("open chat", {
       senderId: user?._id,
-      receiverId: receiver,
+      receiverId: id,
     });
   };
 
   return (
     <div>
-      <>
+      <div style={{ display: "flex", flexDirection: "column" }}>
         <button
+          style={{ alignSelf: "flex-end" }}
           onClick={() => {
             setListOpen(!listOpen);
             if (listOpen) {
@@ -44,9 +47,9 @@ function ChatList() {
             }
           }}
         >
-          {listOpen ? "Close" : "Open"}
+          {listOpen ? "Close Chat" : "Open Chat"}
         </button>
-      </>
+      </div>
       {listOpen && (
         <div>
           {isError ? (
@@ -66,8 +69,8 @@ function ChatList() {
                       onClick={() =>
                         handleSelect(
                           entry.senderId === user?._id
-                            ? entry.receiverId
-                            : entry.senderId
+                            ? { id: entry.receiverId, name: entry.receiverName }
+                            : { id: entry.senderId, name: entry.senderName }
                         )
                       }
                     >
