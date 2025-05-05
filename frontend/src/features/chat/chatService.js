@@ -20,27 +20,8 @@ const getMessages = async (_, token) => {
   }
 };
 
-const removeMessages = async (selectedChat, token) => {
-  try {
-    const config = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      data: { selectedChat },
-    };
-
-    const response = await axios.delete(API_URL, selectedChat, config);
-
-    return response.data;
-  } catch (error) {
-    handleServiceError(error);
-    throw error;
-  }
-};
-
 const chatService = {
   getMessages,
-  removeMessages,
 };
 
 export default chatService;

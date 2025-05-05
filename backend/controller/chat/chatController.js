@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 import Chat from "../../models/chat/chatModel.js";
 
 export const getMessages = async (req, res) => {
@@ -54,39 +53,5 @@ export const getMessages = async (req, res) => {
     return res.status(500).json({
       message: error.message,
     });
-  }
-};
-
-export const removeMessages = async (req, res) => {
-  const chatId = req.params.chatId;
-  const { messageIds } = req.body;
-
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
-  try {
-    if (!Array.isArray(messageIds) || !messageIds.length) {
-      return res.status(400).json({ message: "Invalid message IDs provided." });
-    }
-
-    await Chat.updateOne(
-      { _id: chatId },
-      { $pull: { chats: { $in: messageIds } } },
-      { session }
-    );
-
-    await session.commitTransaction();
-
-    await Chat.deleteMany({ _id: { $in: messageIds } }, { session });
-
-    return res.status(200).json(chatId);
-  } catch (error) {
-    await session.abortTrainsaction();
-    console.error("Error removing message references:", error);
-    return res.status(500).json({
-      message: error.message,
-    });
-  } finally {
-    session.endSession();
   }
 };

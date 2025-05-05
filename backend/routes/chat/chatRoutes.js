@@ -2,11 +2,8 @@ import { Router } from "express";
 const chatRoutes = Router();
 
 import { protect } from "../../middleware/authMiddleware.js";
-import {
-  getMessages,
-  removeMessages,
-} from "../../controller/chat/chatController.js";
+import { getMessages } from "../../controller/chat/chatController.js";
 
-chatRoutes.route("/").get(protect, getMessages).delete(protect, removeMessages);
+chatRoutes.route("/").get(protect, getMessages);
 
 export default chatRoutes;
