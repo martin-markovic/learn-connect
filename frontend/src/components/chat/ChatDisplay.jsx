@@ -1,4 +1,10 @@
-import { useState, useRef, useLayoutEffect, useContext } from "react";
+import {
+  useState,
+  useRef,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+} from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { ChatContext } from "../../context/chatContext.js";
@@ -16,11 +22,32 @@ const ChatDisplay = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { selectedChat, setSelectedChat, activity, setActivity } =
-    useContext(ChatContext);
+  const {
+    selectedChat,
+    setSelectedChat,
+    activity,
+    setActivity,
+    chatScroll,
+    setChatScroll,
+  } = useContext(ChatContext);
 
   const { user } = useSelector((state) => state.auth);
   const chat = useSelector((state) => state.chat.chat);
+  useEffect(() => {
+    if (chatScroll.isScrolling && chatScroll.eventType === "send message") {
+      chatEndRef.current.scrollIntoView({
+        behavior: "instant",
+        block: "end",
+      });
+
+
+      setChatScroll((prevState) => ({
+        ...prevState,
+        isScrolling: false,
+        eventType: null,
+      }));
+    }
+  }, [chatLength]);
 
   useLayoutEffect(() => {
     if (selectedChat?.id && chat[selectedChat.id]?.length > 0) {
@@ -47,6 +74,11 @@ const ChatDisplay = () => {
 
     setInput("");
     setActivity("");
+    setChatScroll((prevState) => ({
+      ...prevState,
+      isScrolling: true,
+      eventType: "send message",
+    }));
   };
 
   const handleEmitTyping = () => {
