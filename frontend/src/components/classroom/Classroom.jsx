@@ -81,15 +81,15 @@ function Classroom() {
   };
 
   return (
-    <div>
-      <div>
+    <div className="classroom-container">
+      <div className="classroom__enroll-dropdown">
         {isLoading ? (
           <p>Loading classrooms...</p>
         ) : classroomList.length === 0 ? (
           <p>No classrooms available.</p>
         ) : (
-          <div>
-            <p>Select a Classroom:</p>
+          <div className="clasroom__enroll__dropdown-items">
+            <span>Select a Classroom:</span>
             <select
               id="classroom-select"
               value={selectedClassroom}
@@ -101,14 +101,14 @@ function Classroom() {
                   key={`classroom-${classroom?._id}`}
                   value={classroom?._id}
                 >
-                  {classroom?.name}?
+                  {classroom?.name}
                 </option>
               ))}
             </select>
           </div>
         )}
       </div>
-      <div>
+      <div className="classroom__enroll-buttons">
         <button type="button" onClick={handleJoinClassroom}>
           Enroll into classroom
         </button>
