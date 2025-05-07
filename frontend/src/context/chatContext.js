@@ -13,6 +13,10 @@ const ChatContext = createContext();
 const ChatProvider = ({ children }) => {
   const [selectedChat, setSelectedChat] = useState(null);
   const [activity, setActivity] = useState("");
+  const [chatScroll, setChatScroll] = useState({
+    isScrolling: false,
+    eventType: null,
+  });
 
   const selectedChatRef = useRef(null);
   const activityTimer = useRef(null);
@@ -36,6 +40,11 @@ const ChatProvider = ({ children }) => {
       dispatch(addMessage(messagePayload));
 
       setActivity("");
+      setChatScroll((prevState) => ({
+        ...prevState,
+        isScrolling: true,
+        eventType: "new message",
+      }));
 
       if (
         selectedChatRef.current?.id &&
@@ -132,6 +141,8 @@ const ChatProvider = ({ children }) => {
     setSelectedChat,
     activity,
     setActivity,
+    chatScroll,
+    setChatScroll,
   };
 
   return (

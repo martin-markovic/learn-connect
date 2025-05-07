@@ -191,8 +191,6 @@ function UserProfile() {
         ) : (
           <div
             style={{
-              width: "60px",
-              height: "60px",
               borderRadius: "50%",
               border: "solid grey 1px",
               overflow: "hidden",
@@ -206,7 +204,7 @@ function UserProfile() {
               style={{
                 width: "100%",
                 height: "100%",
-                color: "black",
+                color: "grey",
               }}
             />
           </div>
@@ -311,7 +309,7 @@ function UserProfile() {
                     title={`visit ${
                       friend?.senderId === user?._id
                         ? friend?.receiverName.split(" ")[0]
-                        : friend.senderName.spit(" ")[0]
+                        : friend.senderName.split(" ")[0]
                     }'s profile`}
                     className="clickable"
                     key={`friend-${index}`}
@@ -338,14 +336,30 @@ function UserProfile() {
                             : friend?.senderAvatar
                         }
                         style={{
-                          width: "60px",
-                          height: "60px",
+                          width: "40px",
+                          height: "40px",
                           borderRadius: "50%",
                           objectFit: "cover",
                         }}
                       />
                     ) : (
-                      <FaCircleUser />
+                      <div
+                        style={{
+                          width: "40px",
+                          height: "40px",
+                          border: "1px solid grey",
+                          borderRadius: "50%",
+                          background: "white",
+                        }}
+                      >
+                        <FaCircleUser
+                          style={{
+                            height: "100%",
+                            width: "100%",
+                            color: "grey",
+                          }}
+                        />
+                      </div>
                     )}
                     <p>
                       {friend?.senderId === user?._id

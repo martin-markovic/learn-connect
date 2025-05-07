@@ -36,10 +36,16 @@ function ChatList() {
   };
 
   return (
-    <div>
-      <div style={{ display: "flex", flexDirection: "column" }}>
+    <div style={{ flex: 1 }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "start",
+          alignItems: "start",
+        }}
+      >
         <button
-          style={{ alignSelf: "flex-end" }}
           onClick={() => {
             setListOpen(!listOpen);
             if (listOpen) {
@@ -51,16 +57,23 @@ function ChatList() {
         </button>
       </div>
       {listOpen && (
-        <div>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "start",
+            alignItems: "start",
+            height: "100%",
+          }}
+        >
           {isError ? (
             <p>
               An error occurred while fetching your friend list. Please try
               again later.
             </p>
           ) : friendList && friendList.length > 0 ? (
-            <div>
+            <div className="chatlist-container">
               <h3>Your Friends:</h3>
-              <ul>
+              <ul className="friendlist">
                 {friendList.map((entry, index) => {
                   return (
                     <li

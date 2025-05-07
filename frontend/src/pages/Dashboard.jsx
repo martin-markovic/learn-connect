@@ -43,7 +43,24 @@ export default function Dashboard() {
                 }}
               />
             ) : (
-              <FaCircleUser title="visit your profile" />
+              <div
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  borderRadius: "50%",
+                  border: "solid grey 1px",
+                  overflow: "hidden",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: "grey",
+                }}
+              >
+                <FaCircleUser
+                  style={{ width: "100%", height: "100%", color: "white" }}
+                  title="visit your profile"
+                />
+              </div>
             )}
           </div>
           <span>{user?.name}</span>

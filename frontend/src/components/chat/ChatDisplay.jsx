@@ -1,4 +1,10 @@
-import { useState, useRef, useLayoutEffect, useContext } from "react";
+import {
+  useState,
+  useRef,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+} from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { ChatContext } from "../../context/chatContext.js";
@@ -12,21 +18,91 @@ const ChatDisplay = () => {
   const chatEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
   const isTyping = useRef(false);
+  const parentContainerRef = useRef(null);
+  const isEngagedRef = useRef(false);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { selectedChat, setSelectedChat, activity, setActivity } =
-    useContext(ChatContext);
+  const {
+    selectedChat,
+    setSelectedChat,
+    activity,
+    setActivity,
+    chatScroll,
+    setChatScroll,
+  } = useContext(ChatContext);
 
   const { user } = useSelector((state) => state.auth);
   const chat = useSelector((state) => state.chat.chat);
+  const chatLength = chat[selectedChat?.id]?.length;
+
+  useEffect(() => {
+    if (!selectedChat?.id) return;
+
+    const handleClick = (e) => {
+      const engaged = parentContainerRef.current?.contains(e.target);
+      if (isEngagedRef.current !== engaged) {
+        isEngagedRef.current = engaged;
+      }
+    };
+
+    document.addEventListener("click", handleClick);
+
+    return () => {
+      document.removeEventListener("click", handleClick);
+
+      isEngagedRef.current = false;
+    };
+  }, [selectedChat?.id]);
+
+  useEffect(() => {
+    if (chatScroll.isScrolling && chatScroll.eventType === "send message") {
+      chatEndRef.current.scrollIntoView({
+        behavior: "instant",
+        block: "end",
+      });
+
+
+      setChatScroll((prevState) => ({
+        ...prevState,
+        isScrolling: false,
+        eventType: null,
+      }));
+    }
+  }, [chatLength]);
 
   useLayoutEffect(() => {
-    if (selectedChat?.id && chat[selectedChat.id]?.length > 0) {
-      chatEndRef.current?.scrollIntoView({ behavior: "instant" });
+    if (
+      !chatEndRef.current ||
+      !selectedChat?.id ||
+      chatScroll.eventType === "send message"
+    )
+      return;
+
+    if (chatScroll.isScrolling) {
+      if (chatScroll.eventType === "new message" && isEngagedRef.current)
+        return;
+
+      chatEndRef.current.scrollIntoView({
+        behavior: chatScroll.eventType === "new message" ? "smooth" : "instant",
+        block: "end",
+      });
+
+
+      setChatScroll((prevState) => ({
+        ...prevState,
+        isScrolling: false,
+        eventType: null,
+      }));
     }
-  }, [selectedChat?.id]);
+  }, [
+    chatLength,
+    chatScroll.isScrolling,
+    chatScroll.eventType,
+    setChatScroll,
+    selectedChat?.id,
+  ]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -47,6 +123,11 @@ const ChatDisplay = () => {
 
     setInput("");
     setActivity("");
+    setChatScroll((prevState) => ({
+      ...prevState,
+      isScrolling: true,
+      eventType: "send message",
+    }));
   };
 
   const handleEmitTyping = () => {
@@ -85,7 +166,7 @@ const ChatDisplay = () => {
   };
 
   return (
-    <div className="content__scrollable-wrapper">
+    <div ref={parentContainerRef} className="content__scrollable-wrapper">
       <div
         style={{
           display: "flex",
