@@ -5,12 +5,11 @@ import {
   useEffect,
   useLayoutEffect,
 } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { ChatContext } from "../../context/chatContext.js";
 
 import socketEventManager from "../../features/socket/socket.eventManager.js";
-import { removeMessages } from "../../features/chat/chatSlice.js";
 import { FaCircleUser } from "react-icons/fa6";
 
 const ChatDisplay = () => {
@@ -21,7 +20,6 @@ const ChatDisplay = () => {
   const parentContainerRef = useRef(null);
   const isEngagedRef = useRef(false);
 
-  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const {
@@ -63,13 +61,14 @@ const ChatDisplay = () => {
         block: "end",
       });
 
-
       setChatScroll((prevState) => ({
         ...prevState,
         isScrolling: false,
         eventType: null,
       }));
     }
+
+    // eslint-disable-next-line
   }, [chatLength]);
 
   useLayoutEffect(() => {
@@ -88,7 +87,6 @@ const ChatDisplay = () => {
         behavior: chatScroll.eventType === "new message" ? "smooth" : "instant",
         block: "end",
       });
-
 
       setChatScroll((prevState) => ({
         ...prevState,
