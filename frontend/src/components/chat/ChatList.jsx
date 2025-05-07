@@ -15,7 +15,7 @@ function ChatList() {
   } = useSelector((state) => state.friends);
   const { user } = useSelector((state) => state.auth);
 
-  const { setSelectedChat } = useContext(ChatContext);
+  const { setSelectedChat, setChatScroll } = useContext(ChatContext);
 
   const dispatch = useDispatch();
 
@@ -33,10 +33,16 @@ function ChatList() {
       senderId: user?._id,
       receiverId: id,
     });
+
+    setChatScroll((prevState) => ({
+      ...prevState,
+      isScrolling: true,
+      eventType: "chat opened",
+    }));
   };
 
   return (
-    <div style={{ flex: 1 }}>
+    <div style={{ flex: 1, paddingLeft: "2em" }}>
       <div
         style={{
           display: "flex",
@@ -48,12 +54,9 @@ function ChatList() {
         <button
           onClick={() => {
             setListOpen(!listOpen);
-            if (listOpen) {
-              setSelectedChat(null);
-            }
           }}
         >
-          {listOpen ? "Close Chat" : "Open Chat"}
+          {listOpen ? "Close Friend List" : "Open Friend List"}
         </button>
       </div>
       {listOpen && (

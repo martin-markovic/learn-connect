@@ -192,7 +192,6 @@ function UserProfile() {
           <div
             style={{
               borderRadius: "50%",
-              border: "solid grey 1px",
               overflow: "hidden",
               display: "flex",
               alignItems: "center",
@@ -347,7 +346,6 @@ function UserProfile() {
                         style={{
                           width: "40px",
                           height: "40px",
-                          border: "1px solid grey",
                           borderRadius: "50%",
                           background: "white",
                         }}
