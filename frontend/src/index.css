@@ -204,6 +204,25 @@ li {
   overflow: hidden;
 }
 
+.chat__display-heading {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  background: linear-gradient(180deg, #add8e6, #ffffff);
+  border: none;
+}
+
+.chat__display-heading h3 {
+  color: rgb(76, 95, 42);
+}
+
+.chat__display-close {
+  margin-top: 0.5em;
+  max-height: 35%;
+  color: white;
+  background-color: red;
+}
+
 .friendlist {
   width: "fit-content";
   max-height: "50%";
@@ -217,6 +236,29 @@ li {
   width: 100%;
 }
 
+.chat__message-list {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  margin: 0;
+  width: 100%;
+  padding: 0 1em;
+}
+
+.chat__item-sender {
+  align-self: flex-end;
+  text-align: right;
+  padding-right: 2em;
+}
+
+.chat__item-sender p {
+  text-align: left;
+}
+
+.chat__item-receiver {
+  align-self: flex-start;
+  text-align: left;
+}
 .quiz__list {
   margin-top: 0;
   display: inherit;
