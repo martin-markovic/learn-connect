@@ -42,15 +42,8 @@ function ChatList() {
   };
 
   return (
-    <div style={{ flex: 1, paddingLeft: "2em" }}>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "start",
-          alignItems: "start",
-        }}
-      >
+    <div className="friendlist-container">
+      <div className="friendlist__container-toggle">
         <button
           onClick={() => {
             setListOpen(!listOpen);
@@ -60,14 +53,7 @@ function ChatList() {
         </button>
       </div>
       {listOpen && (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "start",
-            alignItems: "start",
-            height: "100%",
-          }}
-        >
+        <div className="friendlist__container-wrapper">
           {isError ? (
             <p>
               An error occurred while fetching your friend list. Please try

@@ -221,6 +221,25 @@ li {
   max-height: 35%;
   color: white;
   background-color: red;
+.friendlist-container {
+  padding-left: 2em;
+  flex: 1;
+}
+
+.friendlist__container-toggle {
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  align-items: start;
+  padding-left: 2em;
+}
+
+.friendlist__container-wrapper {
+  display: flex;
+  justify-content: start;
+  align-items: start;
+  height: 100%;
+  padding-left: 1.5em;
 }
 
 .friendlist {
