@@ -165,14 +165,8 @@ const ChatDisplay = () => {
 
   return (
     <div ref={parentContainerRef} className="content__scrollable-wrapper">
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          justifyContent: "space-between",
-        }}
-      >
-        <h3 style={{ paddingLeft: "0.8em" }}>
+      <div className="chat__display-heading">
+        <h3>
           Chat with{" "}
           <span
             title={`visit ${selectedChat?.name.split(" ")[0]}'s profile`}
@@ -185,7 +179,8 @@ const ChatDisplay = () => {
           </span>
         </h3>
         <button
-          style={{ maxHeight: "30%" }}
+          title="Close Chat"
+          className="chat__display-close clickable"
           type="button"
           onClick={() => {
             setSelectedChat(null);
@@ -196,18 +191,15 @@ const ChatDisplay = () => {
       </div>
 
       <div className="content__scrollable">
-        <ul style={{ padding: "0 1em" }}>
+        <ul className="chat__message-list">
           {chat[selectedChat?.id] && chat[selectedChat?.id]?.length > 0 ? (
             chat[selectedChat?.id]?.map((message) => (
               <li
-                style={{
-                  margin: "1em 0",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems:
-                    message?.senderId === user?._id ? "flex-end" : "flex-start",
-                  gap: "0.5em",
-                }}
+                className={`message ${
+                  message?.senderId === user?._id
+                    ? "chat__item-sender"
+                    : "chat__item-receiver"
+                }`}
                 key={message?._id}
               >
                 {message.senderAvatar ? (
