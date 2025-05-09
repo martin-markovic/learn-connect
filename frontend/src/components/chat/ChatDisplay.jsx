@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { ChatContext } from "../../context/chatContext.js";
 
 import socketEventManager from "../../features/socket/socket.eventManager.js";
+
 import { FaCircleUser } from "react-icons/fa6";
 
 const ChatDisplay = () => {
@@ -206,32 +207,25 @@ const ChatDisplay = () => {
                   <img
                     src={message?.senderAvatar}
                     alt="user avatar"
-                    style={{
-                      width: "40px",
-                      height: "40px",
-                      borderRadius: "50%",
-                      objectFit: "cover",
-                    }}
+                    className={`chat-avatar ${
+                      message?.senderId === user?._id
+                        ? "chat__item-sender"
+                        : "chat__item-receiver"
+                    }`}
                   />
                 ) : (
                   <div
-                    style={{
-                      width: "40px",
-                      height: "40px",
-                      borderRadius: "50%",
-                      border: "solid grey 1px",
-                      overflow: "hidden",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      backgroundColor: "grey",
-                    }}
+                    className={`chat-avatar chat__icon  ${
+                      message?.senderId === user?._id
+                        ? "chat__item-sender"
+                        : "chat__item-receiver"
+                    }`}
                   >
                     <FaCircleUser
                       style={{
                         width: "100%",
                         height: "100%",
-                        color: "white",
+                        color: "grey",
                       }}
                     />
                   </div>
@@ -247,7 +241,9 @@ const ChatDisplay = () => {
                 </span>
 
                 <p>{message?.text}</p>
-                <span>{message?.isRead ? "read" : "sent"}</span>
+                {message.senderId !== user?._id && (
+                  <span>{message?.isRead ? "read" : "sent"}</span>
+                )}
               </li>
             ))
           ) : (
