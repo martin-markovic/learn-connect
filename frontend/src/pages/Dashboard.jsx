@@ -24,46 +24,47 @@ export default function Dashboard() {
       </div>
       <div className="dashboard-right__box">
         <div className="right__box-top">
-          <div
-            className="avatar-wrapper clickable"
-            onClick={() => {
-              navigate(`/profile/${user?._id}`);
-            }}
-          >
-            {user?.avatar ? (
-              <img
-                title="visit your profile"
-                src={user?.avatar}
-                alt="user avatar"
-                style={{
-                  width: "60px",
-                  height: "60px",
-                  borderRadius: "50%",
-                  objectFit: "cover",
-                }}
-              />
-            ) : (
-              <div
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  borderRadius: "50%",
-                  border: "solid grey 1px",
-                  overflow: "hidden",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  backgroundColor: "grey",
-                }}
-              >
-                <FaCircleUser
-                  style={{ width: "100%", height: "100%", color: "white" }}
+          <div className="dashboard-user__info">
+            <div
+              className="avatar-wrapper clickable"
+              onClick={() => {
+                navigate(`/profile/${user?._id}`);
+              }}
+            >
+              {user?.avatar ? (
+                <img
                   title="visit your profile"
+                  src={user?.avatar}
+                  alt="user avatar"
+                  style={{
+                    width: "60px",
+                    height: "60px",
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                  }}
                 />
-              </div>
-            )}
+              ) : (
+                <div
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    borderRadius: "50%",
+                    overflow: "hidden",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    backgroundColor: "white",
+                  }}
+                >
+                  <FaCircleUser
+                    style={{ width: "100%", height: "100%", color: "grey" }}
+                    title="visit your profile"
+                  />
+                </div>
+              )}
+            </div>
+            <span>{user?.name}</span>
           </div>
-          <span>{user?.name}</span>
           <Classroom />
         </div>
         <ChatProvider>

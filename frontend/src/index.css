@@ -93,14 +93,33 @@ li {
   display: flex;
   height: 100vh;
   gap: 10px;
-  justify-content: space-evenly;
-  margin: 3rem 3rem;
+  flex-direction: row;
+  margin: 3em 2em;
+  overflow: hidden;
+}
+
 .dashboard-left__box,
 .dashboard-right__box {
   display: flex;
   flex-direction: column;
-  flex: 1;
   height: 100%;
+  overflow: hidden;
+}
+
+.dashboard-left__box {
+  flex: 1;
+}
+
+.dashboard-right__box {
+  flex: 2;
+}
+
+.dashboard-user__info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 25%;
 }
 
 .left__box-top {
@@ -112,6 +131,38 @@ li {
 
 .left__box-bottom {
   flex: 3;
+.classroom-container {
+  display: flex;
+  flex-direction: row;
+  max-height: 100px;
+  width: 55%;
+  margin-top: 2em;
+  margin-bottom: auto;
+  align-self: flex-end;
+  gap: 1em;
+}
+
+.classroom__enroll-dropdown {
+  width: 60%;
+  height: 100%;
+  margin-top: 0.5em;
+  margin-bottom: auto;
+}
+
+.clasroom__enroll__dropdown-items {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 100%;
+}
+
+.classroom__enroll__dropdown-items select {
+  margin-top: 0.3em;
+  margin-left: 1em;
+}
+
+.classroom__enroll-buttons {
+  display: flex;
 }
 
 .classroom-container {
@@ -202,6 +253,16 @@ li {
   max-height: fit-content;
   max-width: fit-content;
   overflow: hidden;
+}
+
+.chatlist__user-status {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: greenyellow;
+  display: inline-block;
+  min-width: 0;
+  min-height: 0;
 }
 
 .chat__display-heading {

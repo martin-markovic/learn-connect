@@ -17,6 +17,7 @@ const ChatProvider = ({ children }) => {
     isScrolling: false,
     eventType: null,
   });
+  const [onlineList, setOnlineList] = useState([]);
 
   const selectedChatRef = useRef(null);
   const activityTimer = useRef(null);
@@ -94,6 +95,21 @@ const ChatProvider = ({ children }) => {
     [dispatch]
   );
 
+  const handleConnect = useCallback((data) => {
+    setOnlineList([...data?.payloadList]);
+  }, []);
+
+  const handleUserOnline = useCallback((data) => {
+    setOnlineList((prevState) => [...prevState, data?.id]);
+  }, []);
+
+  const handleUserOffline = useCallback(
+    (data) => {
+      setOnlineList(onlineList.filter((f) => f !== data?.id));
+    },
+    [onlineList]
+  );
+
   useEffect(() => {
     if (!user?._id) {
       isInitialized.current = false;
@@ -107,6 +123,12 @@ const ChatProvider = ({ children }) => {
       { event: "message seen", handler: handleMarkAsRead },
       { event: "chat activity", handler: handleChatActivity },
       { event: "messages read", handler: handleMarkAllAsRead },
+      { event: "user connected", handler: handleConnect },
+      { event: "friend connected", handler: handleUserOnline },
+      {
+        event: "friend disconnected",
+        handler: handleUserOffline,
+      },
     ];
 
     subscriptions.forEach(({ event, handler }) => {
@@ -128,6 +150,9 @@ const ChatProvider = ({ children }) => {
     handleMarkAsRead,
     handleChatActivity,
     handleMarkAllAsRead,
+    handleConnect,
+    handleUserOnline,
+    handleUserOffline,
   ]);
 
   useEffect(() => {
@@ -143,6 +168,10 @@ const ChatProvider = ({ children }) => {
     setActivity,
     chatScroll,
     setChatScroll,
+    onlineList,
+    handleConnect,
+    handleUserOnline,
+    handleUserOffline,
   };
 
   return (

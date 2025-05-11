@@ -30,6 +30,7 @@ const ChatDisplay = () => {
     setActivity,
     chatScroll,
     setChatScroll,
+    onlineList,
   } = useContext(ChatContext);
 
   const { user } = useSelector((state) => state.auth);
@@ -178,6 +179,9 @@ const ChatDisplay = () => {
           >
             {selectedChat?.name}
           </span>
+          {onlineList.includes(selectedChat?.id) && (
+            <span className="chatlist__user-status"></span>
+          )}
         </h3>
         <button
           title="Close Chat"

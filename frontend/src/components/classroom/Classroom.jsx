@@ -110,10 +110,10 @@ function Classroom() {
       </div>
       <div className="classroom__enroll-buttons">
         <button type="button" onClick={handleJoinClassroom}>
-          Enroll into classroom
+          Enroll
         </button>
         <button type="button" onClick={handleLeaveClassroom}>
-          Leave classroom
+          Leave Classroom
         </button>
       </div>
     </div>

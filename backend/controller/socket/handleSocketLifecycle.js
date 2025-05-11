@@ -9,6 +9,7 @@ import handleSocialEvents from "./handleSocial.js";
 import handleQuizEvents from "./handleQuiz.js";
 import handleExamEvents from "./handleExam.js";
 import handleErrorEvents from "./helpers/socket.errorController.js";
+import { handleConnectionStatus } from "./helpers/socket.userPresence.js";
 
 const handleSocketLifeCycle = (io) => {
   io.on("connection", (socket) => {
@@ -24,6 +25,8 @@ const handleSocketLifeCycle = (io) => {
 
     const context = createSocketContext(socket, io);
 
+    handleConnectionStatus(context, { userId, isOnline: true });
+
     handleMessages(context);
     handleNotificationEvents(context);
     handleSocialEvents(context);
@@ -32,6 +35,8 @@ const handleSocketLifeCycle = (io) => {
     handleErrorEvents(socket);
 
     socket.on("disconnect", () => {
+      handleConnectionStatus(context, { userId, isOnline: false });
+
       console.log("User disconnected: ", userId);
       removeUserSocket(userId);
     });
