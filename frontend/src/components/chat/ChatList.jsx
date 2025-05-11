@@ -15,7 +15,8 @@ function ChatList() {
   } = useSelector((state) => state.friends);
   const { user } = useSelector((state) => state.auth);
 
-  const { setSelectedChat, setChatScroll } = useContext(ChatContext);
+  const { setSelectedChat, setChatScroll, onlineList } =
+    useContext(ChatContext);
 
   const dispatch = useDispatch();
 
@@ -64,6 +65,10 @@ function ChatList() {
               <h3>Your Friends:</h3>
               <ul className="friendlist">
                 {friendList.map((entry, index) => {
+                  const isOnline =
+                    onlineList?.includes(entry.senderId) ||
+                    onlineList?.includes(entry.receiverId);
+
                   return (
                     <li
                       className="clickable"
@@ -76,9 +81,14 @@ function ChatList() {
                         )
                       }
                     >
-                      {entry.senderId === user?._id
-                        ? entry.receiverName
-                        : entry.senderName}
+                      <span>
+                        {entry.senderId === user?._id
+                          ? entry.receiverName
+                          : entry.senderName}
+                      </span>
+                      {isOnline && (
+                        <span className="chatlist__user-status"></span>
+                      )}
                     </li>
                   );
                 })}

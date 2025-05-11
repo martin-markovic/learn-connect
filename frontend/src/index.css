@@ -255,6 +255,16 @@ li {
   overflow: hidden;
 }
 
+.chatlist__user-status {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: greenyellow;
+  display: inline-block;
+  min-width: 0;
+  min-height: 0;
+}
+
 .chat__display-heading {
   display: flex;
   flex-direction: row;
