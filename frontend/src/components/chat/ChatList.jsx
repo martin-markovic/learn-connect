@@ -72,6 +72,12 @@ function ChatList() {
 
                   return (
                     <li
+                      style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        alignItems: "center",
+                        gap: "6px",
+                      }}
                       className="clickable"
                       key={`chat-${index}`}
                       onClick={() =>
@@ -91,17 +97,42 @@ function ChatList() {
                       }
                     >
                       <span
+                        style={{
+                          width: "25px",
+                          height: "25px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
                       >
                         {entry.senderId === user?._id ? (
                           entry.receiverAvatar ? (
                             <img
                               src={entry.receiverAvatar}
                               alt="avatar"
+                              style={{
+                                objectFit: "cover",
+                                width: "15px",
+                                height: "15px",
+                                border: "1px solid grey",
+                              }}
                             />
                           ) : (
                             <div
+                              style={{
+                                width: "22px",
+                                height: "22px",
+                                borderRadius: "50%",
+                                overflow: "hidden",
+                                backgroundColor: "white",
+                              }}
                             >
                               <FaCircleUser
+                                style={{
+                                  width: "100%",
+                                  height: "100%",
+                                  color: "grey",
+                                }}
                               />
                             </div>
                           )
@@ -109,11 +140,28 @@ function ChatList() {
                           <img
                             src={entry.senderAvatar}
                             alt="avatar"
+                            style={{
+                              objectFit: "cover",
+                              width: "22px",
+                              height: "22px",
+                            }}
                           />
                         ) : (
                           <div
+                            style={{
+                              width: "22px",
+                              height: "22px",
+                              borderRadius: "50%",
+                              overflow: "hidden",
+                              backgroundColor: "white",
+                            }}
                           >
                             <FaCircleUser
+                              style={{
+                                width: "100%",
+                                height: "100%",
+                                color: "grey",
+                              }}
                             />
                           </div>
                         )}
