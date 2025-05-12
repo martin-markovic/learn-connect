@@ -169,9 +169,11 @@ const ChatDisplay = () => {
     <div ref={parentContainerRef} className="content__scrollable-wrapper">
       <div className="chat__display-heading">
         <div
+          className="chat__display__heading-text"
         >
           <span>Chat with </span>
           <span
+            className="chat__display__heading-userinfo"
           >
             <span
               style={{
@@ -273,6 +275,7 @@ const ChatDisplay = () => {
                         width: "100%",
                         height: "100%",
                         color: "grey",
+                        alignSelf: "flex-end",
                       }}
                     />
                   </div>
