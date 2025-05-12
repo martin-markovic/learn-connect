@@ -5,6 +5,7 @@ import socketEventManager from "../../features/socket/socket.eventManager.js";
 import { getFriendList } from "../../features/friend/friendSlice.js";
 import { getMessages } from "../../features/chat/chatSlice.js";
 import { ChatContext } from "../../context/chatContext.js";
+import { FaCircleUser } from "react-icons/fa6";
 
 function ChatList() {
   const [listOpen, setListOpen] = useState(false);
@@ -76,11 +77,47 @@ function ChatList() {
                       onClick={() =>
                         handleSelect(
                           entry.senderId === user?._id
-                            ? { id: entry.receiverId, name: entry.receiverName }
-                            : { id: entry.senderId, name: entry.senderName }
+                            ? {
+                                id: entry.receiverId,
+                                name: entry.receiverName,
+                                avatar: entry?.receiverAvatar,
+                              }
+                            : {
+                                id: entry.senderId,
+                                name: entry.senderName,
+                                avatar: entry.senderAvatar,
+                              }
                         )
                       }
                     >
+                      <span
+                      >
+                        {entry.senderId === user?._id ? (
+                          entry.receiverAvatar ? (
+                            <img
+                              src={entry.receiverAvatar}
+                              alt="avatar"
+                            />
+                          ) : (
+                            <div
+                            >
+                              <FaCircleUser
+                              />
+                            </div>
+                          )
+                        ) : entry.senderAvatar ? (
+                          <img
+                            src={entry.senderAvatar}
+                            alt="avatar"
+                          />
+                        ) : (
+                          <div
+                          >
+                            <FaCircleUser
+                            />
+                          </div>
+                        )}
+                      </span>
                       <span>
                         {entry.senderId === user?._id
                           ? entry.receiverName
