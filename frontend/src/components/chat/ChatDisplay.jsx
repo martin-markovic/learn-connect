@@ -168,21 +168,66 @@ const ChatDisplay = () => {
   return (
     <div ref={parentContainerRef} className="content__scrollable-wrapper">
       <div className="chat__display-heading">
-        <h3>
-          Chat with{" "}
+        <div
+          className="chat__display__heading-text"
+        >
+          <span>Chat with </span>
           <span
-            title={`visit ${selectedChat?.name.split(" ")[0]}'s profile`}
-            className="clickable"
-            onClick={() => {
-              navigate(`profile/${selectedChat?.id}`);
-            }}
+            className="chat__display__heading-userinfo"
           >
-            {selectedChat?.name}
+            <span
+              style={{
+                width: "30px",
+                height: "30px",
+              }}
+            >
+              {selectedChat?.avatar ? (
+                <img
+                  style={{
+                    objectFit: "cover",
+                    width: "27px",
+                    height: "27px",
+                    borderRadius: "50%",
+                    overflow: "hidden",
+                  }}
+                  src={selectedChat?.avatar}
+                  alt="avatar"
+                ></img>
+              ) : (
+                <div
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    borderRadius: "50%",
+                    overflow: "hidden",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    backgroundColor: "white",
+                  }}
+                >
+                  <FaCircleUser
+                    style={{ width: "100%", height: "100%", color: "grey" }}
+                  />
+                </div>
+              )}
+            </span>
+
+            <span
+              title={`visit ${selectedChat?.name.split(" ")[0]}'s profile`}
+              className="clickable"
+              onClick={() => {
+                navigate(`profile/${selectedChat?.id}`);
+              }}
+            >
+              {selectedChat?.name}
+            </span>
+
+            {onlineList.includes(selectedChat?.id) && (
+              <span className="chatlist__user-status"></span>
+            )}
           </span>
-          {onlineList.includes(selectedChat?.id) && (
-            <span className="chatlist__user-status"></span>
-          )}
-        </h3>
+        </div>
         <button
           title="Close Chat"
           className="chat__display-close clickable"
@@ -230,6 +275,7 @@ const ChatDisplay = () => {
                         width: "100%",
                         height: "100%",
                         color: "grey",
+                        alignSelf: "flex-end",
                       }}
                     />
                   </div>
