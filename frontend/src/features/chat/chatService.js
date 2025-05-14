@@ -20,8 +20,26 @@ const getMessages = async (_, token) => {
   }
 };
 
+const getChatStatus = async (token) => {
+  try {
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    const response = await axios.get(`${API_URL}/status`, config);
+
+    return response;
+  } catch (error) {
+    handleServiceError(error);
+    throw error;
+  }
+};
+
 const chatService = {
   getMessages,
+  getChatStatus,
 };
 
 export default chatService;
