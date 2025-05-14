@@ -8,6 +8,7 @@ const initialState = {
   isError: false,
   errorMessage: "",
   chat: {},
+  online: false,
 };
 
 export const getMessages = createAsyncThunk(
@@ -17,6 +18,14 @@ export const getMessages = createAsyncThunk(
       const token = thunkAPI.getState().auth.user.token;
 
       const response = await chatService.getMessages(classroomId, token);
+
+export const getChatStatus = createAsyncThunk(
+  "chat/getChatStatus",
+  async (_, thunkAPI) => {
+    try {
+      const token = thunkAPI.getState().auth.user.token;
+
+      const response = await chatService.getChatStatus(token);
 
       return response.data;
     } catch (error) {
@@ -82,11 +91,32 @@ const chatSlice = createSlice({
         state.isSuccess = false;
         state.isError = true;
         state.errorMessage = action.payload || "Failed to fetch user messages";
+      })
+      .addCase(getChatStatus.pending, (state) => {
+        state.isLoading = true;
+        state.errorMessage = "";
+      })
+      .addCase(getChatStatus.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.isError = false;
+        state.errorMessage = "";
+        state.online = action.payload?.online;
+      })
+      .addCase(getChatStatus.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = false;
+        state.isError = true;
+        state.errorMessage = action.payload || "Failed to fetch chat status";
       });
   },
 });
 
-export const { resetChat, addMessage, markAsRead, markAllAsRead } =
-  chatSlice.actions;
+export const {
+  resetChat,
+  addMessage,
+  markAsRead,
+  markAllAsRead,
+} = chatSlice.actions;
 
 export default chatSlice.reducer;

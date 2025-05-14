@@ -46,6 +46,10 @@ const userSchema = mongoose.Schema({
     },
   ],
   quizScoreSchema: [quizScoreSchema],
+  online: {
+    type: Boolean,
+    default: true,
+  },
 });
 
 const User = mongoose.model("User", userSchema);
