@@ -48,15 +48,22 @@ function ChatList() {
     }));
   };
 
+  const handleChatConnection = () => {
+    try {
+      socketEventManager.handleEmitEvent("change chat status", {
+        userId: user?._id,
+        chatConnected: !online,
+      });
+    } catch (error) {
+      console.error("Error handling chat connection: ", error.message);
+    }
+  };
+
   return (
     <div className="friendlist-container">
       <div className="friendlist__container-toggle">
-        <button
-          onClick={() => {
-            setListOpen(!listOpen);
-          }}
-        >
-          {listOpen ? "Close Friend List" : "Open Friend List"}
+        <button onClick={handleChatConnection}>
+          Go {online ? "Offline" : "Online"}
         </button>
         {online && (
           <button

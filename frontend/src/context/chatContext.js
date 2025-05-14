@@ -169,9 +169,6 @@ const ChatProvider = ({ children }) => {
     chatScroll,
     setChatScroll,
     onlineList,
-    handleConnect,
-    handleUserOnline,
-    handleUserOffline,
   };
 
   return (

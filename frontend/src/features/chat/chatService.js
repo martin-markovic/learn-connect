@@ -3,7 +3,7 @@ import { handleServiceError } from "../redux.errorHandler.js";
 
 const API_URL = "http://127.0.0.1:8000/api/chat";
 
-const getMessages = async (_, token) => {
+const getMessages = async (token) => {
   try {
     const config = {
       headers: {
