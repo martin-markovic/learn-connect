@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 
 import socketEventManager from "../../features/socket/socket.eventManager.js";
 import { getFriendList } from "../../features/friend/friendSlice.js";
-import { getMessages } from "../../features/chat/chatSlice.js";
+import { getChatStatus, getMessages } from "../../features/chat/chatSlice.js";
 import { ChatContext } from "../../context/chatContext.js";
 import { FaCircleUser } from "react-icons/fa6";
 
@@ -15,11 +15,16 @@ function ChatList() {
     friendList = [],
   } = useSelector((state) => state.friends);
   const { user } = useSelector((state) => state.auth);
+  const online = useSelector((state) => state.chat?.online);
 
   const { setSelectedChat, setChatScroll, onlineList } =
     useContext(ChatContext);
 
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(getChatStatus());
+  }, [dispatch]);
 
   useEffect(() => {
     dispatch(getFriendList());
@@ -53,8 +58,17 @@ function ChatList() {
         >
           {listOpen ? "Close Friend List" : "Open Friend List"}
         </button>
+        {online && (
+          <button
+            onClick={() => {
+              setListOpen(!listOpen);
+            }}
+          >
+            {listOpen ? "Close Friend List" : "Open Friend List"}
+          </button>
+        )}
       </div>
-      {listOpen && (
+      {listOpen && online && (
         <div className="friendlist__container-wrapper">
           {isError ? (
             <p>
