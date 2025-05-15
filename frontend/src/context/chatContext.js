@@ -108,11 +108,21 @@ const ChatProvider = ({ children }) => {
     setOnlineList((prevState) => [...prevState, data?.id]);
   }, []);
 
-  const handleUserOffline = useCallback(
+  const handleUserOffline = useCallback((data) => {
+
+    setOnlineList((prev) => prev.filter((f) => f !== data?.id));
+  }, []);
+
+  const handleChatStatus = useCallback(
     (data) => {
-      setOnlineList(onlineList.filter((f) => f !== data?.id));
+
+      if (data?.success) {
+        dispatch(changeChatStatus(data?.online));
+
+        chatStatus.current = data?.online ? "reconnected" : "disconnected";
+      }
     },
-    [onlineList]
+    [dispatch]
   );
 
   useEffect(() => {
@@ -136,6 +146,10 @@ const ChatProvider = ({ children }) => {
   useEffect(() => {
     if (!user?._id) {
       isInitialized.current = false;
+      return;
+    }
+
+    if (!online) {
       return;
     }
 
@@ -169,6 +183,7 @@ const ChatProvider = ({ children }) => {
   }, [
     dispatch,
     user?._id,
+    online,
     handleNewMessage,
     handleMarkAsRead,
     handleChatActivity,
@@ -176,6 +191,7 @@ const ChatProvider = ({ children }) => {
     handleConnect,
     handleUserOnline,
     handleUserOffline,
+    handleChatStatus,
   ]);
 
   useEffect(() => {
