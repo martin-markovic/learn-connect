@@ -3,6 +3,7 @@ import {
   handleMarkAsRead,
   handleChatOpen,
   handleTyping,
+  handleChatStatus,
 } from "./helpers/socket.messages.js";
 import validateFriendship from "../../middleware/socialMiddleware.js";
 
@@ -45,6 +46,10 @@ const handleMessages = (context) => {
     } catch (error) {
       console.error("Error emitting user typing event: ", error.message);
     }
+  });
+
+  context.socket.on("change chat status", async (data) => {
+    await handleChatStatus(context, data);
   });
 };
 

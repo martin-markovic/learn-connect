@@ -13,11 +13,26 @@ const initialState = {
 
 export const getMessages = createAsyncThunk(
   "chat/getMessages",
-  async (classroomId, thunkAPI) => {
+  async (_, thunkAPI) => {
     try {
       const token = thunkAPI.getState().auth.user.token;
 
-      const response = await chatService.getMessages(classroomId, token);
+      const response = await chatService.getMessages(token);
+
+      return response.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+
+      handleSliceError(error, thunkAPI);
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
 
 export const getChatStatus = createAsyncThunk(
   "chat/getChatStatus",
@@ -70,6 +85,9 @@ const chatSlice = createSlice({
         message.isRead !== true ? { ...message, isRead: true } : message
       );
     },
+    changeChatStatus: (state, action) => {
+      state.online = action?.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -117,6 +135,7 @@ export const {
   addMessage,
   markAsRead,
   markAllAsRead,
+  changeChatStatus,
 } = chatSlice.actions;
 
 export default chatSlice.reducer;

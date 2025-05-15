@@ -1,5 +1,7 @@
 import Chat from "../../../models/chat/chatModel.js";
 import Conversation from "../../../models/chat/conversationModel.js";
+import User from "../../../models/users/userModel.js";
+import { handleConnectionStatus } from "./socket.userPresence.js";
 
 export const sendMessage = async (context, data) => {
   try {
@@ -158,5 +160,43 @@ export const handleTyping = (context, data) => {
   } catch (error) {
     console.error("Error emitting chat activity", error.message);
     context.socket.emit("error", { message: error.message });
+  }
+};
+
+export const handleChatStatus = async (context, data) => {
+  try {
+    const { userId, chatConnected } = data;
+
+
+    const userFound = await User.findOne({ _id: userId });
+
+
+    if (!userFound) {
+      throw new Error("User is not authorized");
+    }
+
+    const updatedStatus = await User.findByIdAndUpdate(
+      userId,
+      { online: chatConnected },
+      { new: true }
+    );
+
+
+    if (!updatedStatus) {
+      throw new Error("Database update failure");
+    }
+
+    await handleConnectionStatus(context, {
+      userId,
+      isOnline: updatedStatus?.online,
+    });
+
+    context.emitEvent("sender", "chat status changed", {
+      success: true,
+      online: updatedStatus?.online,
+    });
+  } catch (error) {
+    console.error("Error turning off chat events: ", error.message);
+    context.emitEvent("sender", "error", error.message);
   }
 };
