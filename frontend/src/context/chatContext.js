@@ -115,12 +115,11 @@ const ChatProvider = ({ children }) => {
 
   const handleChatStatus = useCallback(
     (data) => {
+      if (!data?.success) return;
 
-      if (data?.success) {
-        dispatch(changeChatStatus(data?.online));
+      dispatch(changeChatStatus(data?.online));
 
-        chatStatus.current = data?.online ? "reconnected" : "disconnected";
-      }
+      chatStatus.current = data?.online ? "reconnected" : "disconnected";
     },
     [dispatch]
   );
@@ -224,11 +223,14 @@ const ChatProvider = ({ children }) => {
 
       dispatch(getMessages());
 
+      socketEventManager.handleEmitEvent("reconnect chat", {
+        userId: user?._id,
+      });
+
       chatStatus.current = null;
     }
 
     if (chatStatus.current === "disconnected") {
-      console.log("disconnecting chat events");
 
       subscriptions.forEach((event) => {
         socketEventManager.unsubscribe(event);

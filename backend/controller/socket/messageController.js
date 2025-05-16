@@ -6,11 +6,12 @@ import {
   handleChatStatus,
 } from "./helpers/socket.messages.js";
 import validateFriendship from "../../middleware/socialMiddleware.js";
+import { handleConnectionStatus } from "./helpers/socket.userPresence.js";
 
 const handleMessages = (context) => {
-  context.socket.on("send message", (data) => {
+  context.socket.on("send message", async (data) => {
     try {
-      validateFriendship(data, async () => {
+      await validateFriendship(data, async () => {
         await sendMessage(context, data);
       });
     } catch (error) {
@@ -18,9 +19,9 @@ const handleMessages = (context) => {
     }
   });
 
-  context.socket.on("user typing", (data) => {
+  context.socket.on("user typing", async (data) => {
     try {
-      validateFriendship(data, () => {
+      await validateFriendship(data, () => {
         handleTyping(context, data);
       });
     } catch (error) {
@@ -30,7 +31,7 @@ const handleMessages = (context) => {
 
   context.socket.on("message read", async (data) => {
     try {
-      validateFriendship(data, async () => {
+      await validateFriendship(data, async () => {
         await handleMarkAsRead(context, data);
       });
     } catch (error) {
@@ -40,7 +41,7 @@ const handleMessages = (context) => {
 
   context.socket.on("open chat", async (data) => {
     try {
-      validateFriendship(data, async () => {
+      await validateFriendship(data, async () => {
         await handleChatOpen(context, data);
       });
     } catch (error) {
@@ -50,6 +51,15 @@ const handleMessages = (context) => {
 
   context.socket.on("change chat status", async (data) => {
     await handleChatStatus(context, data);
+  });
+
+  context.socket.on("reconnect chat", async (data) => {
+    try {
+      await handleConnectionStatus(context, data?.userId, "reconnected");
+    } catch (error) {
+      console.error("Error reconnecting chat: ", error.message);
+      context.emitEvent("sender", "error", error.message);
+    }
   });
 };
 
