@@ -186,15 +186,14 @@ export const handleChatStatus = async (context, data) => {
       throw new Error("Database update failure");
     }
 
-    await handleConnectionStatus(context, {
-      userId,
-      isOnline: updatedStatus?.online,
-    });
-
     context.emitEvent("sender", "chat status changed", {
       success: true,
       online: updatedStatus?.online,
     });
+
+    if (!updatedStatus.online) {
+      await handleConnectionStatus(context, userId, "offline");
+    }
   } catch (error) {
     console.error("Error turning off chat events: ", error.message);
     context.emitEvent("sender", "error", error.message);

@@ -12,7 +12,7 @@ import handleErrorEvents from "./helpers/socket.errorController.js";
 import { handleConnectionStatus } from "./helpers/socket.userPresence.js";
 
 const handleSocketLifeCycle = (io) => {
-  io.on("connection", (socket) => {
+  io.on("connection", async (socket) => {
     console.log(`New connection: Socket ID ${socket.id}`);
 
     const userId = socket?.user?.id;
@@ -25,8 +25,6 @@ const handleSocketLifeCycle = (io) => {
 
     const context = createSocketContext(socket, io);
 
-    handleConnectionStatus(context, { userId, isOnline: true });
-
     handleMessages(context);
     handleNotificationEvents(context);
     handleSocialEvents(context);
@@ -34,8 +32,10 @@ const handleSocketLifeCycle = (io) => {
     handleExamEvents(context);
     handleErrorEvents(socket);
 
-    socket.on("disconnect", () => {
-      handleConnectionStatus(context, { userId, isOnline: false });
+    await handleConnectionStatus(context, userId, "connected");
+
+    socket.on("disconnect", async () => {
+      await handleConnectionStatus(context, userId, "disconnected");
 
       console.log("User disconnected: ", userId);
       removeUserSocket(userId);
