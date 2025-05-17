@@ -4,13 +4,29 @@ const API_URL = "http://127.0.0.1:8000/api/users";
 
 const registerUser = async (userData) => {
   try {
-    const { email, password } = userData;
+    const { email, password, avatar } = userData;
 
     if (!email || !password) {
       throw new Error("Email and password are required.");
     }
 
-    const response = await axios.post(API_URL, userData, {});
+    let multiPartData;
+
+    if (avatar) {
+      const formData = new FormData();
+      formData.append("avatar", avatar);
+      Object.entries(userData).forEach(([key, value]) => {
+        if (key !== "avatar") formData.append(key, value);
+      });
+
+      multiPartData = formData;
+    }
+
+    const response = await axios.post(
+      API_URL,
+      avatar ? multiPartData : userData,
+      {}
+    );
 
     if (response.data) {
       localStorage.setItem("user", JSON.stringify(response.data));
