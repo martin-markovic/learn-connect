@@ -1,4 +1,4 @@
-import axios from "axios";
+import axiosInstance from "../../utils/axiosInstance.js";
 
 const API_URL = "http://127.0.0.1:8000/api/users";
 
@@ -22,7 +22,7 @@ const registerUser = async (userData) => {
       multiPartData = formData;
     }
 
-    const response = await axios.post(
+    const response = await axiosInstance.post(
       API_URL,
       avatar ? multiPartData : userData,
       {}
@@ -40,7 +40,7 @@ const registerUser = async (userData) => {
 
 const loginUser = async (userData) => {
   try {
-    const response = await axios.post(API_URL + "/login", userData);
+    const response = await axiosInstance.post(API_URL + "/login", userData);
 
     if (response.data) {
       localStorage.setItem("user", JSON.stringify(response.data));
@@ -76,7 +76,7 @@ const updateUser = async (userData, token) => {
       multiPartData = formData;
     }
 
-    const response = await axios.put(
+    const response = await axiosInstance.put(
       `${API_URL}/`,
       userData.avatar ? multiPartData : userData,
       config

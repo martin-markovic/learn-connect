@@ -1,11 +1,11 @@
-import axios from "axios";
+import axiosInstance from "../../utils/axiosInstance.js";
 import { handleServiceError } from "../redux.errorHandler.js";
 
 const API_URL = "http://127.0.0.1:8000/api/classroom/";
 
 const joinClassroom = async (classroomId, token) => {
   try {
-    const response = await axios.post(
+    const response = await axiosInstance.post(
       `${API_URL}join/${classroomId}`,
       {},
       {
@@ -22,7 +22,7 @@ const joinClassroom = async (classroomId, token) => {
 
 const leaveClassroom = async (classroomId, token) => {
   try {
-    const response = await axios.post(
+    const response = await axiosInstance.post(
       `${API_URL}leave/${classroomId}`,
       {},
       {
@@ -38,7 +38,7 @@ const leaveClassroom = async (classroomId, token) => {
 
 const getClassroomList = async (token) => {
   try {
-    const response = await axios.get(API_URL, {
+    const response = await axiosInstance.get(API_URL, {
       headers: { Authorization: `Bearer ${token}` },
     });
 

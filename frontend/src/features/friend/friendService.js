@@ -1,4 +1,4 @@
-import axios from "axios";
+import axiosInstance from "../../utils/axiosInstance.js";
 import { handleServiceError } from "../redux.errorHandler.js";
 
 const API_URL = "http://127.0.0.1:8000/api/friends/";
@@ -11,7 +11,7 @@ const getFriendList = async (token) => {
       },
     };
 
-    const response = await axios.get(`${API_URL}me`, config);
+    const response = await axiosInstance.get(`${API_URL}me`, config);
 
     return response.data;
   } catch (error) {
@@ -28,7 +28,7 @@ const getUserList = async (token) => {
       },
     };
 
-    const response = await axios.get(API_URL, config);
+    const response = await axiosInstance.get(API_URL, config);
 
     return response.data;
   } catch (error) {
