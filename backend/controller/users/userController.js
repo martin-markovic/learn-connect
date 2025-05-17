@@ -91,8 +91,12 @@ export const updateUser = async (req, res) => {
 
     const updateFields = { name, email, password, avatar: avatarUrl };
 
-    Object.keys(updateFields).forEach(
-      (key) => updateFields[key] == null && delete updateFields[key]
+    const cleanedFields = Object.entries(updateFields).reduce(
+      (acc, [key, value]) => {
+        if (value != null && value !== "null" && value !== "") acc[key] = value;
+        return acc;
+      },
+      {}
     );
 
     if (email) {
@@ -103,7 +107,7 @@ export const updateUser = async (req, res) => {
       }
     }
 
-    const updatedData = await User.findByIdAndUpdate(userId, updateFields, {
+    const updatedData = await User.findByIdAndUpdate(userId, cleanedFields, {
       new: true,
       runValidators: true,
     }).select("-password -__v");
