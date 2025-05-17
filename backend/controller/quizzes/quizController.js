@@ -9,7 +9,7 @@ export const getUserQuizzes = async (req, res) => {
     const userFound = User.findById(userId);
 
     if (!userFound) {
-      return res.status(401).json({ message: "User is not authenticated" });
+      return res.status(403).json({ message: "User is not registered" });
     }
 
     const quizzes = await Quiz.find({ createdBy: userId });
@@ -33,7 +33,7 @@ export const getClassroomQuizzes = async (req, res) => {
     const userFound = await User.findById(userId);
 
     if (!userFound) {
-      return res.status(401).json({ message: "User is not authenticated" });
+      return res.status(403).json({ message: "User is not registered" });
     }
 
     const userClassrooms = userFound?.classrooms;
@@ -62,7 +62,7 @@ export const updateQuiz = async (req, res) => {
     }
 
     if (!req.user) {
-      return res.status(401).json({ message: "User not found" });
+      return res.status(403).json({ message: "User id is required" });
     }
 
     const user = await User.findById(req.user.id);
@@ -76,7 +76,9 @@ export const updateQuiz = async (req, res) => {
     }
 
     if (quizToUpdate.user.toString() !== user.id) {
-      return res.status(401).json({ message: "User not authorized" });
+      return res
+        .status(403)
+        .json({ message: "Access denied, quiz does not belong to this user" });
     }
 
     return res.status(200).json(updatedQuiz);
@@ -97,14 +99,16 @@ export const deleteQuiz = async (req, res) => {
       return res.status(404).json({ message: "Quiz not found" });
     }
 
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user?.id);
 
     if (!user) {
-      return res.status(401).json({ message: "User not found" });
+      return res.status(403).json({ message: "User is not registered" });
     }
 
-    if (quiz.user.toString() !== user.id) {
-      return res.status(401).json({ message: "User not authorized" });
+    if (quiz.user.toString() !== user?.id) {
+      return res
+        .status(403)
+        .json({ message: "Access denied, quiz does not belong to this user" });
     }
 
     await Quiz.deleteOne({ _id: req.params.id });

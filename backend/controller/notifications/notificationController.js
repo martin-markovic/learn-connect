@@ -5,7 +5,7 @@ export const getNotifications = async (req, res) => {
     const userId = req.params.userId;
 
     if (!userId) {
-      return response.status(401).json({ message: "User not authorized" });
+      return response.status(403).json({ message: "User id is required" });
     }
 
     const unreadNotifications = await Notification.find({

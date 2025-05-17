@@ -12,7 +12,7 @@ export const joinClassroom = async (req, res) => {
     const userId = req.user._id;
 
     if (!userId) {
-      return res.status(401).json({ message: "User not authorized" });
+      return res.status(403).json({ message: "User id is required" });
     }
 
     const classroom = await Classroom.findById(classroomId);
@@ -55,7 +55,7 @@ export const leaveClassroom = async (req, res) => {
     const userId = req.user._id || req.user.id;
 
     if (!userId) {
-      return res.status(401).json({ message: "User not authorized" });
+      return res.status(403).json({ message: "User id is required" });
     }
 
     const classroom = await Classroom.findById(classroomId);
@@ -107,7 +107,7 @@ export const getUserClassrooms = async (req, res) => {
     const user = req.user;
 
     if (!user || !user._id) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(403).json({ message: "User id is required" });
     }
 
     const classrooms = await Classroom.find({ students: user._id });
