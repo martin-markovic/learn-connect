@@ -1,4 +1,4 @@
-import axios from "axios";
+import axiosInstances from "../../utils/axiosInstance.js";
 import { handleServiceError } from "../redux.errorHandler.js";
 
 const API_URL = "http://127.0.0.1:8000/api/chat";
@@ -11,7 +11,7 @@ const getMessages = async (token) => {
       },
     };
 
-    const response = await axios.get(API_URL, config);
+    const response = await axiosInstances.get(API_URL, config);
 
     return response;
   } catch (error) {
@@ -28,7 +28,7 @@ const getChatStatus = async (token) => {
       },
     };
 
-    const response = await axios.get(`${API_URL}/status`, config);
+    const response = await axiosInstances.get(`${API_URL}/status`, config);
 
     return response;
   } catch (error) {

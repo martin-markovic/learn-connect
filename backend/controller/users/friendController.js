@@ -6,7 +6,7 @@ export const getFriendList = async (req, res) => {
     const userId = req.user?._id;
 
     if (!userId) {
-      return res.status(401).json({ message: "User not authenticated" });
+      return res.status(403).json({ message: "User id is required" });
     }
 
     const friendList = await Friend.find(
@@ -31,7 +31,7 @@ export const getUserList = async (req, res) => {
     const userId = req.user?._id;
 
     if (!userId) {
-      return res.status(401).json({ message: "User not authorized" });
+      return res.status(403).json({ message: "User id is required" });
     }
 
     const blockedUsers = await Friend.find({

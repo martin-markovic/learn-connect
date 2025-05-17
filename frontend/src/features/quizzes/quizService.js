@@ -1,4 +1,4 @@
-import axios from "axios";
+import axiosInstance from "../../utils/axiosInstance.js";
 import { handleServiceError } from "../redux.errorHandler.js";
 
 const API_URL = "http://127.0.0.1:8000/api/quizzes/";
@@ -11,7 +11,7 @@ const getUserQuizzes = async (token) => {
       },
     };
 
-    const response = await axios.get(API_URL, config);
+    const response = await axiosInstance.get(API_URL, config);
 
     return response.data;
   } catch (error) {
@@ -27,7 +27,7 @@ const getClassQuizzes = async (token) => {
       },
     };
 
-    const response = await axios.get(`${API_URL}classroom`, config);
+    const response = await axiosInstance.get(`${API_URL}classroom`, config);
 
     return response.data;
   } catch (error) {
@@ -43,7 +43,7 @@ const updateQuiz = async (id, quizData, token) => {
       },
     };
 
-    const response = await axios.put(API_URL + id, quizData, config);
+    const response = await axiosInstance.put(API_URL + id, quizData, config);
 
     return response.data;
   } catch (error) {
@@ -66,7 +66,7 @@ const deleteQuiz = async (id, token) => {
       },
     };
 
-    const response = await axios.delete(API_URL + id, config);
+    const response = await axiosInstance.delete(API_URL + id, config);
 
     return response.data;
   } catch (error) {

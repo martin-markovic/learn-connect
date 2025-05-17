@@ -1,16 +1,32 @@
-import axios from "axios";
+import axiosInstance from "../../utils/axiosInstance.js";
 
 const API_URL = "http://127.0.0.1:8000/api/users";
 
 const registerUser = async (userData) => {
   try {
-    const { email, password } = userData;
+    const { email, password, avatar } = userData;
 
     if (!email || !password) {
       throw new Error("Email and password are required.");
     }
 
-    const response = await axios.post(API_URL, userData, {});
+    let multiPartData;
+
+    if (avatar) {
+      const formData = new FormData();
+      formData.append("avatar", avatar);
+      Object.entries(userData).forEach(([key, value]) => {
+        if (key !== "avatar") formData.append(key, value);
+      });
+
+      multiPartData = formData;
+    }
+
+    const response = await axiosInstance.post(
+      API_URL,
+      avatar ? multiPartData : userData,
+      {}
+    );
 
     if (response.data) {
       localStorage.setItem("user", JSON.stringify(response.data));
@@ -24,7 +40,7 @@ const registerUser = async (userData) => {
 
 const loginUser = async (userData) => {
   try {
-    const response = await axios.post(API_URL + "/login", userData);
+    const response = await axiosInstance.post(API_URL + "/login", userData);
 
     if (response.data) {
       localStorage.setItem("user", JSON.stringify(response.data));
@@ -60,7 +76,7 @@ const updateUser = async (userData, token) => {
       multiPartData = formData;
     }
 
-    const response = await axios.put(
+    const response = await axiosInstance.put(
       `${API_URL}/`,
       userData.avatar ? multiPartData : userData,
       config

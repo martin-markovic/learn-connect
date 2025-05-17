@@ -1,4 +1,4 @@
-import axios from "axios";
+import axiosInstance from "../../../utils/axiosInstance.js";
 import { handleServiceError } from "../../redux.errorHandler.js";
 
 const API_URL = "http://127.0.0.1:8000/api/exam";
@@ -9,7 +9,7 @@ const createExam = async (quizId, token) => {
       throw new Error("User is not authenticated,no token");
     }
 
-    const response = await axios.post(API_URL + "/", quizId, {
+    const response = await axiosInstance.post(API_URL + "/", quizId, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -33,7 +33,7 @@ const getExam = async (token) => {
       },
     };
 
-    const response = await axios.get(API_URL + "/", config);
+    const response = await axiosInstance.get(API_URL + "/", config);
 
     return response.data;
   } catch (error) {
@@ -53,7 +53,10 @@ const getExamFeedback = async (quizId, token) => {
       },
     };
 
-    const response = await axios.get(`${API_URL}/feedback/${quizId}`, config);
+    const response = await axiosInstance.get(
+      `${API_URL}/feedback/${quizId}`,
+      config
+    );
 
     return response.data;
   } catch (error) {
