@@ -3,6 +3,7 @@ import Exam from "../../../models/quizzes/examModel.js";
 import Quiz from "../../../models/quizzes/quizModel.js";
 import Classroom from "../../../models/classrooms/classroomModel.js";
 import Score from "../../../models/quizzes/scoreModel.js";
+import { handleNewNotification } from "./socket.notification.js";
 
 export const createExam = async (context, data) => {
   try {
@@ -131,6 +132,15 @@ export const finishExam = async (context, data) => {
     }
 
     context.emitEvent("sender", "exam finished", examEndPayload.examPayload);
+
+    const notificationData = {
+      senderId: data?.senderId,
+      notificationName: "quiz graded",
+      quizScore: examEndPayload?.examPayload?.scorePayload?.latestScore,
+      quizId: examEndPayload?.examPayload?.scorePayload?.quiz,
+    };
+
+    await handleNewNotification(context, notificationData);
   } catch (error) {
     console.error(error.message);
   }
