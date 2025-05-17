@@ -19,13 +19,6 @@ const useGlobalEvents = (currentLocation, user) => {
     (data) => {
       dispatch(finishExam(data));
 
-      socketEventManager.handleEmitEvent("new notification", {
-        senderId: data?.scorePayload?.user,
-        quizId: data?.scorePayload?.quiz,
-        quizScore: data?.scorePayload?.latestScore,
-        notificationName: "quiz graded",
-      });
-
       if (currentLocation.startsWith(`/exam/${data?.scorePayload?.quizId}`)) {
         navigate("/");
       }
@@ -36,12 +29,6 @@ const useGlobalEvents = (currentLocation, user) => {
   const handleIncomingRequest = useCallback(
     (data) => {
       dispatch(newFriendRequest(data));
-
-      socketEventManager.handleEmitEvent("new notification", {
-        senderId: data?.senderId,
-        receiverId: data?.receiverId,
-        notificationName: "new friend request",
-      });
     },
     [dispatch]
   );
@@ -63,19 +50,6 @@ const useGlobalEvents = (currentLocation, user) => {
   const handleAcceptRequest = useCallback(
     (data) => {
       dispatch(handleAccept(data));
-
-      if (data?.receiverId === user?._id) {
-        const notificationData = {
-          senderId: data?.senderId,
-          receiverId: data?.receiverId,
-          notificationName: "friend request accepted",
-        };
-
-        socketEventManager.handleEmitEvent(
-          "new notification",
-          notificationData
-        );
-      }
     },
     [dispatch, user?._id]
   );
