@@ -294,6 +294,24 @@ li {
   justify-content: space-between;
   background: linear-gradient(180deg, #add8e6, #ffffff);
   border: none;
+
+.chat__display__heading-avatar {
+  object-fit: cover;
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.chat__display__heading-icon {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
 }
 
 .chat__display__heading-text {
