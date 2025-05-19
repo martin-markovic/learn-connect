@@ -8,6 +8,7 @@ const initialState = {
   isError: false,
   errorMessage: "",
   classroomList: [],
+  userClassroom: null,
 };
 
 export const joinClassroom = createAsyncThunk(
@@ -71,6 +72,24 @@ export const getClassroomList = createAsyncThunk(
   }
 );
 
+export const getUserClassroom = createAsyncThunk(
+  "classroom/getUserClassroom",
+  async (_, thunkAPI) => {
+    try {
+      const { token } = thunkAPI.getState().auth.user;
+      if (!token) {
+        throw new Error("Token not found");
+      }
+
+      const data = await classroomService.getUserClassroom(token);
+
+      return data;
+    } catch (error) {
+      handleSliceError(error);
+    }
+  }
+);
+
 const classroomSlice = createSlice({
   name: "classroom",
   initialState,
@@ -89,7 +108,7 @@ const classroomSlice = createSlice({
         state.isSuccess = true;
         state.isError = false;
         state.errorMessage = "";
-        state.classroomList.push(action.payload.classroom);
+        state.userClassroom = action.payload?.updatedClassroom;
       })
       .addCase(joinClassroom.rejected, (state, action) => {
         state.isLoading = false;
@@ -116,6 +135,25 @@ const classroomSlice = createSlice({
         state.isError = true;
         state.errorMessage =
           action.payload?.message || "Failed to load classrooms";
+      })
+      .addCase(getUserClassroom.pending, (state) => {
+        state.isLoading = true;
+        state.isError = false;
+        state.errorMessage = "";
+      })
+      .addCase(getUserClassroom.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.isError = false;
+        state.errorMessage = "";
+        state.userClassroom = action.payload;
+      })
+      .addCase(getUserClassroom.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = false;
+        state.isError = true;
+        state.errorMessage =
+          action.payload?.message || "Failed to get user classroom";
       })
       .addCase(leaveClassroom.pending, (state) => {
         state.isLoading = true;
