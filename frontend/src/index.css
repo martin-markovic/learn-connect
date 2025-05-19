@@ -255,6 +255,13 @@ li {
   overflow: hidden;
 }
 
+.chatlist-container p {
+  background: #c3b1ee;
+  width: 100%;
+  padding: 0.5em 0 0.7em 1em;
+  font-weight: 500;
+}
+
 .chatlist__avatar-wrapper {
   width: 25px;
   height: 25px;
@@ -279,11 +286,11 @@ li {
 }
 
 .chatlist__user-status {
+  margin-left: 1em;
   width: 11px;
   height: 11px;
   border-radius: 50%;
   background: greenyellow;
-  display: inline-block;
   min-width: 0;
   min-height: 0;
 }
@@ -294,6 +301,24 @@ li {
   justify-content: space-between;
   background: linear-gradient(180deg, #add8e6, #ffffff);
   border: none;
+
+.chat__display__heading-avatar {
+  object-fit: cover;
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.chat__display__heading-icon {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
 }
 
 .chat__display__heading-text {
@@ -335,7 +360,6 @@ li {
 
 .friendlist__container-wrapper {
   display: flex;
-  justify-content: start;
   align-items: start;
   height: 100%;
   width: 366px;

@@ -183,29 +183,12 @@ const ChatDisplay = () => {
             >
               {selectedChat?.avatar ? (
                 <img
-                  style={{
-                    objectFit: "cover",
-                    width: "27px",
-                    height: "27px",
-                    borderRadius: "50%",
-                    overflow: "hidden",
-                  }}
+                  className="chat__display__heading-avatar"
                   src={selectedChat?.avatar}
                   alt="avatar"
                 ></img>
               ) : (
-                <div
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    borderRadius: "50%",
-                    overflow: "hidden",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    backgroundColor: "white",
-                  }}
-                >
+                <div className="chat__display__heading-icon">
                   <FaCircleUser
                     style={{ width: "100%", height: "100%", color: "grey" }}
                   />
@@ -291,13 +274,17 @@ const ChatDisplay = () => {
                 </span>
 
                 <p>{message?.text}</p>
-                {message.senderId !== user?._id && (
+                {message.senderId === user?._id && (
                   <span>{message?.isRead ? "read" : "sent"}</span>
                 )}
               </li>
             ))
           ) : (
-            <div>No messages yet.</div>
+            <div style={{ alignSelf: "center", paddingTop: "10%" }}>
+              <span style={{ paddingLeft: "3em" }}>No messages.</span>
+              <br />
+              New messages will show here.
+            </div>
           )}
         </ul>
         <div ref={chatEndRef} />
