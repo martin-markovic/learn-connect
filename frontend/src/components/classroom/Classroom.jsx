@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
   getClassroomList,
+  getUserClassroom,
   joinClassroom,
   leaveClassroom,
   resetClassroom,
@@ -15,6 +16,7 @@ function Classroom() {
 
   const {
     classroomList = [],
+    userClassroom,
     isLoading,
     isError,
     errorMessage,
@@ -22,6 +24,7 @@ function Classroom() {
 
   useEffect(() => {
     dispatch(getClassroomList());
+    dispatch(getUserClassroom());
 
     return () => {
       dispatch(resetClassroom());
@@ -88,23 +91,31 @@ function Classroom() {
         ) : classroomList.length === 0 ? (
           <p>No classrooms available.</p>
         ) : (
-          <div className="clasroom__enroll__dropdown-items">
-            <span>Select a Classroom:</span>
-            <select
-              id="classroom-select"
-              value={selectedClassroom}
-              onChange={handleChange}
-            >
-              <option value="" disabled></option>
-              {classroomList.map((classroom) => (
-                <option
-                  key={`classroom-${classroom?._id}`}
-                  value={classroom?._id}
-                >
-                  {classroom?.name}
-                </option>
-              ))}
-            </select>
+          <div>
+            <span>
+              {userClassroom
+                ? `Current classroom: ${userClassroom?.name}`
+                : "User is not enrolled in classroom"}
+            </span>
+
+            <div className="clasroom__enroll__dropdown-items">
+              <span>Select a Classroom:</span>
+              <select
+                id="classroom-select"
+                value={selectedClassroom}
+                onChange={handleChange}
+              >
+                <option value="" disabled></option>
+                {classroomList.map((classroom) => (
+                  <option
+                    key={`classroom-${classroom?._id}`}
+                    value={classroom?._id}
+                  >
+                    {classroom?.name}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         )}
       </div>
