@@ -64,10 +64,31 @@ const getExamFeedback = async (quizId, token) => {
   }
 };
 
+const getExamScores = async (token) => {
+  try {
+    if (!token) {
+      throw new Error("User is not authenticated, no token");
+    }
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    const response = await axiosInstance.get(`${API_URL}/scores`, config);
+
+    return response.data;
+  } catch (error) {
+    handleServiceError(error);
+  }
+};
+
 const examService = {
   createExam,
   getExam,
   getExamFeedback,
+  getExamScores,
 };
 
 export default examService;
