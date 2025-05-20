@@ -6,7 +6,12 @@ import {
   getFriendList,
   handleBlock,
   newFriendRequest,
+  resetUserList,
 } from "../features/friend/friendSlice.js";
+import {
+  getExamScores,
+  resetExam,
+} from "../features/quizzes/exam/examSlice.js";
 import socketEventManager from "../features/socket/socket.eventManager.js";
 import { FaCircleUser } from "react-icons/fa6";
 
@@ -29,10 +34,17 @@ function UserProfile() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector((state) => state.auth.user);
+  const { examScores } = useSelector((state) => state.exam);
 
   useEffect(() => {
     dispatch(getUserList());
     dispatch(getFriendList());
+    dispatch(getExamScores());
+
+    return () => {
+      dispatch(resetExam());
+      dispatch(resetUserList());
+    };
   }, [dispatch]);
 
   useEffect(() => {
