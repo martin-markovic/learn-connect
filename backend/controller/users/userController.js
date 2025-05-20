@@ -110,7 +110,7 @@ export const updateUser = async (req, res) => {
     const updatedData = await User.findByIdAndUpdate(userId, cleanedFields, {
       new: true,
       runValidators: true,
-    }).select("-password -__v");
+    }).select("-password -online -__v");
 
     if (!updatedData) {
       return res.status(404).json({ message: "User not found" });
