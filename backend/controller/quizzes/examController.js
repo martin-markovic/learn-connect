@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import Exam from "../../models/quizzes/examModel.js";
 import Score from "../../models/quizzes/scoreModel.js";
-import Quiz from "../../models/quizzes/quizModel.js";
 
 export const getExam = async (req, res) => {
   try {
@@ -61,6 +60,31 @@ export const getExamFeedback = async (req, res) => {
     console.error(`Error fetching exam feedback: ${error.message}`);
     return res.status(500).json({
       message: `Error fetching exam feedback: ${error.message}`,
+    });
+  }
+};
+
+export const getExamScores = async (req, res) => {
+  try {
+    const userId = req.user?._id;
+
+    if (!userId) {
+      throw new Error({ statusCode: 403, message: "User id is required" });
+    }
+
+    const examScores = await Score.find({ user: userId })
+      .select("-user -examFeedback -__v")
+      .populate({
+        path: "quiz",
+        select:
+          "-createdBy -classroom -questions -timeLimit -createdAt -updatedAt -__v",
+      });
+
+    return res.status(200).json(examScores || []);
+  } catch (error) {
+    console.error("Error fetching exam scores", error.message);
+    return res.status(error.statusCode || 500).json({
+      message: `Error fetching exam scores: ${error.message || "Server error"}`,
     });
   }
 };
