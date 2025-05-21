@@ -131,73 +131,73 @@ li {
 
 .left__box-bottom {
   flex: 3;
-.classroom-container {
-  display: flex;
-  flex-direction: row;
-  max-height: 100px;
-  width: 55%;
-  margin-top: 2em;
-  margin-bottom: auto;
-  align-self: flex-end;
-  gap: 1em;
-}
+  .classroom-container {
+    display: flex;
+    flex-direction: row;
+    max-height: 100px;
+    width: 55%;
+    margin-top: 2em;
+    margin-bottom: auto;
+    align-self: flex-end;
+    gap: 1em;
+  }
 
-.classroom__enroll-dropdown {
-  width: 60%;
-  height: 100%;
-  margin-top: 0.5em;
-  margin-bottom: auto;
-}
+  .classroom__enroll-dropdown {
+    width: 60%;
+    height: 100%;
+    margin-top: 0.5em;
+    margin-bottom: auto;
+  }
 
-.clasroom__enroll__dropdown-items {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  width: 100%;
-}
+  .clasroom__enroll__dropdown-items {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+  }
 
-.classroom__enroll__dropdown-items select {
-  margin-top: 0.3em;
-  margin-left: 1em;
-}
+  .classroom__enroll__dropdown-items select {
+    margin-top: 0.3em;
+    margin-left: 1em;
+  }
 
-.classroom__enroll-buttons {
-  display: flex;
-}
+  .classroom__enroll-buttons {
+    display: flex;
+  }
 
-.classroom-container {
-  display: flex;
-  flex-direction: row;
-  max-height: 100px;
-  width: 55%;
-  margin-top: 2em;
-  margin-bottom: auto;
-  align-self: flex-end;
-  gap: 1em;
-}
+  .classroom-container {
+    display: flex;
+    flex-direction: row;
+    max-height: 100px;
+    width: 55%;
+    margin-top: 2em;
+    margin-bottom: auto;
+    align-self: flex-end;
+    gap: 1em;
+  }
 
-.classroom__enroll-dropdown {
-  width: 60%;
-  height: 100%;
-  margin-top: 0.5em;
-  margin-bottom: auto;
-}
+  .classroom__enroll-dropdown {
+    width: 60%;
+    height: 100%;
+    margin-top: 0.5em;
+    margin-bottom: auto;
+  }
 
-.clasroom__enroll__dropdown-items {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  width: 100%;
-}
+  .clasroom__enroll__dropdown-items {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+  }
 
-.classroom__enroll-buttons {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-around;
-  width: 35%;
-  margin-top: 0.7em;
-  margin-bottom: 0;
-}
+  .classroom__enroll-buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    width: 35%;
+    margin-top: 0.7em;
+    margin-bottom: 0;
+  }
 
   overflow: hidden;
 }
@@ -245,6 +245,8 @@ li {
   height: 100%;
   max-height: 100%;
   overflow-y: hidden;
+}
+
 .chatlist-container {
   display: flex;
   flex-direction: column;
@@ -301,6 +303,7 @@ li {
   justify-content: space-between;
   background: linear-gradient(180deg, #add8e6, #ffffff);
   border: none;
+}
 
 .chat__display__heading-avatar {
   object-fit: cover;
@@ -345,6 +348,8 @@ li {
   max-height: 35%;
   color: white;
   background-color: red;
+}
+
 .friendlist-container {
   padding-left: 2em;
   flex: 1;
