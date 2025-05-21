@@ -5,7 +5,7 @@ export const getNotifications = async (req, res) => {
     const userId = req.params.userId;
 
     if (!userId) {
-      return response.status(403).json({ message: "User id is required" });
+      throw new Error({ statusCode: 403, message: "User id is required" });
     }
 
     const unreadNotifications = await Notification.find({
@@ -15,6 +15,6 @@ export const getNotifications = async (req, res) => {
 
     return res.status(200).json(unreadNotifications || []);
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    return res.status(error.statusCode || 500).json({ message: error.message });
   }
 };
