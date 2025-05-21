@@ -64,7 +64,7 @@ const getExamFeedback = async (quizId, token) => {
   }
 };
 
-const getExamScores = async (token) => {
+const getExamScores = async (userId, token) => {
   try {
     if (!token) {
       throw new Error("User is not authenticated, no token");
@@ -76,7 +76,10 @@ const getExamScores = async (token) => {
       },
     };
 
-    const response = await axiosInstance.get(`${API_URL}/scores`, config);
+    const response = await axiosInstance.get(
+      `${API_URL}/scores/${userId}`,
+      config
+    );
 
     return response.data;
   } catch (error) {

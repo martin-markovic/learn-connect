@@ -10,7 +10,7 @@ const initialState = {
   examData: {},
   quizFeedback: {},
   examFeedback: {},
-  examScores: [],
+  examScores: {},
 };
 
 export const getExam = createAsyncThunk("exam/get", async (_, thunkAPI) => {
@@ -42,11 +42,11 @@ export const getExamFeedback = createAsyncThunk(
 
 export const getExamScores = createAsyncThunk(
   "exam/getExamScores",
-  async (quizId, thunkAPI) => {
+  async (userId, thunkAPI) => {
     try {
       const token = thunkAPI.getState().auth.user.token;
 
-      const response = await examService.getExamScores(token);
+      const response = await examService.getExamScores(userId, token);
 
       return response;
     } catch (error) {
@@ -128,13 +128,21 @@ export const examSlice = createSlice({
         state.isError = false;
         state.errorMessage = "";
 
-        const existingIds = new Set(state.examScores.map((score) => score._id));
+        const { friendId, scoreList } = action.payload;
 
-        action.payload.forEach((item) => {
-          if (item?._id && !existingIds.has(item._id)) {
-            state.examScores.push(item);
-          }
-        });
+        if (!state.examScores[friendId]) {
+          state.examScores[friendId] = scoreList;
+        } else {
+          const existingIds = new Set(
+            state.examScores[action.payload?.friendId].map((score) => score._id)
+          );
+
+          scoreList.forEach((item) => {
+            if (item?._id && !existingIds.has(item._id)) {
+              state.examScores[item?._id].push(item);
+            }
+          });
+        }
       })
       .addCase(getExamScores.rejected, (state, action) => {
         state.isLoading = false;

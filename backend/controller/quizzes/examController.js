@@ -72,7 +72,13 @@ export const getExamScores = async (req, res) => {
       throw new Error({ statusCode: 403, message: "User id is required" });
     }
 
-    const examScores = await Score.find({ user: userId })
+    const { friendId } = req.params;
+
+    if (!friendId) {
+      throw new Error({ statusCode: 403, message: "Unindentified " });
+    }
+
+    const examScores = await Score.find({ user: friendId })
       .select("-user -examFeedback -__v")
       .populate({
         path: "quiz",
@@ -80,7 +86,7 @@ export const getExamScores = async (req, res) => {
           "-createdBy -classroom -questions -timeLimit -createdAt -updatedAt -__v",
       });
 
-    return res.status(200).json(examScores || []);
+    return res.status(200).json({ friendId, scoreList: examScores || [] });
   } catch (error) {
     console.error("Error fetching exam scores", error.message);
     return res.status(error.statusCode || 500).json({
