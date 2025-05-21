@@ -6,7 +6,10 @@ export const getFriendList = async (req, res) => {
     const userId = req.user?._id;
 
     if (!userId) {
-      return res.status(403).json({ message: "User id is required" });
+      throw new Error({
+        statusCode: 403,
+        message: "User id is required",
+      });
     }
 
     const friendList = await Friend.find(
@@ -31,7 +34,7 @@ export const getUserList = async (req, res) => {
     const userId = req.user?._id;
 
     if (!userId) {
-      return res.status(403).json({ message: "User id is required" });
+      throw new Error({ statusCode: 403, message: "User id is required" });
     }
 
     const blockedUsers = await Friend.find({
@@ -55,6 +58,8 @@ export const getUserList = async (req, res) => {
     return res.status(200).json(userList);
   } catch (error) {
     console.error("Error fetching list of users", error);
-    return res.status(500).json({ message: "Server error" });
+    return res
+      .status(error.statusCode || 500)
+      .json({ message: error.message || "Server error" });
   }
 };

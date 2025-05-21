@@ -5,7 +5,7 @@ export const getMessages = async (req, res) => {
   const userId = req.user._id;
 
   if (!userId) {
-    return res.status(403).json({ message: "User id is required" });
+    throw new Error({ statusCode: 403, message: "User id is required" });
   }
 
   try {
@@ -51,7 +51,7 @@ export const getMessages = async (req, res) => {
 
     return res.status(200).json(formattedPayload);
   } catch (error) {
-    return res.status(500).json({
+    return res.status(error.statusCode || 500).json({
       message: error.message,
     });
   }
@@ -62,7 +62,7 @@ export const getChatStatus = async (req, res) => {
     const userId = req.user._id;
 
     if (!userId) {
-      return res.status(403).json({ message: "Please provide user id" });
+      throw new Error({ statusCode: 403, message: "User id is required" });
     }
 
     const userFound = await User.findOne({ _id: userId });
@@ -75,7 +75,7 @@ export const getChatStatus = async (req, res) => {
 
     return res.status(200).json({ online: userFound?.online });
   } catch (error) {
-    return res.status(500).json({
+    return res.status(error.statusCode || 500).json({
       message: error.message,
     });
   }
