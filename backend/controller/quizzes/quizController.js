@@ -9,7 +9,10 @@ export const getUserQuizzes = async (req, res) => {
     const userFound = User.findById(userId);
 
     if (!userFound) {
-      return res.status(403).json({ message: "User is not registered" });
+      throw new Error({
+        statusCode: 403,
+        message: "User is not registered",
+      });
     }
 
     const quizzes = await Quiz.find({ createdBy: userId });
@@ -20,7 +23,7 @@ export const getUserQuizzes = async (req, res) => {
       `Error fetching quizzes for ${req.user._id}:  ${error.message}`
     );
 
-    return res.status(500).json({
+    return res.status(error.statusCode || 500).json({
       message: `Error fetching quizzes for ${req.user._id}: ${error.message}`,
     });
   }
@@ -33,7 +36,10 @@ export const getClassroomQuizzes = async (req, res) => {
     const userFound = await User.findById(userId);
 
     if (!userFound) {
-      return res.status(403).json({ message: "User is not registered" });
+      throw new Error({
+        statusCode: 403,
+        message: "User is not registered",
+      });
     }
 
     const userClassrooms = userFound?.classrooms;
@@ -49,7 +55,9 @@ export const getClassroomQuizzes = async (req, res) => {
     return res.json(quizPayload || []);
   } catch (error) {
     console.error("Error in getQuizzesByClassroom:", error);
-    res.status(500).json({ message: `Server error: ${error.message}` });
+    res
+      .status(error.statusCode || 500)
+      .json({ message: `Server error: ${error.message}` });
   }
 };
 
@@ -58,11 +66,17 @@ export const updateQuiz = async (req, res) => {
     const quizToUpdate = await Quiz.findById(req.params.id);
 
     if (!quizToUpdate) {
-      return res.status(400).json({ message: "quiz not found" });
+      throw new Error({
+        statusCode: 403,
+        message: "Quiz not found",
+      });
     }
 
     if (!req.user) {
-      return res.status(403).json({ message: "User id is required" });
+      throw new Error({
+        statusCode: 403,
+        message: "User id is required",
+      });
     }
 
     const user = await User.findById(req.user.id);
@@ -72,20 +86,24 @@ export const updateQuiz = async (req, res) => {
     });
 
     if (!updatedQuiz) {
-      return res.status(500).json({ message: "Failed to update quiz" });
+      throw new Error({
+        statusCode: 500,
+        message: "Failed to update quiz",
+      });
     }
 
     if (quizToUpdate.user.toString() !== user.id) {
-      return res
-        .status(403)
-        .json({ message: "Access denied, quiz does not belong to this user" });
+      throw new Error({
+        statusCode: 403,
+        message: "Access denied, quiz does not belong to this user",
+      });
     }
 
     return res.status(200).json(updatedQuiz);
   } catch (error) {
     console.error(`Error updating quiz ${req.params.id}: ${error.message}`);
 
-    return res.status(500).json({
+    return res.status(error.statusCode || 500).json({
       message: `Error updating quiz ${req.params.id}: ${error.message}`,
     });
   }
@@ -96,19 +114,26 @@ export const deleteQuiz = async (req, res) => {
     const quiz = await Quiz.findById(req.params.id);
 
     if (!quiz) {
-      return res.status(404).json({ message: "Quiz not found" });
+      throw new Error({
+        statusCode: 404,
+        message: "Quiz not found",
+      });
     }
 
     const user = await User.findById(req.user?.id);
 
     if (!user) {
-      return res.status(403).json({ message: "User is not registered" });
+      throw new Error({
+        statusCode: 403,
+        message: "User is not registered",
+      });
     }
 
     if (quiz.user.toString() !== user?.id) {
-      return res
-        .status(403)
-        .json({ message: "Access denied, quiz does not belong to this user" });
+      throw new Error({
+        statusCode: 403,
+        message: "Access denied, quiz does not belong to this user",
+      });
     }
 
     await Quiz.deleteOne({ _id: req.params.id });
@@ -120,7 +145,7 @@ export const deleteQuiz = async (req, res) => {
   } catch (error) {
     console.error(`Error deleting quiz ${req.params.id}: ${error.message}`);
 
-    return res.status(500).json({
+    return res.status(error.statusCode || 500).json({
       message: `Error deleting quiz ${req.params.id}: ${error.message}`,
     });
   }
