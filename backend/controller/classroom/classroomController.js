@@ -28,7 +28,7 @@ export const joinClassroom = async (req, res) => {
     }
 
     classroom.students.push(userId);
-    await classroom.save();
+    const updatedClassroom = await classroom.save();
 
     await User.findByIdAndUpdate(
       userId,
@@ -38,7 +38,7 @@ export const joinClassroom = async (req, res) => {
 
     return res.status(200).json({
       message: "User joined classroom successfully",
-      classroom,
+      updatedClassroom,
     });
   } catch (error) {
     return res.status(error.statusCode || 500).json({
@@ -115,9 +115,10 @@ export const getAllClassrooms = async (req, res) => {
   }
 };
 
-export const getUserClassrooms = async (req, res) => {
+export const getUserClassroom = async (req, res) => {
   try {
     const user = req.user;
+
 
     if (!user || !user._id) {
       throw new Error({
@@ -126,9 +127,9 @@ export const getUserClassrooms = async (req, res) => {
       });
     }
 
-    const classrooms = await Classroom.find({ students: user._id });
+    const classroom = await Classroom.find({ students: user?._id });
 
-    return res.status(200).json(classrooms);
+    return res.status(200).json(classroom.length ? classroom[0] : null);
   } catch (error) {
     return res.status(error.statusCode || 500).json({
       message: error.message,

@@ -1,5 +1,6 @@
 import Friend from "../../models/users/friendModel.js";
 import User from "../../models/users/userModel.js";
+import { handleNewNotification } from "./helpers/socket.notification.js";
 
 const handleSocialEvents = (context) => {
   context.socket.on("send friend request", async (data) => {
@@ -51,6 +52,14 @@ const handleSocialEvents = (context) => {
         "friend request received",
         friendRequestPayload
       );
+
+      const userData = {
+        senderId,
+        receiverId,
+        notificationName: "new friend request",
+      };
+
+      await handleNewNotification(context, userData);
     } catch (error) {
       console.error(error.message);
       context.socket.emit("error", error.message);
@@ -126,6 +135,14 @@ const handleSocialEvents = (context) => {
         "friend request accepted",
         friendRequestPayload
       );
+
+      const userData = {
+        senderId,
+        receiverId,
+        notificationName: "friend request accepted",
+      };
+
+      await handleNewNotification(context, userData);
     } catch (error) {
       console.error("Error processing friend request: ", error.message);
       context.emitEvent("sender", "error", { message: error.message });

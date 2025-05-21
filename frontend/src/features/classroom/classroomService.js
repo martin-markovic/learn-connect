@@ -49,10 +49,24 @@ const getClassroomList = async (token) => {
   }
 };
 
+const getUserClassroom = async (token) => {
+  try {
+    const response = await axiosInstance.get(`${API_URL}/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    return response.data;
+  } catch (error) {
+    handleServiceError(error);
+    throw error;
+  }
+};
+
 const classroomService = {
   joinClassroom,
   leaveClassroom,
   getClassroomList,
+  getUserClassroom,
 };
 
 export default classroomService;
