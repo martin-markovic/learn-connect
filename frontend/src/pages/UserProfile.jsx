@@ -234,9 +234,10 @@ function UserProfile() {
           </div>
         </div>
 
-        <h1>{userInfo?.name}</h1>
-        <h2>Classroom Space</h2>
-
+        <section>
+          <h1>{userInfo?.name}</h1>
+          <h2>Classroom Space</h2>
+        </section>
         {String(user?._id) === String(userId) && (
           <button
             type="button"
@@ -297,17 +298,19 @@ function UserProfile() {
                 </select>
               </div>
             )}
-            {modalOpen && (
-              <div className="modal">
-                <p>
-                  Are you sure you want to {actionToConfirm} {userInfo?.name}?
-                </p>
-                <div>
-                  <button onClick={handleConfirmAction}>Yes</button>
-                  <button onClick={handleCancelAction}>No</button>
-                </div>
-              </div>
-            )}
+            <div className="modal">
+              {modalOpen && (
+                <>
+                  <p>
+                    Are you sure you want to {actionToConfirm} {userInfo?.name}?
+                  </p>
+                  <div className="modal-buttons">
+                    <button onClick={handleConfirmAction}>Yes</button>
+                    <button onClick={handleCancelAction}>No</button>
+                  </div>
+                </>
+              )}
+            </div>
             {!isLoading && friendshipStatus === null && !modalOpen && (
               <div>
                 <button type="button" onClick={handleSend}>
