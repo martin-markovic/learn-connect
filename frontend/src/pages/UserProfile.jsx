@@ -334,7 +334,7 @@ function UserProfile() {
         className="user__profile-bottom__box
       "
       >
-        <div>
+        <div className="user__profile-bottom__box-content">
           {friendList.length ? (
             <div>
               <p>{user?.name?.split(" ")[0]}&apos;s friends</p>
@@ -408,8 +408,25 @@ function UserProfile() {
             <p>Friend list is empty</p>
           )}
         </div>
-        <div>
+        <div className="user__profile-bottom__box-content">
           <p>Quiz Score Records</p>
+          <div>
+            {examScores[userId]?.length ? (
+              examScores[userId]?.map((entry) => {
+                return (
+                  <div key={entry?._id}>
+                    <span>{entry?.quiz?.title}</span>
+                    <p>
+                      <span>Latest score{entry?.latestScore}</span>
+                      <span>High score{entry?.highScore}</span>
+                    </p>
+                  </div>
+                );
+              })
+            ) : (
+              <p>User has no quiz records</p>
+            )}
+          </div>
         </div>
       </div>
     </div>
