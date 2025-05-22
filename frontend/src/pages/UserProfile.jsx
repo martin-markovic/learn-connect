@@ -193,122 +193,51 @@ function UserProfile() {
       }}
     />
   ) : (
-    <div>
-      <div className="avatar-wrapper">
-        {userInfo?.avatar ? (
-          <img
-            src={userInfo?.avatar}
-            alt="user avatar"
-            style={{
-              width: "80px",
-              height: "80px",
-              borderRadius: "50%",
-              objectFit: "cover",
-            }}
-          />
-        ) : (
-          <div
-            style={{
-              borderRadius: "50%",
-              overflow: "hidden",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              backgroundColor: "white",
-            }}
-          >
-            <FaCircleUser
-              style={{
-                width: "100%",
-                height: "100%",
-                color: "grey",
-              }}
-            />
-          </div>
-        )}
-      </div>
-      <h1>{userInfo?.name}</h1>
-      {String(user?._id) !== String(userId) && (
-        <>
-          {friendshipStatus === "pending" &&
-            friendList.find(
-              (item) =>
-                String(item.senderId) === String(user._id) &&
-                String(item.receiverId) === String(userId)
-            ) && <button disabled={true}>Request Sent</button>}
-          {friendshipStatus === "pending" &&
-            friendList.find(
-              (item) =>
-                String(item.receiverId) === String(user?._id) &&
-                String(item.senderId) === String(userId)
-            ) && (
-              <div>
-                <button
-                  type="button"
-                  data-response="accept"
-                  disabled={isProcessing}
-                  onClick={handleProcessRequest}
-                >
-                  Accept
-                </button>
-                <button
-                  type="button"
-                  data-response="decline"
-                  disabled={isProcessing}
-                  onClick={handleProcessRequest}
-                >
-                  Decline
-                </button>
-              </div>
-            )}
-          {friendshipStatus === "accepted" && (
-            <div>
-              <select
-                name="friendshipStatus"
-                id="friendshipStatus"
-                defaultValue="friends"
-                onChange={handleStatusChange}
-                ref={selectRef}
-              >
-                <option value="friends" hidden>
-                  Friends
-                </option>
-                <option value="unfriend">Unfriend</option>
-                <option value="block">Block</option>
-              </select>
-            </div>
-          )}
-          {modalOpen && (
-            <div className="modal">
-              <p>
-                Are you sure you want to {actionToConfirm} {userInfo?.name}?
-              </p>
-              <div>
-                <button onClick={handleConfirmAction}>Yes</button>
-                <button onClick={handleCancelAction}>No</button>
-              </div>
-            </div>
-          )}
-          {!isLoading && friendshipStatus === null && !modalOpen && (
-            <div>
-              <button type="button" onClick={handleSend}>
-                Add Friend
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setModalOpen(true);
-                  setActionToConfirm("block");
+    <div className="user__profile-container">
+      <div
+        className="user__profile-top__box
+      "
+      >
+        <div>
+          <div className="avatar-wrapper">
+            {userInfo?.avatar ? (
+              <img
+                src={userInfo?.avatar}
+                alt="user avatar"
+                style={{
+                  width: "80px",
+                  height: "80px",
+                  borderRadius: "50%",
+                  objectFit: "cover",
+                }}
+              />
+            ) : (
+              <div
+                style={{
+                  borderRadius: "50%",
+                  overflow: "hidden",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: "white",
                 }}
               >
-                Block User
-              </button>
-            </div>
-          )}
-        </>
-      )}
-      {String(user?._id) === String(userId) && (
-        <>
+                <FaCircleUser
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    color: "grey",
+                  }}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+
+        <h1>{userInfo?.name}</h1>
+        <h2>Classroom Space</h2>
+
+        {String(user?._id) === String(userId) && (
           <button
             type="button"
             onClick={() => {
@@ -317,6 +246,92 @@ function UserProfile() {
           >
             Edit Account Info
           </button>
+        )}
+        {String(user?._id) !== String(userId) && (
+          <>
+            {friendshipStatus === "pending" &&
+              friendList.find(
+                (item) =>
+                  String(item.senderId) === String(user._id) &&
+                  String(item.receiverId) === String(userId)
+              ) && <button disabled={true}>Request Sent</button>}
+            {friendshipStatus === "pending" &&
+              friendList.find(
+                (item) =>
+                  String(item.receiverId) === String(user?._id) &&
+                  String(item.senderId) === String(userId)
+              ) && (
+                <div>
+                  <button
+                    type="button"
+                    data-response="accept"
+                    disabled={isProcessing}
+                    onClick={handleProcessRequest}
+                  >
+                    Accept
+                  </button>
+                  <button
+                    type="button"
+                    data-response="decline"
+                    disabled={isProcessing}
+                    onClick={handleProcessRequest}
+                  >
+                    Decline
+                  </button>
+                </div>
+              )}
+            {friendshipStatus === "accepted" && (
+              <div>
+                <select
+                  name="friendshipStatus"
+                  id="friendshipStatus"
+                  defaultValue="friends"
+                  onChange={handleStatusChange}
+                  ref={selectRef}
+                >
+                  <option value="friends" hidden>
+                    Friends
+                  </option>
+                  <option value="unfriend">Unfriend</option>
+                  <option value="block">Block</option>
+                </select>
+              </div>
+            )}
+            {modalOpen && (
+              <div className="modal">
+                <p>
+                  Are you sure you want to {actionToConfirm} {userInfo?.name}?
+                </p>
+                <div>
+                  <button onClick={handleConfirmAction}>Yes</button>
+                  <button onClick={handleCancelAction}>No</button>
+                </div>
+              </div>
+            )}
+            {!isLoading && friendshipStatus === null && !modalOpen && (
+              <div>
+                <button type="button" onClick={handleSend}>
+                  Add Friend
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setModalOpen(true);
+                    setActionToConfirm("block");
+                  }}
+                >
+                  Block User
+                </button>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+      <div
+        className="user__profile-bottom__box
+      "
+      >
+        <div>
           {friendList.length ? (
             <div>
               <p>{user?.name?.split(" ")[0]}&apos;s friends</p>
@@ -389,8 +404,11 @@ function UserProfile() {
           ) : (
             <p>Friend list is empty</p>
           )}
-        </>
-      )}
+        </div>
+        <div>
+          <p>Quiz Score Records</p>
+        </div>
+      </div>
     </div>
   );
 }
