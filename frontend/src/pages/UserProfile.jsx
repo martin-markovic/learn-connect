@@ -199,14 +199,14 @@ function UserProfile() {
       "
       >
         <div>
-          <div className="avatar-wrapper">
+          <div className="user__profile-avatar">
             {userInfo?.avatar ? (
               <img
                 src={userInfo?.avatar}
                 alt="user avatar"
                 style={{
-                  width: "80px",
-                  height: "80px",
+                  width: "90px",
+                  height: "90px",
                   borderRadius: "50%",
                   objectFit: "cover",
                 }}
