@@ -336,57 +336,41 @@ function UserProfile() {
       >
         <div className="user__profile-bottom__box-content">
           {friendList.length ? (
-            <div>
-              <p>{user?.name?.split(" ")[0]}&apos;s friends</p>
-              {friendList.map((friend, index) =>
-                friend?.status === "accepted" ? (
-                  <div
-                    title={`visit ${
-                      friend?.senderId === user?._id
-                        ? friend?.receiverName?.split(" ")[0]
-                        : friend.senderName?.split(" ")[0]
-                    }'s profile`}
-                    className="clickable"
-                    key={`friend-${index}`}
-                    onClick={() => {
-                      navigate(
-                        `/profile/${
-                          friend?.senderId === user?._id
-                            ? friend?.receiverId
-                            : friend?.senderId
-                        }`
-                      );
-                    }}
-                  >
-                    {(
-                      friend?.senderId === user?._id
-                        ? friend?.receiverAvatar
-                        : friend?.senderAvatar
-                    ) ? (
-                      <img
-                        alt="user avatar"
-                        src={
-                          friend?.senderId === user?._id
-                            ? friend?.receiverAvatar
-                            : friend?.senderAvatar
-                        }
-                        style={{
-                          width: "40px",
-                          height: "40px",
-                          borderRadius: "50%",
-                          objectFit: "cover",
-                        }}
-                      />
-                    ) : (
-                      <div
-                        style={{
-                          width: "40px",
-                          height: "40px",
-                          borderRadius: "50%",
-                          background: "white",
-                        }}
-                      >
-                        <FaCircleUser
+            <div className="user__profile-friendlist-container">
+              <h4>{user?.name?.split(" ")[0]}&apos;s friends</h4>
+              <ul className="user__profile-list">
+                {friendList.map((friend, index) =>
+                  friend?.status === "accepted" ? (
+                    <li
+                      title={`visit ${
+                        friend?.senderId === user?._id
+                          ? friend?.receiverName?.split(" ")[0]
+                          : friend.senderName?.split(" ")[0]
+                      }'s profile`}
+                      className="user__profile-list__entry list__item-friend clickable"
+                      key={`friend-${index}`}
+                      onClick={() => {
+                        navigate(
+                          `/profile/${
+                            friend?.senderId === user?._id
+                              ? friend?.receiverId
+                              : friend?.senderId
+                          }`
+                        );
+                      }}
+                    >
+                      {(
+                        friend?.senderId === user?._id
+                          ? friend?.receiverAvatar
+                          : friend?.senderAvatar
+                      ) ? (
+                        <img
+                          alt="user avatar"
+                          src={
+                            friend?.senderId === user?._id
+                              ? friend?.receiverAvatar
+                              : friend?.senderAvatar
+                          }
                           style={{
                             height: "100%",
                             width: "100%",
