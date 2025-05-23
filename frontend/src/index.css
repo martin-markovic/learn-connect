@@ -590,6 +590,17 @@ li {
   width: 27%;
   height: 40%;
   max-height: 40%;
+.quiz__entry-scores {
+  width: 100%;
+}
+
+.quiz__entry-scores-item {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 90%;
+  padding-left: 7px;
+}
 form {
   display: flex;
   flex-direction: column;

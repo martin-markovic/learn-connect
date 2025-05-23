@@ -50,7 +50,7 @@ function UserProfile() {
     if (friendshipStatus === "accepted" || userId === user?._id) {
       dispatch(getExamScores(userId));
     }
-  }, [friendshipStatus, userId, user?._id]);
+  }, [friendshipStatus, userId, user?._id, dispatch]);
 
   useEffect(() => {
     const selectedUser = userList.find((person) => person._id === userId);
@@ -372,21 +372,39 @@ function UserProfile() {
                               : friend?.senderAvatar
                           }
                           style={{
-                            height: "100%",
-                            width: "100%",
-                            color: "grey",
+                            width: "60px",
+                            height: "60px",
+                            borderRadius: "50%",
+                            objectFit: "cover",
                           }}
                         />
-                      </div>
-                    )}
-                    <p>
-                      {friend?.senderId === user?._id
-                        ? friend?.receiverName
-                        : friend?.senderName}
-                    </p>
-                  </div>
-                ) : null
-              )}
+                      ) : (
+                        <div
+                          style={{
+                            width: "60px",
+                            height: "60px",
+                            borderRadius: "50%",
+                            background: "white",
+                          }}
+                        >
+                          <FaCircleUser
+                            style={{
+                              height: "100%",
+                              width: "100%",
+                              color: "grey",
+                            }}
+                          />
+                        </div>
+                      )}
+                      <p style={{ width: "100%", textAlign: "center" }}>
+                        {friend?.senderId === user?._id
+                          ? friend?.receiverName
+                          : friend?.senderName}
+                      </p>
+                    </li>
+                  ) : null
+                )}
+              </ul>
             </div>
           ) : (
             <p>Friend list is empty</p>
@@ -394,23 +412,29 @@ function UserProfile() {
         </div>
         <div className="user__profile-bottom__box-content">
           <p>Quiz Score Records</p>
-          <div>
+          <ul>
             {examScores[userId]?.length ? (
               examScores[userId]?.map((entry) => {
                 return (
-                  <div key={entry?._id}>
-                    <span>{entry?.quiz?.title}</span>
-                    <p>
-                      <span>Latest score{entry?.latestScore}</span>
-                      <span>High score{entry?.highScore}</span>
-                    </p>
-                  </div>
+                  <li key={entry?._id}>
+                    <p>{entry?.quiz?.title}</p>
+                    <div className="quiz__entry-scores">
+                      <div className="quiz__entry-scores-item">
+                        <div>Last score:</div>
+                        <div>{entry?.latestScore}</div>
+                      </div>
+                      <div className="quiz__entry-scores-item">
+                        <div>High score:</div>
+                        <div>{entry?.highScore}</div>
+                      </div>
+                    </div>
+                  </li>
                 );
               })
             ) : (
               <p>User has no quiz records</p>
             )}
-          </div>
+          </ul>
         </div>
       </div>
     </div>
