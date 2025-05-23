@@ -411,13 +411,16 @@ function UserProfile() {
           )}
         </div>
         <div className="user__profile-bottom__box-content">
-          <p>Quiz Score Records</p>
-          <ul>
+          <h4>Quiz Score Records</h4>
+          <ul className="user__profile-list">
             {examScores[userId]?.length ? (
               examScores[userId]?.map((entry) => {
                 return (
-                  <li key={entry?._id}>
-                    <p>{entry?.quiz?.title}</p>
+                  <li
+                    className="user__profile-list__entry list__item-quiz"
+                    key={entry?._id}
+                  >
+                    <p className="quiz__entry-title">{entry?.quiz?.title}</p>
                     <div className="quiz__entry-scores">
                       <div className="quiz__entry-scores-item">
                         <div>Last score:</div>

@@ -590,6 +590,31 @@ li {
   width: 27%;
   height: 40%;
   max-height: 40%;
+}
+
+.list__item-quiz {
+  display: flex;
+  flex-direction: column;
+  justify-content: baseline;
+  align-items: center;
+  max-width: 27%;
+  width: 27%;
+  height: 45%;
+  max-height: 45%;
+}
+
+.list__item-quiz span {
+  width: 100%;
+}
+
+.quiz__entry-title {
+  text-align: center;
+  width: 100%;
+  font-weight: 500;
+  word-break: normal;
+  margin-bottom: 0.6em;
+}
+
 .quiz__entry-scores {
   width: 100%;
 }
@@ -601,6 +626,7 @@ li {
   width: 90%;
   padding-left: 7px;
 }
+
 form {
   display: flex;
   flex-direction: column;
