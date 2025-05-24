@@ -236,7 +236,6 @@ function UserProfile() {
 
         <section>
           <h1>{userInfo?.name}</h1>
-          <h2>Classroom Space</h2>
         </section>
         {String(user?._id) === String(userId) && (
           <button
@@ -337,7 +336,7 @@ function UserProfile() {
         <div className="user__profile-bottom__box-content">
           {friendList.length ? (
             <div className="user__profile-friendlist-container">
-              <h4>{user?.name?.split(" ")[0]}&apos;s friends</h4>
+              <h4>Friends</h4>
               <ul className="user__profile-list">
                 {friendList.map((friend, index) =>
                   friend?.status === "accepted" ? (
@@ -411,7 +410,10 @@ function UserProfile() {
           )}
         </div>
         <div className="user__profile-bottom__box-content">
-          <h4>Quiz Score Records</h4>
+          <h2>Classroom Space</h2>
+        </div>
+        <div className="user__profile-bottom__box-content">
+          <h4>Recent Quiz Scores</h4>
           <ul className="user__profile-list">
             {examScores[userId]?.length ? (
               examScores[userId]?.map((entry) => {
