@@ -154,14 +154,22 @@ function UserForm({ setIsEditing, userDetails }) {
                   src={avatarPreview}
                   alt="new avatar preview"
                   style={{
-                    width: "80px",
-                    height: "80px",
+                    width: "140px",
+                    height: "140px",
                     borderRadius: "50%",
                     objectFit: "cover",
                   }}
                 />
               ) : (
-                <FaCircleUser />
+                <FaCircleUser
+                  style={{
+                    width: "140px",
+                    height: "140px",
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                    color: "grey",
+                  }}
+                />
               )}
               <button
                 type="button"
@@ -197,7 +205,15 @@ function UserForm({ setIsEditing, userDetails }) {
               }}
             />
           ) : (
-            <FaCircleUser />
+            <FaCircleUser
+              style={{
+                width: "140px",
+                height: "140px",
+                borderRadius: "50%",
+                objectFit: "cover",
+                color: "grey",
+              }}
+            />
           )}
 
           <label className="upload-button clickable">
@@ -258,11 +274,11 @@ function UserForm({ setIsEditing, userDetails }) {
             </>
           ) : (
             <div className="edit__info-entry-container">
-              <p>
+              <h2>
                 {pendingChanges?.name
                   ? pendingChanges?.name
                   : userDetails?.name}
-              </p>
+              </h2>
               <button name="name" type="button" onClick={handleEdit}>
                 Change Name
               </button>
@@ -397,7 +413,7 @@ function UserForm({ setIsEditing, userDetails }) {
           <input
             type="submit"
             onClick={handleSubmit}
-            value="Save changes"
+            value="Save"
             disabled={
               Object.values(pendingChanges).length === 0 ||
               Object.keys(pendingChanges).every(
@@ -411,7 +427,7 @@ function UserForm({ setIsEditing, userDetails }) {
               setIsEditing(false);
             }}
           >
-            Go Back
+            Back
           </button>
         </div>
       </form>
