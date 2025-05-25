@@ -14,13 +14,16 @@ body {
   width: 100vw;
   display: flex;
   flex-direction: column;
+  justify-content: baseline;
+  gap: 1em;
+  align-items: center;
 }
 
 header {
-  display: inherit;
+  display: flex;
   flex-direction: row;
   justify-content: end;
-  margin: 3rem 3rem 0;
+  margin: 2rem 2rem 0 0;
   width: 80%;
 }
 
@@ -32,6 +35,33 @@ header ul {
   cursor: pointer;
 }
 
+#login-form,
+#register-form {
+  height: 100%;
+  width: 35%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 3em;
+}
+
+#register-form {
+  gap: 2.5em;
+  width: 45%;
+}
+
+.auth-form-input_group {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.auth-form-input_group input {
+  padding-left: 1em;
+}
+
 .nav-buttons {
   display: flex;
   flex-direction: row;
@@ -41,14 +71,18 @@ header ul {
 }
 
 .container {
+  height: 50%;
+  width: 50%;
   margin-top: 5rem;
   display: inherit;
   justify-content: center;
 }
 
 .avatar {
+  width: 100%;
   display: flex;
   flex-direction: row;
+  justify-content: space-between;
   align-items: center;
   gap: 1rem;
 }
@@ -241,7 +275,6 @@ li {
 .content__scrollable-wrapper {
   display: flex;
   flex-direction: column;
-  border: 1px solid black;
   height: 100%;
   max-height: 100%;
   overflow-y: hidden;
@@ -685,7 +718,7 @@ li {
   justify-content: center;
   align-items: center;
   margin-top: 2em;
-  gap: 1.5em;
+  gap: 2em;
 }
 
 .edit__info-entry-container {
@@ -708,7 +741,9 @@ li {
   height: 116.29px;
 }
 
-.edit__info-input {
+.edit__info-input,
+.auth-input,
+.auth-form-input_group input {
   box-sizing: border-box;
   border: 2px solid transparent;
   border-bottom: 2px solid rgb(172, 172, 172);
@@ -719,7 +754,9 @@ li {
   padding-left: 0;
 }
 
-.edit__info-input:focus {
+.edit__info-input:focus,
+.auth-input:focus,
+.auth-form-input_group input:focus {
   border-bottom: 2px solid rgba(0, 0, 0, 0.596);
   box-shadow: 0 2px 0 0 rgba(0, 0, 0, 0.438);
 }
@@ -755,16 +792,6 @@ li {
   height: 80%;
   width: 20%;
   padding: 2px;
-}
-
-form {
-  display: flex;
-  flex-direction: column;
-}
-
-form input {
-  margin: 0.5rem 0;
-  padding: 0.25rem 0 0.25rem 0.55rem;
 }
 
 code {
