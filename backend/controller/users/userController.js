@@ -24,13 +24,10 @@ export const registerUser = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    const avatar = req.file?.path || null;
-
     const user = await User.create({
       name,
       email,
       password: hashedPassword,
-      avatar,
     });
 
     if (!user) {
@@ -44,7 +41,6 @@ export const registerUser = async (req, res) => {
       _id: user.id,
       name: user.name,
       email: user.email,
-      avatar: user.avatar,
       token: generateToken(user._id),
     });
   } catch (error) {
