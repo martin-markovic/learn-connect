@@ -144,18 +144,11 @@ function UserForm({ setIsEditing, userDetails }) {
   };
 
   return (
-    <div>
-      <form
-        onSubmit={handleSubmit}
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-        }}
-      >
-        <div className="avatar-wrapper">
+    <div className="user__profile-update">
+      <form onSubmit={handleSubmit}>
+        <div className="edit__info-avatar-container">
           {editInfo.avatar ? (
-            <>
+            <div>
               {formData?.avatar ? (
                 <img
                   src={avatarPreview}
@@ -191,7 +184,7 @@ function UserForm({ setIsEditing, userDetails }) {
               >
                 Cancel
               </button>
-            </>
+            </div>
           ) : avatarPreview ? (
             <img
               src={avatarPreview}
@@ -221,13 +214,7 @@ function UserForm({ setIsEditing, userDetails }) {
           </label>
         </div>
 
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-          }}
-        >
+        <div className="edit__info-input__group-container">
           {editInfo.name ? (
             <>
               <input
@@ -270,7 +257,7 @@ function UserForm({ setIsEditing, userDetails }) {
               </button>
             </>
           ) : (
-            <>
+            <div className="edit__info-entry-container">
               <p>
                 {pendingChanges?.name
                   ? pendingChanges?.name
@@ -279,7 +266,7 @@ function UserForm({ setIsEditing, userDetails }) {
               <button name="name" type="button" onClick={handleEdit}>
                 Change Name
               </button>
-            </>
+            </div>
           )}
 
           {editInfo?.email ? (
@@ -324,7 +311,7 @@ function UserForm({ setIsEditing, userDetails }) {
               </button>
             </>
           ) : (
-            <>
+            <div className="edit__info-entry-container">
               <p>
                 {pendingChanges?.email
                   ? pendingChanges?.email
@@ -333,7 +320,7 @@ function UserForm({ setIsEditing, userDetails }) {
               <button name="email" type="button" onClick={handleEdit}>
                 Change Email
               </button>
-            </>
+            </div>
           )}
 
           {editInfo?.password ? (
@@ -398,13 +385,15 @@ function UserForm({ setIsEditing, userDetails }) {
               </button>
             </>
           ) : (
-            <button type="button" name="password" onClick={handleEdit}>
-              Change Password
-            </button>
+            <div className="edit__info-entry-container password-container">
+              <button type="button" name="password" onClick={handleEdit}>
+                Change Password
+              </button>
+            </div>
           )}
         </div>
 
-        <div>
+        <div className="edit__info-confirm__buttons">
           <input
             type="submit"
             onClick={handleSubmit}

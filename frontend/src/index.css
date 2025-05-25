@@ -639,6 +639,71 @@ li {
   padding-left: 7px;
 }
 
+.user__profile-update {
+  width: 80%;
+  height: 80%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.user__profile-update form {
+  width: 50%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 1.5em;
+}
+
+.edit__info-avatar-container {
+  position: relative;
+  width: 140px;
+  height: 140px;
+}
+
+.edit__info-input__group-container {
+  width: 100%;
+  height: 45%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-top: 2em;
+  gap: 1.5em;
+}
+
+.edit__info-entry-container {
+  width: 80%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.password-container {
+  height: 35%;
+}
+
+.edit__info-confirm__buttons {
+  height: auto;
+  width: 50%;
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: space-around;
+  align-items: center;
+  margin: 2.5em 0;
+}
+
+.edit__info-confirm__buttons input,
+.edit__info-confirm__buttons button {
+  height: 80%;
+  width: 20%;
+  padding: 2px;
+}
+
 form {
   display: flex;
   flex-direction: column;
