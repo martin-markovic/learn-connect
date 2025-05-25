@@ -696,8 +696,48 @@ li {
   align-items: center;
 }
 
+.entry-name {
+  height: 71.81px;
+}
+
+.entry-email {
+  height: 53px;
+}
+
+.entry-password {
+  height: 116.29px;
+}
+
+.edit__info-input {
+  box-sizing: border-box;
+  border: 2px solid transparent;
+  border-bottom: 2px solid rgb(172, 172, 172);
+  outline: none;
+  font-size: 16px;
+  transition: font-size 0.3s ease;
+  transition: box-shadow 0.3s ease;
+  padding-left: 0;
+}
+
+.edit__info-input:focus {
+  border-bottom: 2px solid rgba(0, 0, 0, 0.596);
+  box-shadow: 0 2px 0 0 rgba(0, 0, 0, 0.438);
+}
+
 .password-container {
   height: 35%;
+  width: 80%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.edit-password-container {
+  display: flex;
+  flex-direction: column;
+  height: 116.28px;
+  justify-content: space-between;
 }
 
 .edit__info-confirm__buttons {

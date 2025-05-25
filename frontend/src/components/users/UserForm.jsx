@@ -232,8 +232,9 @@ function UserForm({ setIsEditing, userDetails }) {
 
         <div className="edit__info-input__group-container">
           {editInfo.name ? (
-            <>
+            <div className="edit__info-entry-container entry-name">
               <input
+                className="edit__info-input"
                 type="text"
                 name="name"
                 onChange={handleChange}
@@ -271,7 +272,7 @@ function UserForm({ setIsEditing, userDetails }) {
               >
                 Cancel
               </button>
-            </>
+            </div>
           ) : (
             <div className="edit__info-entry-container">
               <h2>
@@ -286,8 +287,9 @@ function UserForm({ setIsEditing, userDetails }) {
           )}
 
           {editInfo?.email ? (
-            <>
+            <div className="edit__info-entry-container entry-email">
               <input
+                className="edit__info-input"
                 type="email"
                 name="email"
                 onChange={handleChange}
@@ -325,7 +327,7 @@ function UserForm({ setIsEditing, userDetails }) {
               >
                 Cancel
               </button>
-            </>
+            </div>
           ) : (
             <div className="edit__info-entry-container">
               <p>
@@ -340,24 +342,28 @@ function UserForm({ setIsEditing, userDetails }) {
           )}
 
           {editInfo?.password ? (
-            <>
-              <input
-                type="password"
-                name="password"
-                onChange={handleChange}
-                value={formData?.password || ""}
-                placeholder="new password"
-                minLength={8}
-              />
+            <div className="edit__info-entry-container entry-password">
+              <div className="edit-password-container">
+                <input
+                  className="edit__info-input"
+                  type="password"
+                  name="password"
+                  onChange={handleChange}
+                  value={formData?.password || ""}
+                  placeholder="new password"
+                  minLength={8}
+                />
 
-              <input
-                type="password"
-                name="password2"
-                onChange={handleChange}
-                value={formData?.password2 || ""}
-                placeholder="confirm password"
-                minLength={8}
-              />
+                <input
+                  className="edit__info-input"
+                  type="password"
+                  name="password2"
+                  onChange={handleChange}
+                  value={formData?.password2 || ""}
+                  placeholder="confirm password"
+                  minLength={8}
+                />
+              </div>
               <button
                 name="password"
                 type="button"
@@ -399,9 +405,9 @@ function UserForm({ setIsEditing, userDetails }) {
               >
                 Cancel
               </button>
-            </>
+            </div>
           ) : (
-            <div className="edit__info-entry-container password-container">
+            <div className="password-container">
               <button type="button" name="password" onClick={handleEdit}>
                 Change Password
               </button>
