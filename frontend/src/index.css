@@ -164,37 +164,53 @@ li {
 
 .dashboard-right__box {
   flex: 2;
+.classroom-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  gap: 1em;
 }
 
 .dashboard-user__info {
+.classroom-user {
+  height: 20%;
+  width: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  width: 25%;
+  gap: 1em;
 }
 
 .left__box-top {
   flex: 1;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
+.classroom-user button {
+  width: 50%;
 }
 
+.classroom__enroll-dropdown {
+  width: 60%;
+  height: 100%;
+  margin-top: 0.5em;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
 
-  .classroom__enroll-dropdown {
-    width: 60%;
-    height: 100%;
-    margin-top: 0.5em;
-    margin-bottom: auto;
-  }
+.classroom__details-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 2em;
+}
 
-  .clasroom__enroll__dropdown-items {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    width: 100%;
-  }
 
   .classroom__enroll__dropdown-items select {
     margin-top: 0.3em;
@@ -238,23 +254,56 @@ li {
     margin-top: 0.7em;
     margin-bottom: 0;
   }
-
-  overflow: hidden;
-}
-
-.right-box {
+.classroom__enroll__dropdown-items {
   display: flex;
   flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  width: 100%;
+  height: 75%;
+  gap: 2em;
+}
+
+.classroom__enroll__dropdown-items select {
+  margin-top: 0.3em;
+  width: 50%;
+}
+
+.classroom__enroll-details {
+  width: 100%;
+  height: 80%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
 }
 
 .right__box-top,
 .right__box-botom {
   flex: 1;
+.classroom__info-container {
+  width: 100%;
+  height: 100%;
+}
+
+.classroom__info-container div {
+  width: 100%;
+  height: 40%;
   display: flex;
   flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 1em;
 }
 .user-info {
   height: 30%;
+
+.classroom__enroll-buttons {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  width: 100%;
+  gap: 1em;
 }
 .notifications {
   flex-grow: 1;
