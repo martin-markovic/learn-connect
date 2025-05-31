@@ -88,44 +88,93 @@ function Classroom() {
       <div className="classroom__enroll-dropdown">
         {isLoading ? (
           <p>Loading classrooms...</p>
-        ) : classroomList.length === 0 ? (
-          <p>No classrooms available.</p>
         ) : (
-          <div>
-            <span>
-              {userClassroom
-                ? `Current classroom: ${userClassroom?.name}`
-                : "User is not enrolled in classroom"}
-            </span>
+          <div className="classroom__details-container">
+            <div className="classroom-user">
+              <h4>
+                {userClassroom
+                  ? `Classroom: ${userClassroom?.name}`
+                  : "User is not enrolled in classroom"}
+              </h4>
 
-            <div className="clasroom__enroll__dropdown-items">
-              <span>Select a Classroom:</span>
-              <select
-                id="classroom-select"
-                value={selectedClassroom}
-                onChange={handleChange}
-              >
-                <option value="" disabled></option>
-                {classroomList.map((classroom) => (
-                  <option
-                    key={`classroom-${classroom?._id}`}
-                    value={classroom?._id}
-                  >
-                    {classroom?.name}
-                  </option>
-                ))}
-              </select>
+              {userClassroom && (
+                <button type="button" onClick={handleLeaveClassroom}>
+                  Leave Classroom
+                </button>
+              )}
             </div>
+
+            {classroomList.length === 0 ? (
+              <p>No classrooms available.</p>
+            ) : (
+              <div className="classroom__enroll__dropdown-items">
+                <select
+                  id="classroom-select"
+                  value={selectedClassroom}
+                  onChange={handleChange}
+                >
+                  <option value="" disabled>
+                    Select a Classroom
+                  </option>
+                  {classroomList.map((classroom) => (
+                    <option
+                      key={`classroom-${classroom?._id}`}
+                      value={classroom?._id}
+                    >
+                      {classroom?.name}
+                    </option>
+                  ))}
+                </select>
+                <div className="classroom__enroll-details">
+                  {selectedClassroom &&
+                    selectedClassroom !== userClassroom?._id && (
+                      <div className="classroom__info-container">
+                        {classroomList.map((classroom) => {
+                          const remainingSits =
+                            classroom?.limit - classroom?.students?.length;
+
+                          const classroomQuizAmount =
+                            classroom?.quizzes?.length;
+
+                          if (classroom._id === selectedClassroom) {
+                            return (
+                              <div key={classroom?._id}>
+                                <span>Subject: {classroom?.subject}</span>
+                                <span>
+                                  {remainingSits > 0
+                                    ? `${remainingSits} seat${
+                                        remainingSits > 1 && "s"
+                                      } left`
+                                    : "Classroom is full"}
+                                </span>
+                                <span>
+                                  {classroomQuizAmount
+                                    ? `${classroomQuizAmount} ${
+                                        classroomQuizAmount > 1
+                                          ? "quizzes"
+                                          : "quiz"
+                                      } total`
+                                    : "No quizzes"}
+                                </span>
+                              </div>
+                            );
+                          }
+
+                          return null;
+                        })}
+
+                        <span className="classroom__enroll-buttons">
+                          <button type="button" onClick={handleJoinClassroom}>
+                            Enroll
+                          </button>
+                        </span>
+                      </div>
+                    )}
+                </div>
+              </div>
+            )}
           </div>
         )}
-      </div>
-      <div className="classroom__enroll-buttons">
-        <button type="button" onClick={handleJoinClassroom}>
-          Enroll
-        </button>
-        <button type="button" onClick={handleLeaveClassroom}>
-          Leave Classroom
-        </button>
       </div>
     </div>
   );

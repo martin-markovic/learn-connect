@@ -45,27 +45,33 @@ function Login() {
   return (
     <div className="container">
       <form id="login-form" onSubmit={handleSubmit}>
-        <label htmlFor="email">Your email</label>
-        <input
-          type="email"
-          name="email"
-          id="email"
-          placeholder="Your email"
-          autoComplete="email"
-          value={email}
-          onChange={handleInput}
-        />
-        <label htmlFor="password">Your password</label>
-        <input
-          type="password"
-          name="password"
-          id="password"
-          placeholder="Your password"
-          autoComplete="off"
-          minLength={8}
-          value={password}
-          onChange={handleInput}
-        />
+        <div className="auth-form-input_group">
+          <label>Email: </label>
+          <input
+            className="auth-input"
+            type="email"
+            name="email"
+            id="email"
+            placeholder="Your email"
+            autoComplete="email"
+            value={email}
+            onChange={handleInput}
+          />
+        </div>
+        <div className="auth-form-input_group">
+          <label>Password: </label>
+          <input
+            className="auth-input"
+            type="password"
+            name="password"
+            id="password"
+            placeholder="Your password"
+            autoComplete="off"
+            minLength={8}
+            value={password}
+            onChange={handleInput}
+          />
+        </div>
         <input style={{ marginTop: "1rem" }} type="submit" value="Login" />
       </form>
     </div>
