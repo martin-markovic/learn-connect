@@ -125,15 +125,13 @@ li {
 
 .dashboard-container {
   display: flex;
-  height: 100vh;
-  gap: 10px;
+  height: 100%;
+  width: 100%;
   flex-direction: row;
-  margin: 3em 2em;
+  justify-content: center;
+  align-items: flex-start;
+  margin-top: 5em;
   overflow: hidden;
-}
-
-.dashboard-notifications {
-  width: 25%;
 }
 
 .left-box,
@@ -142,17 +140,17 @@ li {
 }
 
 .left-box {
-  width: 30%;
+  width: 15%;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .right-box {
   display: flex;
   flex-direction: row;
-  width: 65%;
+  width: 75%;
 }
 
 .dashboard-classroom {
@@ -162,37 +160,33 @@ li {
   width: 100%;
 }
 
-.dashboard-right__box {
-  flex: 2;
 .classroom-container {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  align-items: center;
+  align-items: flex-start;
   width: 100%;
   height: 100%;
   gap: 1em;
 }
 
-.dashboard-user__info {
 .classroom-user {
   height: 20%;
   width: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
   gap: 1em;
 }
 
-.left__box-top {
-  flex: 1;
 .classroom-user button {
   width: 50%;
+  margin-left: 2em;
 }
 
 .classroom__enroll-dropdown {
-  width: 60%;
+  width: 100%;
   height: 100%;
   margin-top: 0.5em;
   display: flex;
@@ -207,58 +201,15 @@ li {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  align-items: center;
+  align-items: flex-start;
   gap: 2em;
 }
 
-
-  .classroom__enroll__dropdown-items select {
-    margin-top: 0.3em;
-    margin-left: 1em;
-  }
-
-  .classroom__enroll-buttons {
-    display: flex;
-  }
-
-  .classroom-container {
-    display: flex;
-    flex-direction: row;
-    max-height: 100px;
-    width: 55%;
-    margin-top: 2em;
-    margin-bottom: auto;
-    align-self: flex-end;
-    gap: 1em;
-  }
-
-  .classroom__enroll-dropdown {
-    width: 60%;
-    height: 100%;
-    margin-top: 0.5em;
-    margin-bottom: auto;
-  }
-
-  .clasroom__enroll__dropdown-items {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    width: 100%;
-  }
-
-  .classroom__enroll-buttons {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-around;
-    width: 35%;
-    margin-top: 0.7em;
-    margin-bottom: 0;
-  }
 .classroom__enroll__dropdown-items {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  align-items: center;
+  align-items: flex-start;
   width: 100%;
   height: 75%;
   gap: 2em;
@@ -267,6 +218,7 @@ li {
 .classroom__enroll__dropdown-items select {
   margin-top: 0.3em;
   width: 50%;
+  margin-left: 2em;
 }
 
 .classroom__enroll-details {
@@ -275,12 +227,9 @@ li {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  align-items: center;
+  align-items: flex-start;
 }
 
-.right__box-top,
-.right__box-botom {
-  flex: 1;
 .classroom__info-container {
   width: 100%;
   height: 100%;
@@ -292,27 +241,30 @@ li {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  align-items: center;
-  gap: 1em;
+  align-items: flex-start;
+  gap: 1.3em;
 }
-.user-info {
-  height: 30%;
 
 .classroom__enroll-buttons {
   display: flex;
   flex-direction: row;
   justify-content: center;
-  width: 100%;
+  width: 67%;
   gap: 1em;
+  margin: 1.3em 2em 0 0;
 }
-.notifications {
-  flex-grow: 1;
+
+.classroom__enroll-button button {
+  width: 50%;
+}
+
 .right__box-left {
   height: 100%;
-  width: 25%;
+  width: 30%;
   display: flex;
   flex-direction: column;
-  padding-top: 0.5em;
+  align-items: center;
+  gap: 2em;
 }
 
 .right__box-right {
@@ -321,26 +273,58 @@ li {
   width: 75%;
   flex-direction: column;
   justify-content: space-between;
-  align-items: flex-start;
-}
-  max-height: 70%;
-  overflow-y: auto;
-}
-
-.bottom-box {
-  justify-content: center;
+.notification-container {
   align-items: center;
 }
 
-.friend-search {
+.notification-container div {
+  width: 70%;
+  margin-left: 2.3em;
+}
+
+.friend__search-box {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  height: 55%;
+}
+
+.friend__search-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: flex-start;
+  height: 8%;
+}
+
+.result-list {
   max-height: 70%;
+  width: 175px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  transition: all 0.25s ease-in;
+}
+
+.result-list p {
+  width: 100%;
+  height: 22px;
+  text-align: center;
+  margin-top: 0.5em;
   overflow-y: auto;
 }
 
+.result-list p:hover {
+  background-color: rgb(235, 235, 235);
+}
+
+}
+
 .dashboard-notifications {
-  height: 25%;
-  align-self: center;
-  margin-left: 2em;
+  height: 30%;
+  width: 100%;
 }
 
 .dashboard-chat {

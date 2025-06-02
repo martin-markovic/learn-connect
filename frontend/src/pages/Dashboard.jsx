@@ -62,17 +62,15 @@ export default function Dashboard() {
       </div>
       <div className="right-box">
         <div className="right__box-left">
-          <FriendSearch />
-        </div>
-        <div className="right__box-right">
           <div className="dashboard-notifications">
             <UserNotifications />
           </div>
-          <div className="dashboard-chat">
-            <ChatProvider>
-              <Chat />
-            </ChatProvider>
-          </div>
+          <FriendSearch />
+        </div>
+        <div className="right__box-right">
+          <ChatProvider>
+            <Chat />
+          </ChatProvider>
         </div>
       </div>
     </main>

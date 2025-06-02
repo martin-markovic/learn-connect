@@ -55,7 +55,7 @@ function UserNotifications() {
   };
 
   return (
-    <div className="content__scrollable-wrapper">
+    <div className="content__scrollable-wrapper notification-container">
       <div>
         <span
           title={!newsOpen && "open notifications"}
