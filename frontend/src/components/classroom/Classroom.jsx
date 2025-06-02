@@ -139,15 +139,29 @@ function Classroom() {
                           if (classroom._id === selectedClassroom) {
                             return (
                               <div key={classroom?._id}>
-                                <span>Subject: {classroom?.subject}</span>
-                                <span>
+                                <span
+                                  style={{
+                                    marginLeft: "1em",
+                                  }}
+                                >
+                                  Subject: {classroom?.subject}
+                                </span>
+                                <span
+                                  style={{
+                                    marginLeft: "3em",
+                                  }}
+                                >
                                   {remainingSits > 0
                                     ? `${remainingSits} seat${
                                         remainingSits > 1 && "s"
                                       } left`
                                     : "Classroom is full"}
                                 </span>
-                                <span>
+                                <span
+                                  style={{
+                                    marginLeft: "3em",
+                                  }}
+                                >
                                   {classroomQuizAmount
                                     ? `${classroomQuizAmount} ${
                                         classroomQuizAmount > 1
