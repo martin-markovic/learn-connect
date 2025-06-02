@@ -260,10 +260,11 @@ li {
 
 .right__box-left {
   height: 100%;
-  width: 25%;
+  width: 30%;
   display: flex;
   flex-direction: column;
-  padding-top: 0.5em;
+  align-items: center;
+  gap: 2em;
 }
 
 .right__box-right {
@@ -272,6 +273,15 @@ li {
   width: 75%;
   flex-direction: column;
   justify-content: space-between;
+.notification-container {
+  align-items: center;
+}
+
+.notification-container div {
+  width: 70%;
+  margin-left: 2.3em;
+}
+
 .friend__search-box {
   display: flex;
   flex-direction: column;
@@ -306,22 +316,15 @@ li {
   overflow-y: auto;
 }
 
-.bottom-box {
-  justify-content: center;
-  align-items: center;
 .result-list p:hover {
   background-color: rgb(235, 235, 235);
 }
 
-.friend-search {
-  max-height: 70%;
-  overflow-y: auto;
 }
 
 .dashboard-notifications {
-  height: 25%;
-  align-self: center;
-  margin-left: 2em;
+  height: 30%;
+  width: 100%;
 }
 
 .dashboard-chat {
