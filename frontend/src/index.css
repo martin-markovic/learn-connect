@@ -164,7 +164,7 @@ li {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  align-items: center;
+  align-items: flex-start;
   width: 100%;
   height: 100%;
   gap: 1em;
@@ -177,7 +177,7 @@ li {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
   gap: 1em;
 }
 
@@ -185,10 +185,11 @@ li {
   flex: 1;
 .classroom-user button {
   width: 50%;
+  margin-left: 2em;
 }
 
 .classroom__enroll-dropdown {
-  width: 60%;
+  width: 100%;
   height: 100%;
   margin-top: 0.5em;
   display: flex;
@@ -203,58 +204,15 @@ li {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  align-items: center;
+  align-items: flex-start;
   gap: 2em;
 }
 
-
-  .classroom__enroll__dropdown-items select {
-    margin-top: 0.3em;
-    margin-left: 1em;
-  }
-
-  .classroom__enroll-buttons {
-    display: flex;
-  }
-
-  .classroom-container {
-    display: flex;
-    flex-direction: row;
-    max-height: 100px;
-    width: 55%;
-    margin-top: 2em;
-    margin-bottom: auto;
-    align-self: flex-end;
-    gap: 1em;
-  }
-
-  .classroom__enroll-dropdown {
-    width: 60%;
-    height: 100%;
-    margin-top: 0.5em;
-    margin-bottom: auto;
-  }
-
-  .clasroom__enroll__dropdown-items {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    width: 100%;
-  }
-
-  .classroom__enroll-buttons {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-around;
-    width: 35%;
-    margin-top: 0.7em;
-    margin-bottom: 0;
-  }
 .classroom__enroll__dropdown-items {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  align-items: center;
+  align-items: flex-start;
   width: 100%;
   height: 75%;
   gap: 2em;
@@ -263,6 +221,7 @@ li {
 .classroom__enroll__dropdown-items select {
   margin-top: 0.3em;
   width: 50%;
+  margin-left: 2em;
 }
 
 .classroom__enroll-details {
@@ -271,7 +230,7 @@ li {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .classroom__info-container {
@@ -285,8 +244,8 @@ li {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  align-items: center;
-  gap: 1em;
+  align-items: flex-start;
+  gap: 1.3em;
 }
 .user-info {
   height: 30%;
