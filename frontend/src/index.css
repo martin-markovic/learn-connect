@@ -353,14 +353,20 @@ li {
 .chat-closed
   border: 1px solid transparent;
 }
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
 
 .content__scrollable-wrapper {
   display: flex;
   flex-direction: column;
+  height: 100%;
+  max-height: 100%;
+  overflow-y: hidden;
+}
+
+.chat__display-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   height: 100%;
   max-height: 100%;
   overflow-y: hidden;
@@ -463,10 +469,35 @@ li {
 }
 
 .chat__display-close {
-  margin-top: 0.5em;
-  max-height: 35%;
+  margin-top: 1.2em;
+  margin-right: 1.5em;
+  max-height: 40%;
   color: white;
   background-color: red;
+  border: 1px solid white;
+  border-radius: 25%;
+}
+
+.chat-form {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  position: relative;
+  top: 2em;
+}
+
+.chat-form input {
+  width: 96.7%;
+  height: 2.5em;
+  padding-left: 1em;
+  border: 1px solid transparent;
+  border-top: 1px solid grey;
+}
+
+.chat-form button {
+  position: absolute;
+  top: 0.7em;
+  right: 1.5em;
 }
 
 .friendlist-container {
@@ -566,6 +597,11 @@ li {
 
 .message p {
   word-break: break-all;
+  text-align: center;
+}
+
+.chat__message-status {
+  margin-right: 1em;
 }
 
 .chat__icon {

@@ -317,7 +317,7 @@ const ChatDisplay = () => {
         <div ref={chatEndRef} />
       </div>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="chat-form">
         <input
           type="text"
           id="message"
