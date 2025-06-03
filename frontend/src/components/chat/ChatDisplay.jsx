@@ -166,15 +166,11 @@ const ChatDisplay = () => {
   };
 
   return (
-    <div ref={parentContainerRef} className="content__scrollable-wrapper">
+    <div ref={parentContainerRef} className="chat__display-container">
       <div className="chat__display-heading">
-        <div
-          className="chat__display__heading-text"
-        >
+        <div className="chat__display__heading-text">
           <span>Chat with </span>
-          <span
-            className="chat__display__heading-userinfo"
-          >
+          <span className="chat__display__heading-userinfo">
             <span
               style={{
                 width: "30px",
@@ -239,6 +235,14 @@ const ChatDisplay = () => {
                   <img
                     src={message?.senderAvatar}
                     alt="user avatar"
+                    style={{
+                      alignSelf:
+                        message?.senderId === user?._id
+                          ? "center"
+                          : "flex-start",
+                      marginLeft:
+                        message?.senderId === user?._id ? "2.8em" : "0",
+                    }}
                     className={`chat-avatar ${
                       message?.senderId === user?._id
                         ? "chat__item-sender"
@@ -247,24 +251,35 @@ const ChatDisplay = () => {
                   />
                 ) : (
                   <div
-                    className={`chat-avatar chat__icon  ${
-                      message?.senderId === user?._id
-                        ? "chat__item-sender"
-                        : "chat__item-receiver"
-                    }`}
+                    className="chat-avatar chat__icon"
+                    style={{
+                      alignSelf:
+                        message?.senderId === user?._id
+                          ? "flex-end"
+                          : "flex-start",
+                      marginRight:
+                        message?.senderId === user?._id ? "0.8em" : "0",
+                    }}
                   >
                     <FaCircleUser
                       style={{
                         width: "100%",
                         height: "100%",
                         color: "grey",
-                        alignSelf: "flex-end",
                       }}
                     />
                   </div>
                 )}
 
-                <span>
+                <span
+                  style={{
+                    alignSelf:
+                      message?.senderId === user?._id
+                        ? "flex-end"
+                        : "flex-start",
+                    paddingRight: message?.senderId === user?._id ? "1em" : "0",
+                  }}
+                >
                   <strong>
                     {message?.senderId === user?._id
                       ? "You"
@@ -273,17 +288,29 @@ const ChatDisplay = () => {
                   :{" "}
                 </span>
 
-                <p>{message?.text}</p>
+                <p
+                  style={{
+                    alignSelf:
+                      message?.senderId === user?._id
+                        ? "flex-end"
+                        : "flex-start",
+                    marginRight: message?.senderId === user?._id ? "1em" : "0",
+                  }}
+                >
+                  {message?.text}
+                </p>
                 {message.senderId === user?._id && (
-                  <span>{message?.isRead ? "read" : "sent"}</span>
+                  <span className="chat__message-status">
+                    {message?.isRead ? "read" : "sent"}
+                  </span>
                 )}
               </li>
             ))
           ) : (
-            <div style={{ alignSelf: "center", paddingTop: "10%" }}>
+            <div style={{ alignSelf: "center", paddingTop: "30%" }}>
               <span style={{ paddingLeft: "3em" }}>No messages.</span>
               <br />
-              New messages will show here.
+              New messages will appear here.
             </div>
           )}
         </ul>
