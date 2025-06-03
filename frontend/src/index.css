@@ -24,7 +24,7 @@ header {
   flex-direction: row;
   justify-content: end;
   margin: 2rem 2rem 0 0;
-  width: 80%;
+  width: 95%;
 }
 
 header ul {
@@ -270,9 +270,12 @@ li {
 .right__box-right {
   display: flex;
   height: 100%;
-  width: 75%;
-  flex-direction: column;
+  width: 70%;
+  flex-direction: column-reverse;
   justify-content: space-between;
+  align-items: center;
+}
+
 .notification-container {
   align-items: center;
 }
@@ -320,6 +323,12 @@ li {
   background-color: rgb(235, 235, 235);
 }
 
+.user-details {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-left: 5%;
 }
 
 .dashboard-notifications {
@@ -327,14 +336,39 @@ li {
   width: 100%;
 }
 
-.dashboard-chat {
-  height: 70%;
-  width: 100%;
-}
 .conversation {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
   height: 100%;
+  width: 100%;
+  gap: 2.5em;
+}
+
+.conversation-chat__list {
+  width: 35%;
+  height: 100%;
+}
+
+.conversation-chat__display {
+  height: 482px;
+  width: 52%;
+  overflow: hidden;
+  border-radius: 5% 5% 0 0;
+  border: 1px solid transparent;
+  margin-top: 1.1em;
+  transition: all 0.2s ease-in-out;
+}
+
+.chat-active,
+.friendlist-open {
+  border: 1px solid rgb(172, 172, 172);
+}
+
+.chat-closed,
+.friendlist-closed {
+  border: 1px solid transparent;
 }
 
 .content__scrollable-wrapper {
@@ -345,21 +379,31 @@ li {
   overflow-y: hidden;
 }
 
+.chat__display-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  max-height: 100%;
+  overflow-y: hidden;
+}
+
 .chatlist-container {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  height: 100%;
-  max-height: fit-content;
-  max-width: fit-content;
-  overflow: hidden;
+  height: 102%;
+  width: 100%;
+  margin-bottom: 5px;
 }
 
 .chatlist-container p {
-  background: #c3b1ee;
+  background: rgb(216, 214, 214);
   width: 100%;
   padding: 0.5em 0 0.7em 1em;
   font-weight: 500;
+  margin-bottom: 0;
+  margin-top: 0;
 }
 
 .chatlist__avatar-wrapper {
@@ -399,8 +443,8 @@ li {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  background: linear-gradient(180deg, #add8e6, #ffffff);
-  border: none;
+  background-color: rgb(216, 214, 214);
+  height: 3.5em;
 }
 
 .chat__display__heading-avatar {
@@ -442,58 +486,115 @@ li {
 }
 
 .chat__display-close {
-  margin-top: 0.5em;
-  max-height: 35%;
+  margin-top: 1.2em;
+  margin-right: 1.5em;
+  max-height: 40%;
   color: white;
   background-color: red;
+  border: 1px solid white;
+  border-radius: 25%;
+}
+
+.chat-form {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  position: relative;
+  top: 2em;
+}
+
+.chat-form input {
+  width: 96.7%;
+  height: 2.5em;
+  padding-left: 1em;
+  border: 1px solid transparent;
+  border-top: 1px solid grey;
+}
+
+.chat-form button {
+  position: absolute;
+  top: 0.7em;
+  right: 1.5em;
 }
 
 .friendlist-container {
-  padding-left: 2em;
   flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-end;
+  gap: 1.5em;
+  margin-top: 3em;
 }
 
 .friendlist__container-toggle {
   display: flex;
-  flex-direction: column;
-  justify-content: start;
-  align-items: start;
-  padding-left: 2em;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: flex-end;
+  width: 100%;
+  height: 8%;
+  gap: 3em;
+}
+
+.friendlist__container-toggle button {
+  height: 60%;
+  width: 100%;
+}
+
+.friendlist__container-toggle span {
+  width: 36%;
+  height: 100%;
 }
 
 .friendlist__container-wrapper {
   display: flex;
   align-items: start;
-  height: 100%;
-  width: 366px;
+  height: 482px;
+  width: 271px;
   min-width: 0;
-  padding-left: 1.5em;
+  border-radius: 5% 5% 0 0;
+  overflow: hidden;
+  transition: all 0.2s ease-in-out;
+}
+
+.friendlist__container-online {
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+  border-radius: 0%;
+  height: 482px;
+  width: 271px;
 }
 
 .friendlist {
   flex: 1;
   width: 100%;
   max-height: 50%;
-  overflow-y: scroll;
   list-style: none;
   padding: 0;
   margin: 0;
   min-width: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .friendlist li {
   position: relative;
-  padding: 5px;
-  border: 1px solid white;
+  padding: 0.5em 0 0.5em 1.5em;
+  border: 1px solid rgb(216, 214, 214);
+  border-left: 1px solid transparent;
   display: flex;
   flex-direction: row;
   align-items: center;
   gap: 6px;
+  width: 100%;
 }
 
 .friendlist li:hover {
-  border: 1px solid #e0d8f5;
-  background-color: #e0d8f5;
+  border: 1px solid rgb(216, 214, 214);
+  background-color: rgb(235, 235, 235);
 }
 
 .content__scrollable {
@@ -539,19 +640,24 @@ li {
   display: flex;
   flex-direction: column;
   margin-top: 1em;
-  max-width: 40%;
+  width: 35%;
   word-wrap: break-word;
 }
 
 .message p {
   word-break: break-all;
+  text-align: center;
+}
+
+.chat__message-status {
+  margin-right: 1em;
 }
 
 .chat__icon {
   overflow: hidden;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
   background-color: white;
 }
 
