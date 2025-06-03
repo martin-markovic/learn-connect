@@ -24,7 +24,7 @@ header {
   flex-direction: row;
   justify-content: end;
   margin: 2rem 2rem 0 0;
-  width: 80%;
+  width: 95%;
 }
 
 header ul {
@@ -270,9 +270,12 @@ li {
 .right__box-right {
   display: flex;
   height: 100%;
-  width: 75%;
-  flex-direction: column;
+  width: 70%;
+  flex-direction: column-reverse;
   justify-content: space-between;
+  align-items: center;
+}
+
 .notification-container {
   align-items: center;
 }
@@ -336,6 +339,12 @@ li {
   width: 100%;
   gap: 2.5em;
 }
+
+.conversation-chat__list {
+  width: 35%;
+  height: 100%;
+}
+
 .conversation-chat__display {
   height: 482px;
   width: 52%;
@@ -375,11 +384,9 @@ li {
 .chatlist-container {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  height: 100%;
-  max-height: fit-content;
-  max-width: fit-content;
-  overflow: hidden;
+  height: 102%;
+  width: 100%;
+  margin-bottom: 5px;
 }
 
 .chatlist-container p {
@@ -501,16 +508,25 @@ li {
 }
 
 .friendlist-container {
-  padding-left: 2em;
   flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-end;
+  gap: 1.5em;
+  margin-top: 3em;
 }
 
 .friendlist__container-toggle {
   display: flex;
-  flex-direction: column;
-  justify-content: start;
-  align-items: start;
-  padding-left: 2em;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: flex-end;
+  width: 100%;
+  height: 8%;
+  gap: 3em;
+}
 }
 
 .friendlist__container-wrapper {
