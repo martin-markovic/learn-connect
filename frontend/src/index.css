@@ -355,11 +355,13 @@ li {
   transition: all 0.2s ease-in-out;
 }
 
-.chat-active
+.chat-active,
+.friendlist-open {
   border: 1px solid rgb(172, 172, 172);
 }
 
-.chat-closed
+.chat-closed,
+.friendlist-closed {
   border: 1px solid transparent;
 }
 
@@ -532,10 +534,21 @@ li {
 .friendlist__container-wrapper {
   display: flex;
   align-items: start;
-  height: 100%;
-  width: 366px;
+  height: 482px;
+  width: 271px;
   min-width: 0;
-  padding-left: 1.5em;
+  border-radius: 5% 5% 0 0;
+  overflow: hidden;
+  transition: all 0.2s ease-in-out;
+}
+
+.friendlist__container-online {
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+  border-radius: 0%;
+  height: 482px;
+  width: 271px;
 }
 
 .friendlist {
