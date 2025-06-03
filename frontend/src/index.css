@@ -327,11 +327,32 @@ li {
   width: 100%;
 }
 
-.dashboard-chat {
-  height: 70%;
-  width: 100%;
-}
 .conversation {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  gap: 2.5em;
+}
+.conversation-chat__display {
+  height: 482px;
+  width: 52%;
+  overflow: hidden;
+  border-radius: 5% 5% 0 0;
+  border: 1px solid transparent;
+  margin-top: 1.1em;
+  transition: all 0.2s ease-in-out;
+}
+
+.chat-active
+  border: 1px solid rgb(172, 172, 172);
+}
+
+.chat-closed
+  border: 1px solid transparent;
+}
   display: flex;
   flex-direction: column;
   height: 100%;
