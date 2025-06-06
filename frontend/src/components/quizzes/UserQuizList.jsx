@@ -71,14 +71,14 @@ function UserQuizList() {
   ) : (
     <div className="user__quizzes-container">
       <button
+        style={{ height: "2.3em", width: "12%" }}
         onClick={() => {
           setEditQuiz(null);
           setOpenForm(true);
         }}
       >
-        Add New Quiz
+        Create New Quiz
       </button>
-
       {localQuizzes.length > 0 ? (
         <div className="quiz__entry__list-container">
           <div className="user__quiz__list-container">
@@ -87,6 +87,7 @@ function UserQuizList() {
               .map((quiz, index) => (
                 <div key={index} className="user__quiz__list-entry">
                   <p
+                    title={`Open ${quiz?.title}`}
                     onClick={() => {
                       navigate(`/quizzes/${quiz._id}`);
                     }}
@@ -95,10 +96,15 @@ function UserQuizList() {
                     {quiz.title}
                   </p>
                   <div className="entry__buttons-container">
-                    <button onClick={() => handleDelete(quiz._id)}>
+                    <button
+                      className="entry-delete"
+                      onClick={() => handleDelete(quiz._id)}
+                      title="Delete Quiz"
+                    >
                       Delete
                     </button>
                     <button
+                      type="button"
                       onClick={() => {
                         handleEdit(quiz);
                       }}
