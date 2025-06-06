@@ -9,11 +9,13 @@ import {
 } from "../../features/quizzes/quizSlice.js";
 import QuizForm from "./QuizForm.jsx";
 import socketEventManager from "../../features/socket/socket.eventManager.js";
+import { FaArrowAltCircleLeft, FaArrowAltCircleRight } from "react-icons/fa";
 
 function UserQuizList() {
   const [localQuizzes, setLocalQuizzes] = useState([]);
   const [openForm, setOpenForm] = useState(false);
   const [editQuiz, setEditQuiz] = useState(null);
+  const [curPage, setCurPage] = useState(1);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -80,28 +82,56 @@ function UserQuizList() {
       {localQuizzes.length > 0 ? (
         <div className="quiz__entry__list-container">
           <div className="user__quiz__list-container">
-            {localQuizzes.map((quiz, index) => (
-              <div key={index} className="user__quiz__list-entry">
-                <p
-                  onClick={() => {
-                    navigate(`/quizzes/${quiz._id}`);
-                  }}
-                  className="clickable"
-                >
-                  {quiz.title}
-                </p>
-                <div className="entry__buttons-container">
-                  <button onClick={() => handleDelete(quiz._id)}>Delete</button>
-                  <button
+            {localQuizzes
+              .slice((curPage - 1) * 9, curPage * 9)
+              .map((quiz, index) => (
+                <div key={index} className="user__quiz__list-entry">
+                  <p
                     onClick={() => {
-                      handleEdit(quiz);
+                      navigate(`/quizzes/${quiz._id}`);
                     }}
+                    className="clickable"
                   >
-                    Edit
-                  </button>
+                    {quiz.title}
+                  </p>
+                  <div className="entry__buttons-container">
+                    <button onClick={() => handleDelete(quiz._id)}>
+                      Delete
+                    </button>
+                    <button
+                      onClick={() => {
+                        handleEdit(quiz);
+                      }}
+                    >
+                      Edit
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+          </div>
+          <div className="user__quiz__pagination-container">
+            <div>
+              {curPage > 1 && (
+                <FaArrowAltCircleLeft
+                  className="clickable pagination-button"
+                  title="Previous Page"
+                  onClick={() => {
+                    setCurPage((prevState) => (prevState -= 1));
+                  }}
+                />
+              )}
+            </div>
+            <div>
+              {localQuizzes.length - curPage * 9 > 0 && (
+                <FaArrowAltCircleRight
+                  className="clickable pagination-button"
+                  title="Next Page"
+                  onClick={() => {
+                    setCurPage((prevState) => (prevState += 1));
+                  }}
+                />
+              )}
+            </div>
           </div>
         </div>
       ) : (
