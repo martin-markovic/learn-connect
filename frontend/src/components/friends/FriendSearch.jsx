@@ -97,8 +97,8 @@ export default function FriendSearch() {
     e.preventDefault();
   };
 
-  const handleVisit = (userId) => {
-    navigate(`/profile/${userId}`);
+  const handleVisit = (id, queryType) => {
+    navigate(`/${queryType}/${id}`);
   };
 
   return (
@@ -131,15 +131,71 @@ export default function FriendSearch() {
         {input.length >= 2 && resultList.length === 0 ? (
           <p>No matching users found.</p>
         ) : (
-          resultList.map((person) => (
-            <p
-              className="clickable"
-              key={person._id}
-              onClick={() => handleVisit(person._id)}
-            >
-              {person?.name}
-            </p>
-          ))
+          <div
+            style={{
+              overflowY: showAllResults ? "auto" : "visible",
+              width: "100%",
+              maxHeight: showAllResults ? "90%" : "none",
+              display: "flex",
+              flexDirection: "column",
+              gap: "0.5em",
+            }}
+          >
+            {resultList
+              .slice(0, showAllResults ? resultList.length : 4)
+              .map((entry) => (
+                <div>
+                  <div
+                    key={entry._id}
+                    onClick={() =>
+                      handleVisit(
+                        entry._id,
+                        entry?.name ? "profile" : "quizzes"
+                      )
+                    }
+                  >
+                    {entry?.name || entry?.title}
+                  </div>
+                  {entry?.name ? (
+                    <div>
+                      {" "}
+                      {entry?.avatar ? (
+                        <img
+                          src={entry?.avatar}
+                          alt="avatar"
+                          style={{ objectFit: "cover" }}
+                        />
+                      ) : (
+                        <FaUserCircle />
+                      )}
+                    </div>
+                  ) : null}
+                </div>
+              ))}
+            {resultList.length > 4 && !showAllResults ? (
+              <div>
+                <span>
+                  {resultList.length - 4} more result
+                  {resultList.length - 4 > 1 && "s"}
+                </span>
+                <button
+                  onClick={() => {
+                    setShowAllResults(true);
+                  }}
+                >
+                  Show
+                </button>
+              </div>
+            ) : null}
+            {showAllResults && (
+              <button
+                className="result__list-close"
+                onClick={() => setShowAllResults(false)}
+              >
+                Close
+              </button>
+            )}
+          </div>
         )}
       </div>
     </div>
