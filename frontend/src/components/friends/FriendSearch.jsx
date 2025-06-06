@@ -3,23 +3,71 @@ import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { getUserList, resetUserList } from "../../features/friend/friendSlice";
 import { FaSearch } from "react-icons/fa";
+import { FaSearch, FaUserCircle } from "react-icons/fa";
+import {
+  resetQuizzes,
+  getClassQuizzes,
+  getUserQuizzes,
+} from "../../features/quizzes/quizSlice";
 
 export default function FriendSearch() {
   const [input, setInput] = useState("");
   const [resultList, setResultList] = useState([]);
+  const [resultMap, setResultMap] = useState({ users: [], quizzes: [] });
+  const [showAllResults, setShowAllResults] = useState(false);
 
-  const { userList } = useSelector((state) => state.friends);
+  const { isLoading: userStateLoading, userList } = useSelector(
+    (state) => state.friends
+  );
+  const {
+    isLoading: quizStateLoading,
+    userQuizzes,
+    classQuizzes,
+  } = useSelector((state) => state.quizzes);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   useEffect(() => {
     dispatch(getUserList());
+    dispatch(getUserQuizzes());
+    dispatch(getClassQuizzes());
 
     return () => {
       dispatch(resetUserList());
+      dispatch(resetQuizzes());
     };
   }, [dispatch]);
+
+  useEffect(() => {
+    if (!userStateLoading) {
+      setResultMap((prevState) => ({
+        ...prevState,
+        users: [...userList],
+      }));
+    }
+
+    if (!quizStateLoading) {
+      const quizList = [...userQuizzes, ...classQuizzes];
+      const quizIdSet = new Set();
+      const filteredList = [];
+
+      for (const quiz of quizList) {
+        const { _id } = quiz;
+
+        if (!quizIdSet.has(_id)) {
+          quizIdSet.add(_id);
+
+          filteredList.push(quiz);
+        }
+      }
+
+      setResultMap((prevState) => ({
+        ...prevState,
+        quizzes: filteredList,
+      }));
+    }
+  }, [userStateLoading, quizStateLoading, userList, classQuizzes, userQuizzes]);
 
   const handleChange = (e) => {
     e.preventDefault();
@@ -32,9 +80,15 @@ export default function FriendSearch() {
       return;
     }
 
-    const results = userList.filter((user) =>
+    const userResults = resultMap?.users?.filter((user) =>
       user.name.toLowerCase().startsWith(query.trim().toLowerCase())
     );
+
+    const quizResults = resultMap?.quizzes?.filter((quiz) =>
+      quiz?.title?.toLowerCase().startsWith(query.trim().toLowerCase())
+    );
+
+    const results = [...userResults, ...quizResults];
 
     setResultList(results);
   };
