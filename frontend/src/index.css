@@ -321,6 +321,33 @@ li {
 
 .result-list p:hover {
   background-color: rgb(235, 235, 235);
+.result__list-entry {
+  height: 35px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.list__entry-avatar {
+  height: 27px;
+  width: 27px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: white;
+  border-radius: 50%;
+}
+
+.result__list-entry:hover {
+  background-color: rgb(216, 214, 214);
+}
+
+.result__list-close {
+  position: absolute;
+  bottom: -1.8em;
+  left: 4em;
 }
 
 .user-details {

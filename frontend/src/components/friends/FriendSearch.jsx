@@ -126,6 +126,7 @@ export default function FriendSearch() {
               ? "1px solid rgb(172, 172, 172)"
               : "1px solid transparent",
           borderRadius: "0 0 5% 5%",
+          position: "relative",
         }}
       >
         {input.length >= 2 && resultList.length === 0 ? (
@@ -144,8 +145,9 @@ export default function FriendSearch() {
             {resultList
               .slice(0, showAllResults ? resultList.length : 4)
               .map((entry) => (
-                <div>
+                <div className="result__list-entry">
                   <div
+                    className="clickable list__entry-name"
                     key={entry._id}
                     onClick={() =>
                       handleVisit(
@@ -157,7 +159,7 @@ export default function FriendSearch() {
                     {entry?.name || entry?.title}
                   </div>
                   {entry?.name ? (
-                    <div>
+                    <div className="list__entry-avatar">
                       {" "}
                       {entry?.avatar ? (
                         <img
@@ -166,14 +168,28 @@ export default function FriendSearch() {
                           style={{ objectFit: "cover" }}
                         />
                       ) : (
-                        <FaUserCircle />
+                        <FaUserCircle
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            color: "grey",
+                          }}
+                        />
                       )}
                     </div>
                   ) : null}
                 </div>
               ))}
             {resultList.length > 4 && !showAllResults ? (
-              <div>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  height: "27px",
+                  marginBottom: "0.5em",
+                }}
+              >
                 <span>
                   {resultList.length - 4} more result
                   {resultList.length - 4 > 1 && "s"}
