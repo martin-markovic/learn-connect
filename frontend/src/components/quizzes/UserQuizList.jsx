@@ -67,7 +67,7 @@ function UserQuizList() {
   ) : openForm ? (
     <QuizForm quiz={editQuiz} onClose={() => setOpenForm(false)} />
   ) : (
-    <div>
+    <div className="user__quizzes-container">
       <button
         onClick={() => {
           setEditQuiz(null);
@@ -76,28 +76,33 @@ function UserQuizList() {
       >
         Add New Quiz
       </button>
+
       {localQuizzes.length > 0 ? (
-        <div>
-          {localQuizzes.map((quiz, index) => (
-            <div key={index}>
-              <p>{quiz.title}</p>
-              <button
-                onClick={() => {
-                  navigate(`/quizzes/${quiz._id}`);
-                }}
-              >
-                Open
-              </button>
-              <button
-                onClick={() => {
-                  handleEdit(quiz);
-                }}
-              >
-                Edit
-              </button>
-              <button onClick={() => handleDelete(quiz._id)}>Delete</button>
-            </div>
-          ))}
+        <div className="quiz__entry__list-container">
+          <div className="user__quiz__list-container">
+            {localQuizzes.map((quiz, index) => (
+              <div key={index} className="user__quiz__list-entry">
+                <p
+                  onClick={() => {
+                    navigate(`/quizzes/${quiz._id}`);
+                  }}
+                  className="clickable"
+                >
+                  {quiz.title}
+                </p>
+                <div className="entry__buttons-container">
+                  <button onClick={() => handleDelete(quiz._id)}>Delete</button>
+                  <button
+                    onClick={() => {
+                      handleEdit(quiz);
+                    }}
+                  >
+                    Edit
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       ) : (
         <p>No quizzes created.</p>
