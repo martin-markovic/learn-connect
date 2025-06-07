@@ -16,6 +16,7 @@ function UserQuizList() {
   const [openForm, setOpenForm] = useState(false);
   const [editQuiz, setEditQuiz] = useState(null);
   const [curPage, setCurPage] = useState(1);
+  const [inputVal, setInputVal] = useState("");
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -64,56 +65,75 @@ function UserQuizList() {
     }
   };
 
+  const handleChange = (e) => {
+    setInputVal(e.target.value);
+  };
+
   return isLoading ? (
     <p>Loading...</p>
   ) : openForm ? (
     <QuizForm quiz={editQuiz} onClose={() => setOpenForm(false)} />
   ) : (
     <div className="user__quizzes-container">
-      <button
-        style={{ height: "2.3em", width: "12%" }}
-        onClick={() => {
-          setEditQuiz(null);
-          setOpenForm(true);
-        }}
-      >
-        Create New Quiz
-      </button>
+      <div>
+        <input
+          type="search"
+          placeholder="Search quizzes"
+          value={inputVal}
+          onChange={handleChange}
+        ></input>
+        <button
+          style={{ height: "2.3em", width: "12%" }}
+          onClick={() => {
+            setEditQuiz(null);
+            setOpenForm(true);
+          }}
+        >
+          Create New Quiz
+        </button>
+      </div>
       {localQuizzes.length > 0 ? (
         <div className="quiz__entry__list-container">
           <div className="user__quiz__list-container">
             {localQuizzes
+              .filter((quiz) => {
+                return quiz.title
+                  ?.toLowerCase()
+                  .includes(inputVal.toLowerCase());
+              })
               .slice((curPage - 1) * 9, curPage * 9)
-              .map((quiz, index) => (
-                <div key={index} className="user__quiz__list-entry">
-                  <p
-                    title={`Open ${quiz?.title}`}
-                    onClick={() => {
-                      navigate(`/quizzes/${quiz._id}`);
-                    }}
-                    className="clickable"
-                  >
-                    {quiz.title}
-                  </p>
-                  <div className="entry__buttons-container">
-                    <button
-                      className="entry-delete"
-                      onClick={() => handleDelete(quiz._id)}
-                      title="Delete Quiz"
-                    >
-                      Delete
-                    </button>
-                    <button
-                      type="button"
+              .map((quiz, index) => {
+                return (
+                  <div key={index} className="user__quiz__list-entry">
+                    <p
+                      title={`Open ${quiz?.title}`}
                       onClick={() => {
-                        handleEdit(quiz);
+                        navigate(`/quizzes/${quiz._id}`);
                       }}
+                      className="clickable"
                     >
-                      Edit
-                    </button>
+                      {quiz.title}
+                    </p>
+                    <div className="entry__buttons-container">
+                      <button
+                        className="entry-delete"
+                        onClick={() => handleDelete(quiz._id)}
+                        title="Delete Quiz"
+                      >
+                        Delete
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          handleEdit(quiz);
+                        }}
+                      >
+                        Edit
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
           </div>
           <div className="user__quiz__pagination-container">
             <div>
@@ -128,7 +148,13 @@ function UserQuizList() {
               )}
             </div>
             <div>
-              {localQuizzes.length - curPage * 9 > 0 && (
+              {localQuizzes.filter((quiz) => {
+                return quiz.title
+                  ?.toLowerCase()
+                  .includes(inputVal.toLowerCase());
+              }).length -
+                curPage * 9 >
+                0 && (
                 <FaArrowAltCircleRight
                   className="clickable pagination-button"
                   title="Next Page"
