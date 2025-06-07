@@ -75,7 +75,7 @@ function UserQuizList() {
     <QuizForm quiz={editQuiz} onClose={() => setOpenForm(false)} />
   ) : (
     <div className="user__quizzes-container">
-      <div>
+      <div className="user__quizzes-top__box">
         <input
           type="search"
           placeholder="Search quizzes"

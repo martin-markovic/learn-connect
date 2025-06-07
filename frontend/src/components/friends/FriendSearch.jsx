@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { getUserList, resetUserList } from "../../features/friend/friendSlice";
-import { FaSearch } from "react-icons/fa";
 import { FaSearch, FaUserCircle } from "react-icons/fa";
 import {
   resetQuizzes,
