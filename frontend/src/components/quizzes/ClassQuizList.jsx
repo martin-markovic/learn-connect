@@ -44,7 +44,7 @@ function ClassQuizList() {
   };
 
   return (
-    <div>
+    <div className="class__quizzes-container">
       <div>
         <input
           type="search"
@@ -53,6 +53,7 @@ function ClassQuizList() {
           value={searchQuery}
           onChange={handleChange}
           autoComplete="off"
+          placeholder="Search quizzes"
         />
       </div>
       <div className="class__quiz__list-container">
@@ -62,9 +63,14 @@ function ClassQuizList() {
           filteredQuizzes
             .slice((curPage - 1) * 9, curPage * 9)
             .map((quiz, index) => (
-              <div key={index}>
+              <div className="class__quiz-entry" key={index}>
                 <p>{quiz.title}</p>
-                <button onClick={() => handleClick(quiz?._id)}>Open</button>
+                <button
+                  className="clickable"
+                  onClick={() => handleClick(quiz?._id)}
+                >
+                  Open
+                </button>
               </div>
             ))
         )}
