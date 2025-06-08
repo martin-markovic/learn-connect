@@ -732,6 +732,15 @@ li {
   gap: 1em;
 }
 
+.class__quiz__list-container {
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 2.5em;
+}
 .user__quizzes-container {
   justify-content: flex-start;
 }
@@ -813,7 +822,7 @@ li {
   background-color: rgb(216, 214, 214);
 }
 
-.user__quiz__pagination-container {
+.quiz__pagination-container {
   width: 35%;
   display: flex;
   flex-direction: row;
@@ -822,7 +831,11 @@ li {
   right: 5%;
 }
 
-.user__quiz__pagination-container div {
+.pagination-classes {
+  width: 33.4%;
+}
+
+.quiz__pagination-container div {
   width: 30px;
   height: 30px;
 }
