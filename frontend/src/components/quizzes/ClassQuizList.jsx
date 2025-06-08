@@ -5,10 +5,12 @@ import {
   getClassQuizzes,
   resetQuizzes,
 } from "../../features/quizzes/quizSlice";
+import { FaArrowAltCircleLeft, FaArrowAltCircleRight } from "react-icons/fa";
 
 function ClassQuizList() {
   const [searchQuery, setSearchQuery] = useState("");
   const { classQuizzes = [] } = useSelector((state) => state.quizzes);
+  const [curPage, setCurPage] = useState(1);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -42,9 +44,8 @@ function ClassQuizList() {
   };
 
   return (
-    <div>
+    <div className="class__quizzes-container">
       <div>
-        <span>Search for a quiz:</span>
         <input
           type="search"
           id="quiz-search"
@@ -52,21 +53,52 @@ function ClassQuizList() {
           value={searchQuery}
           onChange={handleChange}
           autoComplete="off"
+          placeholder="Search quizzes"
         />
       </div>
-      {filteredQuizzes.length === 0 ? (
-        <p>No quizzes found</p>
-      ) : (
-        filteredQuizzes.map((quiz, index) => (
-          <div key={index}>
-            <p>{quiz.title}</p>
-            <p>{quiz.subject}</p>
-            <button type="button" onClick={() => handleClick(quiz?._id)}>
-              Open
-            </button>
-          </div>
-        ))
-      )}
+      <div className="class__quiz__list-container">
+        {filteredQuizzes.length === 0 ? (
+          <p>No quizzes found</p>
+        ) : (
+          filteredQuizzes
+            .slice((curPage - 1) * 9, curPage * 9)
+            .map((quiz, index) => (
+              <div className="class__quiz-entry" key={index}>
+                <p>{quiz.title}</p>
+                <button
+                  className="clickable"
+                  onClick={() => handleClick(quiz?._id)}
+                >
+                  Open
+                </button>
+              </div>
+            ))
+        )}
+      </div>
+      <div className="quiz__pagination-container pagination-classes">
+        <div>
+          {curPage > 1 && (
+            <FaArrowAltCircleLeft
+              className="clickable pagination-button"
+              title="Previous Page"
+              onClick={() => {
+                setCurPage((prevState) => (prevState -= 1));
+              }}
+            />
+          )}
+        </div>
+        <div>
+          {filteredQuizzes.length - curPage * 9 > 0 && (
+            <FaArrowAltCircleRight
+              className="clickable pagination-button"
+              title="Next Page"
+              onClick={() => {
+                setCurPage((prevState) => (prevState += 1));
+              }}
+            />
+          )}
+        </div>
+      </div>
     </div>
   );
 }
