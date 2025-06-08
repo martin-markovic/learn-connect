@@ -898,6 +898,34 @@ li {
   color: gray;
 }
 
+.quiz__form-container,
+#quiz-form {
+  width: 65%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 2em;
+  margin-top: 0.5em;
+}
+
+.quiz__form-group {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.quiz__choices-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  gap: 0.7em;
+  margin-top: 1em;
+}
 .user__profile-container {
   height: 85%;
   width: 80%;

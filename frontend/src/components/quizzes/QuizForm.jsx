@@ -225,10 +225,10 @@ function QuizForm({ quiz, onClose }) {
   };
 
   return (
-    <div>
+    <div className="quiz__form-container">
       <form id="quiz-form" onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="title">Add quiz title:</label>
+        <div className="quiz__form-group">
+          <span>Add quiz title:</span>
           <input
             type="text"
             id="title"
@@ -238,8 +238,8 @@ function QuizForm({ quiz, onClose }) {
           />
         </div>
 
-        <div>
-          <label htmlFor="classroom">Select Classroom:</label>
+        <div className="quiz__form-group">
+          <span>Select Classroom:</span>
           <select
             id="classroom"
             name="classroom"
@@ -259,7 +259,7 @@ function QuizForm({ quiz, onClose }) {
           </select>
         </div>
 
-        <div>
+        <div className="quiz__form-group">
           <button
             type="button"
             onClick={handleBack}
@@ -282,8 +282,8 @@ function QuizForm({ quiz, onClose }) {
           </span>
         </div>
 
-        <div>
-          <label htmlFor="question">Add question:</label>
+        <div className="quiz__form-group">
+          <span>Add question:</span>
           <input
             type="text"
             id="question"
@@ -293,33 +293,34 @@ function QuizForm({ quiz, onClose }) {
           />
         </div>
 
-        <div>
+        <div className="quiz__form-group">
           <span>Add choices:</span>
-          {choices.map((choice, index) => (
-            <div key={index}>
-              <input
-                type="radio"
-                id={`choice-radio-${index}`}
-                name="choice"
-                value={choice || ""}
-                disabled
-              />
-              <label htmlFor={`choice-radio-${index}`}>{choice}</label>
-              <input
-                type="text"
-                id={`choice-text-${index}`}
-                name={`choice-${index}`}
-                value={choice || ""}
-                onChange={(e) =>
-                  handleChoiceChange(index, e.target.value || "")
-                }
-              />
-            </div>
-          ))}
+          <div className="quiz__choices-container">
+            {choices.map((choice, index) => (
+              <div key={index}>
+                <input
+                  type="radio"
+                  id={`choice-radio-${index}`}
+                  name="choice"
+                  value={choice || ""}
+                  disabled
+                />
+                <input
+                  type="text"
+                  id={`choice-text-${index}`}
+                  name={`choice-${index}`}
+                  value={choice || ""}
+                  onChange={(e) =>
+                    handleChoiceChange(index, e.target.value || "")
+                  }
+                />
+              </div>
+            ))}
+          </div>
         </div>
 
-        <div>
-          <label htmlFor="answer">Add answer:</label>
+        <div className="quiz__form-group">
+          <span>Add answer:</span>
           <input
             type="text"
             id="answer"
@@ -334,22 +335,24 @@ function QuizForm({ quiz, onClose }) {
           </button>
         </div>
 
-        <div>
-          <label htmlFor="time-limit">Add time limit:</label>
-          <input
-            type="number"
-            id="time-limit"
-            name="time-limit"
-            min={3}
-            max={10}
-            value={timeLimit}
-            onChange={handleChange}
-            required
-          />
-          <span>minutes</span>
+        <div className="quiz__form-group">
+          <span>Add time limit:</span>
+          <div>
+            <input
+              type="number"
+              id="time-limit"
+              name="time-limit"
+              min={3}
+              max={10}
+              value={timeLimit}
+              onChange={handleChange}
+              required
+            />
+            <span>minutes</span>
+          </div>
         </div>
 
-        <>
+        <div className="quiz__form-group">
           <button type="button" onClick={handleCancel}>
             Cancel
           </button>
@@ -358,7 +361,7 @@ function QuizForm({ quiz, onClose }) {
           ) : (
             <input type="submit" value="Create Quiz" />
           )}
-        </>
+        </div>
       </form>
     </div>
   );
