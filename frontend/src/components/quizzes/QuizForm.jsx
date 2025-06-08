@@ -30,7 +30,7 @@ function QuizForm({ quiz, onClose }) {
 
   const dispatch = useDispatch();
 
-  const { title, timeLimit, isEditing, classroomId } = quizState;
+  const { title, timeLimit, isEditing } = quizState;
   const { question, choices, answer } = questionState;
   const { classroomList } = useSelector((state) => state.classroom);
   const { user } = useSelector((state) => state.auth);
@@ -265,14 +265,14 @@ function QuizForm({ quiz, onClose }) {
             onClick={handleBack}
             disabled={currentQuestionIndex <= 0}
           >
-            Back
+            Previous Question
           </button>
           <button
             type="button"
             onClick={handleNext}
             disabled={currentQuestionIndex >= quizState.questions.length}
           >
-            Next
+            Next Question
           </button>
         </div>
         <div>
@@ -297,8 +297,9 @@ function QuizForm({ quiz, onClose }) {
           <span>Add choices:</span>
           <div className="quiz__choices-container">
             {choices.map((choice, index) => (
-              <div key={index}>
+              <div className="choice-container" key={index}>
                 <input
+                  className="choice-radio"
                   type="radio"
                   id={`choice-radio-${index}`}
                   name="choice"
@@ -306,6 +307,7 @@ function QuizForm({ quiz, onClose }) {
                   disabled
                 />
                 <input
+                  className="choice-input"
                   type="text"
                   id={`choice-text-${index}`}
                   name={`choice-${index}`}
@@ -347,6 +349,7 @@ function QuizForm({ quiz, onClose }) {
               value={timeLimit}
               onChange={handleChange}
               required
+              style={{ width: "2em" }}
             />
             <span>minutes</span>
           </div>
@@ -354,12 +357,20 @@ function QuizForm({ quiz, onClose }) {
 
         <div className="quiz__form-group">
           <button type="button" onClick={handleCancel}>
-            Cancel
+            Cancel Editing
           </button>
           {isEditing ? (
-            <input type="submit" value="Update Quiz" />
+            <input
+              style={{ fontSize: "smaller" }}
+              type="submit"
+              value="Update Quiz"
+            />
           ) : (
-            <input type="submit" value="Create Quiz" />
+            <input
+              style={{ fontSize: "smaller" }}
+              type="submit"
+              value="Create Quiz"
+            />
           )}
         </div>
       </form>
