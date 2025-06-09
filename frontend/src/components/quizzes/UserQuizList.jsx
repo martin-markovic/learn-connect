@@ -135,7 +135,7 @@ function UserQuizList() {
                 );
               })}
           </div>
-          <div className="user__quiz__pagination-container">
+          <div className="quiz__pagination-container">
             <div>
               {curPage > 1 && (
                 <FaArrowAltCircleLeft
