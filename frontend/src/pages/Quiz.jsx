@@ -61,72 +61,82 @@ function Quiz() {
     });
   };
 
-  return showFeedback ? (
-    <QuizScore quizFeedback={quizFeedback} setShowFeedback={setShowFeedback} />
-  ) : (
-    <div>
-      <div>
-        {classQuizzes?.length > 0 ? (
-          classQuizzes
-            ?.filter((quiz) => quiz._id === quizId)
-            .map((item, index) => (
-              <div key={`quiz__description-${index}`}>
-                <h1>{item.title}</h1>
-                <span>{`time limit: ${item.timeLimit} minutes`}</span>
-                <span>{`${item.questions.length} questions`}</span>
-              </div>
-            ))
-        ) : (
-          <p>Loading quizzes, please wait...</p>
-        )}
-      </div>
-      {quizFeedback?._id ? (
-        <div>
-          <span>
-            Your highest score: {quizFeedback?.highScore}{" "}
-            {quizFeedback?.highScore > 1 ? "points" : "point"}
-          </span>
-          <span>See the latest result</span>
-          <button
-            type="button"
-            onClick={() => {
-              setShowFeedback(true);
-            }}
-          >
-            Show
-          </button>
-        </div>
+  return (
+    <div className="quiz__info-container">
+      {showFeedback ? (
+        <QuizScore
+          quizFeedback={quizFeedback}
+          setShowFeedback={setShowFeedback}
+        />
       ) : (
-        <p>You have not taken this quiz yet</p>
-      )}
-      {!showFeedback &&
-        (isInProgress ? (
-          <div>
-            <p>
-              Exam is currently in progress{" "}
-              <span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    navigate(`/exam/${examData?._id}`);
-                  }}
-                  disabled={!isInProgress}
-                >
-                  Click
-                </button>
-              </span>{" "}
-              to navigate to the exam page
-            </p>
+        <>
+          <div className="quiz__info-list-container">
+            {classQuizzes?.length > 0 ? (
+              classQuizzes
+                ?.filter((quiz) => quiz._id === quizId)
+                .map((item, index) => (
+                  <div
+                    className="quiz__info-entry"
+                    key={`quiz__description-${index}`}
+                  >
+                    <h1>{item.title}</h1>
+                    <span>{`time limit: ${item.timeLimit} minutes`}</span>
+                    <span>{`${item.questions.length} questions`}</span>
+                  </div>
+                ))
+            ) : (
+              <p>Loading quizzes, please wait...</p>
+            )}
           </div>
-        ) : (
-          <button
-            type="button"
-            onClick={handleStartQuiz}
-            disabled={isInProgress}
-          >
-            Start Quiz
-          </button>
-        ))}
+          {quizFeedback?._id ? (
+            <div className="quiz__info-result-container">
+              <span>
+                Your highest score: {quizFeedback?.highScore}{" "}
+                {quizFeedback?.highScore > 1 ? "points" : "point"}
+              </span>
+              <span>See the latest result</span>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowFeedback(true);
+                }}
+              >
+                Show
+              </button>
+            </div>
+          ) : (
+            <p>You have not taken this quiz yet</p>
+          )}
+          {!showFeedback &&
+            (isInProgress ? (
+              <div>
+                <p>
+                  Exam is currently in progress{" "}
+                  <span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigate(`/exam/${examData?._id}`);
+                      }}
+                      disabled={!isInProgress}
+                    >
+                      Click
+                    </button>
+                  </span>{" "}
+                  to navigate to the exam page
+                </p>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={handleStartQuiz}
+                disabled={isInProgress}
+              >
+                Start Quiz
+              </button>
+            ))}
+        </>
+      )}
     </div>
   );
 }
