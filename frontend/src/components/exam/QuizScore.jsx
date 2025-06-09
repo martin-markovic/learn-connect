@@ -25,34 +25,46 @@ function QuizScore({ quizFeedback, setShowFeedback }) {
                   <div className="quiz__feedback" key={`question-${index}`}>
                     <p>{q.question}</p>
                     <ul>
-                      {q.choices.map((choice, choiceIndex) => (
-                        <li
-                          style={{
-                            color:
-                              choice ===
-                              quizFeedback?.examFeedback?.userChoices?.[
-                                currPage
-                              ]?.correctAnswer
-                                ? "green"
-                                : choice ===
-                                  quizFeedback?.examFeedback?.userChoices?.[
-                                    currPage
-                                  ]?.userAnswer
-                                ? "red"
-                                : "black",
-                          }}
-                          key={`feedback-${choiceIndex}`}
-                        >
-                          <span>{choice}</span>
-                          {choice ===
-                            quizFeedback?.examFeedback?.userChoices?.[currPage]
-                              ?.correctAnswer &&
-                            choice ===
-                              quizFeedback?.examFeedback?.userChoices?.[
-                                currPage
-                              ]?.userAnswer && <span>{" +1 pt"}</span>}
-                        </li>
-                      ))}
+                      {q.choices.map((choice, choiceIndex) => {
+                        const userChoice =
+                          quizFeedback?.examFeedback?.userChoices?.[currPage]
+                            ?.userAnswer;
+
+                        const correctChoice =
+                          quizFeedback?.examFeedback?.userChoices?.[currPage]
+                            ?.correctAnswer;
+
+                        return (
+                          <li key={`feedback-${choiceIndex}`}>
+                            {choice === userChoice && (
+                              <span
+                                className={`choice__checkbox-${
+                                  choice === correctChoice ? "correct" : "wrong"
+                                }`}
+                              ></span>
+                            )}
+                            <span
+                              style={{
+                                marginRight: choice === userChoice ? "8%" : "0",
+                              }}
+                            >
+                              {choice}
+                            </span>
+                            {choice === correctChoice && (
+                              <span
+                                style={{
+                                  position: "absolute",
+                                  right: "4%",
+                                  fontWeight: "bold",
+                                  color: "green",
+                                }}
+                              >
+                                {` +${choice === userChoice ? "1" : "0"} pt`}
+                              </span>
+                            )}
+                          </li>
+                        );
+                      })}
                     </ul>
                   </div>
                 );
@@ -86,6 +98,11 @@ function QuizScore({ quizFeedback, setShowFeedback }) {
       </div>
       <button
         type="button"
+        style={{
+          width: "5.5em",
+          height: "2em",
+          marginTop: "2.5em",
+        }}
         onClick={() => {
           setShowFeedback(false);
         }}
