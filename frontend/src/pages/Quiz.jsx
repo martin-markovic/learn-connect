@@ -80,7 +80,7 @@ function Quiz() {
                     key={`quiz__description-${index}`}
                   >
                     <h1>{item.title}</h1>
-                    <span>{`time limit: ${item.timeLimit} minutes`}</span>
+                    <span>{`Time limit: ${item.timeLimit} minutes`}</span>
                     <span>{`${item.questions.length} questions`}</span>
                   </div>
                 ))
@@ -92,17 +92,20 @@ function Quiz() {
             <div className="quiz__info-result-container">
               <span>
                 Your highest score: {quizFeedback?.highScore}{" "}
-                {quizFeedback?.highScore > 1 ? "points" : "point"}
+                {quizFeedback?.highScore === 1 ? "point" : "points"}
               </span>
-              <span>See the latest result</span>
-              <button
-                type="button"
-                onClick={() => {
-                  setShowFeedback(true);
-                }}
-              >
-                Show
-              </button>
+              <span>
+                See the latest result{" "}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowFeedback(true);
+                  }}
+                  title="Show latest result"
+                >
+                  Here
+                </button>
+              </span>
             </div>
           ) : (
             <p>You have not taken this quiz yet</p>
@@ -113,6 +116,7 @@ function Quiz() {
                 <p>
                   Exam is currently in progress{" "}
                   <span>
+                    Click
                     <button
                       type="button"
                       onClick={() => {
@@ -120,7 +124,7 @@ function Quiz() {
                       }}
                       disabled={!isInProgress}
                     >
-                      Click
+                      Here
                     </button>
                   </span>{" "}
                   to navigate to the exam page
@@ -128,11 +132,12 @@ function Quiz() {
               </div>
             ) : (
               <button
+                style={{ width: "6.5em", height: "2.1em", marginTop: "2em" }}
                 type="button"
                 onClick={handleStartQuiz}
                 disabled={isInProgress}
               >
-                Start Quiz
+                Start Exam
               </button>
             ))}
         </>

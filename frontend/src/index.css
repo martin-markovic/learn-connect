@@ -956,6 +956,11 @@ li {
   align-items: center;
   gap: 2.5em;
 }
+
+.quiz__info-container > *,
+  font-size: large;
+}
+
 .quiz__info-list-container {
   margin-top: 2em;
 }
