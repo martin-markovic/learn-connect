@@ -123,22 +123,24 @@ function Exam() {
   };
 
   return (
-    <div>
+    <div className="exam-container">
       <ExamTimer examFinish={examData?.examFinish} />
       {examData ? (
-        <div>
+        <div className="exam__data-container">
           {examData?.shuffledQuestions?.length &&
             examData?.shuffledQuestions.find(
               (_, index) => index === currQuestion
             ) && (
-              <div>
+              <div className="exam-data">
                 <h1>{examData?.shuffledQuestions[currQuestion]?.question}</h1>
-
-                <div>
+                <div className="exam__choices-container">
                   {examData?.shuffledQuestions[currQuestion]?.choices.map(
                     (choice, choiceIndex) => {
                       return (
-                        <div key={`choice-${choiceIndex}`}>
+                        <div
+                          className="exam__choice-entry"
+                          key={`choice-${choiceIndex}`}
+                        >
                           <input
                             name="choice"
                             type="radio"
