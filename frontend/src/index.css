@@ -967,6 +967,8 @@ li {
 
 .quiz__info-result-container,
 .quiz__info-entry,
+.quiz__score-container,
+.quiz__feedback {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -981,6 +983,33 @@ li {
 
 .quiz__info-result-container {
   gap: 2.5em;
+}
+
+.quiz__score-container {
+  height: 70%;
+  justify-content: flex-start;
+  margin-top: 1em;
+}
+
+.quiz__score-container,
+.quiz__feedback-container,
+.quiz__feedback {
+  width: 100%;
+}
+.quiz__feedback-container {
+  height: 60%;
+}
+
+.quiz__feedback {
+  height: 100%;
+}
+.quiz__info-pagination {
+  width: 35%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1em;
 }
 .user__profile-container {
   height: 85%;
