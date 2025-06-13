@@ -281,8 +281,9 @@ li {
 }
 
 .notification-container div {
-  width: 70%;
-  margin-left: 2.3em;
+  width: 100%;
+}
+
 .notification-heading {
   width: 90%;
   display: flex;
@@ -307,6 +308,23 @@ li {
   line-height: 16px;
   font-size: small;
 }
+
+.notification-display ul {
+  margin: 0;
+  padding: 0;
+}
+
+.notification-display ul li {
+  border: 1px solid rgb(216, 214, 214);
+  transition: all 0.25s ease-in;
+  width: 99.4%;
+}
+
+.notification-display ul li p {
+  width: 80%;
+  padding-left: 2.5em;
+}
+
 .notification-controller {
   width: 100%;
   display: flex;
@@ -392,7 +410,7 @@ li {
 }
 
 .dashboard-notifications {
-  height: 30%;
+  height: 40%;
   width: 100%;
 }
 
@@ -1098,6 +1116,12 @@ li {
   align-items: center;
   margin-top: 1em;
 }
+
+.quiz__info-pagination span {
+  width: 27px;
+  height: 27px;
+}
+
 .exam-container {
   height: 70%;
   width: 75%;
@@ -1141,6 +1165,13 @@ li {
   height: 20%;
 }
 
+.exam__choice-entry input {
+  margin-left: 5em;
+}
+
+.exam__choice-entry label {
+  margin-left: 2em;
+}
 
 .exam__choice-entry input {
   position: relative;
@@ -1174,6 +1205,12 @@ input[type="radio"]:checked::after {
   flex-direction: row;
   justify-content: space-between;
 }
+
+.exam__timer-container {
+  margin-right: 4em;
+  margin-top: 2em;
+}
+
 .user__profile-container {
   height: 85%;
   width: 80%;

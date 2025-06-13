@@ -35,15 +35,22 @@ function ExamTimer({ examFinish }) {
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${String(minutes).padStart(2, "0")}:${String(secs).padStart(
+    return `${String(minutes).padStart(2, "0")} : ${String(secs).padStart(
       2,
       "0"
     )}`;
   };
 
   return (
-    <div>
-      <p>Time Left: {formatTime(examTimer)}</p>
+    <div className="exam__timer-container">
+      <p>
+        <span
+          style={{ fontWeight: "bold", fontSize: "large", marginRight: "1em" }}
+        >
+          Time Left:
+        </span>
+        {formatTime(examTimer)}
+      </p>
     </div>
   );
 }
