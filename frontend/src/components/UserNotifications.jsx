@@ -56,20 +56,35 @@ function UserNotifications() {
 
   return (
     <div className="content__scrollable-wrapper notification-container">
-      <div>
-        <span
-          title={!newsOpen && "open notifications"}
-          className="clickable"
-          onClick={handleOpen}
+      <div className="notification-heading">
+        <div
+          style={{
+            width: "30%",
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "flex-start",
+            alignItems: "flex-start",
+            gap: "0.5em",
+            marginLeft: "1.5em",
+          }}
         >
-          Notifications
-        </span>
-        {userNotifications.length > 0 ? (
-          <span>{userNotifications.length}</span>
-        ) : null}
+          <span
+            title={!newsOpen ? "open notifications" : null}
+            className="clickable"
+            onClick={handleOpen}
+            style={{ position: "relative" }}
+          >
+            Notifications
+            {userNotifications.length > 0 ? (
+              <span className="notification-count">
+                {userNotifications.length}
+              </span>
+            ) : null}
+          </span>
+        </div>
         <button onClick={handleMarkAll}>Mark all as read</button>
       </div>
-      <div className="content__scrollable">
+      <div className="content__scrollable notification-display">
         {newsOpen ? (
           <ul>
             {userNotifications && userNotifications.length > 0 ? (
@@ -80,18 +95,23 @@ function UserNotifications() {
                   ) : (
                     <p>No message available</p>
                   )}
-                  {notification?.date ? (
-                    <span>{notification?.date}</span>
-                  ) : (
-                    <span>No date available</span>
-                  )}
-                  <button
-                    onClick={() => {
-                      handleMark(notification?._id);
-                    }}
-                  >
-                    Mark as read
-                  </button>
+                  <div className="notification-controller">
+                    <span>
+                      {notification?.date
+                        ? "Received: " +
+                          notification?.date.split(" ")[0] +
+                          ", at " +
+                          notification?.date.split(" ")[1]
+                        : null}
+                    </span>
+                    <button
+                      onClick={() => {
+                        handleMark(notification?._id);
+                      }}
+                    >
+                      Mark as read
+                    </button>
+                  </div>
                 </li>
               ))
             ) : (

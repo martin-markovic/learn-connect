@@ -283,6 +283,36 @@ li {
 .notification-container div {
   width: 70%;
   margin-left: 2.3em;
+.notification-heading {
+  width: 90%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 4em;
+  height: 40px;
+  background-color: rgb(216, 214, 214);
+}
+
+.notification-count {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  background-color: red;
+  color: white;
+  right: -21%;
+  text-align: center;
+  line-height: 16px;
+  font-size: small;
+}
+.notification-controller {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 2.5em;
 }
 
 .friend__search-box {
