@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import socketEventManager from "../features/socket/socket.eventManager.js";
 import {
@@ -13,6 +13,7 @@ function UserNotifications() {
   const { user } = useSelector((state) => state.auth);
 
   const dispatch = useDispatch();
+  const clickRef = useRef();
 
   useEffect(() => {
     dispatch(getNotifications());
@@ -37,6 +38,22 @@ function UserNotifications() {
     };
   }, [dispatch]);
 
+  useEffect(() => {
+    function handleClick(e) {
+      if (clickRef.current) {
+        if (!clickRef.current.contains(e.target)) {
+          setNewsOpen(false);
+        }
+      }
+    }
+
+    document.addEventListener("click", handleClick);
+
+    return () => {
+      document.removeEventListener("click", handleClick);
+    };
+  }, []);
+
   const handleOpen = () => {
     setNewsOpen((prev) => !prev);
   };
@@ -55,8 +72,11 @@ function UserNotifications() {
   };
 
   return (
-    <div className="content__scrollable-wrapper notification-container">
-      <div className="notification-heading">
+    <div
+      className="content__scrollable-wrapper notification-container"
+      ref={clickRef}
+    >
+      <div onClick={handleOpen} className="notification-heading clickable">
         <div
           style={{
             width: "30%",
@@ -68,12 +88,7 @@ function UserNotifications() {
             marginLeft: "1.5em",
           }}
         >
-          <span
-            title={!newsOpen ? "open notifications" : null}
-            className="clickable"
-            onClick={handleOpen}
-            style={{ position: "relative" }}
-          >
+          <span style={{ position: "relative" }}>
             Notifications
             {userNotifications.length > 0 ? (
               <span className="notification-count">

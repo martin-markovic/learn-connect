@@ -75,15 +75,24 @@ const chatSlice = createSlice({
       const { messageId, friendId } = action.payload;
 
       state.chat[friendId] = state.chat[friendId].map((message) =>
-        message._id === messageId ? { ...message, isRead: true } : message
+        message._id === messageId
+          ? { ...message, isRead: true, updatedAt: new Date().toISOString() }
+          : message
       );
     },
     markAllAsRead: (state, action) => {
-      state.chat[action.payload.friendId] = state.chat[
-        action.payload.friendId
-      ].map((message) =>
-        message.isRead !== true ? { ...message, isRead: true } : message
-      );
+      const { friendId, receiverId } = action.payload;
+
+      state.chat[friendId] = state.chat[friendId].map((message) => {
+        const shouldUpdate =
+          receiverId != null
+            ? message.receiverId === friendId && !message.isRead
+            : message.receiverId !== friendId && !message.isRead;
+
+        return shouldUpdate
+          ? { ...message, isRead: true, updatedAt: new Date().toISOString() }
+          : message;
+      });
     },
     changeChatStatus: (state, action) => {
       state.online = action?.payload;

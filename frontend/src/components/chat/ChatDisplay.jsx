@@ -271,22 +271,23 @@ const ChatDisplay = () => {
                   </div>
                 )}
 
-                <span
-                  style={{
-                    alignSelf:
-                      message?.senderId === user?._id
-                        ? "flex-end"
-                        : "flex-start",
-                    paddingRight: message?.senderId === user?._id ? "1em" : "0",
-                  }}
-                >
-                  <strong>
-                    {message?.senderId === user?._id
-                      ? "You"
-                      : message?.senderName}
-                  </strong>
-                  :{" "}
-                </span>
+                {message?.senderId === user?._id ? null : (
+                  <span
+                    style={{
+                      alignSelf:
+                        message?.senderId === user?._id
+                          ? "flex-end"
+                          : "flex-start",
+                      paddingRight:
+                        message?.senderId === user?._id ? "1em" : "0",
+                    }}
+                  >
+                    <strong>
+                      {message?.senderName}
+                      {": "}
+                    </strong>
+                  </span>
+                )}
 
                 <p
                   style={{
@@ -299,15 +300,30 @@ const ChatDisplay = () => {
                 >
                   {message?.text}
                 </p>
-                {message.senderId === user?._id && (
-                  <span className="chat__message-status">
-                    {message?.isRead ? "read" : "sent"}
-                  </span>
-                )}
+
+                <span
+                  className="chat__message-status"
+                  title={
+                    message?.isRead
+                      ? `Seen by ${message?.receiverName} ${
+                          message?.updatedAt?.slice(0, 10) ??
+                          message?.createdAt?.slice(0, 10)
+                        }, at ${
+                          message?.updatedAt?.slice(11, 16) ??
+                          message?.createdAt?.slice(11, 16)
+                        }`
+                      : `Sent ${message?.createdAt?.slice(
+                          0,
+                          10
+                        )}, at ${message?.createdAt?.slice(11, 16)}`
+                  }
+                >
+                  {message?.isRead ? "seen" : "sent"}
+                </span>
               </li>
             ))
           ) : (
-            <div style={{ alignSelf: "center", paddingTop: "30%" }}>
+            <div style={{ alignSelf: "center", paddingTop: "45%" }}>
               <span style={{ paddingLeft: "3em" }}>No messages.</span>
               <br />
               New messages will appear here.

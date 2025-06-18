@@ -4,7 +4,7 @@ import User from "../../../models/users/userModel.js";
 
 export const markNotificationAsRead = async (context, data) => {
   try {
-    const { senderId, notificationId } = data;
+    const { notificationId } = data;
 
     if (!notificationId) {
       throw new Error("Invalid notification id");
@@ -18,15 +18,17 @@ export const markNotificationAsRead = async (context, data) => {
       throw new Error("Notification not found on server");
     }
 
-    if (notificationFound.readBy.includes(senderId)) {
-      throw new Error("User is already notified");
+    if (notificationFound?.isRead) {
+      throw new Error("Notification already marked as read");
     }
 
     await Notification.findByIdAndUpdate(
       notificationId,
       {
-        $addToSet: { readBy: senderId },
-        $set: { expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) },
+        $set: {
+          isRead: true,
+          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        },
       },
       { new: true }
     );
@@ -45,10 +47,12 @@ export const markAllNotificationsAsRead = async (context, data) => {
     const { senderId } = data;
 
     const result = await Notification.updateMany(
-      { receiver: senderId, readBy: { $ne: senderId } },
+      { receiver: senderId, isRead: false },
       {
-        $push: { readBy: senderId },
-        $set: { expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) },
+        $set: {
+          isRead: true,
+          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        },
       }
     );
 

@@ -33,7 +33,7 @@ export const getMessages = async (req, res) => {
         receiverId: message.receiver?._id,
         receiverName: message.receiver?.name,
         receiverAvatar: message.sender?.avatar,
-        timestamp: message.timestamp,
+        createdAt: message.createdAt,
         isRead: message.isRead,
       }));
 

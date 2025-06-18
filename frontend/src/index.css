@@ -430,12 +430,12 @@ li {
 }
 
 .conversation-chat__display {
-  height: 482px;
+  height: 85%;
   width: 52%;
   overflow: hidden;
   border-radius: 5% 5% 0 0;
   border: 1px solid transparent;
-  margin-top: 1.1em;
+  align-self: flex-start;
   transition: all 0.2s ease-in-out;
 }
 
@@ -478,7 +478,7 @@ li {
 .chatlist-container p {
   background: rgb(216, 214, 214);
   width: 100%;
-  padding: 0.5em 0 0.7em 1em;
+  padding: 0.5em 0 0.7em 3.5em;
   font-weight: 500;
   margin-bottom: 0;
   margin-top: 0;
@@ -552,6 +552,7 @@ li {
   flex-direction: row;
   justify-content: space-around;
   align-items: center;
+  margin-left: 0.7em;
 }
 
 .chat__display__heading-userinfo {
@@ -565,7 +566,7 @@ li {
 
 .chat__display-close {
   margin-top: 1.2em;
-  margin-right: 1.5em;
+  margin-right: 1.7em;
   max-height: 40%;
   color: white;
   background-color: red;
@@ -660,14 +661,14 @@ li {
 
 .friendlist li {
   position: relative;
-  padding: 0.5em 0 0.5em 1.5em;
+  padding: 0.5em 0 0.5em 2em;
   border: 1px solid rgb(216, 214, 214);
   border-left: 1px solid transparent;
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 6px;
-  width: 100%;
+  gap: 0.8em;
+  width: 88%;
 }
 
 .friendlist li:hover {
@@ -689,6 +690,7 @@ li {
   margin: 0;
   width: 100%;
   padding: 0 1em;
+  gap: 1em;
 }
 
 .chat__item-sender {
@@ -725,10 +727,14 @@ li {
 .message p {
   word-break: break-all;
   text-align: center;
+  margin-top: 0;
+  margin-bottom: 0.6em;
 }
 
 .chat__message-status {
-  margin-right: 1em;
+  margin-right: 1.3em;
+  font-size: small;
+  cursor: default;
 }
 
 .chat__icon {

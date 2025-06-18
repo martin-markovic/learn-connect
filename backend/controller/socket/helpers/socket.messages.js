@@ -48,7 +48,7 @@ export const sendMessage = async (context, data) => {
         receiverAvatar: populatedMessage.receiver.avatar,
         text: populatedMessage.text,
         isRead: populatedMessage.isRead,
-        timestamp: populatedMessage.createdAt,
+        createdAt: populatedMessage.createdAt,
       };
     } else {
       const newMessage = new Conversation({
@@ -76,7 +76,7 @@ export const sendMessage = async (context, data) => {
         receiverAvatar: populatedMessage.receiver.avatar,
         text: populatedMessage.text,
         isRead: populatedMessage.isRead,
-        timestamp: populatedMessage.timestamp,
+        createdAt: populatedMessage.createdAt,
       };
     }
 
@@ -101,7 +101,11 @@ export const handleChatOpen = async (context, data) => {
     }
 
     await Conversation.updateMany(
-      { _id: { $in: chatFound.conversation }, isRead: false },
+      {
+        _id: { $in: chatFound.conversation },
+        receiver: senderId,
+        isRead: false,
+      },
       { $set: { isRead: true } }
     );
 
