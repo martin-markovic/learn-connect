@@ -70,6 +70,34 @@ header ul {
   width: 100%;
 }
 
+.nav-buttons li,
+.nav-buttons li button {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-buttons li {
+  margin-left: 3em;
+  margin-right: 3em;
+  gap: 2em;
+  height: 1.6em;
+}
+
+.nav-buttons li button {
+  height: 100%;
+  width: 6em;
+  gap: 0.5em;
+  border: 1px solid grey;
+  border-radius: 5%;
+  cursor: pointer;
+}
+
+.nav-buttons li button:hover {
+  background-color: rgb(235, 235, 235);
+}
+
 .container {
   height: 50%;
   width: 50%;
