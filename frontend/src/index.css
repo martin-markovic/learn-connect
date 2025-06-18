@@ -367,6 +367,7 @@ li {
   justify-content: flex-start;
   align-items: flex-start;
   height: 55%;
+  width: 90%;
 }
 
 .friend__search-container {
@@ -375,6 +376,7 @@ li {
   justify-content: flex-start;
   align-items: flex-start;
   height: 7%;
+  width: 100%;
 }
 
 .friend__search-container input,
@@ -382,11 +384,23 @@ li {
   height: 100%;
 }
 
+.friend__search-container input {
+  width: 70%;
+}
+
+.friend__search-container button {
+  width: 25%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+}
+
 .result-list {
   box-sizing: border-box;
   max-height: 398px;
   min-height: 0;
-  width: 175px;
+  width: 70%;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
