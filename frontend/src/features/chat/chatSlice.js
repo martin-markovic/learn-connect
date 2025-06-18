@@ -75,7 +75,9 @@ const chatSlice = createSlice({
       const { messageId, friendId } = action.payload;
 
       state.chat[friendId] = state.chat[friendId].map((message) =>
-        message._id === messageId ? { ...message, isRead: true } : message
+        message._id === messageId
+          ? { ...message, isRead: true, updatedAt: new Date().toISOString() }
+          : message
       );
     },
     markAllAsRead: (state, action) => {
