@@ -118,6 +118,7 @@ header ul {
 .avatar-wrapper {
   position: relative;
   display: inline-block;
+  margin-left: 2em;
   width: 80px;
   height: 80px;
 }
@@ -234,6 +235,7 @@ li {
 }
 
 .classroom__enroll__dropdown-items {
+  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -245,8 +247,24 @@ li {
 
 .classroom__enroll__dropdown-items select {
   margin-top: 0.3em;
-  width: 50%;
-  margin-left: 2em;
+  width: 55%;
+  margin-left: 1.4em;
+}
+
+.classroom__select-cancel {
+  position: absolute;
+  top: 4px;
+  right: 29%;
+  width: 21px;
+  height: 19px;
+  background-color: rgb(216, 214, 214);
+  font-size: medium;
+  cursor: pointer;
+  display: flex;
+  border: 1px solid black;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .classroom__enroll-details {
@@ -448,6 +466,7 @@ li {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  align-items: flex-start;
   margin-left: 5%;
 }
 
@@ -1267,6 +1286,7 @@ input[type="radio"]:checked::after {
   justify-content: flex-start;
   align-items: center;
   gap: 2.5em;
+  gap: 1.5em;
 }
 
 .user__profile-top__box {
