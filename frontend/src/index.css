@@ -465,9 +465,9 @@ li {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
   align-items: flex-start;
   margin-left: 5%;
+  width: 100%;
 }
 
 .dashboard-notifications {
@@ -1285,17 +1285,16 @@ input[type="radio"]:checked::after {
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
-  gap: 2.5em;
   gap: 1.5em;
 }
 
 .user__profile-top__box {
-  height: 40%;
+  height: 45%;
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.5em;
+  gap: 1.3em;
   align-self: start;
 }
 
@@ -1336,9 +1335,30 @@ input[type="radio"]:checked::after {
   height: 140px;
 }
 
+.friendship-container {
+  height: 1.5em;
+  width: 30%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+#friendshipStatus {
+  height: 100%;
+  width: 30%;
+  font-size: medium;
+  text-align: center;
+  cursor: pointer;
+}
+
 .modal {
-  height: 2em;
   width: 40%;
+  height: 5em;
+}
+
+.modal-container {
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: baseline;
@@ -1346,6 +1366,8 @@ input[type="radio"]:checked::after {
 
 .modal p {
   text-align: center;
+  font-size: large;
+  margin-top: 0.2em;
 }
 
 .modal-buttons {

@@ -281,7 +281,7 @@ function UserProfile() {
                 </div>
               )}
             {friendshipStatus === "accepted" && (
-              <div>
+              <div className="friendship-container">
                 <select
                   name="friendshipStatus"
                   id="friendshipStatus"
@@ -299,15 +299,15 @@ function UserProfile() {
             )}
             <div className="modal">
               {modalOpen && (
-                <>
+                <div className="modal-container">
                   <p>
                     Are you sure you want to {actionToConfirm} {userInfo?.name}?
                   </p>
                   <div className="modal-buttons">
                     <button onClick={handleConfirmAction}>Yes</button>
-                    <button onClick={handleCancelAction}>No</button>
+                    <button onClick={handleCancelAction}>Cancel</button>
                   </div>
-                </>
+                </div>
               )}
             </div>
             {!isLoading && friendshipStatus === null && !modalOpen && (
