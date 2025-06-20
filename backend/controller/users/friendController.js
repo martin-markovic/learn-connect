@@ -3,7 +3,7 @@ import User from "../../models/users/userModel.js";
 
 export const getFriendList = async (req, res) => {
   try {
-    const userId = req.user?._id;
+    const { userId } = req.params;
 
     if (!userId) {
       throw new Error({
@@ -12,10 +12,19 @@ export const getFriendList = async (req, res) => {
       });
     }
 
+    const authUserId = req?.user?._id;
+
+    if (!authUserId) {
+      throw new Error({
+        statusCode: 401,
+        message: "User is not authenticated",
+      });
+    }
+
     const friendList = await Friend.find(
       {
         $or: [{ sender: userId }, { receiver: userId }],
-        status: { $ne: "blocked" },
+        status: { $nin: ["blocked", null] },
       },
       "sender receiver status"
     )
