@@ -130,7 +130,9 @@ function UserNotifications() {
                 </li>
               ))
             ) : (
-              <li>No new notifications</li>
+              <li style={{ padding: "0.7em 0", textAlign: "center" }}>
+                No new notifications
+              </li>
             )}
           </ul>
         ) : null}

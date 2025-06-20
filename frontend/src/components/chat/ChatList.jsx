@@ -1,8 +1,11 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 
 import socketEventManager from "../../features/socket/socket.eventManager.js";
-import { getFriendList } from "../../features/friend/friendSlice.js";
+import {
+  getFriendList,
+  resetUserList,
+} from "../../features/friend/friendSlice.js";
 import { getChatStatus, getMessages } from "../../features/chat/chatSlice.js";
 import { ChatContext } from "../../context/chatContext.js";
 import { FaCircleUser } from "react-icons/fa6";
@@ -18,6 +21,8 @@ function ChatList() {
   const { user } = useSelector((state) => state.auth);
   const online = useSelector((state) => state.chat?.online);
 
+  const listFetched = useRef(false);
+
   const { selectedChat, setSelectedChat, setChatScroll, onlineList } =
     useContext(ChatContext);
 
@@ -28,9 +33,18 @@ function ChatList() {
   }, [dispatch]);
 
   useEffect(() => {
-    dispatch(getFriendList());
+    if (!listFetched.current && user?._id) {
+      dispatch(getFriendList(user?._id));
+
+      listFetched.current = true;
+    }
+
     dispatch(getMessages());
-  }, [dispatch, friendList]);
+
+    return () => {
+      dispatch(resetUserList());
+    };
+  }, [dispatch, user?._id]);
 
   const handleSelect = (friend) => {
     const { id } = friend;
@@ -68,7 +82,11 @@ function ChatList() {
         <span>
           <button onClick={handleChatConnection}>
             Go {online ? "Offline" : "Online"}
-            {online ? <PiChatCircleSlashBold /> : <PiChatTeardropDotsBold />}
+            {online ? (
+              <PiChatCircleSlashBold style={{ marginLeft: "0.5em" }} />
+            ) : (
+              <PiChatTeardropDotsBold style={{ marginLeft: "0.5em" }} />
+            )}
           </button>
         </span>
         <span>
