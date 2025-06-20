@@ -83,6 +83,10 @@ function Classroom() {
     }
   };
 
+  const handleCancel = () => {
+    setSelectedClassroom("");
+  };
+
   return (
     <div className="classroom-container">
       <div className="classroom__enroll-dropdown">
@@ -125,6 +129,16 @@ function Classroom() {
                     </option>
                   ))}
                 </select>
+                {selectedClassroom && (
+                  <button
+                    type="button"
+                    onClick={handleCancel}
+                    className="classroom__select-cancel"
+                  >
+                    X
+                  </button>
+                )}
+
                 <div className="classroom__enroll-details">
                   {selectedClassroom &&
                     selectedClassroom !== userClassroom?._id && (

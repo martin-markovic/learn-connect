@@ -70,6 +70,34 @@ header ul {
   width: 100%;
 }
 
+.nav-buttons li,
+.nav-buttons li button {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-buttons li {
+  margin-left: 3em;
+  margin-right: 3em;
+  gap: 2em;
+  height: 1.6em;
+}
+
+.nav-buttons li button {
+  height: 100%;
+  width: 6em;
+  gap: 0.5em;
+  border: 1px solid grey;
+  border-radius: 5%;
+  cursor: pointer;
+}
+
+.nav-buttons li button:hover {
+  background-color: rgb(235, 235, 235);
+}
+
 .container {
   height: 50%;
   width: 50%;
@@ -90,6 +118,7 @@ header ul {
 .avatar-wrapper {
   position: relative;
   display: inline-block;
+  margin-left: 2em;
   width: 80px;
   height: 80px;
 }
@@ -206,6 +235,7 @@ li {
 }
 
 .classroom__enroll__dropdown-items {
+  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -217,8 +247,24 @@ li {
 
 .classroom__enroll__dropdown-items select {
   margin-top: 0.3em;
-  width: 50%;
-  margin-left: 2em;
+  width: 55%;
+  margin-left: 1.4em;
+}
+
+.classroom__select-cancel {
+  position: absolute;
+  top: 4px;
+  right: 29%;
+  width: 21px;
+  height: 19px;
+  background-color: rgb(216, 214, 214);
+  font-size: medium;
+  cursor: pointer;
+  display: flex;
+  border: 1px solid black;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .classroom__enroll-details {
@@ -339,6 +385,7 @@ li {
   justify-content: flex-start;
   align-items: flex-start;
   height: 55%;
+  width: 90%;
 }
 
 .friend__search-container {
@@ -347,6 +394,7 @@ li {
   justify-content: flex-start;
   align-items: flex-start;
   height: 7%;
+  width: 100%;
 }
 
 .friend__search-container input,
@@ -354,11 +402,23 @@ li {
   height: 100%;
 }
 
+.friend__search-container input {
+  width: 70%;
+}
+
+.friend__search-container button {
+  width: 25%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+}
+
 .result-list {
   box-sizing: border-box;
   max-height: 398px;
   min-height: 0;
-  width: 175px;
+  width: 70%;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -405,8 +465,9 @@ li {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
   margin-left: 5%;
+  width: 100%;
 }
 
 .dashboard-notifications {
@@ -1224,16 +1285,16 @@ input[type="radio"]:checked::after {
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
-  gap: 2.5em;
+  gap: 1.5em;
 }
 
 .user__profile-top__box {
-  height: 40%;
+  height: 45%;
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.5em;
+  gap: 1.3em;
   align-self: start;
 }
 
@@ -1274,9 +1335,30 @@ input[type="radio"]:checked::after {
   height: 140px;
 }
 
+.friendship-container {
+  height: 1.5em;
+  width: 30%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+#friendshipStatus {
+  height: 100%;
+  width: 30%;
+  font-size: medium;
+  text-align: center;
+  cursor: pointer;
+}
+
 .modal {
-  height: 2em;
   width: 40%;
+  height: 5em;
+}
+
+.modal-container {
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: baseline;
@@ -1284,6 +1366,8 @@ input[type="radio"]:checked::after {
 
 .modal p {
   text-align: center;
+  font-size: large;
+  margin-top: 0.2em;
 }
 
 .modal-buttons {

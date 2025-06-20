@@ -9,6 +9,6 @@ import { protect } from "../../middleware/authMiddleware.js";
 
 friendRouter.get("/", protect, getUserList);
 
-friendRouter.get("/me", protect, getFriendList);
+friendRouter.get("/:userId", protect, getFriendList);
 
 export default friendRouter;

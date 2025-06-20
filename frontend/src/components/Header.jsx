@@ -53,6 +53,12 @@ function Header() {
           <div className="nav-buttons">
             <li>
               <button
+                style={{
+                  backgroundColor:
+                    location?.pathname === "/"
+                      ? "rgb(235, 235, 235)"
+                      : "transparent",
+                }}
                 onClick={() => {
                   navigate("/");
                 }}
@@ -60,6 +66,11 @@ function Header() {
                 Home <FaHome />
               </button>
               <button
+                style={{
+                  backgroundColor: location?.pathname.startsWith("/quizzes")
+                    ? "rgb(235, 235, 235)"
+                    : "transparent",
+                }}
                 onClick={() => {
                   navigate("/quizzes");
                 }}
@@ -67,6 +78,12 @@ function Header() {
                 Quizzes <FaClipboard />
               </button>
               <button
+                style={{
+                  backgroundColor: location?.pathname.startsWith("/exam")
+                    ? "rgb(235, 235, 235)"
+                    : "transparent",
+                  position: "relative",
+                }}
                 onClick={() => {
                   if (examId) {
                     try {
@@ -77,14 +94,13 @@ function Header() {
                     }
                   }
                 }}
-                style={{ position: "relative" }}
               >
                 Exam <FaHourglassHalf />
                 {examId && location.pathname !== `/exam/${examId}` && (
                   <span
                     style={{
                       position: "absolute",
-                      top: -7,
+                      top: -5,
                       right: -7,
                       color: "red",
                       fontSize: "1.4em",

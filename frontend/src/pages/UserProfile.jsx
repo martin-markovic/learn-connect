@@ -38,13 +38,13 @@ function UserProfile() {
 
   useEffect(() => {
     dispatch(getUserList());
-    dispatch(getFriendList());
+    dispatch(getFriendList(userId));
 
     return () => {
       dispatch(resetExam());
       dispatch(resetUserList());
     };
-  }, [dispatch]);
+  }, [dispatch, userId]);
 
   useEffect(() => {
     if (friendshipStatus === "accepted" || userId === user?._id) {
@@ -61,11 +61,12 @@ function UserProfile() {
   useEffect(() => {
     const isFriend = friendList.find(
       (item) =>
-        item.senderId === String(userId) || item.receiverId === String(userId)
+        item.senderId === String(user?._id) ||
+        item.receiverId === String(user?._id)
     )?.status;
 
     setFriendshipStatus(isFriend || null);
-  }, [friendList, userId]);
+  }, [friendList, user?._id]);
 
   useEffect(() => {
     socketEventManager.subscribe("user blocked", (data) => {
@@ -75,7 +76,7 @@ function UserProfile() {
       setFriendshipStatus("blocked");
 
       dispatch(getUserList());
-      dispatch(getFriendList());
+      dispatch(getFriendList(user?._id));
     });
 
     socketEventManager.subscribe("friend request sent", (data) => {
@@ -86,7 +87,7 @@ function UserProfile() {
       socketEventManager.unsubscribe("user blocked");
       socketEventManager.unsubscribe("friend request sent");
     };
-  }, [dispatch]);
+  }, [dispatch, user?._id]);
 
   const handleSend = () => {
     try {
@@ -281,7 +282,7 @@ function UserProfile() {
                 </div>
               )}
             {friendshipStatus === "accepted" && (
-              <div>
+              <div className="friendship-container">
                 <select
                   name="friendshipStatus"
                   id="friendshipStatus"
@@ -299,15 +300,15 @@ function UserProfile() {
             )}
             <div className="modal">
               {modalOpen && (
-                <>
+                <div className="modal-container">
                   <p>
                     Are you sure you want to {actionToConfirm} {userInfo?.name}?
                   </p>
                   <div className="modal-buttons">
                     <button onClick={handleConfirmAction}>Yes</button>
-                    <button onClick={handleCancelAction}>No</button>
+                    <button onClick={handleCancelAction}>Cancel</button>
                   </div>
-                </>
+                </div>
               )}
             </div>
             {!isLoading && friendshipStatus === null && !modalOpen && (
@@ -334,7 +335,7 @@ function UserProfile() {
       "
       >
         <div className="user__profile-bottom__box-content">
-          {friendList.length ? (
+          {friendList.some((entry) => entry.status === "accepted") ? (
             <div className="user__profile-friendlist-container">
               <h4>Friends</h4>
               <ul className="user__profile-list">
@@ -342,7 +343,7 @@ function UserProfile() {
                   friend?.status === "accepted" ? (
                     <li
                       title={`visit ${
-                        friend?.senderId === user?._id
+                        friend?.senderId === userId
                           ? friend?.receiverName?.split(" ")[0]
                           : friend.senderName?.split(" ")[0]
                       }'s profile`}
@@ -351,7 +352,7 @@ function UserProfile() {
                       onClick={() => {
                         navigate(
                           `/profile/${
-                            friend?.senderId === user?._id
+                            friend?.senderId === userId
                               ? friend?.receiverId
                               : friend?.senderId
                           }`
@@ -359,14 +360,14 @@ function UserProfile() {
                       }}
                     >
                       {(
-                        friend?.senderId === user?._id
+                        friend?.senderId === userId
                           ? friend?.receiverAvatar
                           : friend?.senderAvatar
                       ) ? (
                         <img
                           alt="user avatar"
                           src={
-                            friend?.senderId === user?._id
+                            friend?.senderId === userId
                               ? friend?.receiverAvatar
                               : friend?.senderAvatar
                           }
@@ -396,7 +397,7 @@ function UserProfile() {
                         </div>
                       )}
                       <p style={{ width: "100%", textAlign: "center" }}>
-                        {friend?.senderId === user?._id
+                        {friend?.senderId === userId
                           ? friend?.receiverName
                           : friend?.senderName}
                       </p>

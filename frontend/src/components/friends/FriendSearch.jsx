@@ -46,7 +46,7 @@ export default function FriendSearch() {
       }));
     }
 
-    if (!quizStateLoading) {
+    if (!quizStateLoading && userQuizzes?.length && classQuizzes?.length) {
       const quizList = [...userQuizzes, ...classQuizzes];
       const quizIdSet = new Set();
       const filteredList = [];
@@ -129,7 +129,7 @@ export default function FriendSearch() {
         }}
       >
         {input.length >= 2 && resultList.length === 0 ? (
-          <p>No matching users found.</p>
+          <p>No results found.</p>
         ) : (
           <div
             style={{
