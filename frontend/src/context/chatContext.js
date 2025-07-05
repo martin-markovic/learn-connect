@@ -20,16 +20,30 @@ const ChatProvider = ({ children }) => {
     eventType: null,
   });
   const [onlineList, setOnlineList] = useState([]);
+  const [chatReady, setChatReady] = useState({
+    isInitialized: false,
+    isSubscribed: false,
+    chatStatus: null,
+  });
 
   const selectedChatRef = useRef(null);
   const activityTimer = useRef(null);
-  const isInitialized = useRef(false);
-  const isSubscribed = useRef(false);
-  const chatStatus = useRef(null);
 
   const { user } = useSelector((state) => state.auth);
   const online = useSelector((state) => state.chat.online);
   const dispatch = useDispatch();
+
+  const { isInitialized, isSubscribed, chatStatus } = chatReady;
+
+  useEffect(() => {
+    if (!isInitialized || !isSubscribed || !online || chatStatus !== null)
+      return;
+
+    setChatReady((prevState) => ({
+      ...prevState,
+      chatStatus: "connected",
+    }));
+  }, [isInitialized, isSubscribed, online, chatStatus]);
 
   useEffect(() => {
     selectedChatRef.current = selectedChat;
@@ -109,7 +123,6 @@ const ChatProvider = ({ children }) => {
   }, []);
 
   const handleUserOffline = useCallback((data) => {
-
     setOnlineList((prev) => prev.filter((f) => f !== data?.id));
   }, []);
 
@@ -119,32 +132,54 @@ const ChatProvider = ({ children }) => {
 
       dispatch(changeChatStatus(data?.online));
 
-      chatStatus.current = data?.online ? "reconnected" : "disconnected";
+      setChatReady((prevState) => ({
+        ...prevState,
+        chatStatus: data?.online
+          ? prevState.chatStatus === null
+            ? "connected"
+            : "reconnected"
+          : "disconnected",
+      }));
     },
     [dispatch]
   );
 
   useEffect(() => {
     if (!user?._id) {
-      isSubscribed.current = false;
+      setChatReady((prevState) => ({
+        ...prevState,
+        isSubscribed: false,
+      }));
       return;
     }
 
-    if (isSubscribed.current || !user?._id) return;
+    if (isSubscribed || !user?._id) return;
 
     socketEventManager.subscribe("chat status changed", handleChatStatus);
 
-
-    isSubscribed.current = true;
+    setChatReady((prevState) => ({ ...prevState, isSubscribed: true }));
 
     return () => {
       socketEventManager.unsubscribe("chat status changed");
     };
-  }, [user?._id, handleChatStatus]);
+  }, [user?._id, handleChatStatus, isSubscribed]);
+
+  const socketSubscriptions = [
+    { event: "new message", handler: handleNewMessage },
+    { event: "message seen", handler: handleMarkAsRead },
+    { event: "chat activity", handler: handleChatActivity },
+    { event: "messages read", handler: handleMarkAllAsRead },
+    { event: "user connected", handler: handleConnect },
+    { event: "friend connected", handler: handleUserOnline },
+    { event: "friend disconnected", handler: handleUserOffline },
+  ];
 
   useEffect(() => {
     if (!user?._id) {
-      isInitialized.current = false;
+      setChatReady((prevState) => ({
+        ...prevState,
+        isInitialized: false,
+      }));
       return;
     }
 
@@ -152,32 +187,24 @@ const ChatProvider = ({ children }) => {
       return;
     }
 
-    if (isInitialized.current || !user?._id) return;
+    if (isInitialized || !user?._id) return;
 
-    const subscriptions = [
-      { event: "new message", handler: handleNewMessage },
-      { event: "message seen", handler: handleMarkAsRead },
-      { event: "chat activity", handler: handleChatActivity },
-      { event: "messages read", handler: handleMarkAllAsRead },
-      { event: "user connected", handler: handleConnect },
-      { event: "friend connected", handler: handleUserOnline },
-      {
-        event: "friend disconnected",
-        handler: handleUserOffline,
-      },
-    ];
-
-    subscriptions.forEach(({ event, handler }) => {
+    socketSubscriptions.forEach(({ event, handler }) => {
       socketEventManager.subscribe(event, handler);
     });
 
-    isInitialized.current = true;
+    socketEventManager.handleEmitEvent("connect chat", {
+      senderId: user?._id,
+    });
+
+    setChatReady((prevState) => ({ ...prevState, chatInitialized: true }));
 
     return () => {
-      subscriptions.forEach(({ event }) => {
+      socketSubscriptions.forEach(({ event }) => {
         socketEventManager.unsubscribe(event);
       });
-      isInitialized.current = false;
+
+      setOnlineList([]);
     };
   }, [
     dispatch,
@@ -191,33 +218,14 @@ const ChatProvider = ({ children }) => {
     handleUserOnline,
     handleUserOffline,
     handleChatStatus,
+    isInitialized,
   ]);
 
   useEffect(() => {
-    if (!user?._id) {
-      isInitialized.current = false;
-    }
-  }, [user?._id]);
+    if (!isInitialized) return;
 
-  useEffect(() => {
-    if (!isInitialized.current) return;
-
-    const subscriptions = [
-      { event: "new message", handler: handleNewMessage },
-      { event: "message seen", handler: handleMarkAsRead },
-      { event: "chat activity", handler: handleChatActivity },
-      { event: "messages read", handler: handleMarkAllAsRead },
-      { event: "user connected", handler: handleConnect },
-      { event: "friend connected", handler: handleUserOnline },
-      {
-        event: "friend disconnected",
-        handler: handleUserOffline,
-      },
-    ];
-
-    if (chatStatus.current === "reconnected") {
-
-      subscriptions.forEach(({ event, handler }) => {
+    if (chatStatus === "reconnected") {
+      socketSubscriptions.forEach(({ event, handler }) => {
         socketEventManager.subscribe(event, handler);
       });
 
@@ -226,17 +234,12 @@ const ChatProvider = ({ children }) => {
       socketEventManager.handleEmitEvent("reconnect chat", {
         userId: user?._id,
       });
-
-      chatStatus.current = null;
     }
 
-    if (chatStatus.current === "disconnected") {
-
-      subscriptions.forEach((event) => {
+    if (chatStatus === "disconnected") {
+      socketSubscriptions.forEach((event) => {
         socketEventManager.unsubscribe(event);
       });
-
-      chatStatus.current = null;
     }
   }, [
     online,
@@ -248,6 +251,9 @@ const ChatProvider = ({ children }) => {
     handleUserOnline,
     handleUserOffline,
     dispatch,
+    user?._id,
+    isInitialized,
+    chatStatus,
   ]);
 
   const chatState = {

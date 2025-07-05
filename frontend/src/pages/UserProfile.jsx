@@ -37,14 +37,17 @@ function UserProfile() {
   const { examScores } = useSelector((state) => state.exam);
 
   useEffect(() => {
+    if (userId === user?._id || friendshipStatus !== "blocked") {
+      dispatch(getFriendList(userId));
+    }
+
     dispatch(getUserList());
-    dispatch(getFriendList(userId));
 
     return () => {
       dispatch(resetExam());
       dispatch(resetUserList());
     };
-  }, [dispatch, userId]);
+  }, [dispatch, user?._id, userId, friendshipStatus]);
 
   useEffect(() => {
     if (friendshipStatus === "accepted" || userId === user?._id) {
@@ -61,12 +64,16 @@ function UserProfile() {
   useEffect(() => {
     const isFriend = friendList.find(
       (item) =>
-        item.senderId === String(user?._id) ||
-        item.receiverId === String(user?._id)
+        (item.senderId === String(userId) &&
+          item.receiverId === String(user?._id)) ||
+        (item.receiverId === String(userId) &&
+          item.senderId === String(user?._id))
     )?.status;
 
-    setFriendshipStatus(isFriend || null);
-  }, [friendList, user?._id]);
+    if (isFriend !== undefined && friendshipStatus !== isFriend) {
+      setFriendshipStatus(isFriend);
+    }
+  }, [friendList, userId, user?._id, friendshipStatus]);
 
   useEffect(() => {
     socketEventManager.subscribe("user blocked", (data) => {
@@ -335,7 +342,7 @@ function UserProfile() {
       "
       >
         <div className="user__profile-bottom__box-content">
-          {friendList.some((entry) => entry.status === "accepted") ? (
+          {friendList.length ? (
             <div className="user__profile-friendlist-container">
               <h4>Friends</h4>
               <ul className="user__profile-list">
