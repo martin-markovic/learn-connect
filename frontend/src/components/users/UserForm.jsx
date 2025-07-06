@@ -146,9 +146,11 @@ function UserForm({ setIsEditing, userDetails }) {
   return (
     <div className="user__profile-update">
       <form onSubmit={handleSubmit}>
-        <div className="edit__info-avatar-container">
+        <div className="edit__info-avatar-container user__form-avatar__wrapper">
           {editInfo.avatar ? (
-            <div>
+            <div
+              style={{ position: "relative", width: "140px", height: "140px" }}
+            >
               {formData?.avatar ? (
                 <img
                   src={avatarPreview}
@@ -198,8 +200,8 @@ function UserForm({ setIsEditing, userDetails }) {
               src={avatarPreview}
               alt="user avatar"
               style={{
-                width: "80px",
-                height: "80px",
+                width: "140px",
+                height: "140px",
                 borderRadius: "50%",
                 objectFit: "cover",
               }}
@@ -216,17 +218,16 @@ function UserForm({ setIsEditing, userDetails }) {
             />
           )}
 
-          <label className="upload-button clickable">
+          <label className="upload-button clickable" title="upload user image">
             <input
               type="file"
-              style={{ display: "none" }}
               id="avatar"
               name="avatar"
               accept="image/png, image/jpeg"
               autoComplete="off"
               onChange={handleChange}
             />
-            <MdFileUpload />
+            <MdFileUpload style={{ height: "30%", width: "30%" }} />
           </label>
         </div>
 

@@ -213,8 +213,8 @@ function UserProfile() {
                 src={userInfo?.avatar}
                 alt="user avatar"
                 style={{
-                  width: "90px",
-                  height: "90px",
+                  width: "100%",
+                  height: "100%",
                   borderRadius: "50%",
                   objectFit: "cover",
                 }}

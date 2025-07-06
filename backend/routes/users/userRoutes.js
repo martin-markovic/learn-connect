@@ -13,7 +13,7 @@ import { protect } from "../../middleware/authMiddleware.js";
 
 const upload = multer({ storage });
 
-userRouter.post("/", upload.single("avatar"), registerUser);
+userRouter.post("/", registerUser);
 userRouter.post("/login", loginUser);
 userRouter.put("/", protect, upload.single("avatar"), updateUser);
 
