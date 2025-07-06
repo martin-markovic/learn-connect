@@ -18,6 +18,7 @@ const Chat = () => {
       >
         {selectedChat && online && <ChatDisplay />}
       </div>
+      <div className="chat-glow"></div>
       <div className="conversation-chat__list">
         <ChatList />
       </div>

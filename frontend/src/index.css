@@ -497,6 +497,7 @@ li {
 }
 
 .conversation {
+  position: relative;
   display: flex;
   flex-direction: row;
   justify-content: flex-end;
@@ -519,6 +520,22 @@ li {
   border: 1px solid transparent;
   align-self: flex-start;
   transition: all 0.2s ease-in-out;
+}
+
+.chat-glow {
+  pointer-events: none;
+  position: absolute;
+  display: none;
+  height: 85.2%;
+  width: 51.7%;
+  top: 0;
+  left: 8.5%;
+  right: 0;
+  bottom: 0;
+  box-shadow: 0 0 2px 2px rgba(0, 255, 255, 0.3);
+  filter: blur(2px);
+  z-index: 0;
+  border-radius: 5% 5% 0 0;
 }
 
 .chat-active,
@@ -1603,7 +1620,7 @@ input[type="radio"]:checked::after {
 
 .edit__info-confirm__buttons input,
 .edit__info-confirm__buttons button {
-  height: 80%;
+  height: 95%;
   width: 20%;
   padding: 2px;
 }

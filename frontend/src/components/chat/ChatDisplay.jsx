@@ -45,6 +45,12 @@ const ChatDisplay = () => {
       if (isEngagedRef.current !== engaged) {
         isEngagedRef.current = engaged;
       }
+
+      const chatGlow = document.querySelector(".chat-glow");
+
+      if (chatGlow) {
+        chatGlow.style.display = engaged ? "block" : "none";
+      }
     };
 
     document.addEventListener("click", handleClick);
@@ -213,6 +219,11 @@ const ChatDisplay = () => {
           type="button"
           onClick={() => {
             setSelectedChat(null);
+
+            isEngagedRef.current = false;
+
+            const chatGlow = document.querySelector(".chat-glow");
+            chatGlow.style.display = "none";
           }}
         >
           X
@@ -238,16 +249,10 @@ const ChatDisplay = () => {
                     style={{
                       alignSelf:
                         message?.senderId === user?._id
-                          ? "center"
+                          ? "flex-end"
                           : "flex-start",
-                      marginLeft:
-                        message?.senderId === user?._id ? "2.8em" : "0",
                     }}
-                    className={`chat-avatar ${
-                      message?.senderId === user?._id
-                        ? "chat__item-sender"
-                        : "chat__item-receiver"
-                    }`}
+                    className="chat-avatar"
                   />
                 ) : (
                   <div
