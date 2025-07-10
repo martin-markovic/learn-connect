@@ -66,7 +66,7 @@ const updateUser = async (userData, token) => {
 
     let multiPartData;
 
-    if (userData.avatar) {
+    if (userData.avatar instanceof File) {
       const formData = new FormData();
       formData.append("avatar", userData.avatar);
       Object.entries(userData).forEach(([key, value]) => {
@@ -78,7 +78,9 @@ const updateUser = async (userData, token) => {
 
     const response = await axiosInstance.put(
       `${API_URL}/`,
-      userData.avatar ? multiPartData : userData,
+      userData.avatar && userData.avatar !== "removeAvatar"
+        ? multiPartData
+        : userData,
       config
     );
 

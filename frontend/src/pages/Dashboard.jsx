@@ -28,8 +28,8 @@ export default function Dashboard() {
                 src={user?.avatar}
                 alt="user avatar"
                 style={{
-                  width: "60px",
-                  height: "60px",
+                  width: "80px",
+                  height: "80px",
                   borderRadius: "50%",
                   objectFit: "cover",
                 }}

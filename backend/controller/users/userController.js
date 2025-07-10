@@ -95,13 +95,20 @@ export const updateUser = async (req, res) => {
 
     const avatarUrl = req.file?.path || null;
 
-    const { name, email, password } = req.body;
+    const { name, email, password, avatar } = req.body;
 
-    const updateFields = { name, email, password, avatar: avatarUrl };
+    const updateFields = { name, email, password, avatar };
+
+    if (avatarUrl) {
+      updateFields.avatar = avatarUrl;
+    }
 
     const cleanedFields = Object.entries(updateFields).reduce(
       (acc, [key, value]) => {
-        if (value != null && value !== "null" && value !== "") acc[key] = value;
+        if (key === "avatar" && value === "removeAvatar") {
+          acc[key] = null;
+        } else if (value != null && value !== "null" && value !== "")
+          acc[key] = value;
         return acc;
       },
       {}

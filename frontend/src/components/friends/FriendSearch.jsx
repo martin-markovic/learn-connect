@@ -164,7 +164,11 @@ export default function FriendSearch() {
                         <img
                           src={entry?.avatar}
                           alt="avatar"
-                          style={{ objectFit: "cover" }}
+                          style={{
+                            objectFit: "cover",
+                            height: "27px",
+                            width: "27px",
+                          }}
                         />
                       ) : (
                         <FaUserCircle

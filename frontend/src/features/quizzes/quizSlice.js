@@ -132,7 +132,7 @@ export const quizSlice = createSlice({
       .addCase(updateQuiz.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
-        state.quizzes = state.quizzes.map((quiz) =>
+        state.userQuizzes = state.userQuizzes.map((quiz) =>
           quiz._id === action.payload.id ? action.payload : quiz
         );
       })
@@ -144,7 +144,10 @@ export const quizSlice = createSlice({
       .addCase(deleteQuiz.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
-        state.quizzes = state.quizzes.filter(
+        state.userQuizzes = state.userQuizzes.filter(
+          (quiz) => quiz._id !== action.payload
+        );
+        state.classQuizzes = state.classQuizzes.filter(
           (quiz) => quiz._id !== action.payload
         );
       })
