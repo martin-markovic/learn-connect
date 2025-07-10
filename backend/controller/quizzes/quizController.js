@@ -129,7 +129,7 @@ export const deleteQuiz = async (req, res) => {
       });
     }
 
-    if (quiz.user.toString() !== user?.id) {
+    if (quiz?.createdBy?.toString() !== user?.id) {
       throw new Error({
         statusCode: 403,
         message: "Access denied, quiz does not belong to this user",

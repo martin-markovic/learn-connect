@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -20,7 +20,6 @@ import UserForm from "../components/users/UserForm.jsx";
 function UserProfile() {
   const [userInfo, setUserInfo] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [friendshipStatus, setFriendshipStatus] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [actionToConfirm, setActionToConfirm] = useState("");
@@ -36,8 +35,30 @@ function UserProfile() {
   const user = useSelector((state) => state.auth.user);
   const { examScores } = useSelector((state) => state.exam);
 
+  const friendshipStatus = useMemo(() => {
+    const relation = friendList.find(
+      (item) =>
+        (String(item.senderId) === String(userId) &&
+          String(item.receiverId) === String(user?._id)) ||
+        (String(item.receiverId) === String(userId) &&
+          String(item.senderId) === String(user?._id))
+    );
+    return relation?.status ?? null;
+  }, [friendList, userId, user?._id]);
+
+  const isBlocked = useMemo(() => {
+    const relation = friendList.find(
+      (item) =>
+        (String(item.senderId) === String(userId) &&
+          String(item.receiverId) === String(user?._id)) ||
+        (String(item.receiverId) === String(userId) &&
+          String(item.senderId) === String(user?._id))
+    );
+    return relation?.status === "blocked";
+  }, [friendList, userId, user?._id]);
+
   useEffect(() => {
-    if (userId === user?._id || friendshipStatus !== "blocked") {
+    if (userId === user?._id || !isBlocked) {
       dispatch(getFriendList(userId));
     }
 
@@ -47,13 +68,12 @@ function UserProfile() {
       dispatch(resetExam());
       dispatch(resetUserList());
     };
-  }, [dispatch, user?._id, userId, friendshipStatus]);
+  }, [dispatch, user?._id, userId, isBlocked]);
 
   useEffect(() => {
-    if (friendshipStatus === "accepted" || userId === user?._id) {
-      dispatch(getExamScores(userId));
-    }
-  }, [friendshipStatus, userId, user?._id, dispatch]);
+    dispatch(resetExam());
+    dispatch(resetUserList());
+  }, [userId, dispatch]);
 
   useEffect(() => {
     const selectedUser = userList.find((person) => person._id === userId);
@@ -70,17 +90,19 @@ function UserProfile() {
           item.senderId === String(user?._id))
     )?.status;
 
-    if (isFriend !== undefined && friendshipStatus !== isFriend) {
-      setFriendshipStatus(isFriend);
+    if (
+      (isFriend === "accepted" || userId === user?._id) &&
+      !examScores[userId]
+    ) {
+      dispatch(getExamScores(userId));
     }
-  }, [friendList, userId, user?._id, friendshipStatus]);
+  }, [friendList, userId, user?._id, friendshipStatus, examScores, dispatch]);
 
   useEffect(() => {
     socketEventManager.subscribe("user blocked", (data) => {
       dispatch(handleBlock(data));
 
       setUserInfo((prev) => (prev._id === data ? null : prev));
-      setFriendshipStatus("blocked");
 
       dispatch(getUserList());
       dispatch(getFriendList(user?._id));
@@ -181,7 +203,7 @@ function UserProfile() {
     }
   };
 
-  if (!isLoading && friendshipStatus === "blocked") {
+  if (!isLoading && isBlocked) {
     return <p>You cannot interact with this user.</p>;
   }
 
@@ -428,9 +450,11 @@ function UserProfile() {
                 return (
                   <li
                     className="user__profile-list__entry list__item-quiz"
-                    key={entry?._id}
+                    key={entry?.quiz?.quizId}
                   >
-                    <p className="quiz__entry-title">{entry?.quiz?.title}</p>
+                    <p className="quiz__entry-title">
+                      {entry?.quiz?.quizTitle}
+                    </p>
                     <div className="quiz__entry-scores">
                       <div className="quiz__entry-scores-item">
                         <div>Last score:</div>
