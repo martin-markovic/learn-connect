@@ -163,6 +163,17 @@ li {
   border: 0;
 }
 
+.avatar-remove {
+  position: absolute;
+  height: 1.7em;
+  width: 100%;
+  border: 1px solid black;
+  border-radius: 5%;
+  bottom: -30%;
+  left: 1%;
+  text-align: center;
+}
+
 .user__form-avatar__wrapper:hover .upload-button {
   opacity: 1;
   pointer-events: all;

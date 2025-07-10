@@ -106,7 +106,10 @@ function UserForm({ setIsEditing, userDetails }) {
       const userData = Object.entries(pendingChanges).reduce(
         (acc, [key, value]) => {
           if (key === "avatar") {
-            if (value?.name !== userDetails[key]?.name) {
+            if (
+              value === "removeAvatar" ||
+              value?.name !== userDetails[key]?.name
+            ) {
               acc[key] = value;
             }
             return acc;
@@ -151,7 +154,7 @@ function UserForm({ setIsEditing, userDetails }) {
             <div
               style={{ position: "relative", width: "140px", height: "140px" }}
             >
-              {formData?.avatar ? (
+              {formData?.avatar && formData?.avatar !== "removeAvatar" ? (
                 <img
                   src={avatarPreview}
                   alt="new avatar preview"
@@ -229,6 +232,25 @@ function UserForm({ setIsEditing, userDetails }) {
             />
             <MdFileUpload style={{ height: "30%", width: "30%" }} />
           </label>
+          {userDetails?.avatar && formData?.avatar !== "removeAvatar" && (
+            <button
+              type="button"
+              className="avatar-remove"
+              onClick={() => {
+                setPendingChanges((prevState) => ({
+                  ...prevState,
+                  avatar: "removeAvatar",
+                }));
+                setFormData((prevState) => ({
+                  ...prevState,
+                  avatar: "removeAvatar",
+                }));
+                setAvatarPreview(null);
+              }}
+            >
+              Remove Avatar
+            </button>
+          )}
         </div>
 
         <div className="edit__info-input__group-container">
