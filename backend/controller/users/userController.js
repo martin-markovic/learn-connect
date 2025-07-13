@@ -8,50 +8,39 @@ export const registerUser = async (req, res) => {
     const { name, email, password, password2 } = req.body;
 
     if (!name || !email || !password || !password2) {
-      throw new Error({ statusCode: 400, message: "Please add all fields" });
+      throw { statusCode: 400, message: "Please add all fields" };
     }
 
     if (password !== password2) {
-      throw new Error({ statusCode: 400, message: "Passwords must match" });
+      throw { statusCode: 400, message: "Passwords must match" };
     }
 
     const userExists = await User.findOne({ email });
 
     if (userExists) {
-      throw new Error({ statusCode: 400, message: "User already registered" });
+      throw { statusCode: 400, message: "Email already registered" };
     }
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    const avatar = req.file?.path || null;
-
     const user = await User.create({
       name,
       email,
       password: hashedPassword,
-      avatar,
     });
-
-    if (!user) {
-      throw new Error({
-        statusCode: 400,
-        message: "Invalid registration data",
-      });
-    }
 
     return res.status(201).json({
       _id: user.id,
       name: user.name,
       email: user.email,
-      avatar: user.avatar,
       token: generateToken(user._id),
     });
   } catch (error) {
     console.error("Error registering user", error.message);
     return res
       .status(error?.statusCode || 500)
-      .json(error.message || { message: "Server error" });
+      .json({ message: error.message || "Server error" });
   }
 };
 
@@ -61,13 +50,22 @@ export const loginUser = async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      throw new Error({ statusCode: 400, message: "Please add all fields" });
+      throw {
+        statusCode: 400,
+        message: "Both email and password are required to log in",
+      };
     }
 
     const user = await User.findOne({ email });
 
-    if (!user || !bcrypt.compare(password, user?.password)) {
-      throw new Error({ statusCode: 400, message: "Invalid credentials" });
+    if (!user) {
+      throw { statusCode: 404, message: "User not registered" };
+    }
+
+    const passwordMatch = await bcrypt.compare(password, user.password);
+
+    if (!passwordMatch) {
+      throw { statusCode: 400, message: "Invalid password" };
     }
 
     return res.status(200).json({
@@ -78,10 +76,10 @@ export const loginUser = async (req, res) => {
       token: generateToken(user?._id),
     });
   } catch (error) {
-    console.error("Error registering user", error.message);
+    console.error("Error loggin in", error.message);
     return res
       .status(error?.statusCode || 500)
-      .json(error.message || { message: "Server error" });
+      .json({ message: error.message || "Server error" });
   }
 };
 
@@ -90,7 +88,7 @@ export const updateUser = async (req, res) => {
     const userId = req.user?._id;
 
     if (!userId) {
-      throw new Error({ statusCode: 403, message: "User id is required" });
+      throw { statusCode: 403, message: "Authentication required" };
     }
 
     const avatarUrl = req.file?.path || null;
@@ -118,7 +116,7 @@ export const updateUser = async (req, res) => {
       const existingUser = await User.findOne({ email });
 
       if (existingUser && existingUser._id.toString() !== userId.toString()) {
-        throw new Error({ statusCode: 409, message: "Email already in use" });
+        throw { statusCode: 409, message: "Email already in use" };
       }
     }
 
@@ -128,7 +126,7 @@ export const updateUser = async (req, res) => {
     }).select("-password -online -__v");
 
     if (!updatedData) {
-      throw new Error({ statusCode: 404, message: "User not found" });
+      throw { statusCode: 404, message: "User not found" };
     }
 
     return res.status(200).json(updatedData);
@@ -136,7 +134,7 @@ export const updateUser = async (req, res) => {
     console.error("Error updating user profile: ", error.message);
     return res
       .status(error?.statusCode || 500)
-      .json(error?.message || { message: "Server error" });
+      .json({ message: error?.message || "Server error" });
   }
 };
 

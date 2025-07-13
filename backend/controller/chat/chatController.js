@@ -5,7 +5,7 @@ export const getMessages = async (req, res) => {
   const userId = req.user._id;
 
   if (!userId) {
-    throw new Error({ statusCode: 403, message: "User id is required" });
+    throw new Error({ statusCode: 403, message: "Authentication required" });
   }
 
   try {
@@ -62,7 +62,7 @@ export const getChatStatus = async (req, res) => {
     const userId = req.user._id;
 
     if (!userId) {
-      throw new Error({ statusCode: 403, message: "User id is required" });
+      throw new Error({ statusCode: 403, message: "Authentication required" });
     }
 
     const userFound = await User.findOne({ _id: userId });

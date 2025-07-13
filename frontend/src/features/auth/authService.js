@@ -49,6 +49,7 @@ const loginUser = async (userData) => {
     return response.data;
   } catch (error) {
     console.error("Error logging user in: ", error.message);
+    throw error;
   }
 };
 
@@ -97,6 +98,7 @@ const updateUser = async (userData, token) => {
     return updatedUser;
   } catch (error) {
     console.error("Error updating user: ", error.message);
+    throw error;
   }
 };
 

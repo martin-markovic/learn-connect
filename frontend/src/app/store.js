@@ -6,6 +6,7 @@ import classroomReducer from "../features/classroom/classroomSlice.js";
 import notificationReducer from "../features/notifications/notificationSlice.js";
 import friendReducer from "../features/friend/friendSlice.js";
 import examReducer from "../features/quizzes/exam/examSlice.js";
+import { errorMiddleware } from "../features/redux.errorHandler.js";
 
 const store = configureStore({
   reducer: {
@@ -17,6 +18,8 @@ const store = configureStore({
     friends: friendReducer,
     exam: examReducer,
   },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat(errorMiddleware),
   devTools: process.env.NODE_ENV !== "production",
 });
 

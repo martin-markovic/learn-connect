@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 import { registerUser } from "../features/auth/authSlice";
 import { toast } from "react-toastify";
 
@@ -15,12 +15,6 @@ function Register() {
 
   const { name, email, password, password2 } = formData;
 
-  const { isError, message } = useSelector((state) => state.auth);
-
-  if (isError) {
-    toast.error(message);
-  }
-
   const handleInput = (e) => {
     e.preventDefault();
 
@@ -35,7 +29,8 @@ function Register() {
 
     try {
       if (password !== password2) {
-        throw new Error("Passwords do not match");
+        toast.error("Passwords must match");
+        throw new Error("Passwords must match");
       }
       const userCredentials = {
         name,
@@ -47,7 +42,6 @@ function Register() {
       dispatch(registerUser(userCredentials));
     } catch (error) {
       console.error("Error submitting user credentials: ", error.message);
-      toast.error("Error submitting user credentials: ", error.message);
     }
   };
 

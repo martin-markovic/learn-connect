@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { loginUser } from "../features/auth/authSlice.js";
 import { toast } from "react-toastify";
 
@@ -12,7 +12,6 @@ function Login() {
   });
 
   const { email, password } = formData;
-  const { isError, message } = useSelector((state) => state.auth);
 
   const handleInput = (e) => {
     e.preventDefault();
@@ -27,7 +26,7 @@ function Login() {
     e.preventDefault();
 
     if (!email || !password) {
-      toast.error("Please add all fields");
+      toast.error("Please provide both fields");
     } else {
       const userCredentials = {
         email,
@@ -37,10 +36,6 @@ function Login() {
       dispatch(loginUser(userCredentials));
     }
   };
-
-  if (isError) {
-    toast.error(message);
-  }
 
   return (
     <div className="container">
