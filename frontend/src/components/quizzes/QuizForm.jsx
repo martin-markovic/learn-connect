@@ -118,19 +118,22 @@ function QuizForm({ quiz, onClose }) {
         quizState;
 
       if (!title || !classroomId) {
-        throw new Error("Please add all fields");
+        toast.error("Please add all fields");
+        return;
       }
 
       if (!timeLimit || timeLimit < 3 || timeLimit > 10) {
-        throw new Error(
+        toast.error(
           "Please provide a valid time limit (between 3 and 10 minutes)."
         );
+        return;
       }
 
       const quizLen = questions.length;
 
       if (quizLen < 5 || quizLen > 20) {
-        throw new Error("Please provide between 5 and 20 questions");
+        toast.error("Please provide between 5 and 20 questions");
+        return;
       }
 
       for (let question of questions) {
@@ -139,9 +142,10 @@ function QuizForm({ quiz, onClose }) {
           question.choices.some((choice) => !choice) ||
           !question.answer
         ) {
-          throw new Error(
+          toast.error(
             "Please ensure all questions have a question text, choices, and an answer."
           );
+          return;
         }
       }
 
@@ -165,7 +169,6 @@ function QuizForm({ quiz, onClose }) {
       onClose();
     } catch (error) {
       console.error("Error submitting new quiz: ", error.message);
-      toast.error(`Error subbmitting new quiz: ${error.message}`);
     }
   };
 
