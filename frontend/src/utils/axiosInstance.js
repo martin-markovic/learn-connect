@@ -12,10 +12,11 @@ axiosInstance.interceptors.response.use(
     const status = error.response?.status;
 
     if (status === 401) {
-      console.error("Unauthorized request detected");
-      localStorage.removeItem("user");
+      error.isUnauthorized = true;
+    }
 
-      window.location.href = "/login";
+    if (error.config?.metadata?.clientMessage) {
+      error.clientMessage = error.config.metadata.clientMessage;
     }
 
     return Promise.reject(error);

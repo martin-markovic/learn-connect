@@ -8,7 +8,7 @@ export const protect = async (req, res, next) => {
     if (!authHeader || !authHeader.startsWith("Bearer")) {
       console.error("Missing or invalid auth header");
 
-      throw { status: 400, message: "Login required to access this resource." };
+      throw { status: 401, message: "unauthorized access." };
     }
 
     const token = authHeader.split(" ")[1];
@@ -62,32 +62,41 @@ const decodeToken = (token) => {
 
     return { tokenValid };
   } catch (error) {
-    console.error("JWT verification failed:", error.message);
+    const errorMessage =
+      error.message || "Authentication failed. Please log in again.";
+
+    console.error("JWT verification failed:", errorMessage);
 
     if (error.message === "jwt malformed") {
       return {
         tokenValid: null,
         errorStatus: 400,
-        errorMessage: "Malformed token. Please log in again.",
+        errorMessage,
       };
     } else if (error.message === "invalid token") {
       return {
         tokenValid: null,
         errorStatus: 401,
-        errorMessage: "Invalid token. Session not recognized.",
+        errorMessage,
       };
     } else if (error.message === "jwt expired") {
       return {
         tokenValid: null,
         errorStatus: 401,
-        errorMessage: "Session expired. Please log in again.",
+        errorMessage,
+      };
+    } else if (error.message === "invalid signature") {
+      return {
+        tokenValid: null,
+        errorStatus: 401,
+        errorMessage,
       };
     }
 
     return {
       tokenValid: null,
       errorStatus: error.status || 500,
-      errorMessage: error.message || "Authentication failed. Please log in.",
+      errorMessage: errorMessage || "Unexpected server error.",
     };
   }
 };
