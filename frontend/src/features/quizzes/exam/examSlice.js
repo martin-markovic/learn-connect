@@ -21,7 +21,7 @@ export const getExam = createAsyncThunk("exam/get", async (_, thunkAPI) => {
 
     return response;
   } catch (error) {
-    handleSliceError(error);
+    handleSliceError(error, thunkAPI);
   }
 });
 
@@ -35,7 +35,7 @@ export const getExamFeedback = createAsyncThunk(
 
       return response;
     } catch (error) {
-      handleSliceError(error);
+      handleSliceError(error, thunkAPI);
     }
   }
 );
@@ -50,7 +50,7 @@ export const getExamScores = createAsyncThunk(
 
       return response;
     } catch (error) {
-      handleSliceError(error);
+      handleSliceError(error, thunkAPI);
     }
   }
 );

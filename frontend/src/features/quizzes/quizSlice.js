@@ -18,7 +18,7 @@ export const getUserQuizzes = createAsyncThunk(
       const token = thunkAPI.getState().auth.user.token;
       return await quizService.getUserQuizzes(token);
     } catch (error) {
-      handleSliceError(error);
+      handleSliceError(error, thunkAPI);
     }
   }
 );
@@ -30,7 +30,7 @@ export const getClassQuizzes = createAsyncThunk(
       const token = thunkAPI.getState().auth.user.token;
       return await quizService.getClassQuizzes(token);
     } catch (error) {
-      handleSliceError(error);
+      handleSliceError(error, thunkAPI);
     }
   }
 );
@@ -48,12 +48,7 @@ export const updateQuiz = createAsyncThunk(
       const response = await quizService.updateQuiz(id, quizData, token);
       return { id, ...response };
     } catch (error) {
-      const message =
-        (error.response && error.response && error.response.data.message) ||
-        error.message ||
-        error.toString();
-
-      return thunkAPI.rejectWithValue(message);
+      handleSliceError(error, thunkAPI);
     }
   }
 );
@@ -71,12 +66,7 @@ export const deleteQuiz = createAsyncThunk(
       await quizService.deleteQuiz(id, token);
       return id;
     } catch (error) {
-      const message =
-        (error.response && error.response && error.response.data.message) ||
-        error.message ||
-        error.toString();
-
-      return thunkAPI.rejectWithValue(message);
+      handleSliceError(error, thunkAPI);
     }
   }
 );

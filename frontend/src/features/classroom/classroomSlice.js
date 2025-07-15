@@ -28,7 +28,7 @@ export const joinClassroom = createAsyncThunk(
       const response = await classroomService.joinClassroom(classroomId, token);
       return response;
     } catch (error) {
-      handleSliceError(error);
+      handleSliceError(error, thunkAPI);
     }
   }
 );
@@ -49,7 +49,7 @@ export const leaveClassroom = createAsyncThunk(
       );
       return { classroomId, name: response.name };
     } catch (error) {
-      handleSliceError(error);
+      handleSliceError(error, thunkAPI);
     }
   }
 );
@@ -67,7 +67,7 @@ export const getClassroomList = createAsyncThunk(
 
       return data;
     } catch (error) {
-      handleSliceError(error);
+      handleSliceError(error, thunkAPI);
     }
   }
 );
@@ -85,7 +85,7 @@ export const getUserClassroom = createAsyncThunk(
 
       return data;
     } catch (error) {
-      handleSliceError(error);
+      handleSliceError(error, thunkAPI);
     }
   }
 );
