@@ -13,11 +13,13 @@ const createExam = async (quizId, token) => {
       headers: {
         Authorization: `Bearer ${token}`,
       },
+      metadata: { clientMessage: "create exam" },
     });
 
     return response.data;
   } catch (error) {
     handleServiceError(error);
+    throw error;
   }
 };
 
@@ -31,6 +33,7 @@ const getExam = async (token) => {
       headers: {
         Authorization: `Bearer ${token}`,
       },
+      metadata: { clientMessage: "get exam" },
     };
 
     const response = await axiosInstance.get(API_URL + "/", config);
@@ -38,6 +41,7 @@ const getExam = async (token) => {
     return response.data;
   } catch (error) {
     handleServiceError(error);
+    throw error;
   }
 };
 
@@ -51,6 +55,7 @@ const getExamFeedback = async (quizId, token) => {
       headers: {
         Authorization: `Bearer ${token}`,
       },
+      metadata: { clientMessage: "get exam feedback" },
     };
 
     const response = await axiosInstance.get(
@@ -61,6 +66,7 @@ const getExamFeedback = async (quizId, token) => {
     return response.data;
   } catch (error) {
     handleServiceError(error);
+    throw error;
   }
 };
 
@@ -74,6 +80,7 @@ const getExamScores = async (userId, token) => {
       headers: {
         Authorization: `Bearer ${token}`,
       },
+      metadata: { clientMessage: "get exam scores" },
     };
 
     const response = await axiosInstance.get(
@@ -84,6 +91,7 @@ const getExamScores = async (userId, token) => {
     return response.data;
   } catch (error) {
     handleServiceError(error);
+    throw error;
   }
 };
 

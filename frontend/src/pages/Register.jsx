@@ -30,7 +30,7 @@ function Register() {
     try {
       if (password !== password2) {
         toast.error("Passwords must match");
-        throw new Error("Passwords must match");
+        return;
       }
       const userCredentials = {
         name,

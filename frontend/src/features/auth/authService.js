@@ -25,7 +25,9 @@ const registerUser = async (userData) => {
     const response = await axiosInstance.post(
       API_URL,
       avatar ? multiPartData : userData,
-      {}
+      {
+        metadata: { clientMessage: "register user" },
+      }
     );
 
     if (response.data) {
@@ -40,7 +42,9 @@ const registerUser = async (userData) => {
 
 const loginUser = async (userData) => {
   try {
-    const response = await axiosInstance.post(API_URL + "/login", userData);
+    const response = await axiosInstance.post(API_URL + "/login", userData, {
+      metadata: { clientMessage: "login user" },
+    });
 
     if (response.data) {
       localStorage.setItem("user", JSON.stringify(response.data));
@@ -63,6 +67,7 @@ const updateUser = async (userData, token) => {
       headers: {
         Authorization: `Bearer ${token}`,
       },
+      metadata: { clientMessage: "update user info" },
     };
 
     let multiPartData;

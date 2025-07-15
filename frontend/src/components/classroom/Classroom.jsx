@@ -18,8 +18,6 @@ function Classroom() {
     classroomList = [],
     userClassroom,
     isLoading,
-    isError,
-    errorMessage,
   } = useSelector((state) => state.classroom);
 
   useEffect(() => {
@@ -31,56 +29,45 @@ function Classroom() {
     };
   }, [dispatch]);
 
-  useEffect(() => {
-    if (isError && errorMessage) {
-      console.error("Error :", errorMessage);
-    }
-  }, [isError, errorMessage]);
-
   const handleChange = (e) => {
     setSelectedClassroom(e.target.value);
   };
 
   const handleJoinClassroom = () => {
-    try {
-      if (selectedClassroom) {
-        const result = dispatch(joinClassroom(selectedClassroom));
-
-        if (result.error) {
-          console.error("Error:", result.error.message);
-        } else {
-          toast.success("Successfully joined classroom:", result.payload);
-          dispatch(getClassroomList());
-          setSelectedClassroom("");
-        }
-      } else {
-        toast.error("Please select a classroom");
-      }
-    } catch (error) {
-      console.error("handleJoinClassroom Error: ", error.message);
+    if (!selectedClassroom) {
       toast.error("Failed to join classroom.");
+      return;
     }
+
+    dispatch(joinClassroom(selectedClassroom))
+      .unwrap()
+      .then((payload) => {
+        toast.success("Successfully joined classroom");
+        dispatch(getClassroomList());
+        setSelectedClassroom("");
+      })
+      .catch((error) => {
+        console.error("Join classroom failed:", error.message);
+      });
   };
 
   const handleLeaveClassroom = () => {
-    try {
-      if (selectedClassroom) {
-        const result = dispatch(leaveClassroom(selectedClassroom));
-
-        if (result.error) {
-          console.error("Error:", result.error.message);
-        } else {
-          toast.success(`Successfully left the classroom: ${result.payload}`);
-
-          dispatch(getClassroomList());
-        }
-      } else {
-        toast.error("Please select a classroom");
-      }
-    } catch (error) {
-      console.error("leaveClassroom Error: ", error.message);
-      toast.error("Failed to leave the classroom.");
+    if (!selectedClassroom) {
+      toast.error("Please select a classroom");
+      return;
     }
+
+    dispatch(leaveClassroom(selectedClassroom))
+      .unwrap()
+      .then((payload) => {
+        toast.success("Successfully left the classroom");
+        dispatch(getClassroomList());
+        dispatch(getUserClassroom());
+        setSelectedClassroom("");
+      })
+      .catch((error) => {
+        console.error("leaveClassroom Error:", error.message);
+      });
   };
 
   const handleCancel = () => {

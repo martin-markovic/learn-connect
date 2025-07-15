@@ -97,7 +97,14 @@ function UserNotifications() {
             ) : null}
           </span>
         </div>
-        <button onClick={handleMarkAll}>Mark all as read</button>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            handleMarkAll();
+          }}
+        >
+          Mark all as read
+        </button>
       </div>
       <div className="content__scrollable notification-display">
         {newsOpen ? (
