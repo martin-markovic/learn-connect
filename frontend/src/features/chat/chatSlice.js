@@ -21,15 +21,7 @@ export const getMessages = createAsyncThunk(
 
       return response.data;
     } catch (error) {
-      const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-
-      handleSliceError(error, thunkAPI);
-      return thunkAPI.rejectWithValue(message);
+      return handleSliceError(error, thunkAPI);
     }
   }
 );
@@ -44,15 +36,7 @@ export const getChatStatus = createAsyncThunk(
 
       return response.data;
     } catch (error) {
-      const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-
       handleSliceError(error, thunkAPI);
-      return thunkAPI.rejectWithValue(message);
     }
   }
 );
