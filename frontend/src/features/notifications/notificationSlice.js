@@ -39,15 +39,7 @@ export const getNotifications = createAsyncThunk(
 
       return response;
     } catch (error) {
-      const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-
-      handleSliceError(error, thunkAPI);
-      return thunkAPI.rejectWithValue(message);
+      return thunkAPI.rejectWithValue(error, thunkAPI);
     }
   }
 );

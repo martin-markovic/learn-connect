@@ -29,7 +29,7 @@ export const getFriendList = createAsyncThunk(
 
       return response;
     } catch (error) {
-      handleSliceError(error);
+      handleSliceError(error, thunkAPI);
     }
   }
 );
@@ -47,7 +47,7 @@ export const getUserList = createAsyncThunk(
 
       return response;
     } catch (error) {
-      handleSliceError(error);
+      handleSliceError(error, thunkAPI);
     }
   }
 );

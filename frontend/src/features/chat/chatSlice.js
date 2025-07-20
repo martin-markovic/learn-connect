@@ -21,7 +21,7 @@ export const getMessages = createAsyncThunk(
 
       return response.data;
     } catch (error) {
-      return handleSliceError(error, thunkAPI);
+      handleSliceError(error, thunkAPI);
     }
   }
 );
