@@ -9,9 +9,20 @@ import {
 } from "../../controller/quizzes/quizController.js";
 import { protect } from "../../middleware/authMiddleware.js";
 
-quizRoutes.get("/", protect, getUserQuizzes);
-quizRoutes.route("/:id").put(protect, updateQuiz).delete(protect, deleteQuiz);
+import User from "../../models/users/userModel.js";
+import Quiz from "../../models/quizzes/quizModel.js";
 
-quizRoutes.get("/classroom", protect, getClassroomQuizzes);
+const handleGetUserQuizzes = getUserQuizzes(User, Quiz);
+const handleGetClassQuizzes = getClassroomQuizzes(User, Quiz);
+const handleUpdateQuiz = updateQuiz(User, Quiz);
+const handleDeleteQuiz = deleteQuiz(User, Quiz);
+
+quizRoutes.get("/", protect, handleGetUserQuizzes);
+quizRoutes
+  .route("/:id")
+  .put(protect, updateQuiz)
+  .delete(protect, handleDeleteQuiz);
+
+quizRoutes.get("/classroom", protect, handleGetClassQuizzes);
 
 export default quizRoutes;
