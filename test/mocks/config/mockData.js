@@ -1,8 +1,8 @@
-class MockData {
+export default class MockData {
   constructor() {
     this.mockUsers = [
       {
-        id: 1,
+        _id: "1",
         name: "John Doe",
         email: "johndoe@gmail.com",
         password: "password123",
@@ -11,9 +11,14 @@ class MockData {
           "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwibmFtZSI6IkpvaG4gRG9lIiwiZW1haWwiOiJqb2huZG9lQGdtYWlsLmNvbSJ9.dummySignature",
         avatar: null,
         online: true,
+        classrooms: [
+          {
+            _id: "1",
+          },
+        ],
       },
       {
-        id: 2,
+        _id: "2",
         name: "Jane Doe",
         email: "janedoe@gmail.com",
         password: "password123",
@@ -21,9 +26,10 @@ class MockData {
         token: null,
         avatar: null,
         online: false,
+        classrooms: [{ _id: "1" }],
       },
       {
-        id: 3,
+        _id: "3",
         name: "Bob Mock",
         email: "bobmock@gmail.com",
         password: "password123",
@@ -32,18 +38,19 @@ class MockData {
           "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwibmFtZSI6IkpvaG4gRG9lIiwiZW1haWwiOiJqb2huZG9lQGdtYWlsLmNvbSJ9.dummySignatur0",
         avatar: null,
         online: false,
+        classrooms: [{ _id: "2" }],
       },
     ];
 
     this.mockQuizzes = [
       {
-        id: 1,
+        _id: "1",
         question: "What is the capital of France?",
         choices: ["Berlin", "London", "Amsterdam"],
         answer: "Paris",
       },
       {
-        id: 2,
+        _id: "2",
         question: "What is the capital of Germany?",
         choices: ["Paris", "London", "Amsterdam"],
         answer: "Berlin",
@@ -52,7 +59,7 @@ class MockData {
 
     this.mockClassrooms = [
       {
-        id: 1,
+        _id: "1",
         name: "Mathematics 101",
         subject: "Mathematics",
         limit: 30,
