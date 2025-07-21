@@ -26,7 +26,7 @@ export default class MockData {
         token: null,
         avatar: null,
         online: false,
-        classrooms: [{ _id: "1" }],
+        classrooms: [{ _id: "2" }],
       },
       {
         _id: "3",
@@ -63,7 +63,15 @@ export default class MockData {
         name: "Mathematics 101",
         subject: "Mathematics",
         limit: 30,
-        students: [],
+        students: [this.mockUsers[0]._id, this.mockUsers[1]._id],
+        quizzes: [],
+      },
+      {
+        _id: "2",
+        name: "Mathematics 101",
+        subject: "Mathematics",
+        limit: 30,
+        students: [this.mockUsers[1]._id],
         quizzes: [],
       },
     ];
