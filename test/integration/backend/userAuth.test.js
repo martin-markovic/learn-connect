@@ -25,7 +25,7 @@ describe("Router", () => {
         dbName: process.env.DATABASE_NAME,
       });
     } catch (error) {
-      console.error(error);
+      console.error(error.message);
       process.exit(1);
     }
   });
