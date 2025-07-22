@@ -165,4 +165,124 @@ describe("Quiz Controller Unit Test", () => {
       }
     });
   });
+
+  describe("update user quiz", () => {
+    it("should update the quiz and verify it", async () => {
+      try {
+        const updatedTimeLimit = 7;
+        const updatedQuestion = "mock update quiz question";
+
+        const updatedQuiz = {
+          ...newQuiz,
+          timeLimit: updatedTimeLimit,
+          question: updatedQuestion,
+        };
+
+        const mockReq = {
+          params: { id: newQuiz._id },
+          user: mockUsers[0],
+          body: updatedQuiz,
+        };
+
+        await mockUpdateQuiz(mockReq, quizRes);
+
+        expect(quizRes.statusCode).to.equal(200);
+
+        expect(quizRes.body.title).to.equal(newQuiz.title);
+        expect(quizRes.body.classroom).to.equal(newQuiz._id);
+        expect(quizRes.body.createdBy).to.equal(newQuiz.createdBy);
+        expect(quizRes.body.timeLimit).to.equal(updatedTimeLimit);
+        expect(quizRes.body.createdBy).to.equal(newQuiz.createdBy);
+        expect(quizRes.body.question).to.equal(updatedQuestion);
+      } catch (error) {
+        console.error("Test error: ", error);
+        throw error;
+      }
+    });
+
+    it("should return `Quiz not found` error message", async () => {
+      try {
+        const updatedTimeLimit = 7;
+        const updatedQuestion = "mock update quiz question";
+
+        const updatedQuiz = {
+          ...newQuiz,
+          timeLimit: updatedTimeLimit,
+          question: updatedQuestion,
+        };
+
+        const mockReq = {
+          params: { id: "4" },
+          user: mockUsers[0],
+          body: updatedQuiz,
+        };
+
+        await mockUpdateQuiz(mockReq, quizRes);
+
+        expect(quizRes.statusCode).to.equal(403);
+        expect(quizRes.body.message).to.include("Quiz not found");
+      } catch (error) {
+        console.error("Test error: ", error);
+        throw error;
+      }
+    });
+
+    it("should return `User id is required` error message", async () => {
+      try {
+        const unauthorizedUser = { ...mockUsers[0], _id: undefined };
+
+        const updatedTimeLimit = 7;
+        const updatedQuestion = "mock update quiz question";
+
+        const updatedQuiz = {
+          ...newQuiz,
+          timeLimit: updatedTimeLimit,
+          question: updatedQuestion,
+        };
+
+        const mockReq = {
+          params: { id: newQuiz._id },
+          user: unauthorizedUser,
+          body: updatedQuiz,
+        };
+
+        await mockUpdateQuiz(mockReq, quizRes);
+
+        expect(quizRes.statusCode).to.equal(403);
+        expect(quizRes.body.message).to.include("User id is required");
+      } catch (error) {
+        console.error("Test error: ", error);
+        throw error;
+      }
+    });
+
+    it("should return `User is unauthorized` error message", async () => {
+      try {
+        const unauthorizedUser = { ...mockUsers[0], _id: "1234" };
+
+        const updatedTimeLimit = 7;
+        const updatedQuestion = "mock update quiz question";
+
+        const updatedQuiz = {
+          ...newQuiz,
+          timeLimit: updatedTimeLimit,
+          question: updatedQuestion,
+        };
+
+        const mockReq = {
+          params: { id: newQuiz._id },
+          user: unauthorizedUser,
+          body: updatedQuiz,
+        };
+
+        await mockUpdateQuiz(mockReq, quizRes);
+
+        expect(quizRes.statusCode).to.equal(401);
+        expect(quizRes.body.message).to.include("User is unauthorized");
+      } catch (error) {
+        console.error("Test error: ", error);
+        throw error;
+      }
+    });
+  });
 });
