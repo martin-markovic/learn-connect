@@ -16,7 +16,12 @@ export default class MockModel {
 
   find(query) {
     return this.storage[this.model].filter((item) =>
-      Object.keys(query).every((key) => item[key] === query[key])
+      Object.entries(query).every(([key, value]) => {
+        if (typeof value === "object" && value !== null && "$in" in value) {
+          return value["$in"].includes(item[key]);
+        }
+        return item[key] === value;
+      })
     );
   }
 

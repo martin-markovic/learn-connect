@@ -1,250 +1,366 @@
-import request from "supertest";
+import MockModel from "../../mocks/config/mockModel.js";
+import MockData from "../../mocks/config/mockData.js";
+import MockRes from "../../mocks/config/mockRes.js";
+import {
+  getUserQuizzes,
+  getClassroomQuizzes,
+  updateQuiz,
+  deleteQuiz,
+} from "../../../backend/controller/quizzes/quizController.js";
 import { expect } from "chai";
-import createMockServer from "../../mocks/mockServer.js";
-import mockQuizRoutes from "../../mocks/routes/quizzes/mockQuizRoutes.js";
-import testDB from "../../mocks/config/mockDatabase.js";
 
-let app;
-let server;
-let existingUser = testDB.storage.users[0];
-let unauthorizedUser = testDB.storage.users[1];
-let newQuiz = testDB.storage.quizzes[0];
-let updatedQuiz = {
-  question: "Updated question",
-  choices: ["new choice", "new choice", "new choice"],
-  answer: "new answer",
+const MockQuizModel = new MockModel("quizzes");
+const MockUserModel = new MockModel("users");
+const { mockUsers, mockQuizzes, mockClassrooms } = new MockData();
+
+const mockGetUserQuizzes = getUserQuizzes(MockUserModel, MockQuizModel);
+const mockGetClassroomQuizzes = getClassroomQuizzes(
+  MockUserModel,
+  MockQuizModel
+);
+const mockUpdateQuiz = updateQuiz(MockUserModel, MockQuizModel);
+const mockDeleteQuiz = deleteQuiz(MockUserModel, MockQuizModel);
+
+const quizRes = new MockRes();
+
+const newQuiz = {
+  ...mockQuizzes[0],
+  createdBy: mockUsers[0]._id,
+  classroom: mockClassrooms[0]._id,
+  title: `${mockUsers[0].name} quiz 1`,
+  timeLimit: 4,
+  subject: "Mathematics",
 };
-let mockToken = existingUser.token;
-let unauthorizedToken = unauthorizedUser.token;
 
-describe("Quizz API", () => {
+describe("Quiz Controller Unit Test", () => {
   before(() => {
-    app = createMockServer();
-    server = app.listen(4001, () => {
-      console.log("Test server running on port 4001");
-    });
+    mockUsers.forEach((user) => MockUserModel.create(user));
+    MockQuizModel.create(newQuiz);
+  });
 
-    app.use("/api/quizzes/", mockQuizRoutes);
+  beforeEach(() => {
+    quizRes.reset();
   });
 
   after(() => {
-    server.close(() => {
-      console.log("Test server stopped");
+    mockUsers.forEach((user) => MockUserModel.findByIdAndDelete(user._id));
+    mockQuizzes.forEach((quiz) => MockQuizModel.findByIdAndDelete(quiz._id));
+  });
+
+  describe("get user quizzes", () => {
+    it("should fetch newly created quiz and verify it", async () => {
+      try {
+        const mockReq = {
+          user: mockUsers[0],
+        };
+
+        await mockGetUserQuizzes(mockReq, quizRes);
+
+        expect(quizRes.statusCode).to.equal(200);
+        expect(quizRes.body).to.be.an("array");
+
+        expect(quizRes.body[0].title).to.equal(newQuiz.title);
+        expect(quizRes.body[0].classroom).to.equal(mockClassrooms[0]._id);
+        expect(quizRes.body[0].createdBy).to.equal(newQuiz.createdBy);
+        expect(quizRes.body[0].timeLimit).to.equal(newQuiz.timeLimit);
+        expect(quizRes.body[0].subject).to.equal(newQuiz.subject);
+      } catch (error) {
+        console.error("Test error: ", error);
+        throw error;
+      }
+    });
+
+    it("should return empty array as a response payload", async () => {
+      try {
+        const mockReq = {
+          user: mockUsers[1],
+        };
+
+        await mockGetUserQuizzes(mockReq, quizRes);
+
+        expect(quizRes.statusCode).to.equal(200);
+        expect(quizRes.body).to.be.an("array");
+        expect(quizRes.body.length).to.equal(0);
+      } catch (error) {
+        console.error("Test error: ", error);
+        throw error;
+      }
+    });
+
+    it("should return `User is not registered` error message", async () => {
+      try {
+        const unauthorizedUser = { ...mockUsers[0] };
+        unauthorizedUser._id = "1234";
+
+        const mockReq = {
+          user: unauthorizedUser,
+        };
+
+        await mockGetUserQuizzes(mockReq, quizRes);
+
+        expect(quizRes.statusCode).to.equal(403);
+        expect(quizRes.body.message).to.include("User is not registered");
+      } catch (error) {
+        console.error("Test error: ", error);
+        throw error;
+      }
     });
   });
 
-  describe("Quiz API", () => {
-    describe("createQuiz", () => {
-      it("should create a new quiz and verify it", async () => {
-        const res = await request(app)
-          .post("/api/quizzes/")
-          .send(newQuiz)
-          .set("Authorization", `Bearer ${mockToken}`);
+  describe("get classroom quizzes", () => {
+    it("should fetch an array of classroom quizzes", async () => {
+      try {
+        const mockReq = {
+          user: mockUsers[0],
+        };
 
-        expect(res.status).to.equal(201);
-        expect(res.body).to.have.property("question", newQuiz.question);
-        expect(res.body)
-          .to.have.property("choices")
-          .that.deep.equals(newQuiz.choices);
-        expect(res.body).to.have.property("answer", newQuiz.answer);
-      });
+        await mockGetClassroomQuizzes(mockReq, quizRes);
 
-      it("should return a 401 status and a message no token", async () => {
-        const res = await request(app).post("/api/quizzes/").send(newQuiz);
+        expect(quizRes.statusCode).to.equal(200);
+        expect(quizRes.body).to.be.an("array");
 
-        expect(res.status).to.equal(401);
-        expect(res.body).to.have.property(
-          "message",
-          "Not authorized, no token"
-        );
-      });
-
-      it("should return a 401 status and a message user not authorized", async () => {
-        const res = await request(app)
-          .post("/api/quizzes/")
-          .send(newQuiz)
-          .set("Authorization", `Bearer ${unauthorizedToken}`);
-
-        expect(res.status).to.equal(401);
-        expect(res.body).to.have.property("message", "User not authorized");
-      });
-
-      it("should return a 400 status and a message please add all fields", async () => {
-        const res = await request(app)
-          .post("/api/quizzes/")
-          .send({
-            question: "This is a question",
-            answer: "This is an answer",
-          })
-          .set("Authorization", `Bearer ${mockToken}`);
-
-        expect(res.status).to.equal(400);
-        expect(res.body).to.have.property("message", "Please add all fields");
-      });
+        expect(quizRes.body[0].title).to.equal(newQuiz.title);
+        expect(quizRes.body[0].classroom).to.equal(mockClassrooms[0]._id);
+        expect(quizRes.body[0].createdBy).to.equal(newQuiz.createdBy);
+        expect(quizRes.body[0].timeLimit).to.equal(newQuiz.timeLimit);
+      } catch (error) {
+        console.error("Test error: ", error);
+        throw error;
+      }
     });
 
-    describe("getQuizzes", () => {
-      it("should get all quizzes and verify them", async () => {
-        const res = await request(app)
-          .get("/api/quizzes/")
-          .set("Authorization", `Bearer ${mockToken}`);
+    it("should return empty array as a response payload", async () => {
+      try {
+        const mockReq = {
+          user: mockUsers[1],
+        };
 
-        expect(res.status).to.equal(200);
-        expect(res.body).to.have.property("quizzes").that.is.an("array");
-        expect(res.body.quizzes).to.deep.equal([testDB.storage.quizzes[0]]);
-      });
+        await mockGetClassroomQuizzes(mockReq, quizRes);
 
-      it("should return a 401 status and a message no token", async () => {
-        const res = await request(app).get("/api/quizzes/");
-
-        expect(res.status).to.equal(401);
-        expect(res.body).to.have.property(
-          "message",
-          "Not authorized, no token"
-        );
-      });
-
-      it("should return a 401 status and a message user not authorized", async () => {
-        const res = await request(app)
-          .get("/api/quizzes/")
-          .set("Authorization", `Bearer ${unauthorizedToken}`);
-
-        expect(res.status).to.equal(401);
-        expect(res.body).to.have.property("message", "User not authorized");
-      });
+        expect(quizRes.statusCode).to.equal(200);
+        expect(quizRes.body).to.be.an("array");
+        expect(quizRes.body.length).to.equal(0);
+      } catch (error) {
+        console.error("Test error: ", error);
+        throw error;
+      }
     });
 
-    describe("getQuizById", () => {
-      it("should get a quiz by ID and verify it", async () => {
-        const res = await request(app)
-          .get(`/api/quizzes/${newQuiz.id}`)
-          .set("Authorization", `Bearer ${mockToken}`);
+    it("should return `User is not registered` error message", async () => {
+      try {
+        const unauthorizedUser = { ...mockUsers[0] };
+        unauthorizedUser._id = "1234";
 
-        expect(res.status).to.equal(200);
-        expect(res.body).to.have.property("user", existingUser.id);
-        expect(res.body).to.have.property("question", newQuiz.question);
-        expect(res.body)
-          .to.have.property("choices")
-          .that.deep.equals(newQuiz.choices);
-        expect(res.body).to.have.property("answer", newQuiz.answer);
-      });
+        const mockReq = {
+          user: unauthorizedUser,
+        };
 
-      it("should return a 401 status and a message no token", async () => {
-        const res = await request(app).get("/api/quizzes/");
+        await mockGetClassroomQuizzes(mockReq, quizRes);
 
-        expect(res.status).to.equal(401);
-        expect(res.body).to.have.property(
-          "message",
-          "Not authorized, no token"
-        );
-      });
+        expect(quizRes.statusCode).to.equal(403);
+        expect(quizRes.body.message).to.include("User is not registered");
+      } catch (error) {
+        console.error("Test error: ", error);
+        throw error;
+      }
+    });
+  });
 
-      it("should return a 404 status and a message Quiz not found", async () => {
-        const res = await request(app)
-          .get("/api/quizzes/9999")
-          .set("Authorization", `Bearer ${mockToken}`);
+  describe("update user quiz", () => {
+    it("should update the quiz and verify it", async () => {
+      try {
+        const updatedTimeLimit = 7;
+        const updatedQuestion = "mock update quiz question";
 
-        expect(res.status).to.equal(404);
-        expect(res.body).to.have.property("message", "Quiz not found");
-      });
+        const updatedQuiz = {
+          ...newQuiz,
+          timeLimit: updatedTimeLimit,
+          question: updatedQuestion,
+        };
 
-      it("should return a 401 status and a message user not authorized", async () => {
-        const res = await request(app)
-          .post("/api/quizzes/")
-          .send(newQuiz)
-          .set("Authorization", `Bearer ${unauthorizedToken}`);
+        const mockReq = {
+          params: { id: newQuiz._id },
+          user: mockUsers[0],
+          body: updatedQuiz,
+        };
 
-        expect(res.status).to.equal(401);
-        expect(res.body).to.have.property("message", "User not authorized");
-      });
+        await mockUpdateQuiz(mockReq, quizRes);
+
+        expect(quizRes.statusCode).to.equal(200);
+
+        expect(quizRes.body.title).to.equal(newQuiz.title);
+        expect(quizRes.body.classroom).to.equal(newQuiz._id);
+        expect(quizRes.body.createdBy).to.equal(newQuiz.createdBy);
+        expect(quizRes.body.timeLimit).to.equal(updatedTimeLimit);
+        expect(quizRes.body.createdBy).to.equal(newQuiz.createdBy);
+        expect(quizRes.body.question).to.equal(updatedQuestion);
+      } catch (error) {
+        console.error("Test error: ", error);
+        throw error;
+      }
     });
 
-    describe("updateQuiz", () => {
-      it("should update a quiz and verify it", async () => {
-        const res = await request(app)
-          .put(`/api/quizzes/${newQuiz.id}`)
-          .send(updatedQuiz)
-          .set("Authorization", `Bearer ${mockToken}`);
+    it("should return `Quiz not found` error message", async () => {
+      try {
+        const updatedTimeLimit = 7;
+        const updatedQuestion = "mock update quiz question";
 
-        expect(res.status).to.equal(200);
-        expect(res.body).to.have.property("user", existingUser.id);
-        expect(res.body).to.have.property("question", updatedQuiz.question);
-        expect(res.body)
-          .to.have.property("choices")
-          .that.deep.equals(updatedQuiz.choices);
-        expect(res.body).to.have.property("answer", updatedQuiz.answer);
-      });
+        const updatedQuiz = {
+          ...newQuiz,
+          timeLimit: updatedTimeLimit,
+          question: updatedQuestion,
+        };
 
-      it("should return a 401 status and a message no token", async () => {
-        const res = await request(app)
-          .put(`/api/quizzes/${newQuiz.id}`)
-          .send(updatedQuiz);
+        const mockReq = {
+          params: { id: "4" },
+          user: mockUsers[0],
+          body: updatedQuiz,
+        };
 
-        expect(res.status).to.equal(401);
-        expect(res.body).to.have.property(
-          "message",
-          "Not authorized, no token"
-        );
-      });
+        await mockUpdateQuiz(mockReq, quizRes);
 
-      it("should return a 404 status and a message Quiz not found", async () => {
-        const res = await request(app)
-          .put("/api/quizzes/9999")
-          .send(updatedQuiz)
-          .set("Authorization", `Bearer ${mockToken}`);
-
-        expect(res.status).to.equal(404);
-        expect(res.body).to.have.property("message", "Quiz not found");
-      });
-
-      it("should return a 401 status and a message user not authorized", async () => {
-        const res = await request(app)
-          .put("/api/quizzes/9999")
-          .send(updatedQuiz)
-          .set("Authorization", `Bearer ${unauthorizedToken}`);
-
-        expect(res.status).to.equal(401);
-        expect(res.body).to.have.property("message", "User not authorized");
-      });
+        expect(quizRes.statusCode).to.equal(403);
+        expect(quizRes.body.message).to.include("Quiz not found");
+      } catch (error) {
+        console.error("Test error: ", error);
+        throw error;
+      }
     });
 
-    describe("deleteQuiz", () => {
-      it("should delete a quiz and verify it", async () => {
-        const res = await request(app)
-          .delete(`/api/quizzes/${newQuiz.id}`)
-          .set("Authorization", `Bearer ${mockToken}`);
+    it("should return `User id is required` error message", async () => {
+      try {
+        const unauthorizedUser = { ...mockUsers[0], _id: undefined };
 
-        expect(res.status).to.equal(200);
-        expect(res.body).to.have.property("id", newQuiz.id);
-      });
+        const updatedTimeLimit = 7;
+        const updatedQuestion = "mock update quiz question";
 
-      it("should return a 401 status and a message no token", async () => {
-        const res = await request(app).delete(`/api/quizzes/${newQuiz.id}`);
+        const updatedQuiz = {
+          ...newQuiz,
+          timeLimit: updatedTimeLimit,
+          question: updatedQuestion,
+        };
 
-        expect(res.status).to.equal(401);
-        expect(res.body).to.have.property(
-          "message",
-          "Not authorized, no token"
+        const mockReq = {
+          params: { id: newQuiz._id },
+          user: unauthorizedUser,
+          body: updatedQuiz,
+        };
+
+        await mockUpdateQuiz(mockReq, quizRes);
+
+        expect(quizRes.statusCode).to.equal(403);
+        expect(quizRes.body.message).to.include("User id is required");
+      } catch (error) {
+        console.error("Test error: ", error);
+        throw error;
+      }
+    });
+
+    it("should return `User is unauthorized` error message", async () => {
+      try {
+        const unauthorizedUser = { ...mockUsers[0], _id: "1234" };
+
+        const updatedTimeLimit = 7;
+        const updatedQuestion = "mock update quiz question";
+
+        const updatedQuiz = {
+          ...newQuiz,
+          timeLimit: updatedTimeLimit,
+          question: updatedQuestion,
+        };
+
+        const mockReq = {
+          params: { id: newQuiz._id },
+          user: unauthorizedUser,
+          body: updatedQuiz,
+        };
+
+        await mockUpdateQuiz(mockReq, quizRes);
+
+        expect(quizRes.statusCode).to.equal(401);
+        expect(quizRes.body.message).to.include("User is unauthorized");
+      } catch (error) {
+        console.error("Test error: ", error);
+        throw error;
+      }
+    });
+  });
+
+  describe("delete user quiz", () => {
+    it("should delete the quiz and confirm it", async () => {
+      try {
+        const mockReq = {
+          params: { id: newQuiz._id },
+          user: mockUsers[0],
+        };
+
+        await mockDeleteQuiz(mockReq, quizRes);
+
+        expect(quizRes.statusCode).to.equal(200);
+
+        expect(quizRes.body.message).to.equal(
+          `Quiz ${mockReq.params.id} successfully deleted`
         );
-      });
+        expect(quizRes.body._id).to.equal(mockReq.params.id);
+      } catch (error) {
+        console.error("Test error: ", error);
+        throw error;
+      }
+    });
 
-      it("should return a 404 status and a message Quiz not found", async () => {
-        const res = await request(app)
-          .delete("/api/quizzes/9999")
-          .set("Authorization", `Bearer ${mockToken}`);
+    it("should return `Quiz not found` error message", async () => {
+      try {
+        const mockReq = {
+          params: { id: "1234" },
+          user: mockUsers[0],
+        };
 
-        expect(res.status).to.equal(404);
-        expect(res.body).to.have.property("message", "Quiz not found");
-      });
+        await mockDeleteQuiz(mockReq, quizRes);
 
-      it("should return a 401 status and a message user not authorized", async () => {
-        const res = await request(app)
-          .delete(`/api/quizzes/${newQuiz.id}`)
-          .set("Authorization", `Bearer ${unauthorizedToken}`);
+        expect(quizRes.statusCode).to.equal(404);
+        expect(quizRes.body.message).to.include("Quiz not found");
+      } catch (error) {
+        console.error("Test error: ", error);
+        throw error;
+      }
+    });
 
-        expect(res.status).to.equal(401);
-        expect(res.body).to.have.property("message", "User not authorized");
-      });
+    it("should return `User id is required` error message", async () => {
+      try {
+        const unauthorizedUser = { ...mockUsers[0], _id: undefined };
+
+        const mockReq = {
+          params: { id: newQuiz._id },
+          user: unauthorizedUser,
+        };
+
+        await mockDeleteQuiz(mockReq, quizRes);
+
+        expect(quizRes.statusCode).to.equal(403);
+        expect(quizRes.body.message).to.include("User is not registered");
+      } catch (error) {
+        console.error("Test error: ", error);
+        throw error;
+      }
+    });
+
+    it("should return `Access denied, quiz does not belong to this user` error message", async () => {
+      try {
+        const mockReq = {
+          params: { id: newQuiz._id },
+          user: mockUsers[1],
+        };
+
+        await mockDeleteQuiz(mockReq, quizRes);
+
+        expect(quizRes.statusCode).to.equal(403);
+        expect(quizRes.body.message).to.include(
+          "Access denied, quiz does not belong to this user"
+        );
+      } catch (error) {
+        console.error("Test error: ", error);
+        throw error;
+      }
     });
   });
 });

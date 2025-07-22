@@ -90,11 +90,14 @@ const chatSlice = createSlice({
       })
       .addCase(getMessages.fulfilled, (state, action) => {
         state.errorMessage = "";
-        action.payload.forEach(({ friendId, messages }) => {
-          if (friendId) {
-            state.chat[friendId] = messages;
-          }
-        });
+        if (action?.payload?.length) {
+          action?.payload?.forEach(({ friendId, messages }) => {
+            if (friendId) {
+              state.chat[friendId] = messages;
+            }
+          });
+        }
+
         state.isLoading = false;
         state.isSuccess = true;
       })

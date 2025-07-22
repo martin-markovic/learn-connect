@@ -23,7 +23,7 @@ describe("Server Tests", () => {
       mongoose
         .connect(process.env.MONGO_URI, {})
         .then(() => done())
-        .catch((err) => done(err));
+        .catch((err) => done(err.message));
     });
 
     it("should connect to MongoDB successfully", (done) => {
@@ -37,7 +37,7 @@ describe("Server Tests", () => {
       mongoose
         .disconnect()
         .then(() => done())
-        .catch((err) => done(err));
+        .catch((err) => done(err.message));
     });
   });
 

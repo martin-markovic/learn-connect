@@ -10,7 +10,7 @@ describe("Auth Service Integration Tests", function () {
     try {
       await axios.post(API_URL, userData);
     } catch (error) {
-      console.log("Error creating test user:", error);
+      console.log("Error creating test user:", error.message);
     }
   });
 
@@ -39,7 +39,7 @@ describe("Auth Service Integration Tests", function () {
     try {
       await axios.delete(API_URL, { data: userData });
     } catch (error) {
-      console.log("Error deleting test user:", error);
+      console.log("Error deleting test user:", error.message);
     }
   });
 
@@ -52,7 +52,7 @@ describe("Auth Service Integration Tests", function () {
         const storedData = JSON.parse(localStorage.getItem("user"));
         expect(storedData).to.have.property("token");
       } catch (error) {
-        console.log("Error during registerUser test:", error);
+        console.log("Error during registerUser test:", error.message);
       }
     });
   });
@@ -66,7 +66,7 @@ describe("Auth Service Integration Tests", function () {
         const storedData = JSON.parse(localStorage.getItem("user"));
         expect(storedData).to.have.property("token");
       } catch (error) {
-        console.log("Error during loginUser test:", error);
+        console.log("Error during loginUser test:", error.message);
       }
     });
   });

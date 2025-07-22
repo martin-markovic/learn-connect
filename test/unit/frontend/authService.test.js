@@ -39,7 +39,7 @@ describe("Auth Service", function () {
         const storedData = JSON.parse(localStorage.getItem("user"));
         expect(storedData).to.deep.equal({ token: "sample-token" });
       } catch (error) {
-        console.log(error);
+        console.log(error.message);
       }
     });
 
@@ -65,7 +65,7 @@ describe("Auth Service", function () {
         const storedData = JSON.parse(localStorage.getItem("user"));
         expect(storedData).to.deep.equal({ token: "sample-token" });
       } catch (error) {
-        console.log(error);
+        console.log(error.message);
       }
     });
 
