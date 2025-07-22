@@ -285,4 +285,82 @@ describe("Quiz Controller Unit Test", () => {
       }
     });
   });
+
+  describe("delete user quiz", () => {
+    it("should delete the quiz and confirm it", async () => {
+      try {
+        const mockReq = {
+          params: { id: newQuiz._id },
+          user: mockUsers[0],
+        };
+
+        await mockDeleteQuiz(mockReq, quizRes);
+
+        expect(quizRes.statusCode).to.equal(200);
+
+        expect(quizRes.body.message).to.equal(
+          `Quiz ${mockReq.params.id} successfully deleted`
+        );
+        expect(quizRes.body._id).to.equal(mockReq.params.id);
+      } catch (error) {
+        console.error("Test error: ", error);
+        throw error;
+      }
+    });
+
+    it("should return `Quiz not found` error message", async () => {
+      try {
+        const mockReq = {
+          params: { id: "1234" },
+          user: mockUsers[0],
+        };
+
+        await mockDeleteQuiz(mockReq, quizRes);
+
+        expect(quizRes.statusCode).to.equal(404);
+        expect(quizRes.body.message).to.include("Quiz not found");
+      } catch (error) {
+        console.error("Test error: ", error);
+        throw error;
+      }
+    });
+
+    it("should return `User id is required` error message", async () => {
+      try {
+        const unauthorizedUser = { ...mockUsers[0], _id: undefined };
+
+        const mockReq = {
+          params: { id: newQuiz._id },
+          user: unauthorizedUser,
+        };
+
+        await mockDeleteQuiz(mockReq, quizRes);
+
+        expect(quizRes.statusCode).to.equal(403);
+        expect(quizRes.body.message).to.include("User is not registered");
+      } catch (error) {
+        console.error("Test error: ", error);
+        throw error;
+      }
+    });
+
+    it("should return `Access denied, quiz does not belong to this user` error message", async () => {
+      try {
+        const mockReq = {
+          params: { id: newQuiz._id },
+          user: mockUsers[1],
+        };
+
+        await mockDeleteQuiz(mockReq, quizRes);
+
+        expect(quizRes.statusCode).to.equal(403);
+        expect(quizRes.body.message).to.include(
+          "Access denied, quiz does not belong to this user"
+        );
+      } catch (error) {
+        console.error("Test error: ", error);
+        throw error;
+      }
+    });
+  });
 });
