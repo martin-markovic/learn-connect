@@ -68,14 +68,21 @@ export const updateQuiz = (User, Quiz) => async (req, res) => {
       };
     }
 
-    if (!req.user) {
+    if (!req.user._id) {
       throw {
         statusCode: 403,
         message: "User id is required",
       };
     }
 
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      throw {
+        statusCode: 401,
+        message: "User is unauthorized",
+      };
+    }
 
     const updatedQuiz = await Quiz.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
@@ -88,7 +95,7 @@ export const updateQuiz = (User, Quiz) => async (req, res) => {
       };
     }
 
-    if (quizToUpdate.user.toString() !== user.id) {
+    if (quizToUpdate.createdBy.toString() !== user._id) {
       throw {
         statusCode: 403,
         message: "Access denied, quiz does not belong to this user",
@@ -100,7 +107,7 @@ export const updateQuiz = (User, Quiz) => async (req, res) => {
     console.error(`Error updating quiz ${req.params.id}: ${error.message}`);
 
     return res.status(error.statusCode || 500).json({
-      message: `Error updating quiz ${req.params.id}: ${error.message}`,
+      message: error.message || `Error updating quiz ${req.params.id}`,
     });
   }
 };
@@ -116,7 +123,7 @@ export const deleteQuiz = (User, Quiz) => async (req, res) => {
       };
     }
 
-    const user = await User.findById(req.user?.id);
+    const user = await User.findById(req.user?._id);
 
     if (!user) {
       throw {
@@ -125,17 +132,17 @@ export const deleteQuiz = (User, Quiz) => async (req, res) => {
       };
     }
 
-    if (quiz?.createdBy?.toString() !== user?.id) {
+    if (quiz?.createdBy?.toString() !== user?._id) {
       throw {
         statusCode: 403,
         message: "Access denied, quiz does not belong to this user",
       };
     }
 
-    await Quiz.deleteOne({ _id: req.params.id });
+    await Quiz.findByIdAndDelete({ _id: req.params.id });
 
     return res.status(200).json({
-      message: `quiz ${req.params.id} successfully deleted`,
+      message: `Quiz ${req.params.id} successfully deleted`,
       _id: req.params.id,
     });
   } catch (error) {

@@ -7,7 +7,7 @@ const getMessages = async (token) => {
   try {
     const config = {
       headers: {
-        // Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
       metadata: { clientMessage: "get chat messages" },
     };
