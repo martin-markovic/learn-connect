@@ -1,28 +1,42 @@
+process.env.JWT_SECRET = "test-secret";
 import { expect } from "chai";
-import request from "supertest";
-import createMockServer from "../../mocks/mockServer.js";
-import testDB from "../../mocks/config/mockDatabase.js";
-import mockUserRoutes from "../../mocks/routes/users/mockUserRoutes.js";
+import MockModel from "../../mocks/config/mockModel.js";
+import MockRes from "../../mocks/config/mockRes.js";
+import MockData from "../../mocks/config/mockData.js";
+import {
+  registerUser,
+  loginUser,
+  updateUser,
+} from "../../../backend/controller/users/userController.js";
 
-let app;
-let server;
-let existingUser = testDB.storage.users[0];
 let newUser = {
-  id: 3,
   name: "Jack Hearts",
   email: "jackhearts@gmail.com",
   password: "password123",
   password2: "password123",
-  token: "qwerty3",
+  avatar: "userAvatar.png",
 };
 
+const MockUserModel = new MockModel("users");
+const UserData = new MockData();
+const userRes = new MockRes();
+
+const mockRegisterUser = registerUser(MockUserModel);
+const mockLoginUser = loginUser(MockUserModel);
+const mockUpdateUser = updateUser(MockUserModel);
+
+let existingUser;
+
 describe("User API", () => {
-  before(() => {
-    app = createMockServer();
-    app.use("/api/users/", mockUserRoutes);
-    server = app.listen(4001, () => {
-      console.log("Test server running on 4001");
-    });
+  before(async () => {
+    existingUser = await mockRegisterUser(
+      { body: { ...UserData.mockUsers[0] } },
+      userRes
+    );
+  });
+
+  beforeEach(() => {
+    userRes.reset();
   });
 
   after(() => {

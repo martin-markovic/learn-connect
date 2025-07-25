@@ -1,9 +1,8 @@
-import User from "../../models/users/userModel.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 
 // POST users api/users/
-export const registerUser = async (req, res) => {
+export const registerUser = (User) => async (req, res) => {
   try {
     const { name, email, password, password2 } = req.body;
 
@@ -31,7 +30,7 @@ export const registerUser = async (req, res) => {
     });
 
     return res.status(201).json({
-      _id: user.id,
+      _id: user._id,
       name: user.name,
       email: user.email,
       token: generateToken(user._id),
@@ -45,7 +44,7 @@ export const registerUser = async (req, res) => {
 };
 
 // POST user api/users/login
-export const loginUser = async (req, res) => {
+export const loginUser = (User) => async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -83,7 +82,7 @@ export const loginUser = async (req, res) => {
   }
 };
 
-export const updateUser = async (req, res) => {
+export const updateUser = (User) => async (req, res) => {
   try {
     const userId = req.user?._id;
 
