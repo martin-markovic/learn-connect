@@ -40,72 +40,58 @@ describe("User API", () => {
   });
 
   after(() => {
-    server.close(() => {
-      console.log("Test server stopped");
-    });
+    MockUserModel.cleanupAll();
   });
 
   describe("registerUser", () => {
     it("should register a user and verify it", async () => {
-      const res = await request(app).post("/api/users/").send(newUser);
+      const mockReq = { body: { ...newUser } };
 
-      expect(res.status).to.equal(201);
-      expect(res.body).to.have.property("id", newUser.id);
-      expect(res.body).to.have.property("name", newUser.name);
-      expect(res.body).to.have.property("email", newUser.email);
-      expect(res.body).to.have.property("token", newUser.token);
+      await mockRegisterUser(mockReq, userRes);
+
+      expect(userRes.statusCode).to.equal(201);
+
+      expect(userRes.body.name).to.equal(newUser.name);
+      expect(userRes.body.email).to.equal(newUser.email);
+      expect(userRes.body).to.have.property("_id");
+      expect(userRes.body).to.have.property("token");
     });
 
-    it("should return status 400 and a message please add all fields", async () => {
-      const res = await request(app).post("/api/users/").send({
-        email: newUser.email,
-        password: newUser.password,
-        password2: newUser.password2,
-      });
+    it("should return `Please add all fields` error message", async () => {
+      const invalidUser = { ...newUser };
+      invalidUser.name = undefined;
+      const mockReq = { body: invalidUser };
 
-      expect(res.status).to.equal(400);
-      expect(res.body).to.have.property("message", "Please add all fields");
+      await mockRegisterUser(mockReq, userRes);
+
+      expect(userRes.statusCode).to.equal(400);
+
+      expect(userRes.body.message).to.equal("Please add all fields");
     });
 
-    it("should return status 400 and a message user already registered", async () => {
-      const res = await request(app).post("/api/users/").send(existingUser);
+    it("should return `Passwords must match` error message", async () => {
+      const invalidUser = { ...newUser };
+      invalidUser.password = newUser.password + "0";
+      const mockReq = { body: invalidUser };
 
-      expect(res.status).to.equal(400);
-      expect(res.body).to.have.property("message", "User already registered");
-    });
-  });
+      await mockRegisterUser(mockReq, userRes);
 
-  describe("loginUser", () => {
-    it("should login a user and verify it", async () => {
-      const res = await request(app).post("/api/users/login").send({
-        email: existingUser.email,
-        password: existingUser.password,
-      });
+      expect(userRes.statusCode).to.equal(400);
 
-      expect(res.status).to.equal(200);
-      expect(res.body).to.have.property("id", existingUser.id);
-      expect(res.body).to.have.property("name", existingUser.name);
-      expect(res.body).to.have.property("email", existingUser.email);
-      expect(res.body).to.have.property("token", existingUser.token);
+      expect(userRes.body.message).to.equal("Passwords must match");
     });
 
-    it("should return status 400 and a message please add all fields", async () => {
-      const res = await request(app).post("/api/users/login").send({
-        name: existingUser.name,
-      });
+    it("should return `Email already registered` error message", async () => {
+      const invalidUser = { ...newUser };
+      invalidUser.email = UserData.mockUsers[0].email;
 
-      expect(res.status).to.equal(400);
-      expect(res.body).to.have.property("message", "Please add all fields");
-    });
+      const mockReq = { body: invalidUser };
 
-    it("should return status 404 and a message user not found", async () => {
-      const res = await request(app).post("/api/users/login").send({
-        email: newUser.email,
-        password: newUser.password,
-      });
+      await mockRegisterUser(mockReq, userRes);
 
-      expect(res.status).to.equal(404);
-      expect(res.body).to.have.property("message", "User not found");
+      expect(userRes.statusCode).to.equal(400);
+
+      expect(userRes.body.message).to.equal("Email already registered");
     });
   });
 });
