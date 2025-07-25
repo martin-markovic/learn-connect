@@ -94,4 +94,62 @@ describe("User API", () => {
       expect(userRes.body.message).to.equal("Email already registered");
     });
   });
+
+  describe("loginUser", () => {
+    it("should login a user and verify it", async () => {
+      const mockReq = {
+        body: { email: newUser.email, password: newUser.password },
+      };
+
+      await mockLoginUser(mockReq, userRes);
+
+      expect(userRes.statusCode).to.equal(200);
+
+      expect(userRes.body.name).to.equal(newUser.name);
+      expect(userRes.body.email).to.equal(newUser.email);
+      expect(userRes.body).to.have.property("_id");
+      expect(userRes.body).to.have.property("token");
+    });
+
+    it("should return `Both email and password are required to log in` error message", async () => {
+      const invalidUser = { ...newUser };
+      invalidUser.email = undefined;
+
+      const mockReq = { body: invalidUser };
+
+      await mockLoginUser(mockReq, userRes);
+
+      expect(userRes.statusCode).to.equal(400);
+
+      expect(userRes.body.message).to.equal(
+        "Both email and password are required to log in"
+      );
+    });
+
+    it("should return `User not registered` error message", async () => {
+      const invalidUser = { ...newUser };
+      invalidUser.email = "invaliduser@gmail.com";
+
+      const mockReq = { body: invalidUser };
+
+      await mockLoginUser(mockReq, userRes);
+
+      expect(userRes.statusCode).to.equal(404);
+
+      expect(userRes.body.message).to.equal("User not registered");
+    });
+
+    it("should return `Invalid password` error message", async () => {
+      const invalidUser = { ...newUser };
+      invalidUser.password = newUser.password + "0";
+
+      const mockReq = { body: invalidUser };
+
+      await mockLoginUser(mockReq, userRes);
+
+      expect(userRes.statusCode).to.equal(400);
+
+      expect(userRes.body.message).to.equal("Invalid password");
+    });
+  });
 });
