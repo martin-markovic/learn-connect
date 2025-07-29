@@ -29,10 +29,8 @@ let existingUser;
 
 describe("User API", () => {
   before(async () => {
-    existingUser = await mockRegisterUser(
-      { body: { ...UserData.mockUsers[0] } },
-      userRes
-    );
+    await mockRegisterUser({ body: { ...UserData.mockUsers[0] } }, userRes);
+    existingUser = MockUserModel.storage.users[0];
   });
 
   beforeEach(() => {
@@ -150,6 +148,70 @@ describe("User API", () => {
       expect(userRes.statusCode).to.equal(400);
 
       expect(userRes.body.message).to.equal("Invalid password");
+    });
+  });
+
+  describe("updateUser", () => {
+    it("should update user data and verify it", async () => {
+      const updatedName = "Ben Cage";
+      const mockReq = {
+        body: {
+          name: updatedName,
+        },
+        user: { _id: UserData.mockUsers[0]._id },
+      };
+
+      await mockUpdateUser(mockReq, userRes);
+
+      expect(userRes.statusCode).to.equal(200);
+
+      expect(userRes.body.name).to.equal(updatedName);
+      expect(userRes.body.email).to.equal(existingUser.email);
+      expect(userRes.body._id).to.equal(existingUser._id);
+    });
+
+    it("should update user avatar and verify it", async () => {
+      const updatedAvatar = "newAvatar.png";
+      const mockReq = {
+        file: { path: updatedAvatar },
+        user: { _id: existingUser._id },
+        body: {},
+      };
+
+      await mockUpdateUser(mockReq, userRes);
+
+      expect(userRes.statusCode).to.equal(200);
+      expect(userRes.body._id).to.equal(existingUser._id);
+      expect(userRes.body.email).to.equal(existingUser.email);
+      expect(userRes.body.avatar).to.equal(updatedAvatar);
+    });
+
+    it("should return `Authentication required` error message", async () => {
+      const invalidUser = { ...newUser };
+      invalidUser._id = undefined;
+
+      const mockReq = { body: invalidUser };
+
+      await mockUpdateUser(mockReq, userRes);
+
+      expect(userRes.statusCode).to.equal(403);
+
+      expect(userRes.body.message).to.equal("Authentication required");
+    });
+
+    it("should return `Email already in use` error message", async () => {
+      const updatedEmail = "johndoe@gmail.com";
+
+      const mockReq = {
+        body: { email: updatedEmail },
+        user: { _id: MockUserModel.storage.users[1]._id },
+      };
+
+      await mockUpdateUser(mockReq, userRes);
+
+      expect(userRes.statusCode).to.equal(409);
+
+      expect(userRes.body.message).to.equal("Email already in use");
     });
   });
 });

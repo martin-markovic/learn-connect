@@ -9,7 +9,7 @@ export default class MockData {
         password2: "password123",
         token:
           "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwibmFtZSI6IkpvaG4gRG9lIiwiZW1haWwiOiJqb2huZG9lQGdtYWlsLmNvbSJ9.dummySignature",
-        avatar: null,
+        avatar: "defaultAvatar.png",
         online: true,
         classrooms: [
           {

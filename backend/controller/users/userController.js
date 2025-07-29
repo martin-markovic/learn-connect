@@ -114,7 +114,7 @@ export const updateUser = (User) => async (req, res) => {
     if (email) {
       const existingUser = await User.findOne({ email });
 
-      if (existingUser && existingUser._id.toString() !== userId.toString()) {
+      if (existingUser) {
         throw { statusCode: 409, message: "Email already in use" };
       }
     }
