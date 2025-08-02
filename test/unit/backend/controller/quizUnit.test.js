@@ -1,12 +1,12 @@
-import MockModel from "../../mocks/config/mockModel.js";
-import MockData from "../../mocks/config/mockData.js";
-import MockRes from "../../mocks/config/mockRes.js";
+import MockModel from "../../../mocks/config/mockModel.js";
+import MockData from "../../../mocks/config/mockData.js";
+import MockRes from "../../../mocks/config/mockRes.js";
 import {
   getUserQuizzes,
   getClassroomQuizzes,
   updateQuiz,
   deleteQuiz,
-} from "../../../backend/controller/quizzes/quizController.js";
+} from "../../../../backend/controller/quizzes/quizController.js";
 import { expect } from "chai";
 
 const MockQuizModel = new MockModel("quizzes");
