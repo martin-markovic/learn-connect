@@ -14,7 +14,21 @@ export default class MockModel {
     return created;
   }
 
-  async find(query) {
+  find(query) {
+    // monkey patch to allow chaining populate() method
+    if ("$or" in query && this.model === "friends") {
+      const result = this.storage[this.model];
+      return {
+        populate(...args) {
+          return {
+            populate() {
+              return result;
+            },
+          };
+        },
+      };
+    }
+
     const result = this.storage[this.model].filter((item) =>
       Object.entries(query).every(([key, value]) => {
         if (typeof value === "object" && value !== null && "$in" in value) {
