@@ -6,9 +6,14 @@ import {
   getUserList,
 } from "../../controller/users/friendController.js";
 import { protect } from "../../middleware/authMiddleware.js";
+import User from "../../models/users/userModel.js";
+import Friend from "../../models/users/friendModel.js";
 
-friendRouter.get("/", protect, getUserList);
+const handleGetFriendList = getFriendList(Friend);
+const handleGetUserList = getUserList(Friend, User);
 
-friendRouter.get("/:userId", protect, getFriendList);
+friendRouter.get("/", protect, handleGetFriendList);
+
+friendRouter.get("/:userId", protect, handleGetUserList);
 
 export default friendRouter;

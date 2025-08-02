@@ -1,7 +1,4 @@
-import Friend from "../../models/users/friendModel.js";
-import User from "../../models/users/userModel.js";
-
-export const getFriendList = async (req, res) => {
+export const getFriendList = (Friend) => async (req, res) => {
   try {
     const { userId } = req.params;
 
@@ -38,7 +35,7 @@ export const getFriendList = async (req, res) => {
   }
 };
 
-export const getUserList = async (req, res) => {
+export const getUserList = (Friend, User) => async (req, res) => {
   try {
     const userId = req.user?._id;
 
