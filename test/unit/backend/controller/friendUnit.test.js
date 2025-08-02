@@ -70,19 +70,17 @@ describe("Friend API", () => {
     expect(friendRes.body[0].receiver.name).to.equal(receiverDoc.name);
     expect(friendRes.body[0].sender.name).to.equal(senderDoc.name);
   });
+
+  it("should return `User id is required` error message", async () => {
+    const mockReq = { params: { userId: undefined }, user: { _id: "1" } };
+
+    await mockGetFriendList(mockReq, friendRes);
+
+    expect(friendRes.statusCode).to.equal(403);
+
+    expect(friendRes.body.message).to.equal("User id is required");
+  });
 });
-
-// it("should return `Please add all fields` error message", async () => {
-//   const invalidUser = { ...newUser };
-//   invalidUser.name = undefined;
-//   const mockReq = { body: invalidUser };
-
-//   await mockRegisterUser(mockReq, userRes);
-
-//   expect(userRes.statusCode).to.equal(400);
-
-//   expect(userRes.body.message).to.equal("Please add all fields");
-// });
 
 // it("should return `Passwords must match` error message", async () => {
 //   const invalidUser = { ...newUser };
