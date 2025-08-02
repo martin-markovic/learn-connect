@@ -1,13 +1,13 @@
 process.env.JWT_SECRET = "test-secret";
 import { expect } from "chai";
-import MockModel from "../../mocks/config/mockModel.js";
-import MockRes from "../../mocks/config/mockRes.js";
-import MockData from "../../mocks/config/mockData.js";
+import MockModel from "../../../mocks/config/mockModel.js";
+import MockRes from "../../../mocks/config/mockRes.js";
+import MockData from "../../../mocks/config/mockData.js";
 import {
   registerUser,
   loginUser,
   updateUser,
-} from "../../../backend/controller/users/userController.js";
+} from "../../../../backend/controller/users/userController.js";
 
 let newUser = {
   name: "Jack Hearts",
