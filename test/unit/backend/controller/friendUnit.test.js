@@ -20,6 +20,7 @@ const mockGetUserList = getUserList(MockFriendModel, MockFriendModel);
 
 const senderDoc = { ...UserData.mockUsers[0] };
 const receiverDoc = { ...UserData.mockUsers[1] };
+const mutualFriendDoc = { ...UserData.mockUsers[2] };
 
 describe("Friend API", () => {
   before(async () => {
@@ -30,6 +31,13 @@ describe("Friend API", () => {
       _id: "1",
       sender: { _id: "0", name: senderDoc.name },
       receiver: { _id: "1", name: receiverDoc.name },
+      status: "accepted",
+    });
+
+    MockFriendModel.create({
+      _id: "2",
+      sender: { _id: "0", name: senderDoc.name },
+      receiver: { _id: "2", name: mutualFriendDoc.name },
       status: "accepted",
     });
   });
@@ -52,7 +60,7 @@ describe("Friend API", () => {
       expect(friendRes.statusCode).to.equal(200);
 
       expect(friendRes.body).to.be.an("array");
-      expect(friendRes.body.length).to.equal(1);
+      expect(friendRes.body.length).to.equal(2);
       expect(friendRes.body[0].receiver.name).to.equal(receiverDoc.name);
       expect(friendRes.body[0].sender.name).to.equal(senderDoc.name);
     });
@@ -66,9 +74,24 @@ describe("Friend API", () => {
     expect(friendRes.statusCode).to.equal(200);
 
     expect(friendRes.body).to.be.an("array");
-    expect(friendRes.body.length).to.equal(1);
+    expect(friendRes.body.length).to.equal(2);
     expect(friendRes.body[0].receiver.name).to.equal(receiverDoc.name);
     expect(friendRes.body[0].sender.name).to.equal(senderDoc.name);
+  });
+
+  it("should fetch a friend list for mutual friend and verify it", async () => {
+    const mockReq = { params: { userId: "0" }, user: { _id: "2" } };
+
+    await mockGetFriendList(mockReq, friendRes);
+
+    expect(friendRes.statusCode).to.equal(200);
+
+    console.log("friendRes.body: ", friendRes.body);
+
+    expect(friendRes.body).to.be.an("array");
+    expect(friendRes.body.length).to.equal(2);
+    expect(friendRes.body[1].sender.name).to.equal(senderDoc.name);
+    expect(friendRes.body[1].receiver.name).to.equal(mutualFriendDoc.name);
   });
 
   it("should return `User id is required` error message", async () => {
@@ -80,19 +103,17 @@ describe("Friend API", () => {
 
     expect(friendRes.body.message).to.equal("User id is required");
   });
+
+  it("should return `User is not authenticated` error message", async () => {
+    const mockReq = { params: { userId: "0" }, user: { _id: undefined } };
+
+    await mockGetFriendList(mockReq, friendRes);
+
+    expect(friendRes.statusCode).to.equal(401);
+
+    expect(friendRes.body.message).to.equal("User is not authenticated");
+  });
 });
-
-// it("should return `Passwords must match` error message", async () => {
-//   const invalidUser = { ...newUser };
-//   invalidUser.password = newUser.password + "0";
-//   const mockReq = { body: invalidUser };
-
-//   await mockRegisterUser(mockReq, userRes);
-
-//   expect(userRes.statusCode).to.equal(400);
-
-//   expect(userRes.body.message).to.equal("Passwords must match");
-// });
 
 // it("should return `Email already registered` error message", async () => {
 //   const invalidUser = { ...newUser };
