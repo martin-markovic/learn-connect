@@ -24,7 +24,9 @@ export default class MockModel {
     // monkey patch to allow chaining populate() method
     if ("$or" in query && this.model === "friends") {
       if ("status" in query) {
-        const result = this.storage[this.model];
+        const result = this.storage[this.model].filter(
+          (doc) => doc.status !== "blocked"
+        );
 
         return {
           populate(...args) {

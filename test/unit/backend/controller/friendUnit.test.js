@@ -21,6 +21,11 @@ const mockGetUserList = getUserList(MockFriendModel, MockUserModel);
 const senderDoc = { ...UserData.mockUsers[0] };
 const receiverDoc = { ...UserData.mockUsers[1] };
 const mutualFriendDoc = { ...UserData.mockUsers[2] };
+const blockedUserDoc = {
+  _id: String(UserData.mockUsers.length + 1),
+  name: "Jack Hearts",
+  status: "blocked",
+};
 
 describe("Friend API", () => {
   before(async () => {
@@ -39,6 +44,13 @@ describe("Friend API", () => {
       sender: { _id: "0", name: senderDoc.name },
       receiver: { _id: "2", name: mutualFriendDoc.name },
       status: "accepted",
+    });
+
+    MockFriendModel.create({
+      _id: "3",
+      sender: { _id: "0", name: senderDoc.name },
+      receiver: { _id: blockedUserDoc._id, name: blockedUserDoc.name },
+      status: "blocked",
     });
   });
 
@@ -123,4 +135,14 @@ describe("Friend API", () => {
       expect(friendRes.body[0].name).to.equal(senderDoc.name);
       expect(friendRes.body[1].name).to.equal(receiverDoc.name);
     });
+
+    it("should return `User id is required` error message", async () => {
+      const mockReq = { user: { _id: undefined } };
+
+      await mockGetUserList(mockReq, friendRes);
+
+      expect(friendRes.statusCode).to.equal(403);
+      expect(friendRes.body.message).to.equal("User id is required");
+    });
+  });
 });
