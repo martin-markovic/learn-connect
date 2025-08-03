@@ -53,14 +53,20 @@ export const getUserList = (Friend, User) => async (req, res) => {
       ],
     });
 
-    const blockedUserIds = blockedUsers.map((rel) =>
-      String(rel.sender) === String(userId) ? rel.receiver : rel.sender
-    );
+    let blockedUserIds = [];
+
+    if (blockedUsers.length) {
+      blockedUserIds = blockedUsers.map((rel) =>
+        String(rel.sender) === String(userId) ? rel.receiver : rel.sender
+      );
+    }
 
     const userList = await User.find(
-      {
-        _id: { $nin: blockedUserIds },
-      },
+      blockedUserIds.length
+        ? {
+            _id: { $nin: blockedUserIds },
+          }
+        : {},
       "name avatar"
     );
 

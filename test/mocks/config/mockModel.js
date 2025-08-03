@@ -14,19 +14,30 @@ export default class MockModel {
     return created;
   }
 
-  find(query) {
+  find(query, options) {
+    if (Object.keys(query).length === 0) {
+      const result = this.storage[this.model];
+
+      return this.handleSelect(result);
+    }
+
     // monkey patch to allow chaining populate() method
     if ("$or" in query && this.model === "friends") {
-      const result = this.storage[this.model];
-      return {
-        populate(...args) {
-          return {
-            populate() {
-              return result;
-            },
-          };
-        },
-      };
+      if ("status" in query) {
+        const result = this.storage[this.model];
+
+        return {
+          populate(...args) {
+            return {
+              populate() {
+                return result;
+              },
+            };
+          },
+        };
+      }
+
+      return [];
     }
 
     const result = this.storage[this.model].filter((item) =>

@@ -16,7 +16,7 @@ const friendRes = new MockRes();
 
 const mockRegisterUser = registerUser(MockUserModel);
 const mockGetFriendList = getFriendList(MockFriendModel);
-const mockGetUserList = getUserList(MockFriendModel, MockFriendModel);
+const mockGetUserList = getUserList(MockFriendModel, MockUserModel);
 
 const senderDoc = { ...UserData.mockUsers[0] };
 const receiverDoc = { ...UserData.mockUsers[1] };
@@ -111,4 +111,16 @@ describe("Friend API", () => {
       expect(friendRes.body.message).to.equal("User is not authenticated");
     });
   });
+
+  describe("getUserList", () => {
+    it("should fetch a userlist for sender and verify it", async () => {
+      const mockReq = { user: { _id: senderDoc } };
+
+      await mockGetUserList(mockReq, friendRes);
+
+      expect(friendRes.statusCode).to.equal(200);
+      expect(friendRes.body.length).to.equal(2);
+      expect(friendRes.body[0].name).to.equal(senderDoc.name);
+      expect(friendRes.body[1].name).to.equal(receiverDoc.name);
+    });
 });
