@@ -1,7 +1,4 @@
-import Chat from "../../models/chat/chatModel.js";
-import User from "../../models/users/userModel.js";
-
-export const getMessages = async (req, res) => {
+export const getMessages = (Chat) => async (req, res) => {
   const userId = req.user._id;
 
   if (!userId) {
@@ -57,7 +54,7 @@ export const getMessages = async (req, res) => {
   }
 };
 
-export const getChatStatus = async (req, res) => {
+export const getChatStatus = (User) => async (req, res) => {
   try {
     const userId = req.user._id;
 
