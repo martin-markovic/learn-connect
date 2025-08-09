@@ -1,18 +1,14 @@
-import Classroom from "../../models/classrooms/classroomModel.js";
-import Quiz from "../../models/quizzes/quizModel.js";
-import User from "../../models/users/userModel.js";
-
-export const getUserQuizzes = async (req, res) => {
+export const getUserQuizzes = (User, Quiz) => async (req, res) => {
   try {
     const userId = req.user._id;
 
-    const userFound = User.findById(userId);
+    const userFound = await User.findById(userId);
 
     if (!userFound) {
-      throw new Error({
+      throw {
         statusCode: 403,
         message: "User is not registered",
-      });
+      };
     }
 
     const quizzes = await Quiz.find({ createdBy: userId });
@@ -24,22 +20,22 @@ export const getUserQuizzes = async (req, res) => {
     );
 
     return res.status(error.statusCode || 500).json({
-      message: `Error fetching quizzes for ${req.user._id}: ${error.message}`,
+      message: `Error fetching quizzes: ${error.message}`,
     });
   }
 };
 
-export const getClassroomQuizzes = async (req, res) => {
+export const getClassroomQuizzes = (User, Quiz) => async (req, res) => {
   try {
     const userId = req.user?._id;
 
     const userFound = await User.findById(userId);
 
     if (!userFound) {
-      throw new Error({
+      throw {
         statusCode: 403,
         message: "User is not registered",
-      });
+      };
     }
 
     const userClassrooms = userFound?.classrooms;
@@ -52,7 +48,7 @@ export const getClassroomQuizzes = async (req, res) => {
 
     const quizPayload = await Quiz.find({ classroom: { $in: classroomIds } });
 
-    return res.json(quizPayload || []);
+    return res.status(200).json(quizPayload || []);
   } catch (error) {
     console.error("Error in getQuizzesByClassroom:", error);
     res
@@ -61,42 +57,49 @@ export const getClassroomQuizzes = async (req, res) => {
   }
 };
 
-export const updateQuiz = async (req, res) => {
+export const updateQuiz = (User, Quiz) => async (req, res) => {
   try {
     const quizToUpdate = await Quiz.findById(req.params.id);
 
     if (!quizToUpdate) {
-      throw new Error({
+      throw {
         statusCode: 403,
         message: "Quiz not found",
-      });
+      };
     }
 
-    if (!req.user) {
-      throw new Error({
+    if (!req.user._id) {
+      throw {
         statusCode: 403,
         message: "User id is required",
-      });
+      };
     }
 
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      throw {
+        statusCode: 401,
+        message: "User is unauthorized",
+      };
+    }
 
     const updatedQuiz = await Quiz.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
     });
 
     if (!updatedQuiz) {
-      throw new Error({
+      throw {
         statusCode: 500,
         message: "Failed to update quiz",
-      });
+      };
     }
 
-    if (quizToUpdate.user.toString() !== user.id) {
-      throw new Error({
+    if (quizToUpdate.createdBy.toString() !== user._id) {
+      throw {
         statusCode: 403,
         message: "Access denied, quiz does not belong to this user",
-      });
+      };
     }
 
     return res.status(200).json(updatedQuiz);
@@ -104,42 +107,42 @@ export const updateQuiz = async (req, res) => {
     console.error(`Error updating quiz ${req.params.id}: ${error.message}`);
 
     return res.status(error.statusCode || 500).json({
-      message: `Error updating quiz ${req.params.id}: ${error.message}`,
+      message: error.message || `Error updating quiz ${req.params.id}`,
     });
   }
 };
 
-export const deleteQuiz = async (req, res) => {
+export const deleteQuiz = (User, Quiz) => async (req, res) => {
   try {
     const quiz = await Quiz.findById(req.params.id);
 
     if (!quiz) {
-      throw new Error({
+      throw {
         statusCode: 404,
         message: "Quiz not found",
-      });
+      };
     }
 
-    const user = await User.findById(req.user?.id);
+    const user = await User.findById(req.user?._id);
 
     if (!user) {
-      throw new Error({
+      throw {
         statusCode: 403,
         message: "User is not registered",
-      });
+      };
     }
 
-    if (quiz.user.toString() !== user?.id) {
-      throw new Error({
+    if (quiz?.createdBy?.toString() !== user?._id) {
+      throw {
         statusCode: 403,
         message: "Access denied, quiz does not belong to this user",
-      });
+      };
     }
 
-    await Quiz.deleteOne({ _id: req.params.id });
+    await Quiz.findByIdAndDelete({ _id: req.params.id });
 
     return res.status(200).json({
-      message: `quiz ${req.params.id} successfully deleted`,
+      message: `Quiz ${req.params.id} successfully deleted`,
       _id: req.params.id,
     });
   } catch (error) {

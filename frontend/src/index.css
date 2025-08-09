@@ -14,14 +14,17 @@ body {
   width: 100vw;
   display: flex;
   flex-direction: column;
+  justify-content: baseline;
+  gap: 1em;
+  align-items: center;
 }
 
 header {
-  display: inherit;
+  display: flex;
   flex-direction: row;
   justify-content: end;
-  margin: 3rem 3rem 0;
-  width: 80%;
+  margin: 2rem 2rem 0 0;
+  width: 95%;
 }
 
 header ul {
@@ -32,6 +35,33 @@ header ul {
   cursor: pointer;
 }
 
+#login-form,
+#register-form {
+  height: 100%;
+  width: 35%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 3em;
+}
+
+#register-form {
+  gap: 2.5em;
+  width: 45%;
+}
+
+.auth-form-input_group {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.auth-form-input_group input {
+  padding-left: 1em;
+}
+
 .nav-buttons {
   display: flex;
   flex-direction: row;
@@ -40,15 +70,47 @@ header ul {
   width: 100%;
 }
 
+.nav-buttons li,
+.nav-buttons li button {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-buttons li {
+  margin-left: 3em;
+  margin-right: 3em;
+  gap: 2em;
+  height: 1.6em;
+}
+
+.nav-buttons li button {
+  height: 100%;
+  width: 6em;
+  gap: 0.5em;
+  border: 1px solid grey;
+  border-radius: 5%;
+  cursor: pointer;
+}
+
+.nav-buttons li button:hover {
+  background-color: rgb(235, 235, 235);
+}
+
 .container {
+  height: 50%;
+  width: 50%;
   margin-top: 5rem;
   display: inherit;
   justify-content: center;
 }
 
 .avatar {
+  width: 100%;
   display: flex;
   flex-direction: row;
+  justify-content: space-between;
   align-items: center;
   gap: 1rem;
 }
@@ -56,8 +118,16 @@ header ul {
 .avatar-wrapper {
   position: relative;
   display: inline-block;
+  margin-left: 2em;
   width: 80px;
   height: 80px;
+}
+
+.user__form-avatar__wrapper {
+  position: relative;
+  display: inline-block;
+  width: 140px;
+  height: 140px;
 }
 
 li {
@@ -74,14 +144,39 @@ li {
   background: #000000aa;
   color: white;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
   transition: opacity 0.3s ease;
+  pointer-events: none;
 }
 
-.avatar-wrapper:hover .upload-button {
+.upload-button input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+.avatar-remove {
+  position: absolute;
+  height: 1.7em;
+  width: 100%;
+  border: 1px solid black;
+  border-radius: 5%;
+  bottom: -30%;
+  left: 1%;
+  text-align: center;
+}
+
+.user__form-avatar__wrapper:hover .upload-button {
   opacity: 1;
+  pointer-events: all;
 }
 
 .avatar-input {
@@ -91,157 +186,392 @@ li {
 
 .dashboard-container {
   display: flex;
-  height: 100vh;
-  gap: 10px;
-  flex-direction: row;
-  margin: 3em 2em;
-  overflow: hidden;
-}
-
-.dashboard-left__box,
-.dashboard-right__box {
-  display: flex;
-  flex-direction: column;
   height: 100%;
+  width: 100%;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-start;
+  margin-top: 5em;
   overflow: hidden;
 }
 
-.dashboard-left__box {
-  flex: 1;
+.left-box,
+.right-box {
+  height: 100%;
 }
 
-.dashboard-right__box {
-  flex: 2;
-}
-
-.dashboard-user__info {
+.left-box {
+  width: 15%;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
-  width: 25%;
-}
-
-.left__box-top {
-  flex: 1;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-}
-
-.left__box-bottom {
-  flex: 3;
-  .classroom-container {
-    display: flex;
-    flex-direction: row;
-    max-height: 100px;
-    width: 55%;
-    margin-top: 2em;
-    margin-bottom: auto;
-    align-self: flex-end;
-    gap: 1em;
-  }
-
-  .classroom__enroll-dropdown {
-    width: 60%;
-    height: 100%;
-    margin-top: 0.5em;
-    margin-bottom: auto;
-  }
-
-  .clasroom__enroll__dropdown-items {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    width: 100%;
-  }
-
-  .classroom__enroll__dropdown-items select {
-    margin-top: 0.3em;
-    margin-left: 1em;
-  }
-
-  .classroom__enroll-buttons {
-    display: flex;
-  }
-
-  .classroom-container {
-    display: flex;
-    flex-direction: row;
-    max-height: 100px;
-    width: 55%;
-    margin-top: 2em;
-    margin-bottom: auto;
-    align-self: flex-end;
-    gap: 1em;
-  }
-
-  .classroom__enroll-dropdown {
-    width: 60%;
-    height: 100%;
-    margin-top: 0.5em;
-    margin-bottom: auto;
-  }
-
-  .clasroom__enroll__dropdown-items {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    width: 100%;
-  }
-
-  .classroom__enroll-buttons {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-around;
-    width: 35%;
-    margin-top: 0.7em;
-    margin-bottom: 0;
-  }
-
-  overflow: hidden;
+  align-items: flex-start;
 }
 
 .right-box {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  width: 75%;
 }
 
-.right__box-top,
-.right__box-botom {
-  flex: 1;
+.dashboard-classroom {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  width: 100%;
+}
+
+.classroom-container {
   display: flex;
   flex-direction: column;
-}
-.user-info {
-  height: 30%;
-}
-.notifications {
-  flex-grow: 1;
-  max-height: 70%;
-  overflow-y: auto;
+  justify-content: flex-start;
+  align-items: flex-start;
+  width: 100%;
+  height: 100%;
+  gap: 1em;
 }
 
-.bottom-box {
+.classroom-user {
+  height: 20%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 1em;
+}
+
+.classroom-user button {
+  width: 50%;
+  margin-left: 2em;
+}
+
+.classroom__enroll-dropdown {
+  width: 100%;
+  height: 100%;
+  margin-top: 0.5em;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.classroom__details-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 2em;
+}
+
+.classroom__enroll__dropdown-items {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  width: 100%;
+  height: 75%;
+  gap: 2em;
+}
+
+.classroom__enroll__dropdown-items select {
+  margin-top: 0.3em;
+  width: 55%;
+  margin-left: 1.4em;
+}
+
+.classroom__select-cancel {
+  position: absolute;
+  top: 4px;
+  right: 29%;
+  width: 21px;
+  height: 19px;
+  background-color: rgb(216, 214, 214);
+  font-size: medium;
+  cursor: pointer;
+  display: flex;
+  border: 1px solid black;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
 }
 
-.friend-search {
-  max-height: 70%;
-  overflow-y: auto;
+.classroom__enroll-details {
+  width: 100%;
+  height: 80%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.classroom__info-container {
+  width: 100%;
+  height: 100%;
+}
+
+.classroom__info-container div {
+  width: 100%;
+  height: 40%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 1.3em;
+}
+
+.classroom__enroll-buttons {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  width: 67%;
+  gap: 1em;
+  margin: 1.3em 2em 0 0;
+}
+
+.classroom__enroll-button button {
+  width: 50%;
+}
+
+.right__box-left {
+  height: 100%;
+  width: 30%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2em;
+}
+
+.right__box-right {
+  display: flex;
+  height: 100%;
+  width: 70%;
+  flex-direction: column-reverse;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.notification-container {
+  align-items: center;
+}
+
+.notification-container div {
+  width: 100%;
+}
+
+.notification-heading {
+  width: 90%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 4em;
+  height: 40px;
+  background-color: rgb(216, 214, 214);
+}
+
+.notification-count {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  background-color: red;
+  color: white;
+  right: -21%;
+  text-align: center;
+  line-height: 16px;
+  font-size: small;
+}
+
+.notification-display ul {
+  margin: 0;
+  padding: 0;
+}
+
+.notification-display ul li {
+  border: 1px solid rgb(216, 214, 214);
+  transition: all 0.25s ease-in;
+  width: 99.4%;
+}
+
+.notification-display ul li p {
+  width: 80%;
+  padding-left: 2.5em;
+}
+
+.notification-controller {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 2.5em;
+}
+
+.friend__search-box {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  height: 55%;
+  width: 90%;
+}
+
+.friend__search-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: flex-start;
+  height: 7%;
+  width: 100%;
+}
+
+.friend__search-container input,
+.friend__search-container button {
+  height: 100%;
+}
+
+.friend__search-container input {
+  width: 70%;
+}
+
+.friend__search-container button {
+  width: 25%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.result-list {
+  box-sizing: border-box;
+  max-height: 398px;
+  min-height: 0;
+  width: 70%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  transition: all 0.25s ease-in;
+}
+
+.list__entry-name {
+  width: 50%;
+  text-align: center;
+  margin: 7px 0;
+}
+
+.result__list-entry {
+  height: 35px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.list__entry-avatar {
+  height: 27px;
+  width: 27px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: white;
+  border-radius: 50%;
+}
+
+.result__list-entry:hover {
+  background-color: rgb(216, 214, 214);
+}
+
+.result__list-close {
+  position: absolute;
+  bottom: -1.8em;
+  left: 4em;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  margin-left: 5%;
+  width: 100%;
+}
+
+.dashboard-notifications {
+  height: 40%;
+  width: 100%;
 }
 
 .conversation {
+  position: relative;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
   height: 100%;
+  width: 100%;
+  gap: 2.5em;
+}
+
+.conversation-chat__list {
+  width: 35%;
+  height: 100%;
+}
+
+.conversation-chat__display {
+  height: 85%;
+  width: 52%;
+  overflow: hidden;
+  border-radius: 5% 5% 0 0;
+  border: 1px solid transparent;
+  align-self: flex-start;
+  transition: all 0.2s ease-in-out;
+}
+
+.chat-glow {
+  pointer-events: none;
+  position: absolute;
+  display: none;
+  height: 85.2%;
+  width: 51.7%;
+  top: 0;
+  left: 8.5%;
+  right: 0;
+  bottom: 0;
+  box-shadow: 0 0 2px 2px rgba(0, 255, 255, 0.3);
+  filter: blur(2px);
+  z-index: 0;
+  border-radius: 5% 5% 0 0;
+}
+
+.chat-active,
+.friendlist-open {
+  border: 1px solid rgb(172, 172, 172);
+}
+
+.chat-closed,
+.friendlist-closed {
+  border: 1px solid transparent;
 }
 
 .content__scrollable-wrapper {
   display: flex;
   flex-direction: column;
-  border: 1px solid black;
+  height: 100%;
+  max-height: 100%;
+  overflow-y: hidden;
+}
+
+.chat__display-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   height: 100%;
   max-height: 100%;
   overflow-y: hidden;
@@ -250,18 +580,18 @@ li {
 .chatlist-container {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  height: 100%;
-  max-height: fit-content;
-  max-width: fit-content;
-  overflow: hidden;
+  height: 102%;
+  width: 100%;
+  margin-bottom: 5px;
 }
 
 .chatlist-container p {
-  background: #c3b1ee;
+  background: rgb(216, 214, 214);
   width: 100%;
-  padding: 0.5em 0 0.7em 1em;
+  padding: 0.5em 0 0.7em 3.5em;
   font-weight: 500;
+  margin-bottom: 0;
+  margin-top: 0;
 }
 
 .chatlist__avatar-wrapper {
@@ -301,8 +631,8 @@ li {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  background: linear-gradient(180deg, #add8e6, #ffffff);
-  border: none;
+  background-color: rgb(216, 214, 214);
+  height: 3.5em;
 }
 
 .chat__display__heading-avatar {
@@ -332,6 +662,7 @@ li {
   flex-direction: row;
   justify-content: space-around;
   align-items: center;
+  margin-left: 0.7em;
 }
 
 .chat__display__heading-userinfo {
@@ -344,58 +675,115 @@ li {
 }
 
 .chat__display-close {
-  margin-top: 0.5em;
-  max-height: 35%;
+  margin-top: 1.2em;
+  margin-right: 1.7em;
+  max-height: 40%;
   color: white;
   background-color: red;
+  border: 1px solid white;
+  border-radius: 25%;
+}
+
+.chat-form {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  position: relative;
+  top: 2em;
+}
+
+.chat-form input {
+  width: 96.7%;
+  height: 2.5em;
+  padding-left: 1em;
+  border: 1px solid transparent;
+  border-top: 1px solid grey;
+}
+
+.chat-form button {
+  position: absolute;
+  top: 0.7em;
+  right: 1.5em;
 }
 
 .friendlist-container {
-  padding-left: 2em;
   flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-end;
+  gap: 1.5em;
+  margin-top: 3em;
 }
 
 .friendlist__container-toggle {
   display: flex;
-  flex-direction: column;
-  justify-content: start;
-  align-items: start;
-  padding-left: 2em;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: flex-end;
+  width: 100%;
+  height: 8%;
+  gap: 3em;
+}
+
+.friendlist__container-toggle button {
+  height: 60%;
+  width: 100%;
+}
+
+.friendlist__container-toggle span {
+  width: 36%;
+  height: 100%;
 }
 
 .friendlist__container-wrapper {
   display: flex;
   align-items: start;
-  height: 100%;
-  width: 366px;
+  height: 482px;
+  width: 271px;
   min-width: 0;
-  padding-left: 1.5em;
+  border-radius: 5% 5% 0 0;
+  overflow: hidden;
+  transition: all 0.2s ease-in-out;
+}
+
+.friendlist__container-online {
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+  border-radius: 0%;
+  height: 482px;
+  width: 271px;
 }
 
 .friendlist {
   flex: 1;
   width: 100%;
   max-height: 50%;
-  overflow-y: scroll;
   list-style: none;
   padding: 0;
   margin: 0;
   min-width: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .friendlist li {
   position: relative;
-  padding: 5px;
-  border: 1px solid white;
+  padding: 0.5em 0 0.5em 2em;
+  border: 1px solid rgb(216, 214, 214);
+  border-left: 1px solid transparent;
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 6px;
+  gap: 0.8em;
+  width: 88%;
 }
 
 .friendlist li:hover {
-  border: 1px solid #e0d8f5;
-  background-color: #e0d8f5;
+  border: 1px solid rgb(216, 214, 214);
+  background-color: rgb(235, 235, 235);
 }
 
 .content__scrollable {
@@ -412,6 +800,7 @@ li {
   margin: 0;
   width: 100%;
   padding: 0 1em;
+  gap: 1em;
 }
 
 .chat__item-sender {
@@ -441,48 +830,810 @@ li {
   display: flex;
   flex-direction: column;
   margin-top: 1em;
-  max-width: 40%;
+  width: 35%;
   word-wrap: break-word;
 }
 
 .message p {
   word-break: break-all;
+  text-align: center;
+  margin-top: 0;
+  margin-bottom: 0.6em;
+}
+
+.chat__message-status {
+  margin-right: 1.3em;
+  font-size: small;
+  cursor: default;
 }
 
 .chat__icon {
   overflow: hidden;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
   background-color: white;
 }
 
-.quiz__list {
-  margin-top: 0;
-  display: inherit;
+.quiz__list-container {
+  display: flex;
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
-  height: 40vh;
+  width: 80%;
+  height: 90%;
+  margin-top: 2em;
 }
 
 .quiz__list-controller {
-  display: inherit;
+  display: flex;
   flex-direction: row;
   justify-content: space-between;
   justify-self: center;
-  width: 30%;
-  margin-bottom: 4rem;
+  width: 45%;
+  height: 3%;
+  margin-bottom: 2em;
 }
 
-form {
+.quiz__list-controller button {
+  width: 22%;
+  height: 100%;
+}
+
+.quiz__list-display {
+  width: 80%;
+  height: 85%;
+  margin-top: 1em;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.user__quizzes-container,
+.quiz__entry__list-container {
+  height: 100%;
+  width: 100%;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  gap: 1em;
 }
 
-form input {
-  margin: 0.5rem 0;
-  padding: 0.25rem 0 0.25rem 0.55rem;
+.class__quizzes-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5em;
+}
+
+#quiz-search {
+  font-size: medium;
+  padding-top: 5px;
+  padding-left: 1em;
+}
+
+.class__quiz__list-container {
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 2.5em;
+}
+
+.class__quiz-entry {
+  height: 116px;
+  width: 292px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+  border: 1px solid rgb(48, 47, 47);
+  background-color: rgb(235, 235, 235);
+  margin-top: 1.5em;
+}
+
+.class__quiz-entry p {
+  height: 46%;
+  width: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  margin-left: 3px;
+  padding: 0;
+  background-color: white;
+  border: 1px solid rgb(48, 47, 47);
+  border-radius: 5%;
+}
+
+.class__quiz-entry button {
+  background-color: white;
+  border: 1px solid black;
+}
+
+.user__quizzes-container {
+  justify-content: flex-start;
+}
+
+.user__quizzes-top__box {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.user__quizzes-top__box input {
+  height: 90%;
+  width: 17%;
+  font-size: medium;
+  padding-top: 5px;
+  padding-left: 1em;
+}
+
+.user__quiz__list-container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+  align-items: flex-start;
+  width: 100%;
+  height: auto;
+  max-height: 95%;
+  padding-top: 2em;
+  gap: 1.5em;
+}
+
+.user__quiz__list-entry {
+  position: relative;
+  width: 27%;
+  height: 114px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+  border: 1px solid rgb(48, 47, 47);
+  background-color: rgb(235, 235, 235);
+  margin-top: 1.7em;
+}
+
+.user__quiz__list-entry p {
+  height: 46%;
+  width: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  margin-left: 3px;
+  padding: 0;
+  border: 1px solid black;
+  background-color: white;
+  border-radius: 5%;
+}
+
+.entry__buttons-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  height: 80%;
+  width: 25%;
+}
+
+.entry__buttons-container button {
+  width: 100%;
+  background-color: white;
+  border: 1px solid black;
+  border-radius: 5%;
+}
+
+.user__quiz__list-entry p:hover,
+.entry__buttons-container button:hover,
+.class__quiz-entry button:hover {
+  background-color: rgb(216, 214, 214);
+}
+
+.quiz__pagination-container {
+  width: 35%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin: 1.5em auto;
+  right: 5%;
+}
+
+.pagination-classes {
+  width: 33.4%;
+}
+
+.quiz__pagination-container div {
+  width: 30px;
+  height: 30px;
+}
+
+.pagination-button {
+  width: 100%;
+  height: 100%;
+  color: rgb(48, 47, 47);
+}
+
+.pagination-button:hover {
+  color: gray;
+}
+
+.quiz__form-container,
+#quiz-form {
+  width: 65%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 2em;
+  margin-top: 0.5em;
+}
+
+#quiz-form input,
+.quiz__form-group span {
+  font-size: medium;
+}
+
+.quiz__form-group {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.quiz__form-group select {
+  width: 45%;
+}
+
+.quiz__choices-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  gap: 0.7em;
+  margin-top: 1em;
+}
+
+.choice-radio {
+  display: none;
+}
+
+#time-limit {
+  margin-right: 0.6em;
+}
+
+.quiz__info-container {
+  height: 80%;
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 2.5em;
+}
+
+.quiz__info-container > *,
+.exam-container > * {
+  font-size: large;
+}
+
+.quiz__info-list-container {
+  margin-top: 2em;
+}
+
+.quiz__info-result-container,
+.quiz__info-entry,
+.quiz__score-container,
+.quiz__feedback {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5em;
+  width: 100%;
+}
+
+.quiz__info-entry {
+  gap: 2.5em;
+}
+
+.quiz__info-result-container {
+  gap: 2.5em;
+}
+
+.quiz__score-container {
+  height: 70%;
+  justify-content: flex-start;
+  margin-top: 1em;
+}
+
+.quiz__score-container,
+.quiz__feedback-container,
+.quiz__feedback {
+  width: 100%;
+}
+
+.quiz__score-container h1,
+.quiz__score-container h2 {
+  margin: 0.2em 0;
+}
+
+.quiz__feedback-container {
+  height: 60%;
+}
+
+.quiz__feedback {
+  height: 100%;
+}
+
+.quiz__feedback ul {
+  height: 50%;
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 1.6em;
+  padding-left: 1em;
+}
+
+.quiz__feedback ul li {
+  position: relative;
+  width: 50%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.choice__checkbox-correct,
+.choice__checkbox-wrong {
+  position: relative;
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 1px solid black;
+  right: 15%;
+}
+
+.choice__checkbox-wrong::after,
+.choice__checkbox-correct::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  right: 15%;
+}
+
+.choice__checkbox-correct::after {
+  background-color: green;
+}
+
+.choice__checkbox-wrong::after {
+  background-color: red;
+}
+
+.quiz__info-pagination {
+  width: 35%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1em;
+}
+
+.quiz__info-pagination span {
+  width: 27px;
+  height: 27px;
+}
+
+.exam-container {
+  height: 70%;
+  width: 75%;
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.exam__data-container {
+  width: 55%;
+  height: 95%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-end;
+  padding-top: 3em;
+}
+
+.exam-data {
+  width: 70%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 2em;
+}
+
+.exam__choices-container {
+  height: 50%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.exam__choice-entry {
+  width: 100%;
+  height: 20%;
+}
+
+.exam__choice-entry input {
+  margin-left: 5em;
+}
+
+.exam__choice-entry label {
+  margin-left: 2em;
+}
+
+.exam__choice-entry input {
+  position: relative;
+  appearance: none;
+  -webkit-appearance: none;
+  border-radius: 0;
+  border: 1px solid #000;
+  width: 16px;
+  height: 16px;
+}
+
+input[type="radio"]::after {
+  content: "";
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 12px;
+  height: 12px;
+  background-color: green;
+  display: none;
+}
+
+input[type="radio"]:checked::after {
+  display: block;
+}
+
+.exam__choices-pagination {
+  height: 1.7em;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.exam__timer-container {
+  margin-right: 4em;
+  margin-top: 2em;
+}
+
+.user__profile-container {
+  height: 85%;
+  width: 80%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 1.5em;
+}
+
+.user__profile-top__box {
+  height: 45%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.3em;
+  align-self: start;
+}
+
+.user__profile-top__box > :first-child {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.2em;
+}
+
+.user__profile-top__box section {
+  width: 80%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+}
+
+.user__profile-top__box section h1,
+.edit__info-name-container h2 {
+  flex: 1;
+  margin: 2px 0;
+  text-align: center;
+  min-width: 0;
+}
+
+.user__profile-top__box section h2 {
+  flex: 1;
+  margin: 2px 0;
+  text-align: center;
+  min-width: 0;
+  padding-top: 3px;
+  padding-left: 5px;
+}
+
+.user__profile-avatar {
+  width: 140px;
+  height: 140px;
+}
+
+.friendship-container {
+  height: 1.5em;
+  width: 30%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+#friendshipStatus {
+  height: 100%;
+  width: 30%;
+  font-size: medium;
+  text-align: center;
+  cursor: pointer;
+}
+
+.modal {
+  width: 40%;
+  height: 5em;
+}
+
+.modal-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: baseline;
+}
+
+.modal p {
+  text-align: center;
+  font-size: large;
+  margin-top: 0.2em;
+}
+
+.modal-buttons {
+  align-self: center;
+  width: 30%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 2em;
+}
+
+.user__profile-bottom__box {
+  width: 90%;
+  height: 60%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.user__profile-bottom__box-content {
+  height: 85%;
+  width: 40%;
+  display: flex;
+  flex-direction: column;
+  justify-content: baseline;
+  align-items: center;
+}
+
+.user__profile-bottom__box-content h4,
+.user__profile-bottom__box-content h2 {
+  margin: 0;
+}
+
+.user__profile-friendlist-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: baseline;
+  gap: 1em;
+}
+
+.user__profile-friendlist-container h4 {
+  text-align: center;
+}
+
+.user__profile-list {
+  padding: 0;
+  height: 70%;
+  width: 100%;
+  align-self: center;
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-start;
+  overflow-wrap: break-word;
+  overflow-y: auto;
+  gap: 1.5em;
+  list-style: none;
+}
+
+.user__profile-list__entry {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.list__item-friend {
+  max-width: 27%;
+  width: 27%;
+  height: 40%;
+  max-height: 40%;
+}
+
+.list__item-quiz {
+  display: flex;
+  flex-direction: column;
+  justify-content: baseline;
+  align-items: center;
+  max-width: 27%;
+  width: 27%;
+  height: 40%;
+  max-height: 40%;
+}
+
+.list__item-quiz span {
+  width: 100%;
+}
+
+.quiz__entry-title {
+  text-align: center;
+  width: 100%;
+  font-weight: 500;
+  word-break: normal;
+  margin-bottom: 0.6em;
+}
+
+.quiz__entry-scores {
+  width: 100%;
+}
+
+.quiz__entry-scores-item {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 90%;
+  padding-left: 7px;
+}
+
+.user__profile-update {
+  width: 80%;
+  height: 80%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.user__profile-update form {
+  width: 50%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 1.5em;
+}
+
+.edit__info-avatar-container {
+  position: relative;
+  width: 140px;
+  height: 140px;
+}
+
+.edit__info-input__group-container {
+  width: 100%;
+  height: 45%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-top: 2em;
+  gap: 2em;
+}
+
+.edit__info-entry-container {
+  width: 80%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.entry-name {
+  height: 71.81px;
+}
+
+.entry-email {
+  height: 53px;
+}
+
+.entry-password {
+  height: 116.29px;
+}
+
+.edit__info-input,
+.auth-input,
+.auth-form-input_group input {
+  box-sizing: border-box;
+  border: 2px solid transparent;
+  border-bottom: 2px solid rgb(172, 172, 172);
+  outline: none;
+  font-size: 16px;
+  transition: font-size 0.3s ease;
+  transition: box-shadow 0.3s ease;
+  padding-left: 0;
+}
+
+.edit__info-input:focus,
+.auth-input:focus,
+.auth-form-input_group input:focus {
+  border-bottom: 2px solid rgba(0, 0, 0, 0.596);
+  box-shadow: 0 2px 0 0 rgba(0, 0, 0, 0.438);
+}
+
+.password-container {
+  height: 35%;
+  width: 80%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.edit-password-container {
+  display: flex;
+  flex-direction: column;
+  height: 116.28px;
+  justify-content: space-between;
+}
+
+.edit__info-confirm__buttons {
+  height: auto;
+  width: 50%;
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: space-around;
+  align-items: center;
+  margin: 2.5em 0;
+}
+
+.edit__info-confirm__buttons input,
+.edit__info-confirm__buttons button {
+  height: 95%;
+  width: 20%;
+  padding: 2px;
 }
 
 code {

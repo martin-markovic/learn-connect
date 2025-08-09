@@ -3,12 +3,13 @@ import { handleServiceError } from "../redux.errorHandler.js";
 
 const API_URL = "http://127.0.0.1:8000/api/friends/";
 
-const getFriendList = async (token) => {
+const getFriendList = async (userId, token) => {
   try {
     const config = {
       headers: {
         Authorization: `Bearer ${token}`,
       },
+      metadata: { clientMessage: "get friend list" },
     };
 
     const response = await axiosInstance.get(
@@ -29,6 +30,7 @@ const getUserList = async (userId, token) => {
       headers: {
         Authorization: `Bearer ${token}`,
       },
+      metadata: { clientMessage: "get user list" },
     };
 
     const response = await axiosInstance.get(`${API_URL}${userId}`, config);

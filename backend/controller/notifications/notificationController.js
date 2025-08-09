@@ -10,8 +10,8 @@ export const getNotifications = async (req, res) => {
 
     const unreadNotifications = await Notification.find({
       receiver: userId,
-      readBy: { $nin: [userId] },
-    });
+      isRead: false,
+    }).select("-__v -expiresAt -updatedAt");
 
     return res.status(200).json(unreadNotifications || []);
   } catch (error) {

@@ -7,7 +7,13 @@ import {
   getMessages,
 } from "../../controller/chat/chatController.js";
 
-chatRoutes.get("/", protect, getMessages);
-chatRoutes.get("/status", protect, getChatStatus);
+import Chat from "../../models/chat/chatModel.js";
+import User from "../../models/users/userModel.js";
+
+const handleGetMessages = getMessages(Chat);
+const handleGetChatStatus = getChatStatus(User);
+
+chatRoutes.get("/", protect, handleGetMessages);
+chatRoutes.get("/status", protect, handleGetChatStatus);
 
 export default chatRoutes;

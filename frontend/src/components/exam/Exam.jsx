@@ -7,6 +7,7 @@ import {
   getExam,
 } from "../../features/quizzes/exam/examSlice.js";
 import socketEventManager from "../../features/socket/socket.eventManager.js";
+import { FaArrowAltCircleLeft, FaArrowAltCircleRight } from "react-icons/fa";
 
 import ExamTimer from "./ExamTimer.jsx";
 
@@ -123,30 +124,44 @@ function Exam() {
   };
 
   return (
-    <div>
+    <div className="exam-container">
       <ExamTimer examFinish={examData?.examFinish} />
       {examData ? (
-        <div>
+        <div className="exam__data-container">
           {examData?.shuffledQuestions?.length &&
             examData?.shuffledQuestions.find(
               (_, index) => index === currQuestion
             ) && (
-              <div>
-                <h1>{examData?.shuffledQuestions[currQuestion]?.question}</h1>
-
-                <div>
+              <div className="exam-data">
+                <p>
+                  <span style={{ fontWeight: "bold", fontSize: "larger" }}>
+                    {currQuestion + 1}.{" "}
+                  </span>
+                  <span style={{ fontSize: "large" }}>
+                    {examData?.shuffledQuestions[currQuestion]?.question}
+                  </span>
+                </p>
+                <div className="exam__choices-container">
                   {examData?.shuffledQuestions[currQuestion]?.choices.map(
                     (choice, choiceIndex) => {
                       return (
-                        <div key={`choice-${choiceIndex}`}>
+                        <div
+                          className="exam__choice-entry"
+                          key={`choice-${choiceIndex}`}
+                        >
                           <input
+                            className="clickable"
                             name="choice"
                             type="radio"
                             id={choice}
                             onChange={handleChange}
                             checked={examData.answers[currQuestion] === choice}
                           />
-                          <label htmlFor="choice" id={choice}>
+                          <label
+                            className="clickable"
+                            htmlFor="choice"
+                            id={choice}
+                          >
                             {choice}
                           </label>
                         </div>
@@ -154,27 +169,42 @@ function Exam() {
                     }
                   )}
                 </div>
-                {currQuestion > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setCurrQuestion((prevState) => prevState - 1);
-                    }}
-                  >
-                    Previous Question
-                  </button>
-                )}
-                {currQuestion < examData.shuffledQuestions.length - 1 && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setCurrQuestion(() => currQuestion + 1);
-                    }}
-                  >
-                    Next Question
-                  </button>
-                )}
-                <button type="button" onClick={handleSubmit}>
+                <div className="exam__choices-pagination">
+                  <span>
+                    {currQuestion > 0 && (
+                      <FaArrowAltCircleLeft
+                        className="pagination-button clickable"
+                        title="Previous Question"
+                        onClick={() => {
+                          setCurrQuestion((prevState) => prevState - 1);
+                        }}
+                      />
+                    )}
+                  </span>
+                  <span>
+                    {currQuestion < examData.shuffledQuestions.length - 1 && (
+                      <FaArrowAltCircleRight
+                        className="pagination-button clickable"
+                        title=" Next Question"
+                        onClick={() => {
+                          setCurrQuestion(() => currQuestion + 1);
+                        }}
+                      />
+                    )}
+                  </span>
+                </div>
+
+                <button
+                  style={{
+                    alignSelf: "center",
+                    marginTop: "2em",
+                    marginLeft: "2em",
+                    height: "3em",
+                    width: "8em",
+                  }}
+                  type="button"
+                  onClick={handleSubmit}
+                >
                   Finish Exam
                 </button>
               </div>

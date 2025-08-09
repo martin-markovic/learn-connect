@@ -7,9 +7,14 @@ const scoreSchema = new mongoose.Schema({
     required: true,
   },
   quiz: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Quiz",
-    required: true,
+    quizId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Quiz",
+      required: true,
+    },
+    quizTitle: {
+      type: "String",
+    },
   },
   highScore: {
     type: Number,

@@ -1,14 +1,11 @@
-import Chat from "../../models/chat/chatModel.js";
-import User from "../../models/users/userModel.js";
-
-export const getMessages = async (req, res) => {
-  const userId = req.user._id;
-
-  if (!userId) {
-    throw new Error({ statusCode: 403, message: "User id is required" });
-  }
-
+export const getMessages = (Chat) => async (req, res) => {
   try {
+    const userId = req.user._id;
+
+    if (!userId) {
+      throw { statusCode: 403, message: "Authentication required" };
+    }
+
     const userChats = await Chat.find({ participants: userId })
       .populate({
         path: "conversation",
@@ -33,7 +30,7 @@ export const getMessages = async (req, res) => {
         receiverId: message.receiver?._id,
         receiverName: message.receiver?.name,
         receiverAvatar: message.sender?.avatar,
-        timestamp: message.timestamp,
+        createdAt: message.createdAt,
         isRead: message.isRead,
       }));
 
@@ -57,12 +54,12 @@ export const getMessages = async (req, res) => {
   }
 };
 
-export const getChatStatus = async (req, res) => {
+export const getChatStatus = (User) => async (req, res) => {
   try {
     const userId = req.user._id;
 
     if (!userId) {
-      throw new Error({ statusCode: 403, message: "User id is required" });
+      throw { statusCode: 403, message: "Authentication required" };
     }
 
     const userFound = await User.findOne({ _id: userId });

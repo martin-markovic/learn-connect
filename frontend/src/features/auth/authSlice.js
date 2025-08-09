@@ -19,12 +19,7 @@ export const registerUser = createAsyncThunk(
       const response = await authService.registerUser(userData);
       return response;
     } catch (error) {
-      const message =
-        (error.response && error.response && error.response.data.message) ||
-        error.message ||
-        error.toString();
-
-      return thunkAPI.rejectWithValue(message);
+      handleSliceError(error, thunkAPI);
     }
   }
 );
@@ -37,12 +32,7 @@ export const loginUser = createAsyncThunk(
 
       return response;
     } catch (error) {
-      const message =
-        (error.response && error.response && error.response.data.message) ||
-        error.message ||
-        error.toString();
-
-      return thunkAPI.rejectWithValue(message);
+      handleSliceError(error, thunkAPI);
     }
   }
 );
@@ -57,12 +47,7 @@ export const updateUser = createAsyncThunk(
 
       return response;
     } catch (error) {
-      const message =
-        (error.response && error.response && error.response.data.message) ||
-        error.message ||
-        error.toString();
-
-      return thunkAPI.rejectWithValue(message);
+      handleSliceError(error, thunkAPI);
     }
   }
 );

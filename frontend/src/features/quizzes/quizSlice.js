@@ -18,7 +18,7 @@ export const getUserQuizzes = createAsyncThunk(
       const token = thunkAPI.getState().auth.user.token;
       return await quizService.getUserQuizzes(token);
     } catch (error) {
-      handleSliceError(error);
+      handleSliceError(error, thunkAPI);
     }
   }
 );
@@ -30,7 +30,7 @@ export const getClassQuizzes = createAsyncThunk(
       const token = thunkAPI.getState().auth.user.token;
       return await quizService.getClassQuizzes(token);
     } catch (error) {
-      handleSliceError(error);
+      handleSliceError(error, thunkAPI);
     }
   }
 );
@@ -48,12 +48,7 @@ export const updateQuiz = createAsyncThunk(
       const response = await quizService.updateQuiz(id, quizData, token);
       return { id, ...response };
     } catch (error) {
-      const message =
-        (error.response && error.response && error.response.data.message) ||
-        error.message ||
-        error.toString();
-
-      return thunkAPI.rejectWithValue(message);
+      handleSliceError(error, thunkAPI);
     }
   }
 );
@@ -71,12 +66,7 @@ export const deleteQuiz = createAsyncThunk(
       await quizService.deleteQuiz(id, token);
       return id;
     } catch (error) {
-      const message =
-        (error.response && error.response && error.response.data.message) ||
-        error.message ||
-        error.toString();
-
-      return thunkAPI.rejectWithValue(message);
+      handleSliceError(error, thunkAPI);
     }
   }
 );
@@ -132,7 +122,7 @@ export const quizSlice = createSlice({
       .addCase(updateQuiz.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
-        state.quizzes = state.quizzes.map((quiz) =>
+        state.userQuizzes = state.userQuizzes.map((quiz) =>
           quiz._id === action.payload.id ? action.payload : quiz
         );
       })
@@ -144,7 +134,10 @@ export const quizSlice = createSlice({
       .addCase(deleteQuiz.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
-        state.quizzes = state.quizzes.filter(
+        state.userQuizzes = state.userQuizzes.filter(
+          (quiz) => quiz._id !== action.payload
+        );
+        state.classQuizzes = state.classQuizzes.filter(
           (quiz) => quiz._id !== action.payload
         );
       })

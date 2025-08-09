@@ -10,7 +10,26 @@ const registerUser = async (userData) => {
       throw new Error("Email and password are required.");
     }
 
-    const response = await axiosInstance.post(API_URL, userData, {});
+
+    let multiPartData;
+
+    if (avatar) {
+      const formData = new FormData();
+      formData.append("avatar", avatar);
+      Object.entries(userData).forEach(([key, value]) => {
+        if (key !== "avatar") formData.append(key, value);
+      });
+
+      multiPartData = formData;
+    }
+
+    const response = await axiosInstance.post(
+      API_URL,
+      avatar ? multiPartData : userData,
+      {
+        metadata: { clientMessage: "register user" },
+      }
+    );
 
     if (response.data) {
       localStorage.setItem("user", JSON.stringify(response.data));
@@ -24,7 +43,9 @@ const registerUser = async (userData) => {
 
 const loginUser = async (userData) => {
   try {
-    const response = await axiosInstance.post(API_URL + "/login", userData);
+    const response = await axiosInstance.post(API_URL + "/login", userData, {
+      metadata: { clientMessage: "login user" },
+    });
 
     if (response.data) {
       localStorage.setItem("user", JSON.stringify(response.data));
@@ -33,6 +54,7 @@ const loginUser = async (userData) => {
     return response.data;
   } catch (error) {
     console.error("Error logging user in: ", error.message);
+    throw error;
   }
 };
 
@@ -46,11 +68,12 @@ const updateUser = async (userData, token) => {
       headers: {
         Authorization: `Bearer ${token}`,
       },
+      metadata: { clientMessage: "update user info" },
     };
 
     let multiPartData;
 
-    if (userData.avatar) {
+    if (userData.avatar instanceof File) {
       const formData = new FormData();
       formData.append("avatar", userData.avatar);
       Object.entries(userData).forEach(([key, value]) => {
@@ -62,7 +85,9 @@ const updateUser = async (userData, token) => {
 
     const response = await axiosInstance.put(
       `${API_URL}/`,
-      userData.avatar ? multiPartData : userData,
+      userData.avatar && userData.avatar !== "removeAvatar"
+        ? multiPartData
+        : userData,
       config
     );
 
@@ -79,6 +104,7 @@ const updateUser = async (userData, token) => {
     return updatedUser;
   } catch (error) {
     console.error("Error updating user: ", error.message);
+    throw error;
   }
 };
 

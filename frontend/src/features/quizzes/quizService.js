@@ -9,6 +9,7 @@ const getUserQuizzes = async (token) => {
       headers: {
         Authorization: `Bearer ${token}`,
       },
+      metadata: { clientMessage: "get user quizzes" },
     };
 
     const response = await axiosInstance.get(API_URL, config);
@@ -16,6 +17,7 @@ const getUserQuizzes = async (token) => {
     return response.data;
   } catch (error) {
     handleServiceError(error);
+    throw error;
   }
 };
 
@@ -25,6 +27,7 @@ const getClassQuizzes = async (token) => {
       headers: {
         Authorization: `Bearer ${token}`,
       },
+      metadata: { clientMessage: "get class quizzes" },
     };
 
     const response = await axiosInstance.get(`${API_URL}classroom`, config);
@@ -32,6 +35,7 @@ const getClassQuizzes = async (token) => {
     return response.data;
   } catch (error) {
     handleServiceError(error);
+    throw error;
   }
 };
 
@@ -41,19 +45,14 @@ const updateQuiz = async (id, quizData, token) => {
       headers: {
         Authorization: `Bearer ${token}`,
       },
+      metadata: { clientMessage: "update quiz" },
     };
 
     const response = await axiosInstance.put(API_URL + id, quizData, config);
 
     return response.data;
   } catch (error) {
-    if (error.response) {
-      console.error("Server error:", error.response.data);
-    } else if (error.request) {
-      console.error("No request received:", error.request);
-    } else {
-      console.error("Error setting up request:", error.message);
-    }
+    handleServiceError(error);
     throw error;
   }
 };
@@ -64,19 +63,15 @@ const deleteQuiz = async (id, token) => {
       headers: {
         Authorization: `Bearer ${token}`,
       },
+      metadata: { clientMessage: "delete quiz" },
     };
 
     const response = await axiosInstance.delete(API_URL + id, config);
 
     return response.data;
   } catch (error) {
-    if (error.response) {
-      console.error("Server error:", error.response.data);
-    } else if (error.request) {
-      console.error("No request received:", error.request);
-    } else {
-      console.error("Error setting up request:", error.message);
-    }
+    handleServiceError(error);
+    throw error;
   }
 };
 

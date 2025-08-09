@@ -137,7 +137,7 @@ export const finishExam = async (context, data) => {
       senderId: data?.senderId,
       notificationName: "quiz graded",
       quizScore: examEndPayload?.examPayload?.scorePayload?.latestScore,
-      quizId: examEndPayload?.examPayload?.scorePayload?.quiz,
+      quizId: examEndPayload?.examPayload?.scorePayload?.quiz?.quizId,
     };
 
     await handleNewNotification(context, notificationData);
@@ -195,7 +195,7 @@ export const createExamPayload = async (data) => {
 
     const scoreFound = await Score.findOne({
       user: senderId,
-      quiz: quizFound?._id,
+      "quiz.quizId": quizFound?._id,
     });
 
     let scorePayload;
@@ -216,7 +216,10 @@ export const createExamPayload = async (data) => {
     } else {
       scorePayload = await new Score({
         user: senderId,
-        quiz: quizFound?._id,
+        quiz: {
+          quizId: quizFound._id,
+          quizTitle: quizFound.title,
+        },
         examFeedback: {
           userChoices,
           randomizedQuestions: examQuestions,

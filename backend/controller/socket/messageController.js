@@ -9,6 +9,14 @@ import validateFriendship from "../../middleware/socialMiddleware.js";
 import { handleConnectionStatus } from "./helpers/socket.userPresence.js";
 
 const handleMessages = (context) => {
+  context.socket.on("connect chat", async (data) => {
+    try {
+      await handleConnectionStatus(context, data?.senderId, "connected");
+    } catch (error) {
+      console.error("Error emitting chat connected event: ", error.message);
+    }
+  });
+
   context.socket.on("send message", async (data) => {
     try {
       await validateFriendship(data, async () => {

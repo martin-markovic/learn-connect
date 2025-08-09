@@ -1,24 +1,23 @@
-import User from "../../models/users/userModel.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 
 // POST users api/users/
-export const registerUser = async (req, res) => {
+export const registerUser = (User) => async (req, res) => {
   try {
     const { name, email, password, password2 } = req.body;
 
     if (!name || !email || !password || !password2) {
-      throw new Error({ statusCode: 400, message: "Please add all fields" });
+      throw { statusCode: 400, message: "Please add all fields" };
     }
 
     if (password !== password2) {
-      throw new Error({ statusCode: 400, message: "Passwords must match" });
+      throw { statusCode: 400, message: "Passwords must match" };
     }
 
     const userExists = await User.findOne({ email });
 
     if (userExists) {
-      throw new Error({ statusCode: 400, message: "User already registered" });
+      throw { statusCode: 400, message: "Email already registered" };
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -30,15 +29,8 @@ export const registerUser = async (req, res) => {
       password: hashedPassword,
     });
 
-    if (!user) {
-      throw new Error({
-        statusCode: 400,
-        message: "Invalid registration data",
-      });
-    }
-
     return res.status(201).json({
-      _id: user.id,
+      _id: user._id,
       name: user.name,
       email: user.email,
       token: generateToken(user._id),
@@ -47,23 +39,32 @@ export const registerUser = async (req, res) => {
     console.error("Error registering user", error.message);
     return res
       .status(error?.statusCode || 500)
-      .json(error.message || { message: "Server error" });
+      .json({ message: error.message || "Server error" });
   }
 };
 
 // POST user api/users/login
-export const loginUser = async (req, res) => {
+export const loginUser = (User) => async (req, res) => {
   try {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      throw new Error({ statusCode: 400, message: "Please add all fields" });
+      throw {
+        statusCode: 400,
+        message: "Both email and password are required to log in",
+      };
     }
 
     const user = await User.findOne({ email });
 
-    if (!user || !bcrypt.compare(password, user?.password)) {
-      throw new Error({ statusCode: 400, message: "Invalid credentials" });
+    if (!user) {
+      throw { statusCode: 404, message: "User not registered" };
+    }
+
+    const passwordMatch = await bcrypt.compare(password, user.password);
+
+    if (!passwordMatch) {
+      throw { statusCode: 400, message: "Invalid password" };
     }
 
     return res.status(200).json({
@@ -74,30 +75,37 @@ export const loginUser = async (req, res) => {
       token: generateToken(user?._id),
     });
   } catch (error) {
-    console.error("Error registering user", error.message);
+    console.error("Error loggin in", error.message);
     return res
       .status(error?.statusCode || 500)
-      .json(error.message || { message: "Server error" });
+      .json({ message: error.message || "Server error" });
   }
 };
 
-export const updateUser = async (req, res) => {
+export const updateUser = (User) => async (req, res) => {
   try {
     const userId = req.user?._id;
 
     if (!userId) {
-      throw new Error({ statusCode: 403, message: "User id is required" });
+      throw { statusCode: 403, message: "Authentication required" };
     }
 
     const avatarUrl = req.file?.path || null;
 
-    const { name, email, password } = req.body;
+    const { name, email, password, avatar } = req.body;
 
-    const updateFields = { name, email, password, avatar: avatarUrl };
+    const updateFields = { name, email, password, avatar };
+
+    if (avatarUrl) {
+      updateFields.avatar = avatarUrl;
+    }
 
     const cleanedFields = Object.entries(updateFields).reduce(
       (acc, [key, value]) => {
-        if (value != null && value !== "null" && value !== "") acc[key] = value;
+        if (key === "avatar" && value === "removeAvatar") {
+          acc[key] = null;
+        } else if (value != null && value !== "null" && value !== "")
+          acc[key] = value;
         return acc;
       },
       {}
@@ -106,8 +114,8 @@ export const updateUser = async (req, res) => {
     if (email) {
       const existingUser = await User.findOne({ email });
 
-      if (existingUser && existingUser._id.toString() !== userId.toString()) {
-        throw new Error({ statusCode: 409, message: "Email already in use" });
+      if (existingUser) {
+        throw { statusCode: 409, message: "Email already in use" };
       }
     }
 
@@ -117,7 +125,7 @@ export const updateUser = async (req, res) => {
     }).select("-password -online -__v");
 
     if (!updatedData) {
-      throw new Error({ statusCode: 404, message: "User not found" });
+      throw { statusCode: 404, message: "User not found" };
     }
 
     return res.status(200).json(updatedData);
@@ -125,7 +133,7 @@ export const updateUser = async (req, res) => {
     console.error("Error updating user profile: ", error.message);
     return res
       .status(error?.statusCode || 500)
-      .json(error?.message || { message: "Server error" });
+      .json({ message: error?.message || "Server error" });
   }
 };
 

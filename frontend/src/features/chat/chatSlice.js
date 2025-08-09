@@ -21,15 +21,7 @@ export const getMessages = createAsyncThunk(
 
       return response.data;
     } catch (error) {
-      const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-
       handleSliceError(error, thunkAPI);
-      return thunkAPI.rejectWithValue(message);
     }
   }
 );
@@ -44,15 +36,7 @@ export const getChatStatus = createAsyncThunk(
 
       return response.data;
     } catch (error) {
-      const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-
       handleSliceError(error, thunkAPI);
-      return thunkAPI.rejectWithValue(message);
     }
   }
 );
@@ -75,15 +59,24 @@ const chatSlice = createSlice({
       const { messageId, friendId } = action.payload;
 
       state.chat[friendId] = state.chat[friendId].map((message) =>
-        message._id === messageId ? { ...message, isRead: true } : message
+        message._id === messageId
+          ? { ...message, isRead: true, updatedAt: new Date().toISOString() }
+          : message
       );
     },
     markAllAsRead: (state, action) => {
-      state.chat[action.payload.friendId] = state.chat[
-        action.payload.friendId
-      ].map((message) =>
-        message.isRead !== true ? { ...message, isRead: true } : message
-      );
+      const { friendId, receiverId } = action.payload;
+
+      state.chat[friendId] = state.chat[friendId].map((message) => {
+        const shouldUpdate =
+          receiverId != null
+            ? message.receiverId === friendId && !message.isRead
+            : message.receiverId !== friendId && !message.isRead;
+
+        return shouldUpdate
+          ? { ...message, isRead: true, updatedAt: new Date().toISOString() }
+          : message;
+      });
     },
     changeChatStatus: (state, action) => {
       state.online = action?.payload;
@@ -97,11 +90,14 @@ const chatSlice = createSlice({
       })
       .addCase(getMessages.fulfilled, (state, action) => {
         state.errorMessage = "";
-        action.payload.forEach(({ friendId, messages }) => {
-          if (friendId) {
-            state.chat[friendId] = messages;
-          }
-        });
+        if (action?.payload?.length) {
+          action?.payload?.forEach(({ friendId, messages }) => {
+            if (friendId) {
+              state.chat[friendId] = messages;
+            }
+          });
+        }
+
         state.isLoading = false;
         state.isSuccess = true;
       })

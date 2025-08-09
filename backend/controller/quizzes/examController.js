@@ -47,7 +47,7 @@ export const getExamFeedback = async (req, res) => {
     }
 
     const scoreFound = await Score.findOne({
-      quiz: new mongoose.Types.ObjectId(quizId),
+      "quiz.quizId": new mongoose.Types.ObjectId(quizId),
       user: new mongoose.Types.ObjectId(userId),
     });
 
@@ -78,13 +78,9 @@ export const getExamScores = async (req, res) => {
       throw new Error({ statusCode: 403, message: "Unindentified " });
     }
 
-    const examScores = await Score.find({ user: friendId })
-      .select("-user -examFeedback -__v")
-      .populate({
-        path: "quiz",
-        select:
-          "-createdBy -classroom -questions -timeLimit -createdAt -updatedAt -__v",
-      });
+    const examScores = await Score.find({ user: friendId }).select(
+      "-user -examFeedback -__v"
+    );
 
     return res.status(200).json({ friendId, scoreList: examScores || [] });
   } catch (error) {

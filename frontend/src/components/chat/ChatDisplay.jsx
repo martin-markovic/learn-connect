@@ -45,6 +45,12 @@ const ChatDisplay = () => {
       if (isEngagedRef.current !== engaged) {
         isEngagedRef.current = engaged;
       }
+
+      const chatGlow = document.querySelector(".chat-glow");
+
+      if (chatGlow) {
+        chatGlow.style.display = engaged ? "block" : "none";
+      }
     };
 
     document.addEventListener("click", handleClick);
@@ -166,15 +172,11 @@ const ChatDisplay = () => {
   };
 
   return (
-    <div ref={parentContainerRef} className="content__scrollable-wrapper">
+    <div ref={parentContainerRef} className="chat__display-container">
       <div className="chat__display-heading">
-        <div
-          className="chat__display__heading-text"
-        >
+        <div className="chat__display__heading-text">
           <span>Chat with </span>
-          <span
-            className="chat__display__heading-userinfo"
-          >
+          <span className="chat__display__heading-userinfo">
             <span
               style={{
                 width: "30px",
@@ -217,6 +219,11 @@ const ChatDisplay = () => {
           type="button"
           onClick={() => {
             setSelectedChat(null);
+
+            isEngagedRef.current = false;
+
+            const chatGlow = document.querySelector(".chat-glow");
+            chatGlow.style.display = "none";
           }}
         >
           X
@@ -239,58 +246,99 @@ const ChatDisplay = () => {
                   <img
                     src={message?.senderAvatar}
                     alt="user avatar"
-                    className={`chat-avatar ${
-                      message?.senderId === user?._id
-                        ? "chat__item-sender"
-                        : "chat__item-receiver"
-                    }`}
+                    style={{
+                      alignSelf:
+                        message?.senderId === user?._id
+                          ? "flex-end"
+                          : "flex-start",
+                    }}
+                    className="chat-avatar"
                   />
                 ) : (
                   <div
-                    className={`chat-avatar chat__icon  ${
-                      message?.senderId === user?._id
-                        ? "chat__item-sender"
-                        : "chat__item-receiver"
-                    }`}
+                    className="chat-avatar chat__icon"
+                    style={{
+                      alignSelf:
+                        message?.senderId === user?._id
+                          ? "flex-end"
+                          : "flex-start",
+                      marginRight:
+                        message?.senderId === user?._id ? "0.8em" : "0",
+                    }}
                   >
                     <FaCircleUser
                       style={{
                         width: "100%",
                         height: "100%",
                         color: "grey",
-                        alignSelf: "flex-end",
                       }}
                     />
                   </div>
                 )}
 
-                <span>
-                  <strong>
-                    {message?.senderId === user?._id
-                      ? "You"
-                      : message?.senderName}
-                  </strong>
-                  :{" "}
-                </span>
-
-                <p>{message?.text}</p>
-                {message.senderId === user?._id && (
-                  <span>{message?.isRead ? "read" : "sent"}</span>
+                {message?.senderId === user?._id ? null : (
+                  <span
+                    style={{
+                      alignSelf:
+                        message?.senderId === user?._id
+                          ? "flex-end"
+                          : "flex-start",
+                      paddingRight:
+                        message?.senderId === user?._id ? "1em" : "0",
+                    }}
+                  >
+                    <strong>
+                      {message?.senderName}
+                      {": "}
+                    </strong>
+                  </span>
                 )}
+
+                <p
+                  style={{
+                    alignSelf:
+                      message?.senderId === user?._id
+                        ? "flex-end"
+                        : "flex-start",
+                    marginRight: message?.senderId === user?._id ? "1em" : "0",
+                  }}
+                >
+                  {message?.text}
+                </p>
+
+                <span
+                  className="chat__message-status"
+                  title={
+                    message?.isRead
+                      ? `Seen by ${message?.receiverName} ${
+                          message?.updatedAt?.slice(0, 10) ??
+                          message?.createdAt?.slice(0, 10)
+                        }, at ${
+                          message?.updatedAt?.slice(11, 16) ??
+                          message?.createdAt?.slice(11, 16)
+                        }`
+                      : `Sent ${message?.createdAt?.slice(
+                          0,
+                          10
+                        )}, at ${message?.createdAt?.slice(11, 16)}`
+                  }
+                >
+                  {message?.isRead ? "seen" : "sent"}
+                </span>
               </li>
             ))
           ) : (
-            <div style={{ alignSelf: "center", paddingTop: "10%" }}>
+            <div style={{ alignSelf: "center", paddingTop: "45%" }}>
               <span style={{ paddingLeft: "3em" }}>No messages.</span>
               <br />
-              New messages will show here.
+              New messages will appear here.
             </div>
           )}
         </ul>
         <div ref={chatEndRef} />
       </div>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="chat-form">
         <input
           type="text"
           id="message"

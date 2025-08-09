@@ -9,6 +9,7 @@ const getNotifications = async (userId, token) => {
       headers: {
         Authorization: `Bearer ${token}`,
       },
+      metadata: { clientMessage: "get notifications" },
     };
 
     const response = await axiosInstance.get(`${API_URL}/${userId}`, config);

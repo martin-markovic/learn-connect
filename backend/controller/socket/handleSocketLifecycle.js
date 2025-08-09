@@ -32,8 +32,6 @@ const handleSocketLifeCycle = (io) => {
     handleExamEvents(context);
     handleErrorEvents(socket);
 
-    await handleConnectionStatus(context, userId, "connected");
-
     socket.on("disconnect", async () => {
       await handleConnectionStatus(context, userId, "disconnected");
 

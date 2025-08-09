@@ -10,6 +10,8 @@ const joinClassroom = async (classroomId, token) => {
       {},
       {
         headers: { Authorization: `Bearer ${token}` },
+
+        metadata: { clientMessage: "join classroom" },
       }
     );
 
@@ -27,6 +29,8 @@ const leaveClassroom = async (classroomId, token) => {
       {},
       {
         headers: { Authorization: `Bearer ${token}` },
+
+        metadata: { clientMessage: "leave classroom" },
       }
     );
     return response.data;
@@ -40,6 +44,8 @@ const getClassroomList = async (token) => {
   try {
     const response = await axiosInstance.get(API_URL, {
       headers: { Authorization: `Bearer ${token}` },
+
+      metadata: { clientMessage: "get classroom list" },
     });
 
     return response.data;
@@ -53,6 +59,8 @@ const getUserClassroom = async (token) => {
   try {
     const response = await axiosInstance.get(`${API_URL}/me`, {
       headers: { Authorization: `Bearer ${token}` },
+
+      metadata: { clientMessage: "get user classroom" },
     });
 
     return response.data;

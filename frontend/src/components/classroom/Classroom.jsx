@@ -18,8 +18,6 @@ function Classroom() {
     classroomList = [],
     userClassroom,
     isLoading,
-    isError,
-    errorMessage,
   } = useSelector((state) => state.classroom);
 
   useEffect(() => {
@@ -31,56 +29,49 @@ function Classroom() {
     };
   }, [dispatch]);
 
-  useEffect(() => {
-    if (isError && errorMessage) {
-      console.error("Error :", errorMessage);
-    }
-  }, [isError, errorMessage]);
-
   const handleChange = (e) => {
     setSelectedClassroom(e.target.value);
   };
 
   const handleJoinClassroom = () => {
-    try {
-      if (selectedClassroom) {
-        const result = dispatch(joinClassroom(selectedClassroom));
-
-        if (result.error) {
-          console.error("Error:", result.error.message);
-        } else {
-          toast.success("Successfully joined classroom:", result.payload);
-          dispatch(getClassroomList());
-          setSelectedClassroom("");
-        }
-      } else {
-        toast.error("Please select a classroom");
-      }
-    } catch (error) {
-      console.error("handleJoinClassroom Error: ", error.message);
+    if (!selectedClassroom) {
       toast.error("Failed to join classroom.");
+      return;
     }
+
+    dispatch(joinClassroom(selectedClassroom))
+      .unwrap()
+      .then((payload) => {
+        toast.success("Successfully joined classroom");
+        dispatch(getClassroomList());
+        setSelectedClassroom("");
+      })
+      .catch((error) => {
+        console.error("Join classroom failed:", error.message);
+      });
   };
 
   const handleLeaveClassroom = () => {
-    try {
-      if (selectedClassroom) {
-        const result = dispatch(leaveClassroom(selectedClassroom));
-
-        if (result.error) {
-          console.error("Error:", result.error.message);
-        } else {
-          toast.success(`Successfully left the classroom: ${result.payload}`);
-
-          dispatch(getClassroomList());
-        }
-      } else {
-        toast.error("Please select a classroom");
-      }
-    } catch (error) {
-      console.error("leaveClassroom Error: ", error.message);
-      toast.error("Failed to leave the classroom.");
+    if (!selectedClassroom) {
+      toast.error("Please select a classroom");
+      return;
     }
+
+    dispatch(leaveClassroom(selectedClassroom))
+      .unwrap()
+      .then((payload) => {
+        toast.success("Successfully left the classroom");
+        dispatch(getClassroomList());
+        dispatch(getUserClassroom());
+        setSelectedClassroom("");
+      })
+      .catch((error) => {
+        console.error("leaveClassroom Error:", error.message);
+      });
+  };
+
+  const handleCancel = () => {
+    setSelectedClassroom("");
   };
 
   return (
@@ -88,44 +79,117 @@ function Classroom() {
       <div className="classroom__enroll-dropdown">
         {isLoading ? (
           <p>Loading classrooms...</p>
-        ) : classroomList.length === 0 ? (
-          <p>No classrooms available.</p>
         ) : (
-          <div>
-            <span>
-              {userClassroom
-                ? `Current classroom: ${userClassroom?.name}`
-                : "User is not enrolled in classroom"}
-            </span>
+          <div className="classroom__details-container">
+            <div className="classroom-user">
+              <h4>
+                {userClassroom
+                  ? `Classroom: ${userClassroom?.name}`
+                  : "User is not enrolled in classroom"}
+              </h4>
 
-            <div className="clasroom__enroll__dropdown-items">
-              <span>Select a Classroom:</span>
-              <select
-                id="classroom-select"
-                value={selectedClassroom}
-                onChange={handleChange}
-              >
-                <option value="" disabled></option>
-                {classroomList.map((classroom) => (
-                  <option
-                    key={`classroom-${classroom?._id}`}
-                    value={classroom?._id}
-                  >
-                    {classroom?.name}
-                  </option>
-                ))}
-              </select>
+              {userClassroom && (
+                <button type="button" onClick={handleLeaveClassroom}>
+                  Leave Classroom
+                </button>
+              )}
             </div>
+
+            {classroomList.length === 0 ? (
+              <p>No classrooms available.</p>
+            ) : (
+              <div className="classroom__enroll__dropdown-items">
+                <select
+                  id="classroom-select"
+                  value={selectedClassroom}
+                  onChange={handleChange}
+                >
+                  <option value="" disabled>
+                    Select a Classroom
+                  </option>
+                  {classroomList.map((classroom) => (
+                    <option
+                      key={`classroom-${classroom?._id}`}
+                      value={classroom?._id}
+                    >
+                      {classroom?.name}
+                    </option>
+                  ))}
+                </select>
+                {selectedClassroom && (
+                  <button
+                    type="button"
+                    onClick={handleCancel}
+                    className="classroom__select-cancel"
+                  >
+                    X
+                  </button>
+                )}
+
+                <div className="classroom__enroll-details">
+                  {selectedClassroom &&
+                    selectedClassroom !== userClassroom?._id && (
+                      <div className="classroom__info-container">
+                        {classroomList.map((classroom) => {
+                          const remainingSits =
+                            classroom?.limit - classroom?.students?.length;
+
+                          const classroomQuizAmount =
+                            classroom?.quizzes?.length;
+
+                          if (classroom._id === selectedClassroom) {
+                            return (
+                              <div key={classroom?._id}>
+                                <span
+                                  style={{
+                                    marginLeft: "1em",
+                                  }}
+                                >
+                                  Subject: {classroom?.subject}
+                                </span>
+                                <span
+                                  style={{
+                                    marginLeft: "3em",
+                                  }}
+                                >
+                                  {remainingSits > 0
+                                    ? `${remainingSits} seat${
+                                        remainingSits > 1 && "s"
+                                      } left`
+                                    : "Classroom is full"}
+                                </span>
+                                <span
+                                  style={{
+                                    marginLeft: "3em",
+                                  }}
+                                >
+                                  {classroomQuizAmount
+                                    ? `${classroomQuizAmount} ${
+                                        classroomQuizAmount > 1
+                                          ? "quizzes"
+                                          : "quiz"
+                                      } total`
+                                    : "No quizzes"}
+                                </span>
+                              </div>
+                            );
+                          }
+
+                          return null;
+                        })}
+
+                        <span className="classroom__enroll-buttons">
+                          <button type="button" onClick={handleJoinClassroom}>
+                            Enroll
+                          </button>
+                        </span>
+                      </div>
+                    )}
+                </div>
+              </div>
+            )}
           </div>
         )}
-      </div>
-      <div className="classroom__enroll-buttons">
-        <button type="button" onClick={handleJoinClassroom}>
-          Enroll
-        </button>
-        <button type="button" onClick={handleLeaveClassroom}>
-          Leave Classroom
-        </button>
       </div>
     </div>
   );

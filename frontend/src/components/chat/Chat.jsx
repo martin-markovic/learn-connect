@@ -11,8 +11,17 @@ const Chat = () => {
 
   return (
     <div className="conversation">
-      <ChatList />
-      {selectedChat && online && <ChatDisplay />}
+      <div
+        className={`conversation-chat__display ${
+          selectedChat && online ? "chat-active" : "chat-closed"
+        }`}
+      >
+        {selectedChat && online && <ChatDisplay />}
+      </div>
+      <div className="chat-glow"></div>
+      <div className="conversation-chat__list">
+        <ChatList />
+      </div>
     </div>
   );
 };

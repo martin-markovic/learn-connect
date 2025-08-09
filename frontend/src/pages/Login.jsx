@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { loginUser } from "../features/auth/authSlice.js";
 import { toast } from "react-toastify";
 
@@ -12,7 +12,6 @@ function Login() {
   });
 
   const { email, password } = formData;
-  const { isError, message } = useSelector((state) => state.auth);
 
   const handleInput = (e) => {
     e.preventDefault();
@@ -27,7 +26,7 @@ function Login() {
     e.preventDefault();
 
     if (!email || !password) {
-      toast.error("Please add all fields");
+      toast.error("Please provide both fields");
     } else {
       const userCredentials = {
         email,
@@ -38,34 +37,36 @@ function Login() {
     }
   };
 
-  if (isError) {
-    toast.error(message);
-  }
-
   return (
     <div className="container">
       <form id="login-form" onSubmit={handleSubmit}>
-        <label htmlFor="email">Your email</label>
-        <input
-          type="email"
-          name="email"
-          id="email"
-          placeholder="Your email"
-          autoComplete="email"
-          value={email}
-          onChange={handleInput}
-        />
-        <label htmlFor="password">Your password</label>
-        <input
-          type="password"
-          name="password"
-          id="password"
-          placeholder="Your password"
-          autoComplete="off"
-          minLength={8}
-          value={password}
-          onChange={handleInput}
-        />
+        <div className="auth-form-input_group">
+          <label>Email: </label>
+          <input
+            className="auth-input"
+            type="email"
+            name="email"
+            id="email"
+            placeholder="Your email"
+            autoComplete="email"
+            value={email}
+            onChange={handleInput}
+          />
+        </div>
+        <div className="auth-form-input_group">
+          <label>Password: </label>
+          <input
+            className="auth-input"
+            type="password"
+            name="password"
+            id="password"
+            placeholder="Your password"
+            autoComplete="off"
+            minLength={8}
+            value={password}
+            onChange={handleInput}
+          />
+        </div>
         <input style={{ marginTop: "1rem" }} type="submit" value="Login" />
       </form>
     </div>

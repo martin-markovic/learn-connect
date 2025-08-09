@@ -33,7 +33,7 @@ describe("Quiz Service Integration Tests", function () {
         expect(result).to.have.property("choices", quizData.choices);
         expect(result).to.have.property("answer", quizData.answer);
       } catch (error) {
-        console.log("Error during createQuiz test:", error);
+        console.log("Error during createQuiz test:", error.message);
       }
     });
   });
@@ -53,7 +53,7 @@ describe("Quiz Service Integration Tests", function () {
         expect(result).to.have.property("choices", quizData.choices);
         expect(result).to.have.property("answer", quizData.answer);
       } catch (error) {
-        console.log("Error during createQuiz test:", error);
+        console.log("Error during createQuiz test:", error.message);
       }
     });
   });
@@ -74,7 +74,7 @@ describe("Quiz Service Integration Tests", function () {
         expect(result).to.have.property("choices", quizData.choices);
         expect(result).to.have.property("answer", quizData.answer);
       } catch (error) {
-        console.log("Error during createQuiz test:", error);
+        console.log("Error during createQuiz test:", error.message);
       }
     });
   });
@@ -102,7 +102,7 @@ describe("Quiz Service Integration Tests", function () {
         expect(result).to.have.property("choices", updatedData.choices);
         expect(result).to.have.property("answer", updatedData.answer);
       } catch (error) {
-        console.log("Error during createQuiz test:", error);
+        console.log("Error during createQuiz test:", error.message);
       }
     });
   });
@@ -119,7 +119,7 @@ describe("Quiz Service Integration Tests", function () {
 
         expect(result).to.deep.equal({ message: "Quiz deleted successfully" });
       } catch (error) {
-        console.log("Error during createQuiz test:", error);
+        console.log("Error during createQuiz test:", error.message);
       }
     });
   });

@@ -106,7 +106,10 @@ function UserForm({ setIsEditing, userDetails }) {
       const userData = Object.entries(pendingChanges).reduce(
         (acc, [key, value]) => {
           if (key === "avatar") {
-            if (value?.name !== userDetails[key]?.name) {
+            if (
+              value === "removeAvatar" ||
+              value?.name !== userDetails[key]?.name
+            ) {
               acc[key] = value;
             }
             return acc;
@@ -144,31 +147,34 @@ function UserForm({ setIsEditing, userDetails }) {
   };
 
   return (
-    <div>
-      <form
-        onSubmit={handleSubmit}
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-        }}
-      >
-        <div className="avatar-wrapper">
+    <div className="user__profile-update">
+      <form onSubmit={handleSubmit}>
+        <div className="edit__info-avatar-container user__form-avatar__wrapper">
           {editInfo.avatar ? (
-            <>
-              {formData?.avatar ? (
+            <div
+              style={{ position: "relative", width: "140px", height: "140px" }}
+            >
+              {formData?.avatar && formData?.avatar !== "removeAvatar" ? (
                 <img
                   src={avatarPreview}
                   alt="new avatar preview"
                   style={{
-                    width: "80px",
-                    height: "80px",
+                    width: "140px",
+                    height: "140px",
                     borderRadius: "50%",
                     objectFit: "cover",
                   }}
                 />
               ) : (
-                <FaCircleUser />
+                <FaCircleUser
+                  style={{
+                    width: "140px",
+                    height: "140px",
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                    color: "grey",
+                  }}
+                />
               )}
               <button
                 type="button"
@@ -191,46 +197,67 @@ function UserForm({ setIsEditing, userDetails }) {
               >
                 Cancel
               </button>
-            </>
+            </div>
           ) : avatarPreview ? (
             <img
               src={avatarPreview}
               alt="user avatar"
               style={{
-                width: "80px",
-                height: "80px",
+                width: "140px",
+                height: "140px",
                 borderRadius: "50%",
                 objectFit: "cover",
               }}
             />
           ) : (
-            <FaCircleUser />
+            <FaCircleUser
+              style={{
+                width: "140px",
+                height: "140px",
+                borderRadius: "50%",
+                objectFit: "cover",
+                color: "grey",
+              }}
+            />
           )}
 
-          <label className="upload-button clickable">
+          <label className="upload-button clickable" title="upload user image">
             <input
               type="file"
-              style={{ display: "none" }}
               id="avatar"
               name="avatar"
               accept="image/png, image/jpeg"
               autoComplete="off"
               onChange={handleChange}
             />
-            <MdFileUpload />
+            <MdFileUpload style={{ height: "30%", width: "30%" }} />
           </label>
+          {userDetails?.avatar && formData?.avatar !== "removeAvatar" && (
+            <button
+              type="button"
+              className="avatar-remove"
+              onClick={() => {
+                setPendingChanges((prevState) => ({
+                  ...prevState,
+                  avatar: "removeAvatar",
+                }));
+                setFormData((prevState) => ({
+                  ...prevState,
+                  avatar: "removeAvatar",
+                }));
+                setAvatarPreview(null);
+              }}
+            >
+              Remove Avatar
+            </button>
+          )}
         </div>
 
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-          }}
-        >
+        <div className="edit__info-input__group-container">
           {editInfo.name ? (
-            <>
+            <div className="edit__info-entry-container entry-name">
               <input
+                className="edit__info-input"
                 type="text"
                 name="name"
                 onChange={handleChange}
@@ -268,23 +295,24 @@ function UserForm({ setIsEditing, userDetails }) {
               >
                 Cancel
               </button>
-            </>
+            </div>
           ) : (
-            <>
-              <p>
+            <div className="edit__info-entry-container">
+              <h2>
                 {pendingChanges?.name
                   ? pendingChanges?.name
                   : userDetails?.name}
-              </p>
+              </h2>
               <button name="name" type="button" onClick={handleEdit}>
                 Change Name
               </button>
-            </>
+            </div>
           )}
 
           {editInfo?.email ? (
-            <>
+            <div className="edit__info-entry-container entry-email">
               <input
+                className="edit__info-input"
                 type="email"
                 name="email"
                 onChange={handleChange}
@@ -322,9 +350,9 @@ function UserForm({ setIsEditing, userDetails }) {
               >
                 Cancel
               </button>
-            </>
+            </div>
           ) : (
-            <>
+            <div className="edit__info-entry-container">
               <p>
                 {pendingChanges?.email
                   ? pendingChanges?.email
@@ -333,28 +361,32 @@ function UserForm({ setIsEditing, userDetails }) {
               <button name="email" type="button" onClick={handleEdit}>
                 Change Email
               </button>
-            </>
+            </div>
           )}
 
           {editInfo?.password ? (
-            <>
-              <input
-                type="password"
-                name="password"
-                onChange={handleChange}
-                value={formData?.password || ""}
-                placeholder="new password"
-                minLength={8}
-              />
+            <div className="edit__info-entry-container entry-password">
+              <div className="edit-password-container">
+                <input
+                  className="edit__info-input"
+                  type="password"
+                  name="password"
+                  onChange={handleChange}
+                  value={formData?.password || ""}
+                  placeholder="new password"
+                  minLength={8}
+                />
 
-              <input
-                type="password"
-                name="password2"
-                onChange={handleChange}
-                value={formData?.password2 || ""}
-                placeholder="confirm password"
-                minLength={8}
-              />
+                <input
+                  className="edit__info-input"
+                  type="password"
+                  name="password2"
+                  onChange={handleChange}
+                  value={formData?.password2 || ""}
+                  placeholder="confirm password"
+                  minLength={8}
+                />
+              </div>
               <button
                 name="password"
                 type="button"
@@ -396,19 +428,21 @@ function UserForm({ setIsEditing, userDetails }) {
               >
                 Cancel
               </button>
-            </>
+            </div>
           ) : (
-            <button type="button" name="password" onClick={handleEdit}>
-              Change Password
-            </button>
+            <div className="password-container">
+              <button type="button" name="password" onClick={handleEdit}>
+                Change Password
+              </button>
+            </div>
           )}
         </div>
 
-        <div>
+        <div className="edit__info-confirm__buttons">
           <input
             type="submit"
             onClick={handleSubmit}
-            value="Save changes"
+            value="Save"
             disabled={
               Object.values(pendingChanges).length === 0 ||
               Object.keys(pendingChanges).every(
@@ -422,7 +456,7 @@ function UserForm({ setIsEditing, userDetails }) {
               setIsEditing(false);
             }}
           >
-            Go Back
+            Back
           </button>
         </div>
       </form>
