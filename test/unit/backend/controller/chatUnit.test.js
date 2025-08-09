@@ -17,7 +17,7 @@ const mockGetChatStatus = getChatStatus(MockUserModel);
 const mockChatData = new MockData();
 
 let mockUserOne;
-let mockUserTwo;
+let noMessageUser;
 
 const chatRes = new MockRes();
 
@@ -49,9 +49,10 @@ describe("Chat API", () => {
   before(async () => {
     await MockUserModel.create({ ...mockChatData.mockUsers[0], _id: "0" });
     await MockUserModel.create({ ...mockChatData.mockUsers[1], _id: "1" });
+    await MockUserModel.create({ ...mockChatData.mockUsers[2], _id: "99" });
 
     mockUserOne = MockUserModel.storage.users[0];
-    mockUserTwo = MockUserModel.storage.users[1];
+    noMessageUser = MockUserModel.storage.users[2];
 
     conversationList.forEach(async (c) => {
       await MockChatModel.create(c);
@@ -67,7 +68,7 @@ describe("Chat API", () => {
     MockChatModel.cleanupAll();
   });
 
-  describe("", () => {
+  describe("getMessages", () => {
     it("should fetch messages and verify them", async () => {
       const mockReq = { user: { _id: mockUserOne._id } };
       await mockGetMessages(mockReq, chatRes);
@@ -99,6 +100,25 @@ describe("Chat API", () => {
           ]);
         });
       });
+    });
+
+    it("should return an empty array as response payload", async () => {
+      const mockReq = { user: { _id: noMessageUser._id } };
+
+      await mockGetMessages(mockReq, chatRes);
+
+      expect(chatRes.statusCode).to.equal(200);
+
+      expect(chatRes.body.length).to.equal(0);
+    });
+
+    it("should return `Authentication required` error message", async () => {
+      const mockReq = { user: { _id: undefined } };
+
+      await mockGetMessages(mockReq, chatRes);
+
+      expect(chatRes.statusCode).to.equal(403);
+      expect(chatRes.body.message).to.equal("Authentication required");
     });
   });
 });

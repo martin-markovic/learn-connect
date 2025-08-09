@@ -1,11 +1,11 @@
 export const getMessages = (Chat) => async (req, res) => {
-  const userId = req.user._id;
-
-  if (!userId) {
-    throw new Error({ statusCode: 403, message: "Authentication required" });
-  }
-
   try {
+    const userId = req.user._id;
+
+    if (!userId) {
+      throw { statusCode: 403, message: "Authentication required" };
+    }
+
     const userChats = await Chat.find({ participants: userId })
       .populate({
         path: "conversation",
@@ -59,7 +59,7 @@ export const getChatStatus = (User) => async (req, res) => {
     const userId = req.user._id;
 
     if (!userId) {
-      throw new Error({ statusCode: 403, message: "Authentication required" });
+      throw { statusCode: 403, message: "Authentication required" };
     }
 
     const userFound = await User.findOne({ _id: userId });
