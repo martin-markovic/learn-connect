@@ -4,11 +4,12 @@ const API_URL = "http://127.0.0.1:8000/api/users";
 
 const registerUser = async (userData) => {
   try {
-    const { email, password, avatar } = userData;
+    const { email, password } = userData;
 
     if (!email || !password) {
       throw new Error("Email and password are required.");
     }
+
 
     let multiPartData;
 

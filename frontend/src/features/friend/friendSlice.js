@@ -36,14 +36,14 @@ export const getFriendList = createAsyncThunk(
 
 export const getUserList = createAsyncThunk(
   "friends/getUserList",
-  async (_, thunkAPI) => {
+  async (userId, thunkAPI) => {
     try {
       const token = thunkAPI.getState().auth.user?.token;
       if (!token) {
         throw new Error("Token not found");
       }
 
-      const response = await friendService.getUserList(token);
+      const response = await friendService.getUserList(userId, token);
 
       return response;
     } catch (error) {
