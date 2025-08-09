@@ -37,8 +37,11 @@ function UserProfile() {
   const { examScores } = useSelector((state) => state.exam);
 
   useEffect(() => {
-    dispatch(getUserList());
-    dispatch(getFriendList());
+    if (userId === user?._id || !isBlocked) {
+      dispatch(getFriendList(userId));
+    }
+
+    dispatch(getUserList(userId));
 
     return () => {
       dispatch(resetExam());

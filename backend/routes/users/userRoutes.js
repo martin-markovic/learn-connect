@@ -9,6 +9,8 @@ import {
   updateUser,
 } from "../../controller/users/userController.js";
 
+import User from "../../models/users/userModel.js";
+
 import { protect } from "../../middleware/authMiddleware.js";
 
 const upload = multer({ storage });

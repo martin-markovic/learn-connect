@@ -7,13 +7,23 @@ export default function FriendSearch() {
   const [input, setInput] = useState("");
   const [resultList, setResultList] = useState([]);
 
-  const { userList } = useSelector((state) => state.friends);
+  const { isLoading: userStateLoading, userList } = useSelector(
+    (state) => state.friends
+  );
+  const {
+    isLoading: quizStateLoading,
+    userQuizzes,
+    classQuizzes,
+  } = useSelector((state) => state.quizzes);
+  const user = useSelector((state) => state.auth);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   useEffect(() => {
-    dispatch(getUserList());
+    dispatch(getUserList(user?._id));
+    dispatch(getUserQuizzes());
+    dispatch(getClassQuizzes());
 
     return () => {
       dispatch(resetUserList());
