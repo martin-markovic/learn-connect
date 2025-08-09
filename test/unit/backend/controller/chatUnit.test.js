@@ -9,7 +9,6 @@ import {
 
 const MockUserModel = new MockModel("users");
 const MockChatModel = new MockModel("chats");
-const MockConversationModel = new MockModel("conversations");
 
 const mockGetMessages = getMessages(MockChatModel);
 const mockGetChatStatus = getChatStatus(MockUserModel);
@@ -119,6 +118,46 @@ describe("Chat API", () => {
 
       expect(chatRes.statusCode).to.equal(403);
       expect(chatRes.body.message).to.equal("Authentication required");
+    });
+  });
+
+  describe("getChatStatus", () => {
+    it("should fetch online user chat status and confirm it", async () => {
+      const mockReq = { user: { _id: mockUserOne._id } };
+
+      await mockGetChatStatus(mockReq, chatRes);
+
+      expect(chatRes.statusCode).to.equal(200);
+      expect(chatRes.body.online).to.equal(true);
+    });
+
+    it("should fetch offline user chat status and confirm it", async () => {
+      const mockReq = { user: { _id: noMessageUser._id } };
+
+      await mockGetChatStatus(mockReq, chatRes);
+
+      expect(chatRes.statusCode).to.equal(200);
+      expect(chatRes.body.online).to.equal(false);
+    });
+
+    it("should return `Authentication required` error message", async () => {
+      const mockReq = { user: { _id: undefined } };
+
+      await mockGetChatStatus(mockReq, chatRes);
+
+      expect(chatRes.statusCode).to.equal(403);
+      expect(chatRes.body.message).to.equal("Authentication required");
+    });
+
+    it("should return `Access denied, user is not registered` error message", async () => {
+      const mockReq = { user: { _id: "01987" } };
+
+      await mockGetChatStatus(mockReq, chatRes);
+
+      expect(chatRes.statusCode).to.equal(403);
+      expect(chatRes.body.message).to.equal(
+        "Access denied, user is not registered"
+      );
     });
   });
 });
