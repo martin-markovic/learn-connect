@@ -21,22 +21,39 @@ export default class MockModel {
       return this.handleSelect(result);
     }
 
-    // monkey patch to allow chaining populate() method
+    if (this.model === "chats") {
+      const messages = this.storage[this.model].filter(
+        (item) =>
+          item.receiver._id === query.participants ||
+          item.sender._id === query.participants
+      );
+
+      const grouped = {};
+
+      for (const message of messages) {
+        const ids = [message.sender._id, message.receiver._id].sort();
+        const key = ids.join("_");
+
+        if (!grouped[key]) {
+          grouped[key] = {
+            conversation: [],
+          };
+        }
+
+        grouped[key].conversation.push(message);
+      }
+
+      return this.handleSelect(Object.values(grouped), true);
+    }
+
     if ("$or" in query && this.model === "friends") {
+      // monkey patch to allow chaining populate() method
       if ("status" in query) {
         const result = this.storage[this.model].filter(
           (doc) => doc.status !== "blocked"
         );
 
-        return {
-          populate(...args) {
-            return {
-              populate() {
-                return result;
-              },
-            };
-          },
-        };
+        return this.handleSelect(result, true);
       }
 
       return [];
@@ -99,7 +116,7 @@ export default class MockModel {
     }
   }
 
-  handleSelect(result) {
+  handleSelect(result, isChained = false) {
     let projectedResult = result;
 
     const wrapper = {
@@ -142,6 +159,14 @@ export default class MockModel {
         }
 
         return wrapper;
+      },
+
+      populate(...args) {
+        return isChained ? wrapper : result;
+      },
+
+      exec() {
+        return result;
       },
 
       then(resolve, reject) {
