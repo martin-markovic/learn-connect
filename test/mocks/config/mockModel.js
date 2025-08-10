@@ -117,6 +117,22 @@ export default class MockModel {
   }
 
   handleSelect(result, isChained = false) {
+    // monkey patch fix to allow save method chaining
+    if (result && typeof result === "object" && this.model === "classrooms") {
+      result.save = async () => {
+        if (result && result._id) {
+          const idx = this.storage[this.model].findIndex(
+            (item) => item._id === result._id
+          );
+          if (idx !== -1) {
+            this.storage[this.model][idx] = { ...result };
+            return Promise.resolve(this.storage[this.model][idx]);
+          }
+        }
+        return Promise.resolve(null);
+      };
+    }
+
     let projectedResult = result;
 
     const wrapper = {
