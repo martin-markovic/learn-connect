@@ -81,7 +81,7 @@ export const leaveClassroom = (Classroom, User) => async (req, res) => {
     }
 
     classroom.students = classroom.students.filter(
-      (student) => !student.equals(userId)
+      (studentId) => studentId !== userId
     );
 
     await classroom.save();

@@ -128,4 +128,68 @@ describe("Classroom API", () => {
       );
     });
   });
+
+  describe("leaveClassroom", () => {
+    it("should leave a classroom and verify it", async () => {
+      const mockReq = {
+        params: { classroomId: secondClassroom._id },
+        user: { _id: enrolledUser._id },
+      };
+
+      await mockLeaveClassroom(mockReq, classroomRes);
+
+      expect(classroomRes.statusCode).to.equal(200);
+      expect(classroomRes.body).to.equal(secondClassroom._id);
+    });
+
+    it("should return a `Please provide classroom ID` error message", async () => {
+      const mockReq = {
+        params: { classroomId: undefined },
+        user: { _id: enrolledUser._id },
+      };
+
+      await mockLeaveClassroom(mockReq, classroomRes);
+
+      expect(classroomRes.statusCode).to.equal(400);
+      expect(classroomRes.body.message).to.equal("Please provide classroom ID");
+    });
+
+    it("should return a `User id is required` error message", async () => {
+      const mockReq = {
+        params: { classroomId: secondClassroom._id },
+        user: { _id: undefined },
+      };
+
+      await mockLeaveClassroom(mockReq, classroomRes);
+
+      expect(classroomRes.statusCode).to.equal(403);
+      expect(classroomRes.body.message).to.equal("User id is required");
+    });
+
+    it("should return a `Classroom not found` error message", async () => {
+      const mockReq = {
+        params: { classroomId: "99" },
+        user: { _id: enrolledUser._id },
+      };
+
+      await mockLeaveClassroom(mockReq, classroomRes);
+
+      expect(classroomRes.statusCode).to.equal(404);
+      expect(classroomRes.body.message).to.equal("Classroom not found");
+    });
+
+    it("should return a `You are not a member of this classroom` error message", async () => {
+      const mockReq = {
+        params: { classroomId: firstClassroom._id },
+        user: { _id: enrolledUser._id },
+      };
+
+      await mockLeaveClassroom(mockReq, classroomRes);
+
+      expect(classroomRes.statusCode).to.equal(403);
+      expect(classroomRes.body.message).to.equal(
+        "You are not a member of this classroom"
+      );
+    });
+  });
 });
