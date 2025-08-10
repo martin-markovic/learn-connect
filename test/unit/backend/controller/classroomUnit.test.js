@@ -23,20 +23,20 @@ const mockGetUserClassroom = getUserClassroom(MockUserModel);
 const classroomRes = new MockRes();
 
 let firstClassroomUser;
-let noClassroomUser;
+let enrolledUser;
 const firstClassroom = MockClassroomData.mockClassrooms[0];
 const secondClassroom = MockClassroomData.mockClassrooms[1];
 
 describe("Classroom API", () => {
   before(async () => {
     await MockUserModel.create({ ...MockClassroomData.mockUsers[0] });
-    await MockUserModel.create({ ...MockClassroomData.mockUsers[2], _id: "2" });
+    await MockUserModel.create({ ...MockClassroomData.mockUsers[1], _id: "2" });
 
     await MockClassroomModel.create({ ...firstClassroom });
     await MockClassroomModel.create({ ...secondClassroom });
 
     firstClassroomUser = MockUserModel.storage.users[0];
-    noClassroomUser = MockUserModel.storage.users[1];
+    enrolledUser = MockUserModel.storage.users[1];
   });
 
   beforeEach(() => {
@@ -75,6 +75,56 @@ describe("Classroom API", () => {
       );
       expect(classroomRes.body.updatedClassroom.students[0]).to.equal(
         firstClassroomUser._id
+      );
+    });
+
+    it("should return a `Classroom ID is required` error message", async () => {
+      const mockReq = {
+        params: { classroomId: undefined },
+        user: { _id: firstClassroomUser._id },
+      };
+
+      await mockJoinClassroom(mockReq, classroomRes);
+
+      expect(classroomRes.statusCode).to.equal(400);
+      expect(classroomRes.body.message).to.equal("Classroom ID is required");
+    });
+
+    it("should return a `User id is required` error message", async () => {
+      const mockReq = {
+        params: { classroomId: firstClassroom._id },
+        user: { _id: undefined },
+      };
+
+      await mockJoinClassroom(mockReq, classroomRes);
+
+      expect(classroomRes.statusCode).to.equal(403);
+      expect(classroomRes.body.message).to.equal("User id is required");
+    });
+
+    it("should return a `Classroom not found` error message", async () => {
+      const mockReq = {
+        params: { classroomId: "99" },
+        user: { _id: firstClassroomUser._id },
+      };
+
+      await mockJoinClassroom(mockReq, classroomRes);
+
+      expect(classroomRes.statusCode).to.equal(404);
+      expect(classroomRes.body.message).to.equal("Classroom not found");
+    });
+
+    it("should return a `User is already in this classroom` error message", async () => {
+      const mockReq = {
+        params: { classroomId: secondClassroom._id },
+        user: { _id: enrolledUser._id },
+      };
+
+      await mockJoinClassroom(mockReq, classroomRes);
+
+      expect(classroomRes.statusCode).to.equal(400);
+      expect(classroomRes.body.message).to.equal(
+        "User is already in this classroom"
       );
     });
   });

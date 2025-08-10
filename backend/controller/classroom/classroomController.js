@@ -20,7 +20,7 @@ export const joinClassroom = (Classroom, User) => async (req, res) => {
     if (classroom.students.includes(userId)) {
       throw {
         statusCode: 400,
-        message: "User already in classroom",
+        message: "User is already in this classroom",
       };
     }
 
