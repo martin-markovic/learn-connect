@@ -9,9 +9,17 @@ import {
   getUserClassroom,
 } from "../../controller/classroom/classroomController.js";
 
-classroomRoutes.post("/join/:classroomId", protect, joinClassroom);
-classroomRoutes.post("/leave/:classroomId", protect, leaveClassroom);
-classroomRoutes.get("/", protect, getAllClassrooms);
-classroomRoutes.get("/me", protect, getUserClassroom);
+import User from "../../models/users/userModel.js";
+import Classroom from "../../models/classrooms/classroomModel.js";
+
+const handleJoinClassrom = joinClassroom(Classroom, User);
+const handlelLeaveClassroom = leaveClassroom(Classroom, User);
+const handleGetAllClassrooms = getAllClassrooms(Classroom);
+const handleGetUserClassroom = getUserClassroom(Classroom);
+
+classroomRoutes.post("/join/:classroomId", protect, handleJoinClassrom);
+classroomRoutes.post("/leave/:classroomId", protect, handlelLeaveClassroom);
+classroomRoutes.get("/", protect, handleGetAllClassrooms);
+classroomRoutes.get("/me", protect, handleGetUserClassroom);
 
 export default classroomRoutes;

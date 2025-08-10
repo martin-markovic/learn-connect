@@ -1,30 +1,27 @@
-import Classroom from "../../models/classrooms/classroomModel.js";
-import User from "../../models/users/userModel.js";
-
-export const joinClassroom = async (req, res) => {
+export const joinClassroom = (Classroom, User) => async (req, res) => {
   try {
     const { classroomId } = req.params;
 
     if (!classroomId) {
-      throw new Error({ statusCode: 400, message: "Classroom ID is required" });
+      throw { statusCode: 400, message: "Classroom ID is required" };
     }
 
     const userId = req.user._id;
 
     if (!userId) {
-      throw new Error({ statusCode: 403, message: "User id is required" });
+      throw { statusCode: 403, message: "User id is required" };
     }
 
     const classroom = await Classroom.findById(classroomId);
     if (!classroom) {
-      throw new Error({ statusCode: 404, message: "Classroom not found" });
+      throw { statusCode: 404, message: "Classroom not found" };
     }
 
     if (classroom.students.includes(userId)) {
-      throw new Error({
+      throw {
         statusCode: 400,
         message: "User already in classroom",
-      });
+      };
     }
 
     classroom.students.push(userId);
@@ -47,40 +44,40 @@ export const joinClassroom = async (req, res) => {
   }
 };
 
-export const leaveClassroom = async (req, res) => {
+export const leaveClassroom = (Classroom, User) => async (req, res) => {
   try {
     const { classroomId } = req.params;
 
     if (!classroomId) {
-      throw new Error({
+      throw {
         statusCode: 400,
         message: "Please provide classroom ID",
-      });
+      };
     }
 
     const userId = req.user._id || req.user.id;
 
     if (!userId) {
-      throw new Error({
+      throw {
         statusCode: 403,
         message: "User id is required",
-      });
+      };
     }
 
     const classroom = await Classroom.findById(classroomId);
 
     if (!classroom) {
-      throw new Error({
+      throw {
         statusCode: 404,
         message: "Classroom not found",
-      });
+      };
     }
 
     if (!classroom.students.includes(userId)) {
-      throw new Error({
+      throw {
         statusCode: 403,
         message: "You are not a member of this classroom",
-      });
+      };
     }
 
     classroom.students = classroom.students.filter(
@@ -103,7 +100,7 @@ export const leaveClassroom = async (req, res) => {
   }
 };
 
-export const getAllClassrooms = async (req, res) => {
+export const getAllClassrooms = (Classroom) => async (req, res) => {
   try {
     const classrooms = await Classroom.find();
 
@@ -115,16 +112,15 @@ export const getAllClassrooms = async (req, res) => {
   }
 };
 
-export const getUserClassroom = async (req, res) => {
+export const getUserClassroom = (Classroom) => async (req, res) => {
   try {
     const user = req.user;
 
-
     if (!user || !user._id) {
-      throw new Error({
+      throw {
         statusCode: 403,
         message: "User id is required",
-      });
+      };
     }
 
     const classroom = await Classroom.find({ students: user?._id });
