@@ -192,4 +192,26 @@ describe("Classroom API", () => {
       );
     });
   });
+
+  describe("getAllClassrooms", () => {
+    it("should fetch list of all classrooms and verify it", async () => {
+      const mockReq = { user: { _id: firstClassroomUser._id } };
+
+      await mockGetAllClassrooms(mockReq, classroomRes);
+
+      expect(classroomRes.statusCode).to.equal(200);
+      expect(classroomRes.body.length).to.equal(2);
+      expect(classroomRes.body[0]._id).to.equal(firstClassroom._id);
+      expect(classroomRes.body[1]._id).to.equal(secondClassroom._id);
+    });
+
+    it("should return a `User is not registered` error message", async () => {
+      const mockReq = { user: { _id: undefined } };
+
+      await mockGetAllClassrooms(mockReq, classroomRes);
+
+      expect(classroomRes.statusCode).to.equal(403);
+      expect(classroomRes.body.message).to.equal("User is not registered");
+    });
+  });
 });

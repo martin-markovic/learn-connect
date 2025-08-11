@@ -39,7 +39,7 @@ export const joinClassroom = (Classroom, User) => async (req, res) => {
     });
   } catch (error) {
     return res.status(error.statusCode || 500).json({
-      message: error.message,
+      message: error.message || "Server error",
     });
   }
 };
@@ -95,19 +95,25 @@ export const leaveClassroom = (Classroom, User) => async (req, res) => {
     return res.status(200).json(classroomId);
   } catch (error) {
     return res.status(error.statusCode || 500).json({
-      message: error.message,
+      message: error.message || "Server error",
     });
   }
 };
 
 export const getAllClassrooms = (Classroom) => async (req, res) => {
   try {
+    const userId = req.user._id;
+
+    if (!userId) {
+      throw { statusCode: 403, message: "User is not registered" };
+    }
+
     const classrooms = await Classroom.find();
 
     return res.status(200).json(classrooms);
   } catch (error) {
-    return res.status(500).json({
-      message: error.message,
+    return res.status(error.statusCode || 500).json({
+      message: error.message || "Server error",
     });
   }
 };
@@ -128,7 +134,7 @@ export const getUserClassroom = (Classroom) => async (req, res) => {
     return res.status(200).json(classroom.length ? classroom[0] : null);
   } catch (error) {
     return res.status(error.statusCode || 500).json({
-      message: error.message,
+      message: error.message || "Server error",
     });
   }
 };

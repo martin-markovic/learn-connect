@@ -15,7 +15,7 @@ export default class MockModel {
   }
 
   find(query, options) {
-    if (Object.keys(query).length === 0) {
+    if (!query || Object.keys(query).length === 0) {
       const result = this.storage[this.model];
 
       return this.handleSelect(result);
