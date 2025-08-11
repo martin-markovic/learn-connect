@@ -15,7 +15,7 @@ export default class MockModel {
   }
 
   find(query, options) {
-    if (Object.keys(query).length === 0) {
+    if (!query || Object.keys(query).length === 0) {
       const result = this.storage[this.model];
 
       return this.handleSelect(result);
@@ -63,6 +63,10 @@ export default class MockModel {
       Object.entries(query).every(([key, value]) => {
         if (typeof value === "object" && value !== null && "$in" in value) {
           return value["$in"].includes(item[key]);
+        }
+
+        if (Array.isArray(item[key])) {
+          return item[key].includes(value);
         }
         return item[key] === value;
       })
@@ -117,6 +121,22 @@ export default class MockModel {
   }
 
   handleSelect(result, isChained = false) {
+    // monkey patch fix to allow save method chaining
+    if (result && typeof result === "object" && this.model === "classrooms") {
+      result.save = async () => {
+        if (result && result._id) {
+          const idx = this.storage[this.model].findIndex(
+            (item) => item._id === result._id
+          );
+          if (idx !== -1) {
+            this.storage[this.model][idx] = { ...result };
+            return Promise.resolve(this.storage[this.model][idx]);
+          }
+        }
+        return Promise.resolve(null);
+      };
+    }
+
     let projectedResult = result;
 
     const wrapper = {
