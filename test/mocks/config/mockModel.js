@@ -64,6 +64,10 @@ export default class MockModel {
         if (typeof value === "object" && value !== null && "$in" in value) {
           return value["$in"].includes(item[key]);
         }
+
+        if (Array.isArray(item[key])) {
+          return item[key].includes(value);
+        }
         return item[key] === value;
       })
     );

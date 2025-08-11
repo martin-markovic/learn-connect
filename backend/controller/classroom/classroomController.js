@@ -125,7 +125,7 @@ export const getUserClassroom = (Classroom) => async (req, res) => {
     if (!user || !user._id) {
       throw {
         statusCode: 403,
-        message: "User id is required",
+        message: "User is not registered",
       };
     }
 

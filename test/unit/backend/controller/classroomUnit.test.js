@@ -17,8 +17,8 @@ const MockClassroomData = new MockData();
 
 const mockJoinClassroom = joinClassroom(MockClassroomModel, MockUserModel);
 const mockLeaveClassroom = leaveClassroom(MockClassroomModel, MockUserModel);
-const mockGetAllClassrooms = getAllClassrooms(MockUserModel);
-const mockGetUserClassroom = getUserClassroom(MockUserModel);
+const mockGetAllClassrooms = getAllClassrooms(MockClassroomModel);
+const mockGetUserClassroom = getUserClassroom(MockClassroomModel);
 
 const classroomRes = new MockRes();
 
@@ -209,6 +209,36 @@ describe("Classroom API", () => {
       const mockReq = { user: { _id: undefined } };
 
       await mockGetAllClassrooms(mockReq, classroomRes);
+
+      expect(classroomRes.statusCode).to.equal(403);
+      expect(classroomRes.body.message).to.equal("User is not registered");
+    });
+  });
+
+  describe("getUserClassrooms", () => {
+    it("should fetch a list of classroms and verify it", async () => {
+      const mockReq = { user: { _id: firstClassroomUser._id } };
+
+      await mockGetUserClassroom(mockReq, classroomRes);
+
+      for (const [key, value] of Object.entries(firstClassroom)) {
+        expect(classroomRes.body[key]).to.equal(value);
+      }
+    });
+
+    it("should return null as a response payload and verify it", async () => {
+      const mockReq = { user: { _id: enrolledUser._id } };
+
+      await mockGetUserClassroom(mockReq, classroomRes);
+
+      expect(classroomRes.statusCode).to.equal(200);
+      expect(classroomRes.body).to.equal(null);
+    });
+
+    it("should return a `User is not registered` error message", async () => {
+      const mockReq = { user: { _id: undefined } };
+
+      await mockGetUserClassroom(mockReq, classroomRes);
 
       expect(classroomRes.statusCode).to.equal(403);
       expect(classroomRes.body.message).to.equal("User is not registered");
