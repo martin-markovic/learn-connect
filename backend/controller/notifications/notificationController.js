@@ -1,9 +1,15 @@
-export const getNotifications = (Notification) => async (req, res) => {
+export const getNotifications = (Notification, User) => async (req, res) => {
   try {
     const userId = req.params.userId;
 
     if (!userId) {
-      throw new Error({ statusCode: 403, message: "User id is required" });
+      throw { statusCode: 403, message: "User id is required" };
+    }
+
+    const userExists = await User.findById(userId);
+
+    if (!userExists) {
+      throw { statusCode: 404, message: "User does not exist" };
     }
 
     const unreadNotifications = await Notification.find({
