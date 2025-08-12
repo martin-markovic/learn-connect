@@ -1,6 +1,4 @@
-import Notification from "../../models/users/notificationModel.js";
-
-export const getNotifications = async (req, res) => {
+export const getNotifications = (Notification) => async (req, res) => {
   try {
     const userId = req.params.userId;
 
