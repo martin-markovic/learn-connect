@@ -39,18 +39,38 @@ export default class MockData {
     ];
 
     this.mockQuizzes = [
-      {
-        _id: "1",
-        question: "What is the capital of France?",
-        choices: ["Berlin", "London", "Amsterdam"],
-        answer: "Paris",
-      },
-      {
-        _id: "2",
-        question: "What is the capital of Germany?",
-        choices: ["Paris", "London", "Amsterdam"],
-        answer: "Berlin",
-      },
+      [
+        {
+          _id: "1",
+          question: "What is the capital of France?",
+          choices: ["Berlin", "London", "Amsterdam"],
+          answer: "Paris",
+        },
+        {
+          _id: "2",
+          question: "What is the capital of Germany?",
+          choices: ["Paris", "London", "Amsterdam"],
+          answer: "Berlin",
+        },
+        {
+          _id: "3",
+          question: "What is the capital of Netherlands?",
+          choices: ["Berlin", "London", "Paris"],
+          answer: "Amsterdam",
+        },
+        {
+          _id: "4",
+          question: "What is the capital of England?",
+          choices: ["Paris", "Berlin", "Amsterdam"],
+          answer: "London",
+        },
+        {
+          _id: "5",
+          question: "What is the capital of Russia?",
+          choices: ["Paris", "London", "Amsterdam"],
+          answer: "Moscow",
+        },
+      ],
     ];
 
     this.mockClassrooms = [
