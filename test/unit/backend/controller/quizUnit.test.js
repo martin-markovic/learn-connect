@@ -26,7 +26,7 @@ const quizRes = new MockRes();
 const newQuiz = {
   ...mockQuizzes[0],
   createdBy: mockUsers[0]._id,
-  classroom: mockClassrooms[0]._id,
+  classroom: mockClassrooms[1]._id,
   title: `${mockUsers[0].name} quiz 1`,
   timeLimit: 4,
   subject: "Mathematics",
@@ -43,8 +43,8 @@ describe("Quiz Controller Unit Test", () => {
   });
 
   after(() => {
-    mockUsers.forEach((user) => MockUserModel.findByIdAndDelete(user._id));
-    mockQuizzes.forEach((quiz) => MockQuizModel.findByIdAndDelete(quiz._id));
+    MockUserModel.cleanupAll();
+    MockQuizModel.cleanupAll();
   });
 
   describe("get user quizzes", () => {
@@ -59,11 +59,9 @@ describe("Quiz Controller Unit Test", () => {
         expect(quizRes.statusCode).to.equal(200);
         expect(quizRes.body).to.be.an("array");
 
-        expect(quizRes.body[0].title).to.equal(newQuiz.title);
-        expect(quizRes.body[0].classroom).to.equal(mockClassrooms[0]._id);
-        expect(quizRes.body[0].createdBy).to.equal(newQuiz.createdBy);
-        expect(quizRes.body[0].timeLimit).to.equal(newQuiz.timeLimit);
-        expect(quizRes.body[0].subject).to.equal(newQuiz.subject);
+        for (const [key, value] of Object.entries(quizRes.body[0])) {
+          expect(newQuiz[key]).to.equal(value);
+        }
       } catch (error) {
         console.error("Test error: ", error);
         throw error;
@@ -111,7 +109,7 @@ describe("Quiz Controller Unit Test", () => {
     it("should fetch an array of classroom quizzes", async () => {
       try {
         const mockReq = {
-          user: mockUsers[0],
+          user: mockUsers[1],
         };
 
         await mockGetClassroomQuizzes(mockReq, quizRes);
@@ -119,12 +117,11 @@ describe("Quiz Controller Unit Test", () => {
         expect(quizRes.statusCode).to.equal(200);
         expect(quizRes.body).to.be.an("array");
 
-        expect(quizRes.body[0].title).to.equal(newQuiz.title);
-        expect(quizRes.body[0].classroom).to.equal(mockClassrooms[0]._id);
-        expect(quizRes.body[0].createdBy).to.equal(newQuiz.createdBy);
-        expect(quizRes.body[0].timeLimit).to.equal(newQuiz.timeLimit);
+        for (const [key, value] of Object.entries(quizRes.body[0])) {
+          expect(newQuiz[key]).to.equal(value);
+        }
       } catch (error) {
-        console.error("Test error: ", error);
+        console.error("Test error:", error);
         throw error;
       }
     });
@@ -132,7 +129,7 @@ describe("Quiz Controller Unit Test", () => {
     it("should return empty array as a response payload", async () => {
       try {
         const mockReq = {
-          user: mockUsers[1],
+          user: mockUsers[0],
         };
 
         await mockGetClassroomQuizzes(mockReq, quizRes);
@@ -188,12 +185,17 @@ describe("Quiz Controller Unit Test", () => {
 
         expect(quizRes.statusCode).to.equal(200);
 
-        expect(quizRes.body.title).to.equal(newQuiz.title);
-        expect(quizRes.body.classroom).to.equal(newQuiz._id);
-        expect(quizRes.body.createdBy).to.equal(newQuiz.createdBy);
-        expect(quizRes.body.timeLimit).to.equal(updatedTimeLimit);
-        expect(quizRes.body.createdBy).to.equal(newQuiz.createdBy);
-        expect(quizRes.body.question).to.equal(updatedQuestion);
+        for (const [key, value] of Object.entries(quizRes.body)) {
+          if (key === "timeLimit") {
+            expect(updatedTimeLimit).to.equal(value);
+          } else if (key === "question") {
+            for (let i = 0; i < value.length; i++) {
+              expect(updatedQuestion[i]).to.equal(value[i]);
+            }
+          } else {
+            expect(newQuiz[key]).to.equal(value);
+          }
+        }
       } catch (error) {
         console.error("Test error: ", error);
         throw error;

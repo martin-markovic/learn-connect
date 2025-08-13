@@ -38,15 +38,15 @@ export const getClassroomQuizzes = (User, Quiz) => async (req, res) => {
       };
     }
 
-    const userClassrooms = userFound?.classrooms;
+    const userClassroom = userFound?.classrooms;
 
-    if (!userClassrooms.length) {
+    if (!userClassroom.length) {
       return res.status(200).json([]);
     }
 
-    const classroomIds = userClassrooms.map((classroom) => classroom._id);
+    const classroomId = userClassroom[0]._id;
 
-    const quizPayload = await Quiz.find({ classroom: { $in: classroomIds } });
+    const quizPayload = await Quiz.find({ classroom: classroomId });
 
     return res.status(200).json(quizPayload || []);
   } catch (error) {
