@@ -1,13 +1,11 @@
 import mongoose from "mongoose";
-import Exam from "../../models/quizzes/examModel.js";
-import Score from "../../models/quizzes/scoreModel.js";
 
-export const getExam = async (req, res) => {
+export const getExam = (Exam) => async (req, res) => {
   try {
     const userId = req.user?._id;
 
     if (!userId) {
-      throw new Error({ statusCode: 403, message: "User id is required" });
+      throw { statusCode: 403, message: "User id is required" };
     }
 
     const examFound = await Exam.findOne({
@@ -25,25 +23,25 @@ export const getExam = async (req, res) => {
 
     return res.status(200).json(examFound || {});
   } catch (error) {
-    console.error(`Error fetching exam: ${error.message}`);
+    console.error(`Error fetching exam: ${error.message || "Server error"}`);
     return res.status(error.statusCode || 500).json({
-      message: `Error fetching exam: ${error.message}`,
+      message: `Error fetching exam: ${error.message || "Server error"}`,
     });
   }
 };
 
-export const getExamFeedback = async (req, res) => {
+export const getExamFeedback = (Score) => async (req, res) => {
   try {
     const userId = req.user?._id;
 
     if (!userId) {
-      throw new Error({ statusCode: 403, message: "User id is required" });
+      throw { statusCode: 403, message: "User id is required" };
     }
 
     const { quizId } = req.params;
 
     if (!quizId) {
-      throw new Error({ statusCode: 400, message: "Missing quiz id" });
+      throw { statusCode: 400, message: "Missing quiz id" };
     }
 
     const scoreFound = await Score.findOne({
@@ -52,30 +50,34 @@ export const getExamFeedback = async (req, res) => {
     });
 
     if (!scoreFound) {
-      throw new Error({ statusCode: 404, message: "Exam score not found" });
+      throw { statusCode: 404, message: "Exam score not found" };
     }
 
     return res.status(200).json(scoreFound);
   } catch (error) {
-    console.error(`Error fetching exam feedback: ${error.message}`);
+    console.error(
+      `Error fetching exam feedback: ${error.message || "Server error"}`
+    );
     return res.status(error.statusCode || 500).json({
-      message: `Error fetching exam feedback: ${error.message}`,
+      message: `Error fetching exam feedback: ${
+        error.message || "Server error"
+      }`,
     });
   }
 };
 
-export const getExamScores = async (req, res) => {
+export const getExamScores = (Score) => async (req, res) => {
   try {
     const userId = req.user?._id;
 
     if (!userId) {
-      throw new Error({ statusCode: 403, message: "User id is required" });
+      throw { statusCode: 403, message: "User id is required" };
     }
 
     const { friendId } = req.params;
 
     if (!friendId) {
-      throw new Error({ statusCode: 403, message: "Unindentified " });
+      throw { statusCode: 403, message: "Unindentified " };
     }
 
     const examScores = await Score.find({ user: friendId }).select(
@@ -84,7 +86,10 @@ export const getExamScores = async (req, res) => {
 
     return res.status(200).json({ friendId, scoreList: examScores || [] });
   } catch (error) {
-    console.error("Error fetching exam scores", error.message);
+    console.error(
+      "Error fetching exam scores",
+      error.message || "Server error"
+    );
     return res.status(error.statusCode || 500).json({
       message: `Error fetching exam scores: ${error.message || "Server error"}`,
     });
