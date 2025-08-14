@@ -77,7 +77,7 @@ export const getExamScores = (Score) => async (req, res) => {
     const { friendId } = req.params;
 
     if (!friendId) {
-      throw { statusCode: 403, message: "Unindentified " };
+      throw { statusCode: 403, message: "Unindentified friend ID" };
     }
 
     const examScores = await Score.find({ user: friendId }).select(

@@ -193,4 +193,68 @@ describe("Exam API", () => {
       );
     });
   });
+
+  describe("getExamScores", () => {
+    it("should fetch exam scores for request sender and verify them", async () => {
+      const mockReq = {
+        params: { friendId: expiredExamUser._id },
+        user: { _id: expiredExamUser._id },
+      };
+
+      await mockGetExamScores(mockReq, examRes);
+
+      expect(examRes.statusCode).to.equal(200);
+      expect(examRes.body.friendId.toString()).to.equal(
+        expiredExamUser._id.toString()
+      );
+      expect(examRes.body.scoreList[0]._id.toString()).to.equal(
+        mockScore._id.toString()
+      );
+    });
+
+    it("should fetch exam scores for another user and verify them", async () => {
+      const mockReq = {
+        params: { friendId: expiredExamUser._id },
+        user: { _id: noExamsUser._id },
+      };
+
+      await mockGetExamScores(mockReq, examRes);
+
+      expect(examRes.statusCode).to.equal(200);
+      expect(examRes.body.friendId.toString()).to.equal(
+        expiredExamUser._id.toString()
+      );
+      expect(examRes.body.scoreList[0]._id.toString()).to.equal(
+        mockScore._id.toString()
+      );
+    });
+
+    it("should return a `User id is required` error message", async () => {
+      const mockReq = {
+        params: { friendId: expiredExamUser._id.toString() },
+        user: { _id: undefined },
+      };
+
+      await mockGetExamScores(mockReq, examRes);
+
+      expect(examRes.statusCode).to.equal(403);
+      expect(examRes.body.message).to.equal(
+        "Error fetching exam scores: User id is required"
+      );
+    });
+
+    it("should return a `Unindentified friend ID` error message", async () => {
+      const mockReq = {
+        params: { friendId: undefined },
+        user: { _id: noExamsUser._id.toString() },
+      };
+
+      await mockGetExamScores(mockReq, examRes);
+
+      expect(examRes.statusCode).to.equal(403);
+      expect(examRes.body.message).to.equal(
+        "Error fetching exam scores: Unindentified friend ID"
+      );
+    });
+  });
 });
