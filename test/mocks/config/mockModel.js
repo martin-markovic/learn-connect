@@ -76,6 +76,16 @@ export default class MockModel {
   }
 
   async findOne(query) {
+    if ("quiz.quizId" in query) {
+      const result = this.storage[this.model].find(
+        (score) =>
+          score.quiz.quizId.toString() === query["quiz.quizId"].toString() &&
+          score.user.toString() === query.user.toString()
+      );
+
+      return this.handleSelect(result);
+    }
+
     const result = this.storage[this.model].find((item) =>
       Object.keys(query).every((key) => item[key] === query[key])
     );

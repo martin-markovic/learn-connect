@@ -8,8 +8,15 @@ import {
 } from "../../controller/quizzes/examController.js";
 import { protect } from "../../middleware/authMiddleware.js";
 
-examRoutes.get("/", protect, getExam);
-examRoutes.get("/feedback/:quizId", protect, getExamFeedback);
-examRoutes.get("/scores/:friendId", protect, getExamScores);
+import Exam from "../../models/quizzes/examModel.js";
+import Score from "../../models/quizzes/scoreModel.js";
+
+const handleGetExam = getExam(Exam);
+const handleGetExamFeedback = getExamFeedback(Score);
+const handleGetExamScores = getExamScores(Score);
+
+examRoutes.get("/", protect, handleGetExam);
+examRoutes.get("/feedback/:quizId", protect, handleGetExamFeedback);
+examRoutes.get("/scores/:friendId", protect, handleGetExamScores);
 
 export default examRoutes;
