@@ -11,6 +11,9 @@ import handleExamEvents from "./handleExam.js";
 import handleErrorEvents from "./helpers/socket.errorController.js";
 import { handleConnectionStatus } from "./helpers/socket.userPresence.js";
 
+import User from "../../models/users/userModel.js";
+import Friend from "../../models/users/friendModel.js";
+
 const handleSocketLifeCycle = (io) => {
   io.on("connection", async (socket) => {
     console.log(`New connection: Socket ID ${socket.id}`);
@@ -27,7 +30,7 @@ const handleSocketLifeCycle = (io) => {
 
     handleMessages(context);
     handleNotificationEvents(context);
-    handleSocialEvents(context);
+    handleSocialEvents({ User, Friend }, context);
     handleQuizEvents(context);
     handleExamEvents(context);
     handleErrorEvents(socket);

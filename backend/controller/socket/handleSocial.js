@@ -1,8 +1,20 @@
-import Friend from "../../models/users/friendModel.js";
-import User from "../../models/users/userModel.js";
 import { handleNewNotification } from "./helpers/socket.notification.js";
 
-const handleSocialEvents = (context) => {
+const handleSocialEvents = (models, context) => {
+  const { User, Friend } = models;
+
+  if (!User) {
+    throw new Error(
+      "Invalid User model, aborting socket social events initialization."
+    );
+  }
+
+  if (!Friend) {
+    throw new Error(
+      "Invalid Friend model, aborting socket social events initialization."
+    );
+  }
+
   context.socket.on("send friend request", async (data) => {
     try {
       const { senderId, receiverId, currentStatus } = data;
