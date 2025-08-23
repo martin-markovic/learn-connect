@@ -1,4 +1,8 @@
 import { handleNewNotification } from "./helpers/socket.notification.js";
+import {
+  handleNewRequest,
+  handleProcessRequest,
+} from "./helpers/socket.friendController.js";
 
 const handleSocialEvents = (models, context) => {
   const { User, Friend } = models;
@@ -17,45 +21,11 @@ const handleSocialEvents = (models, context) => {
 
   context.socket.on("send friend request", async (data) => {
     try {
-      const { senderId, receiverId, currentStatus } = data;
+      const friendRequestPayload = await handleNewRequest(Friend, data);
 
-      if (!senderId || !receiverId) {
-        throw new Error("Please provide valid friend request data");
+      if (!friendRequestPayload._id) {
+        throw new Error("Unable to process new friend request");
       }
-
-      const existingRequest = await Friend.findOne({
-        $or: [
-          { sender: senderId, receiver: receiverId, status: currentStatus },
-          { sender: receiverId, receiver: senderId, status: currentStatus },
-        ],
-      });
-
-      if (existingRequest) {
-        throw new Error("Friend request already pending");
-      }
-
-      const newRequest = new Friend({
-        sender: senderId,
-        receiver: receiverId,
-        status: "pending",
-      });
-
-      await newRequest.save();
-
-      const populatedRequest = await Friend.findById(newRequest._id)
-        .populate("sender", "name _id avatar")
-        .populate("receiver", "name _id avatar");
-
-      const friendRequestPayload = {
-        _id: populatedRequest._id.toString(),
-        senderId,
-        senderName: populatedRequest.sender?.name,
-        senderAvatar: populatedRequest?.sender?.avatar,
-        receiverId,
-        receiverName: populatedRequest.receiver?.name,
-        receiverAvatar: populatedRequest?.receiver?.avatar,
-        status: populatedRequest.status,
-      };
 
       context.emitEvent("sender", "friend request sent", friendRequestPayload);
 
@@ -66,8 +36,8 @@ const handleSocialEvents = (models, context) => {
       );
 
       const userData = {
-        senderId,
-        receiverId,
+        senderId: data.senderId,
+        receiverId: friendRequestPayload.receiverId,
         notificationName: "new friend request",
       };
 
@@ -80,81 +50,34 @@ const handleSocialEvents = (models, context) => {
 
   context.socket.on("process friend request", async (data) => {
     try {
-      const { senderId, receiverId, userResponse } = data;
+      const payload = await handleProcessRequest(Friend, data);
 
-      if (!senderId || !receiverId || !userResponse) {
-        throw new Error("Please provide valid request data");
+      if (!payload._id) {
+        throw new Error("Unable to process request");
       }
 
-      const validStatuses = ["accepted", "declined"];
-
-      if (!validStatuses.includes(userResponse)) {
-        throw new Error("Invalid friend request status");
-      }
-
-      if (userResponse === "declined") {
-        const foundRequest = await Friend.findOne({
-          sender: receiverId,
-          receiver: senderId,
-          status: "pending",
-        });
-
-        if (!foundRequest) {
-          throw new Error("Friend request not found");
-        }
-
-        const payloadId = foundRequest?._id;
-
-        await Friend.deleteOne({ _id: payloadId });
-
+      if (data.userResponse === "declined") {
         context.emitEvent("sender", "friend request declined", {
-          _id: payloadId,
+          _id: payload._id,
         });
 
         context.emitEvent("receiver", "friend request declined", {
-          _id: payloadId,
-          receiverId,
+          _id: payload._id,
+          receiverId: payload.receiverId,
         });
+      } else if (data.userResponse === "accepted") {
+        context.emitEvent("sender", "friend request accepted", payload);
 
-        return;
+        context.emitEvent("receiver", "friend request accepted", payload);
+
+        const userData = {
+          senderId: payload.senderId,
+          receiverId: payload.receiverId,
+          notificationName: "friend request accepted",
+        };
+
+        await handleNewNotification(context, userData);
       }
-
-      const friendRequest = await Friend.findOneAndUpdate(
-        { sender: receiverId, receiver: senderId, status: "pending" },
-        { status: userResponse },
-        { new: true }
-      );
-
-      if (!friendRequest) {
-        throw new Error("Friend request not found");
-      }
-
-      const friendRequestPayload = {
-        _id: friendRequest?._id,
-        status: userResponse,
-        receiverId,
-        senderId,
-      };
-
-      context.emitEvent(
-        "sender",
-        "friend request accepted",
-        friendRequestPayload
-      );
-
-      context.emitEvent(
-        "receiver",
-        "friend request accepted",
-        friendRequestPayload
-      );
-
-      const userData = {
-        senderId,
-        receiverId,
-        notificationName: "friend request accepted",
-      };
-
-      await handleNewNotification(context, userData);
     } catch (error) {
       console.error("Error processing friend request: ", error.message);
       context.emitEvent("sender", "error", { message: error.message });
