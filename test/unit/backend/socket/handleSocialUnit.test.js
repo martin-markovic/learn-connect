@@ -1,6 +1,7 @@
 import { expect } from "chai";
 import {
   handleNewRequest,
+  handleProcessRequest,
 } from "../../../../backend/controller/socket/helpers/socket.friendController.js";
 import MockSocket from "../../../mocks/config/mockSocket.js";
 import MockData from "../../../mocks/config/mockData.js";
@@ -27,8 +28,12 @@ class FriendFactory extends MockSocketModel {
     return new this().create(doc);
   }
 
-  static async findOneAndUpdate(id, updates, options = {}) {
-    return new this().findByIdAndUpdate(id, updates, (options = {}));
+  static async findOneAndUpdate(query, updates, options = {}) {
+    return new this().findOneAndUpdate(query, updates, options);
+  }
+
+  static async deleteOne(query) {
+    return new this().deleteOne(query);
   }
 }
 
@@ -147,4 +152,109 @@ describe("socket social controller API", () => {
     });
   });
 
+  describe("process friend request", () => {
+    it("should process the accepted request and verify it", async () => {
+      const reqSender = mockUsers[3];
+      const reqReceiver = mockUsers[2];
+      const updatedStatus = "accepted";
+      const eventData = {
+        senderId: reqSender._id,
+        receiverId: reqReceiver._id,
+        userResponse: updatedStatus,
+      };
+
+      const response = await handleProcessRequest(FriendFactory, eventData);
+
+      expect(response._id).to.equal(existingFriendship._id);
+      expect(response.status).to.equal(updatedStatus);
+      expect(response.receiverId).to.equal(reqReceiver._id);
+      expect(response.senderId).to.equal(reqSender._id);
+
+      await mockFriendModel.deleteOne({ _id: response._id });
+
+      mockFriendModel.storage.friends[mockFriendModel.storage.friends.length] =
+        {
+          _id: "frdoc_1",
+          sender: mockUsers[3]._id,
+          receiver: mockUserModel.storage.users[2]._id,
+          status: "pending",
+        };
+    });
+
+    it("should process the declined request and verify it", async () => {
+      const reqSender = mockUsers[2];
+      const reqReceiver = mockUsers[3];
+      const updatedStatus = "declined";
+
+      const eventData = {
+        senderId: reqSender._id,
+        receiverId: reqReceiver._id,
+        userResponse: updatedStatus,
+      };
+
+      const storageD = mockFriendModel.storage.friends;
+
+      const response = await handleProcessRequest(FriendFactory, eventData);
+
+      const existsInStorage = mockFriendModel.storage.friends.find(
+        (item) => item._id === response._id
+      );
+
+      expect(response._id).to.equal(existingFriendship._id);
+      expect(existsInStorage).to.equal(undefined);
+    });
+
+    it("should return the `Please provide valid request data` error message", async () => {
+      const reqReceiver = mockUsers[2];
+      const updatedStatus = "accepted";
+      const eventData = {
+        senderId: undefined,
+        receiverId: reqReceiver._id,
+        userResponse: updatedStatus,
+      };
+
+      try {
+        await handleProcessRequest(FriendFactory, eventData);
+        throw new Error("Expected function to throw an error");
+      } catch (error) {
+        expect(error.message).to.equal("Please provide valid request data");
+      }
+    });
+
+    it("should return the `Invalid friend request status` error message", async () => {
+      const reqSender = mockUsers[3];
+      const reqReceiver = mockUsers[2];
+      const updatedStatus = "wrong";
+      const eventData = {
+        senderId: reqSender._id,
+        receiverId: reqReceiver._id,
+        userResponse: updatedStatus,
+      };
+
+      try {
+        await handleProcessRequest(FriendFactory, eventData);
+        throw new Error("Expected function to throw an error");
+      } catch (error) {
+        expect(error.message).to.equal("Invalid friend request status");
+      }
+    });
+
+    it("should return the `Friend request not found` error message", async () => {
+      const reqSender = mockUsers[1];
+      const reqReceiver = mockUsers[3];
+      const updatedStatus = "declined";
+      const eventData = {
+        senderId: reqSender._id,
+        receiverId: reqReceiver._id,
+        userResponse: updatedStatus,
+      };
+
+      try {
+        await handleProcessRequest(FriendFactory, eventData);
+        throw new Error("Expected function to throw an error");
+      } catch (error) {
+        expect(error.message).to.equal("Friend request not found");
+      }
+    });
+  });
 });
