@@ -25,6 +25,54 @@ export default class MockSocketModel {
     return this.handleChain(created);
   }
 
+  find(query, options) {
+    if (!query || Object.keys(query).length === 0) {
+      const result = this.storage[this.currentModel];
+
+      return this.handleChain(result);
+    }
+
+    if (this.currentModel === "chats") {
+      const messages = this.storage[this.currentModel].filter(
+        (item) =>
+          item.receiver._id === query.participants ||
+          item.sender._id === query.participants
+      );
+
+      const grouped = {};
+
+      for (const message of messages) {
+        const ids = [message.sender._id, message.receiver._id].sort();
+        const key = ids.join("_");
+
+        if (!grouped[key]) {
+          grouped[key] = {
+            conversation: [],
+          };
+        }
+
+        grouped[key].conversation.push(message);
+      }
+
+      return this.handleChain(Object.values(grouped));
+    }
+
+    const result = this.storage[this.currentModel].filter((item) =>
+      Object.entries(query).every(([key, value]) => {
+        if (typeof value === "object" && value !== null && "$in" in value) {
+          return value["$in"].includes(item[key]);
+        }
+
+        if (Array.isArray(item[key])) {
+          return item[key].includes(value);
+        }
+        return item[key] === value;
+      })
+    );
+
+    return this.handleChain(result);
+  }
+
   async findOne(query) {
     let result;
 
@@ -72,6 +120,60 @@ export default class MockSocketModel {
     result.populate = this.populate;
 
     return { ...result };
+  }
+
+  async findByIdAndUpdate(id, updates, options = {}) {
+    const items = this.storage[this.currentModel];
+
+    const itemFound = items.find((item) => item._id === id);
+
+    const index = items.indexOf(itemFound);
+
+    if (index === -1) return null;
+
+    const updated = { ...items[index], ...updates };
+    items[index] = updated;
+
+    return this.handleSelect(options.new ? updated : items[index]);
+  }
+
+  async findOneAndUpdate(query, updates, options = {}) {
+    const items = this.storage[this.currentModel];
+    const itemFound = items.find((item) =>
+      Object.keys(query).every((key) => item[key] === query[key])
+    );
+
+    const index = items.indexOf(itemFound);
+
+    if (index === -1) return null;
+
+    const updated = { ...items[index], ...updates };
+    items[index] = updated;
+
+    return this.handleChain(updated);
+  }
+
+  async findByIdAndDelete(id) {
+    const items = this.storage[this.currentModel];
+    const index = items.findIndex((item) => item._id === id);
+    if (index === -1) return null;
+
+    const [deleted] = items.splice(index, 1);
+    return deleted;
+  }
+
+  async deleteOne(query) {
+    const items = this.storage[this.currentModel];
+
+    const itemFound = items.find((item) =>
+      Object.keys(query).every((key) => item[key] === query[key])
+    );
+
+    if (!itemFound) return null;
+
+    this.storage[this.currentModel] = this.storage[this.currentModel].filter(
+      (item) => item._id !== itemFound._id
+    );
   }
 
   cleanupAll() {
