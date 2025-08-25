@@ -2,6 +2,8 @@ import { handleNewNotification } from "./helpers/socket.notification.js";
 import {
   handleNewRequest,
   handleProcessRequest,
+  handleRemoveFriend,
+  handleBlockUser,
 } from "./helpers/socket.friendController.js";
 
 const handleSocialEvents = (models, context) => {
@@ -86,32 +88,17 @@ const handleSocialEvents = (models, context) => {
 
   context.socket.on("remove friend", async (data) => {
     try {
-      const { senderId, receiverId } = data;
+      const payloadId = await handleRemoveFriend(Friend, data);
 
-      if (!senderId || !receiverId) {
-        throw new Error("Invalid user data");
+      if (!payloadId) {
+        throw new Error("Unable to process request");
       }
-
-      const foundFriend = await Friend.findOne({
-        $or: [
-          { sender: senderId, receiver: receiverId },
-          { sender: receiverId, receiver: senderId },
-        ],
-      });
-
-      if (!foundFriend) {
-        throw new Error("Friend not found");
-      }
-
-      const payloadId = foundFriend?._id;
-
-      await Friend.deleteOne({ _id: payloadId });
 
       context.emitEvent("sender", "friend removed", { _id: payloadId });
 
       context.emitEvent("receiver", "friend removed", {
         _id: payloadId,
-        receiverId,
+        receiverId: data.receiverId,
       });
     } catch (error) {
       console.error("Error removing friend: ", error.message);
@@ -121,46 +108,10 @@ const handleSocialEvents = (models, context) => {
 
   context.socket.on("block user", async (data) => {
     try {
-      const { senderId, receiverId } = data;
+      const payloadId = await handleBlockUser(User, Friend, data);
 
-      if (!senderId || !receiverId) {
-        throw new Error("Please provide valid client data");
-      }
-
-      const userFound = await User.findOne({ _id: receiverId });
-
-      if (!userFound) {
-        throw new Error("User not found");
-      }
-
-      const payloadId = userFound?._id;
-
-      const friendFound = await Friend.findOne({
-        $or: [
-          { sender: senderId, receiver: receiverId },
-          { sender: receiverId, receiver: senderId },
-        ],
-      });
-
-      if (friendFound) {
-        await Friend.findOneAndUpdate(
-          {
-            $or: [
-              { sender: senderId, receiver: receiverId },
-              { sender: receiverId, receiver: senderId },
-            ],
-          },
-          { $set: { status: "blocked" } },
-          { new: true }
-        );
-      } else {
-        const blockedUser = new Friend({
-          sender: senderId,
-          receiver: receiverId,
-          status: "blocked",
-        });
-
-        await blockedUser.save();
+      if (!payloadId) {
+        throw new Error("Unable to process request");
       }
 
       context.emitEvent("sender", "user blocked", { _id: payloadId });
