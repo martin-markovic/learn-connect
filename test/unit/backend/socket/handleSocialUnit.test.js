@@ -3,6 +3,7 @@ import {
   handleNewRequest,
   handleProcessRequest,
   handleRemoveFriend,
+  handleBlockUser,
 } from "../../../../backend/controller/socket/helpers/socket.friendController.js";
 import MockSocket from "../../../mocks/config/mockSocket.js";
 import MockData from "../../../mocks/config/mockData.js";
@@ -306,6 +307,76 @@ describe("socket social controller API", () => {
         throw new Error("Expected function to throw an error");
       } catch (error) {
         expect(error.message).to.equal("Friend not found");
+      }
+    });
+  });
+
+  describe("block user", () => {
+    it("should change the existing friendship status to `blocked` and verify it", async () => {
+      const reqSender = mockUsers[1];
+      const reqReceiver = mockUsers[3];
+
+      const eventData = {
+        senderId: reqSender._id,
+        receiverId: reqReceiver._id,
+      };
+
+      const response = await handleBlockUser(
+        UserFactory,
+        FriendFactory,
+        eventData
+      );
+
+      expect(response).to.equal(reqReceiver._id);
+    });
+
+    it("should set the friendship status to `blocked` and verify it", async () => {
+      const reqSender = mockUsers[2];
+      const reqReceiver = mockUsers[3];
+
+      const eventData = {
+        senderId: reqSender._id,
+        receiverId: reqReceiver._id,
+      };
+
+      const response = await handleBlockUser(
+        UserFactory,
+        FriendFactory,
+        eventData
+      );
+
+      expect(response).to.equal(reqReceiver._id);
+    });
+
+    it("should return the `Please provide valid client data` error message", async () => {
+      const reqReceiver = mockUsers[3];
+
+      const eventData = {
+        senderId: undefined,
+        receiverId: reqReceiver._id,
+      };
+
+      try {
+        await handleBlockUser(UserFactory, FriendFactory, eventData);
+        throw new Error("Expected function to throw an error");
+      } catch (error) {
+        expect(error.message).to.equal("Please provide valid client data");
+      }
+    });
+
+    it("should return the `User not found` error message", async () => {
+      const reqSender = mockUsers[1];
+
+      const eventData = {
+        senderId: reqSender._id,
+        receiverId: "1234",
+      };
+
+      try {
+        await handleBlockUser(UserFactory, FriendFactory, eventData);
+        throw new Error("Expected function to throw an error");
+      } catch (error) {
+        expect(error.message).to.equal("User not found");
       }
     });
   });
