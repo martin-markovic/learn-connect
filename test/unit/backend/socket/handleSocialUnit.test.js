@@ -2,6 +2,7 @@ import { expect } from "chai";
 import {
   handleNewRequest,
   handleProcessRequest,
+  handleRemoveFriend,
 } from "../../../../backend/controller/socket/helpers/socket.friendController.js";
 import MockSocket from "../../../mocks/config/mockSocket.js";
 import MockData from "../../../mocks/config/mockData.js";
@@ -254,6 +255,57 @@ describe("socket social controller API", () => {
         throw new Error("Expected function to throw an error");
       } catch (error) {
         expect(error.message).to.equal("Friend request not found");
+      }
+    });
+  });
+
+  describe("remove friend", () => {
+    it("should remove a friend document and verify it", async () => {
+      const reqSender = mockUsers[1];
+      const reqReceiver = mockUsers[2];
+      const eventData = {
+        senderId: reqSender._id,
+        receiverId: reqReceiver._id,
+      };
+
+      const result = await handleRemoveFriend(FriendFactory, eventData);
+
+      const existsInStorage = mockFriendModel.storage.friends.find(
+        (item) => item._id === result
+      );
+
+      expect(result).to.equal("frdoc_2");
+      expect(existsInStorage).to.equal(undefined);
+    });
+
+    it("should return a `Invalid user data` error message", async () => {
+      const reqReceiver = mockUsers[2];
+      const eventData = {
+        senderId: undefined,
+        receiverId: reqReceiver._id,
+      };
+
+      try {
+        await handleRemoveFriend(FriendFactory, eventData);
+        throw new Error("Expected function to throw an error");
+      } catch (error) {
+        expect(error.message).to.equal("Invalid user data");
+      }
+    });
+
+    it("should return a `Friend not found` error message", async () => {
+      const reqSender = mockUsers[1];
+      const reqReceiver = mockUsers[3];
+      const eventData = {
+        senderId: reqSender._id,
+        receiverId: reqReceiver._id,
+      };
+
+      try {
+        await handleRemoveFriend(FriendFactory, eventData);
+        throw new Error("Expected function to throw an error");
+      } catch (error) {
+        expect(error.message).to.equal("Friend not found");
       }
     });
   });
