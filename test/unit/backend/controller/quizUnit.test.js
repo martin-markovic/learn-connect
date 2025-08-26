@@ -23,8 +23,11 @@ const mockDeleteQuiz = deleteQuiz(MockUserModel, MockQuizModel);
 
 const quizRes = new MockRes();
 
+const questions = [...mockQuizzes[0]];
+
 const newQuiz = {
-  ...mockQuizzes[0],
+  _id: "newQuizId",
+  questions,
   createdBy: mockUsers[0]._id,
   classroom: mockClassrooms[1]._id,
   title: `${mockUsers[0].name} quiz 1`,
@@ -49,88 +52,93 @@ describe("Quiz Controller Unit Test", () => {
 
   describe("get user quizzes", () => {
     it("should fetch newly created quiz and verify it", async () => {
-        const mockReq = {
-          user: mockUsers[0],
-        };
+      const mockReq = {
+        user: mockUsers[0],
+      };
+      await mockGetUserQuizzes(mockReq, quizRes);
+      expect(quizRes.statusCode).to.equal(200);
+      expect(quizRes.body).to.be.an("array");
 
-        await mockGetUserQuizzes(mockReq, quizRes);
+      const payload = quizRes.body[0];
+      const payloadQuestions = payload["questions"];
 
-        expect(quizRes.statusCode).to.equal(200);
-        expect(quizRes.body).to.be.an("array");
+      expect(payloadQuestions.length).to.equal(newQuiz.questions.length);
 
-        for (const [key, value] of Object.entries(quizRes.body[0])) {
-          expect(newQuiz[key]).to.equal(value);
+      for (const [key, value] of Object.entries(payloadQuestions)) {
+        expect(newQuiz.questions[key]).to.equal(value);
       }
 
+      for (const [key, value] of Object.entries(payload)) {
+        if (key === "questions") continue;
+        expect(newQuiz[key]).to.equal(value);
+      }
+    });
     it("should return empty array as a response payload", async () => {
-        const mockReq = {
-          user: mockUsers[1],
-        };
+      const mockReq = {
+        user: mockUsers[1],
+      };
 
-        await mockGetUserQuizzes(mockReq, quizRes);
+      await mockGetUserQuizzes(mockReq, quizRes);
 
-        expect(quizRes.statusCode).to.equal(200);
-        expect(quizRes.body).to.be.an("array");
-        expect(quizRes.body.length).to.equal(0);
-      }
+      expect(quizRes.statusCode).to.equal(200);
+      expect(quizRes.body).to.be.an("array");
+      expect(quizRes.body.length).to.equal(0);
     });
 
     it("should return `User is not registered` error message", async () => {
-        const unauthorizedUser = { ...mockUsers[0] };
-        unauthorizedUser._id = "1234";
+      const unauthorizedUser = { ...mockUsers[0] };
+      unauthorizedUser._id = "1234";
+      const mockReq = {
+        user: unauthorizedUser,
+      };
 
-        const mockReq = {
-          user: unauthorizedUser,
-        };
+      await mockGetUserQuizzes(mockReq, quizRes);
 
-        await mockGetUserQuizzes(mockReq, quizRes);
-
-        expect(quizRes.statusCode).to.equal(403);
-        expect(quizRes.body.message).to.include("User is not registered");
+      expect(quizRes.statusCode).to.equal(403);
+      expect(quizRes.body.message).to.include("User is not registered");
     });
   });
 
   describe("get classroom quizzes", () => {
     it("should fetch an array of classroom quizzes", async () => {
-        const mockReq = {
-          user: mockUsers[1],
-        };
+      const mockReq = {
+        user: mockUsers[1],
+      };
 
-        await mockGetClassroomQuizzes(mockReq, quizRes);
+      await mockGetClassroomQuizzes(mockReq, quizRes);
 
-        expect(quizRes.statusCode).to.equal(200);
-        expect(quizRes.body).to.be.an("array");
+      expect(quizRes.statusCode).to.equal(200);
+      expect(quizRes.body).to.be.an("array");
 
-        for (const [key, value] of Object.entries(quizRes.body[0])) {
-          expect(newQuiz[key]).to.equal(value);
-        }
+      for (const [key, value] of Object.entries(quizRes.body[0])) {
+        expect(newQuiz[key]).to.equal(value);
       }
     });
 
     it("should return empty array as a response payload", async () => {
-        const mockReq = {
-          user: mockUsers[0],
-        };
+      const mockReq = {
+        user: mockUsers[0],
+      };
 
-        await mockGetClassroomQuizzes(mockReq, quizRes);
+      await mockGetClassroomQuizzes(mockReq, quizRes);
 
-        expect(quizRes.statusCode).to.equal(200);
-        expect(quizRes.body).to.be.an("array");
-        expect(quizRes.body.length).to.equal(0);
+      expect(quizRes.statusCode).to.equal(200);
+      expect(quizRes.body).to.be.an("array");
+      expect(quizRes.body.length).to.equal(0);
     });
 
     it("should return `User is not registered` error message", async () => {
-        const unauthorizedUser = { ...mockUsers[0] };
-        unauthorizedUser._id = "1234";
+      const unauthorizedUser = { ...mockUsers[0] };
+      unauthorizedUser._id = "1234";
 
-        const mockReq = {
-          user: unauthorizedUser,
-        };
+      const mockReq = {
+        user: unauthorizedUser,
+      };
 
-        await mockGetClassroomQuizzes(mockReq, quizRes);
+      await mockGetClassroomQuizzes(mockReq, quizRes);
 
-        expect(quizRes.statusCode).to.equal(403);
-        expect(quizRes.body.message).to.include("User is not registered");
+      expect(quizRes.statusCode).to.equal(403);
+      expect(quizRes.body.message).to.include("User is not registered");
     });
   });
 
