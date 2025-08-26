@@ -49,7 +49,6 @@ describe("Quiz Controller Unit Test", () => {
 
   describe("get user quizzes", () => {
     it("should fetch newly created quiz and verify it", async () => {
-      try {
         const mockReq = {
           user: mockUsers[0],
         };
@@ -61,15 +60,9 @@ describe("Quiz Controller Unit Test", () => {
 
         for (const [key, value] of Object.entries(quizRes.body[0])) {
           expect(newQuiz[key]).to.equal(value);
-        }
-      } catch (error) {
-        console.error("Test error: ", error);
-        throw error;
       }
-    });
 
     it("should return empty array as a response payload", async () => {
-      try {
         const mockReq = {
           user: mockUsers[1],
         };
@@ -79,14 +72,10 @@ describe("Quiz Controller Unit Test", () => {
         expect(quizRes.statusCode).to.equal(200);
         expect(quizRes.body).to.be.an("array");
         expect(quizRes.body.length).to.equal(0);
-      } catch (error) {
-        console.error("Test error: ", error);
-        throw error;
       }
     });
 
     it("should return `User is not registered` error message", async () => {
-      try {
         const unauthorizedUser = { ...mockUsers[0] };
         unauthorizedUser._id = "1234";
 
@@ -98,16 +87,11 @@ describe("Quiz Controller Unit Test", () => {
 
         expect(quizRes.statusCode).to.equal(403);
         expect(quizRes.body.message).to.include("User is not registered");
-      } catch (error) {
-        console.error("Test error: ", error);
-        throw error;
-      }
     });
   });
 
   describe("get classroom quizzes", () => {
     it("should fetch an array of classroom quizzes", async () => {
-      try {
         const mockReq = {
           user: mockUsers[1],
         };
@@ -120,14 +104,10 @@ describe("Quiz Controller Unit Test", () => {
         for (const [key, value] of Object.entries(quizRes.body[0])) {
           expect(newQuiz[key]).to.equal(value);
         }
-      } catch (error) {
-        console.error("Test error:", error);
-        throw error;
       }
     });
 
     it("should return empty array as a response payload", async () => {
-      try {
         const mockReq = {
           user: mockUsers[0],
         };
@@ -137,14 +117,9 @@ describe("Quiz Controller Unit Test", () => {
         expect(quizRes.statusCode).to.equal(200);
         expect(quizRes.body).to.be.an("array");
         expect(quizRes.body.length).to.equal(0);
-      } catch (error) {
-        console.error("Test error: ", error);
-        throw error;
-      }
     });
 
     it("should return `User is not registered` error message", async () => {
-      try {
         const unauthorizedUser = { ...mockUsers[0] };
         unauthorizedUser._id = "1234";
 
@@ -156,16 +131,11 @@ describe("Quiz Controller Unit Test", () => {
 
         expect(quizRes.statusCode).to.equal(403);
         expect(quizRes.body.message).to.include("User is not registered");
-      } catch (error) {
-        console.error("Test error: ", error);
-        throw error;
-      }
     });
   });
 
   describe("update user quiz", () => {
     it("should update the quiz and verify it", async () => {
-      try {
         const updatedTimeLimit = 7;
         const updatedQuestion = "mock update quiz question";
 
@@ -196,14 +166,10 @@ describe("Quiz Controller Unit Test", () => {
             expect(newQuiz[key]).to.equal(value);
           }
         }
-      } catch (error) {
-        console.error("Test error: ", error);
-        throw error;
       }
     });
 
     it("should return `Quiz not found` error message", async () => {
-      try {
         const updatedTimeLimit = 7;
         const updatedQuestion = "mock update quiz question";
 
@@ -223,14 +189,9 @@ describe("Quiz Controller Unit Test", () => {
 
         expect(quizRes.statusCode).to.equal(403);
         expect(quizRes.body.message).to.include("Quiz not found");
-      } catch (error) {
-        console.error("Test error: ", error);
-        throw error;
-      }
     });
 
     it("should return `User id is required` error message", async () => {
-      try {
         const unauthorizedUser = { ...mockUsers[0], _id: undefined };
 
         const updatedTimeLimit = 7;
@@ -252,14 +213,9 @@ describe("Quiz Controller Unit Test", () => {
 
         expect(quizRes.statusCode).to.equal(403);
         expect(quizRes.body.message).to.include("User id is required");
-      } catch (error) {
-        console.error("Test error: ", error);
-        throw error;
-      }
     });
 
     it("should return `User is unauthorized` error message", async () => {
-      try {
         const unauthorizedUser = { ...mockUsers[0], _id: "1234" };
 
         const updatedTimeLimit = 7;
@@ -281,16 +237,11 @@ describe("Quiz Controller Unit Test", () => {
 
         expect(quizRes.statusCode).to.equal(401);
         expect(quizRes.body.message).to.include("User is unauthorized");
-      } catch (error) {
-        console.error("Test error: ", error);
-        throw error;
-      }
     });
   });
 
   describe("delete user quiz", () => {
     it("should delete the quiz and confirm it", async () => {
-      try {
         const mockReq = {
           params: { id: newQuiz._id },
           user: mockUsers[0],
@@ -304,14 +255,9 @@ describe("Quiz Controller Unit Test", () => {
           `Quiz ${mockReq.params.id} successfully deleted`
         );
         expect(quizRes.body._id).to.equal(mockReq.params.id);
-      } catch (error) {
-        console.error("Test error: ", error);
-        throw error;
-      }
     });
 
     it("should return `Quiz not found` error message", async () => {
-      try {
         const mockReq = {
           params: { id: "1234" },
           user: mockUsers[0],
@@ -321,14 +267,9 @@ describe("Quiz Controller Unit Test", () => {
 
         expect(quizRes.statusCode).to.equal(404);
         expect(quizRes.body.message).to.include("Quiz not found");
-      } catch (error) {
-        console.error("Test error: ", error);
-        throw error;
-      }
     });
 
     it("should return `User id is required` error message", async () => {
-      try {
         const unauthorizedUser = { ...mockUsers[0], _id: undefined };
 
         const mockReq = {
@@ -340,14 +281,9 @@ describe("Quiz Controller Unit Test", () => {
 
         expect(quizRes.statusCode).to.equal(403);
         expect(quizRes.body.message).to.include("User is not registered");
-      } catch (error) {
-        console.error("Test error: ", error);
-        throw error;
-      }
     });
 
     it("should return `Access denied, quiz does not belong to this user` error message", async () => {
-      try {
         const mockReq = {
           params: { id: newQuiz._id },
           user: mockUsers[1],
@@ -359,10 +295,6 @@ describe("Quiz Controller Unit Test", () => {
         expect(quizRes.body.message).to.include(
           "Access denied, quiz does not belong to this user"
         );
-      } catch (error) {
-        console.error("Test error: ", error);
-        throw error;
-      }
     });
   });
 });
