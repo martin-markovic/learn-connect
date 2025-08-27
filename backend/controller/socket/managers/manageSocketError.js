@@ -1,4 +1,4 @@
-const handleErrorEvents = (socket) => {
+const manageErrorEvents = (socket) => {
   socket.on("connection error", (err) => {
     console.error("Socket connection error:", err.message);
   });
@@ -8,4 +8,4 @@ const handleErrorEvents = (socket) => {
   });
 };
 
-export default handleErrorEvents;
+export default manageErrorEvents;

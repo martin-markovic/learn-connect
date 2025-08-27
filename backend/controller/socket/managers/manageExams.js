@@ -1,6 +1,10 @@
-import { createExam, finishExam, updateExam } from "./helpers/socket.exam.js";
+import {
+  createExam,
+  finishExam,
+  updateExam,
+} from "../controllers/handleExams.js";
 
-const handleExamEvents = (context) => {
+const manageExamEvents = (context) => {
   context.socket.on("create exam", async (data) => {
     await createExam(context, data);
   });
@@ -14,4 +18,4 @@ const handleExamEvents = (context) => {
   });
 };
 
-export default handleExamEvents;
+export default manageExamEvents;

@@ -1,7 +1,7 @@
 import Chat from "../../../models/chat/chatModel.js";
 import Conversation from "../../../models/chat/conversationModel.js";
 import User from "../../../models/users/userModel.js";
-import { handleConnectionStatus } from "./socket.userPresence.js";
+import { handleConnectionStatus } from "../config/socket.userPresence.js";
 
 export const sendMessage = async (context, data) => {
   try {
@@ -171,9 +171,7 @@ export const handleChatStatus = async (context, data) => {
   try {
     const { userId, chatConnected } = data;
 
-
     const userFound = await User.findOne({ _id: userId });
-
 
     if (!userFound) {
       throw new Error("User is not authorized");
@@ -184,7 +182,6 @@ export const handleChatStatus = async (context, data) => {
       { online: chatConnected },
       { new: true }
     );
-
 
     if (!updatedStatus) {
       throw new Error("Database update failure");

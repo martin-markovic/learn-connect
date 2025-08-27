@@ -1,26 +1,14 @@
-import { handleNewNotification } from "./helpers/socket.notification.js";
+import { handleNewNotification } from "../handlers/handleNotifications.js";
 import {
   handleNewRequest,
   handleProcessRequest,
   handleRemoveFriend,
   handleBlockUser,
-} from "./helpers/socket.friendController.js";
+} from "../controllers/socialControllers.js";
+import User from "../../../models/users/userModel.js";
+import Friend from "../../../models/users/friendModel.js";
 
-const handleSocialEvents = (models, context) => {
-  const { User, Friend } = models;
-
-  if (!User) {
-    throw new Error(
-      "Invalid User model, aborting socket social events initialization."
-    );
-  }
-
-  if (!Friend) {
-    throw new Error(
-      "Invalid Friend model, aborting socket social events initialization."
-    );
-  }
-
+const handleSocialEvents = (context) => {
   context.socket.on("send friend request", async (data) => {
     try {
       const friendRequestPayload = await handleNewRequest(Friend, data);

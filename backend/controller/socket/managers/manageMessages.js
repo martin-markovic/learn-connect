@@ -4,11 +4,11 @@ import {
   handleChatOpen,
   handleTyping,
   handleChatStatus,
-} from "./helpers/socket.messages.js";
-import validateFriendship from "../../middleware/socialMiddleware.js";
-import { handleConnectionStatus } from "./helpers/socket.userPresence.js";
+} from "../handlers/handleMessages.js";
+import validateFriendship from "../../../middleware/socialMiddleware.js";
+import { handleConnectionStatus } from "../config/socket.userPresence.js";
 
-const handleMessages = (context) => {
+const manageMessages = (context) => {
   context.socket.on("connect chat", async (data) => {
     try {
       await handleConnectionStatus(context, data?.senderId, "connected");
@@ -71,4 +71,4 @@ const handleMessages = (context) => {
   });
 };
 
-export default handleMessages;
+export default manageMessages;
