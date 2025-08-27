@@ -92,3 +92,39 @@ export const createMessage = async (models, data) => {
     throw error;
   }
 };
+
+export const updateChatMessages = async (models, data) => {
+  try {
+    const { Chat, Conversation } = models;
+    if (!Chat || !Conversation) {
+      throw new Error("Missing models");
+    }
+
+    const { senderId, receiverId } = data;
+
+    const chatFound = await Chat.findOne({
+      participants: { $all: [senderId, receiverId] },
+    });
+
+    if (!chatFound || !chatFound?.conversation?.length) {
+      throw new Error("Chat not found");
+    }
+
+    await Conversation.updateMany(
+      {
+        _id: { $in: chatFound.conversation },
+        receiver: senderId,
+        isRead: false,
+      },
+      { $set: { isRead: true } }
+    );
+
+    return { success: true };
+  } catch (error) {
+    console.error(
+      "Error updating chat messages: ",
+      error.message || "Server error"
+    );
+    throw error;
+  }
+};

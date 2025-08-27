@@ -4,6 +4,7 @@ import User from "../../../models/users/userModel.js";
 import { handleConnectionStatus } from "../config/socket.userPresence.js";
 import {
   createMessage,
+  updateChatMessages,
 } from "../controllers/socket.messageControllers.js";
 
 export const sendMessage = async (context, data) => {
@@ -34,26 +35,26 @@ export const sendMessage = async (context, data) => {
 
 export const handleChatOpen = async (context, data) => {
   try {
-    const { senderId, receiverId } = data;
-
-    const chatFound = await Chat.findOne({
-      participants: { $all: [senderId, receiverId] },
-    });
-
-    if (!chatFound || !chatFound?.conversation?.length) {
-      throw new Error("Chat not found");
+    if (!Chat || !Conversation) {
+      throw new Error("Invalid models");
     }
 
-    await Conversation.updateMany(
-      {
-        _id: { $in: chatFound.conversation },
-        receiver: senderId,
-        isRead: false,
-      },
-      { $set: { isRead: true } }
-    );
+    const models = { Chat, Conversation };
+    const response = await updateChatMessages(models, data);
 
-    context.emitEvent("sender", "messages read", { friendId: receiverId });
+    if (!response.success) {
+      throw new Error("Unable to update messages");
+    }
+
+    const { senderId, receiverId } = data;
+
+    if (!senderId || !receiverId) {
+      throw new Error("Event participants required");
+    }
+
+    context.emitEvent("sender", "messages read", {
+      friendId: receiverId,
+    });
 
     context.emitEvent("receiver", "messages read", {
       friendId: senderId,
