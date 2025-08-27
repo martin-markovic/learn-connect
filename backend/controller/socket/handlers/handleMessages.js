@@ -2,87 +2,31 @@ import Chat from "../../../models/chat/chatModel.js";
 import Conversation from "../../../models/chat/conversationModel.js";
 import User from "../../../models/users/userModel.js";
 import { handleConnectionStatus } from "../config/socket.userPresence.js";
+import {
+  createMessage,
+} from "../controllers/socket.messageControllers.js";
 
 export const sendMessage = async (context, data) => {
   try {
-    let messagePayload;
-
-    const { senderId, receiverId, text } = data;
-
-    if (!senderId || !text || !receiverId) {
-      throw new Error("Please provide required message data");
+    if (!Chat || !Conversation) {
+      throw new Error("Invalid models");
     }
 
-    let chatFound = await Chat.findOne({
-      participants: { $all: [senderId, receiverId] },
-    });
+    const models = { Chat, Conversation };
+    const payload = await createMessage(models, data);
 
-    if (!chatFound) {
-      const newMessage = new Conversation({
-        sender: senderId,
-        receiver: receiverId,
-        text,
-      });
-
-      await newMessage.save();
-
-      const populatedMessage = await Conversation.findById(newMessage._id)
-        .populate("sender", "name avatar")
-        .populate("receiver", "name avatar");
-
-      const newChat = new Chat({
-        participants: [senderId, receiverId],
-        conversation: [newMessage._id],
-      });
-
-      chatFound = await newChat.save();
-
-      messagePayload = {
-        chatId: chatFound?._id.toString(),
-        _id: populatedMessage?._id.toString(),
-        senderId: populatedMessage.sender._id.toString(),
-        senderName: populatedMessage.sender.name,
-        senderAvatar: populatedMessage.sender.avatar,
-        receiverId: populatedMessage.receiver._id.toString(),
-        receiverName: populatedMessage.receiver.name,
-        receiverAvatar: populatedMessage.receiver.avatar,
-        text: populatedMessage.text,
-        isRead: populatedMessage.isRead,
-        createdAt: populatedMessage.createdAt,
-      };
-    } else {
-      const newMessage = new Conversation({
-        sender: senderId,
-        receiver: receiverId,
-        text,
-      });
-
-      await newMessage.save();
-      chatFound.conversation.push(newMessage._id);
-
-      await chatFound.save();
-
-      const populatedMessage = await Conversation.findById(newMessage._id)
-        .populate("sender", "name avatar")
-        .populate("receiver", "name avatar");
-
-      messagePayload = {
-        _id: populatedMessage?._id.toString(),
-        senderId: populatedMessage.sender._id.toString(),
-        senderName: populatedMessage.sender.name,
-        senderAvatar: populatedMessage.sender.avatar,
-        receiverId: populatedMessage.receiver._id.toString(),
-        receiverName: populatedMessage.receiver.name,
-        receiverAvatar: populatedMessage.receiver.avatar,
-        text: populatedMessage.text,
-        isRead: populatedMessage.isRead,
-        createdAt: populatedMessage.createdAt,
-      };
+    if (!payload._id) {
+      throw new Error("Unable to create message payload");
     }
 
-    context.emitEvent("sender", "new message", messagePayload);
+    const { senderId, receiverId } = data;
+    if (!senderId || !receiverId) {
+      throw new Error("Event participants required");
+    }
 
-    context.emitEvent("receiver", "new message", messagePayload);
+    context.emitEvent("sender", "new message", payload);
+
+    context.emitEvent("receiver", "new message", payload);
   } catch (error) {
     console.error("Error sending message: ", error.message);
   }
