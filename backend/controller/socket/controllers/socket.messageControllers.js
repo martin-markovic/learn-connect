@@ -89,7 +89,6 @@ export const createMessage = async (models, data) => {
       "Error creating new message: ",
       error.message || "Server error"
     );
-    throw error;
   }
 };
 
@@ -102,12 +101,13 @@ export const updateChatMessages = async (models, data) => {
 
     const { senderId, receiverId } = data;
 
-    const chatFound = await Chat.findOne({
-      participants: { $all: [senderId, receiverId] },
-    });
+    const chatFound =
+      (await Chat.findOne({
+        participants: { $all: [senderId, receiverId] },
+      })) || [];
 
-    if (!chatFound || !chatFound?.conversation?.length) {
-      throw new Error("Chat not found");
+    if (!chatFound?.conversation?.length) {
+      return { success: true, newMessage: false };
     }
 
     await Conversation.updateMany(
@@ -119,12 +119,75 @@ export const updateChatMessages = async (models, data) => {
       { $set: { isRead: true } }
     );
 
-    return { success: true };
+    return { success: true, newMessages: true };
   } catch (error) {
     console.error(
       "Error updating chat messages: ",
       error.message || "Server error"
     );
-    throw error;
+    return { success: false, error: error.message };
+  }
+};
+
+export const markMessageSeen = async (models, data) => {
+  try {
+    const { Conversation } = models;
+    if (!Conversation) {
+      throw new Error("Missing models");
+    }
+
+    const { messageId } = data;
+
+    if (!messageId) {
+      throw new Error("Invalid message id");
+    }
+
+    const updatedMessage = await Conversation.findByIdAndUpdate(
+      messageId,
+      { isRead: true },
+      { new: true }
+    );
+
+    return updatedMessage;
+  } catch (error) {
+    console.error(
+      "Error updating chat messages: ",
+      error.message || "Server error"
+    );
+  }
+};
+
+export const changeChatStatus = async (models, data) => {
+  try {
+    const { User } = models;
+
+    if (!User) {
+      throw new Error("Missing models");
+    }
+
+    const { userId, chatConnected } = data;
+
+    const userFound = await User.findOne({ _id: userId });
+
+    if (!userFound) {
+      throw new Error("User is not authorized");
+    }
+
+    const updatedStatus = await User.findByIdAndUpdate(
+      userId,
+      { online: chatConnected },
+      { new: true }
+    );
+
+    if (!updatedStatus) {
+      throw new Error("Database update failure");
+    }
+
+    return { updatedStatus, success: true };
+  } catch (error) {
+    console.error(
+      "Error changing chat status: ",
+      error.message || "Server error"
+    );
   }
 };
