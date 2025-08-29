@@ -5,6 +5,8 @@ import { handleConnectionStatus } from "../config/socket.userPresence.js";
 import {
   createMessage,
   updateChatMessages,
+  markMessageSeen,
+  changeChatStatus,
 } from "../controllers/socket.messageControllers.js";
 
 export const sendMessage = async (context, data) => {
@@ -46,6 +48,10 @@ export const handleChatOpen = async (context, data) => {
       throw new Error("Unable to update messages");
     }
 
+    if (!response.newMessages) {
+      return;
+    }
+
     const { senderId, receiverId } = data;
 
     if (!senderId || !receiverId) {
@@ -68,28 +74,34 @@ export const handleChatOpen = async (context, data) => {
 
 export const handleMarkAsRead = async (context, data) => {
   try {
-    const { senderId, receiverId, messageId } = data;
-
-    if (!messageId) {
-      throw new Error("Invalid message id");
+    if (!Conversation) {
+      throw new Error("Invalid models");
     }
 
-    const updatedMessage = await Conversation.findByIdAndUpdate(
-      messageId,
-      { isRead: true },
-      { new: true }
-    );
+    const models = { Conversation };
+
+    const payload = await markMessageSeen(models, data);
+
+    if (!payload._id) {
+      throw new Error("Unable to mark message as read");
+    }
+
+    const { sender, receiver } = payload;
+
+    if (!sender || !receiver) {
+      throw new Error("Event participants required");
+    }
 
     context.emitEvent("sender", "message seen", {
-      messageId: updatedMessage?._id,
-      senderId,
-      receiverId,
+      messageId: payload?._id.toString(),
+      senderId: sender.toString(),
+      receiverId: receiver.toString(),
     });
 
     context.emitEvent("receiver", "message seen", {
-      messageId: updatedMessage?._id,
-      senderId,
-      receiverId,
+      messageId: payload?._id.toString(),
+      receiverId: sender.toString(),
+      senderId: receiver.toString(),
     });
   } catch (error) {
     console.error("Error emitting conversation read: ", error.message);
@@ -114,22 +126,22 @@ export const handleTyping = (context, data) => {
 
 export const handleChatStatus = async (context, data) => {
   try {
-    const { userId, chatConnected } = data;
+    const { userId } = data;
 
-    const userFound = await User.findOne({ _id: userId });
-
-    if (!userFound) {
-      throw new Error("User is not authorized");
+    if (!userId) {
+      throw new Error("User id is required");
     }
 
-    const updatedStatus = await User.findByIdAndUpdate(
-      userId,
-      { online: chatConnected },
-      { new: true }
-    );
+    if (!User) {
+      throw new Error("Invalid models");
+    }
 
-    if (!updatedStatus) {
-      throw new Error("Database update failure");
+    const models = { User };
+
+    const { updatedStatus, success } = await changeChatStatus(models, data);
+
+    if (!success || !updatedStatus) {
+      throw new Error("Unable to update chat status");
     }
 
     context.emitEvent("sender", "chat status changed", {
