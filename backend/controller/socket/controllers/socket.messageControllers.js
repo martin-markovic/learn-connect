@@ -1,10 +1,11 @@
-import Chat from "../../../models/chat/chatModel.js";
-import Conversation from "../../../models/chat/conversationModel.js";
-import User from "../../../models/users/userModel.js";
-import { handleConnectionStatus } from "./socket.userPresence.js";
-
-export const sendMessage = async (context, data) => {
+export const createMessage = async (models, data) => {
   try {
+    const { Chat, Conversation } = models;
+
+    if (!Chat || !Conversation) {
+      throw new Error("Missing models");
+    }
+
     let messagePayload;
 
     const { senderId, receiverId, text } = data;
@@ -50,6 +51,8 @@ export const sendMessage = async (context, data) => {
         isRead: populatedMessage.isRead,
         createdAt: populatedMessage.createdAt,
       };
+
+      return messagePayload;
     } else {
       const newMessage = new Conversation({
         sender: senderId,
@@ -78,26 +81,33 @@ export const sendMessage = async (context, data) => {
         isRead: populatedMessage.isRead,
         createdAt: populatedMessage.createdAt,
       };
+
+      return messagePayload;
     }
-
-    context.emitEvent("sender", "new message", messagePayload);
-
-    context.emitEvent("receiver", "new message", messagePayload);
   } catch (error) {
-    console.error("Error sending message: ", error.message);
+    console.error(
+      "Error creating new message: ",
+      error.message || "Server error"
+    );
   }
 };
 
-export const handleChatOpen = async (context, data) => {
+export const updateChatMessages = async (models, data) => {
   try {
+    const { Chat, Conversation } = models;
+    if (!Chat || !Conversation) {
+      throw new Error("Missing models");
+    }
+
     const { senderId, receiverId } = data;
 
-    const chatFound = await Chat.findOne({
-      participants: { $all: [senderId, receiverId] },
-    });
+    const chatFound =
+      (await Chat.findOne({
+        participants: { $all: [senderId, receiverId] },
+      })) || [];
 
-    if (!chatFound || !chatFound?.conversation?.length) {
-      throw new Error("Chat not found");
+    if (!chatFound?.conversation?.length) {
+      return { success: true, newMessage: false };
     }
 
     await Conversation.updateMany(
@@ -109,21 +119,24 @@ export const handleChatOpen = async (context, data) => {
       { $set: { isRead: true } }
     );
 
-    context.emitEvent("sender", "messages read", { friendId: receiverId });
-
-    context.emitEvent("receiver", "messages read", {
-      friendId: senderId,
-      receiverId,
-    });
+    return { success: true, newMessages: true };
   } catch (error) {
-    console.error("Error emitting conversation read: ", error.message);
-    context.socket.emit("sender", "error", { message: error.message });
+    console.error(
+      "Error updating chat messages: ",
+      error.message || "Server error"
+    );
+    return { success: false, error: error.message };
   }
 };
 
-export const handleMarkAsRead = async (context, data) => {
+export const markMessageSeen = async (models, data) => {
   try {
-    const { senderId, receiverId, messageId } = data;
+    const { Conversation } = models;
+    if (!Conversation) {
+      throw new Error("Missing models");
+    }
+
+    const { messageId } = data;
 
     if (!messageId) {
       throw new Error("Invalid message id");
@@ -135,45 +148,26 @@ export const handleMarkAsRead = async (context, data) => {
       { new: true }
     );
 
-    context.emitEvent("sender", "message seen", {
-      messageId: updatedMessage?._id,
-      senderId,
-      receiverId,
-    });
-
-    context.emitEvent("receiver", "message seen", {
-      messageId: updatedMessage?._id,
-      senderId,
-      receiverId,
-    });
+    return updatedMessage;
   } catch (error) {
-    console.error("Error emitting conversation read: ", error.message);
-    context.socket.emit("sender", "error", { message: error.message });
+    console.error(
+      "Error updating chat messages: ",
+      error.message || "Server error"
+    );
   }
 };
 
-export const handleTyping = (context, data) => {
+export const changeChatStatus = async (models, data) => {
   try {
-    const { senderId, receiverId, senderName } = data;
+    const { User } = models;
 
-    if (!senderId || !receiverId || !senderName) {
-      throw new Error("Please provide valid client data");
+    if (!User) {
+      throw new Error("Missing models");
     }
 
-    context.emitEvent("receiver", "chat activity", data);
-  } catch (error) {
-    console.error("Error emitting chat activity", error.message);
-    context.socket.emit("error", { message: error.message });
-  }
-};
-
-export const handleChatStatus = async (context, data) => {
-  try {
     const { userId, chatConnected } = data;
 
-
     const userFound = await User.findOne({ _id: userId });
-
 
     if (!userFound) {
       throw new Error("User is not authorized");
@@ -185,21 +179,15 @@ export const handleChatStatus = async (context, data) => {
       { new: true }
     );
 
-
     if (!updatedStatus) {
       throw new Error("Database update failure");
     }
 
-    context.emitEvent("sender", "chat status changed", {
-      success: true,
-      online: updatedStatus?.online,
-    });
-
-    if (!updatedStatus.online) {
-      await handleConnectionStatus(context, userId, "offline");
-    }
+    return { updatedStatus, success: true };
   } catch (error) {
-    console.error("Error turning off chat events: ", error.message);
-    context.emitEvent("sender", "error", error.message);
+    console.error(
+      "Error changing chat status: ",
+      error.message || "Server error"
+    );
   }
 };
