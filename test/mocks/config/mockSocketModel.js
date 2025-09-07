@@ -1,16 +1,24 @@
 export default class MockSocketModel {
   constructor(newDoc, modelName) {
-    this.prevModel = modelName !== null ? modelName : this.prevModel;
-    this.currentModel = modelName !== null ? modelName : this.prevModel;
-    this._id = null;
-    this.storage = sharedStorage;
-    this.queriedDoc =
-      newDoc !== null
-        ? {
-            ...newDoc,
-            _id: `frdoc_${this.storage[this.currentModel].length + 1}`,
-          }
-        : null;
+    try {
+      this.prevModel = modelName !== null ? modelName : this.prevModel;
+      this.currentModel = modelName !== null ? modelName : this.prevModel;
+      this._id = null;
+      this.storage = sharedStorage;
+      this.queriedDoc =
+        newDoc !== null
+          ? {
+              ...newDoc,
+              _id: `frdoc_${this.storage[this.currentModel].length + 1}`,
+            }
+          : null;
+    } catch (error) {
+      console.error(
+        "Error constructing mock socket model",
+        modelName,
+        error.message
+      );
+    }
   }
 
   async create(doc) {
@@ -93,12 +101,16 @@ export default class MockSocketModel {
     return this.handleChain(result);
   }
 
-  async findById(id) {
+  async findById(id, projection = null, options = {}) {
     let result;
     const queryType = id.split("_")[0];
+    const store =
+      this.currentModel === "friends"
+        ? this.storage["friends"]
+        : this.storage["conversations"];
 
     if (queryType === "frdoc") {
-      result = this.storage["friends"].find((item) => item._id === id);
+      result = store.find((item) => item._id === id);
 
       const reqSender = this.storage["users"].find(
         (u) => u._id === result.sender
@@ -116,6 +128,10 @@ export default class MockSocketModel {
 
     result =
       this.storage[this.currentModel].find((item) => item._id === id) || null;
+
+    if (options.populate) {
+      return this.handleChain(result);
+    }
 
     result.populate = this.populate;
 
@@ -183,6 +199,14 @@ export default class MockSocketModel {
   }
 
   save() {
+    if (
+      this.currentModel === "conversations" ||
+      (this.currentModel === "chats" && !this.queriedDoc.isRead)
+    ) {
+      this.queriedDoc.isRead = false;
+      this.queriedDoc.createdAt = new Date();
+    }
+
     this.storage[this.currentModel].push(this.queriedDoc);
     return this.queriedDoc;
   }
@@ -203,6 +227,16 @@ export default class MockSocketModel {
     };
 
     return formattedDoc;
+  }
+
+  cleanupAll() {
+    this.prevModel = null;
+    this.currentModel = null;
+    this._id = null;
+    this.storage = Object.entries(this.storage).forEach(
+      (key, value) => (key = [])
+    );
+    this.queriedDoc = null;
   }
 }
 
