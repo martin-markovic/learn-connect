@@ -12,8 +12,8 @@ import Friend from "../../models/users/friendModel.js";
 const handleGetFriendList = getFriendList(Friend);
 const handleGetUserList = getUserList(Friend, User);
 
-friendRouter.get("/", protect, handleGetFriendList);
+friendRouter.get("/", protect, handleGetUserList);
 
-friendRouter.get("/:userId", protect, handleGetUserList);
+friendRouter.get("/:userId", protect, handleGetFriendList);
 
 export default friendRouter;

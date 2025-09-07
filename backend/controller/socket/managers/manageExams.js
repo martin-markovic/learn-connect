@@ -1,8 +1,4 @@
-import {
-  createExam,
-  finishExam,
-  updateExam,
-} from "../controllers/handleExams.js";
+import { createExam, finishExam, updateExam } from "../handlers/handleExams.js";
 
 const manageExamEvents = (context) => {
   context.socket.on("create exam", async (data) => {

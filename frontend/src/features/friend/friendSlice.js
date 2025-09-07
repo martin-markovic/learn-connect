@@ -161,7 +161,7 @@ const friendSlice = createSlice({
         state.isSuccess = true;
         state.isError = false;
         state.errorMessage = "";
-        if (action.payload.length) {
+        if (action.payload?.length) {
           action.payload.forEach((item) => {
             const alreadyExists = state.userList.some(
               (user) => user?._id === item?._id

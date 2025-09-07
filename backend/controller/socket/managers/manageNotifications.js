@@ -2,7 +2,7 @@ import {
   markNotificationAsRead,
   markAllNotificationsAsRead,
   handleNewNotification,
-} from "./helpers/socket.notification.js";
+} from "../handlers/handleNotifications.js";
 
 const handleNotificationEvents = (context) => {
   context.socket.on("mark as read", async (data) => {
