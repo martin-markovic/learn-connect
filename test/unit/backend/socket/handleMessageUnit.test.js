@@ -1,6 +1,7 @@
 import { expect } from "chai";
 import MockSocketModel from "../../../mocks/config/mockSocketModel.js";
 import MockData from "../../../mocks/config/mockData.js";
+import { createMessage } from "../../../../backend/controller/socket/controllers/socket.messageControllers.js";
 
 class ChatFactory extends MockSocketModel {
   constructor(newDoc) {
@@ -33,6 +34,10 @@ class ChatFactory extends MockSocketModel {
 
   static async cleanupAll() {
     return new this().cleanupAll();
+  }
+
+  static getStorage() {
+    return new this().storage;
   }
 }
 
@@ -125,4 +130,59 @@ describe("socket message controllers", () => {
     UserFactory.cleanupAll();
   });
 
+  describe("create message", () => {
+    it("should create a new message for an empty chat and verify it", async () => {
+      const models = { Chat: ChatFactory, Conversation: ConversationFactory };
+      const mockMsgText = "test message 1";
+      const eventData = {
+        senderId: mockSender._id,
+        receiverId: mockReceiver._id,
+        text: mockMsgText,
+      };
+
+      const response = await createMessage(models, eventData);
+
+      expect(response._id).to.equal("frdoc_1");
+      expect(response.chatId).to.equal("frdoc_1");
+      expect(response.senderId).to.equal(mockSender._id);
+      expect(response.receiverId).to.equal(mockReceiver._id);
+      expect(response.senderName).to.equal(mockSender.name);
+      expect(response.receiverName).to.equal(mockReceiver.name);
+      expect(response.senderAvatar).to.equal(mockSender.avatar);
+      expect(response.receiverAvatar).to.equal(mockReceiver.avatar);
+      expect(response.text).to.equal(mockMsgText);
+      expect(response.isRead).to.equal(false);
+
+      const chatStorage = ChatFactory.getStorage().chats;
+
+      expect(chatStorage.length).to.equal(1);
+    });
+
+    it("should create a new message for a non-empty chat and verify it", async () => {
+      const models = { Chat: ChatFactory, Conversation: ConversationFactory };
+      const mockMsgText = "test message 2";
+      const eventData = {
+        senderId: mockSender._id,
+        receiverId: mockReceiver._id,
+        text: mockMsgText,
+      };
+
+      const response = await createMessage(models, eventData);
+
+      expect(response._id).to.equal("frdoc_2");
+      expect(response.chatId).to.equal("frdoc_2");
+      expect(response.senderId).to.equal(mockSender._id);
+      expect(response.receiverId).to.equal(mockReceiver._id);
+      expect(response.senderName).to.equal(mockSender.name);
+      expect(response.receiverName).to.equal(mockReceiver.name);
+      expect(response.senderAvatar).to.equal(mockSender.avatar);
+      expect(response.receiverAvatar).to.equal(mockReceiver.avatar);
+      expect(response.text).to.equal(mockMsgText);
+      expect(response.isRead).to.equal(false);
+
+      const chatStorage = ChatFactory.getStorage().chats;
+
+      expect(chatStorage.length).to.equal(2);
+    });
+  });
 });
