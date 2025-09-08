@@ -96,10 +96,12 @@ export const createMessage = async (models, data) => {
       return messagePayload;
     }
   } catch (error) {
-    console.error(
-      "Error creating new message: ",
+    const errorMessage = `Error creating new message: ${
       error.message || "Server error"
-    );
+    }`;
+
+    console.error(errorMessage);
+    throw new Error(errorMessage);
   }
 };
 

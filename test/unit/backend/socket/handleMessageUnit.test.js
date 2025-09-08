@@ -184,5 +184,67 @@ describe("socket message controllers", () => {
 
       expect(chatStorage.length).to.equal(2);
     });
+
+    it("should return a `Error creating new message: Missing models` error message", async () => {
+      const models = { Chat: undefined, Conversation: ConversationFactory };
+      const mockMsgText = "test message";
+      const eventData = {
+        senderId: mockSender._id,
+        receiverId: mockReceiver._id,
+        text: mockMsgText,
+      };
+
+      try {
+        await createMessage(models, eventData);
+      } catch (error) {
+        expect(error.message).to.equal(
+          "Error creating new message: Missing models"
+        );
+      }
+    });
+
+    it("should return a `Error creating new message: Please provide required message data` error message", async () => {
+      const models = { Chat: ChatFactory, Conversation: ConversationFactory };
+      const mockMsgText = null;
+      const eventData = {
+        senderId: mockSender._id,
+        receiverId: mockReceiver._id,
+        text: mockMsgText,
+      };
+
+      try {
+        await createMessage(models, eventData);
+      } catch (error) {
+        expect(error.message).to.equal(
+          "Error creating new message: Please provide required message data"
+        );
+      }
+    });
+
+    it("should return a `Error creating new message: Failed to retrieve saved message` error message", async () => {
+      const originalFindById = ChatFactory.findById;
+      const mockFindById = () => {
+        return null;
+      };
+      ChatFactory.findById = mockFindById;
+
+      const models = { Chat: ChatFactory, Conversation: ConversationFactory };
+      const mockMsgText = "test message 3";
+      const eventData = {
+        senderId: mockSender._id,
+        receiverId: mockReceiver._id,
+        text: mockMsgText,
+      };
+
+      try {
+        await createMessage(models, eventData);
+      } catch (error) {
+        expect(error.message).to.equal(
+          "Error creating new message: Failed to retrieve saved message"
+        );
+      }
+
+      ChatFactory.findById = originalFindById;
+    });
   });
 });
