@@ -24,11 +24,14 @@ export default function FriendSearch() {
     classQuizzes,
   } = useSelector((state) => state.quizzes);
 
+  const user = useSelector((state) => state.auth);
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   useEffect(() => {
-    dispatch(getUserList());
+
+    dispatch(getUserList(user?._id));
     dispatch(getUserQuizzes());
     dispatch(getClassQuizzes());
 

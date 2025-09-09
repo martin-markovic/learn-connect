@@ -12,7 +12,10 @@ const getFriendList = async (userId, token) => {
       metadata: { clientMessage: "get friend list" },
     };
 
-    const response = await axiosInstance.get(`${API_URL}${userId}`, config);
+    const response = await axiosInstance.get(
+      `${API_URL}profile/${userId}`,
+      config
+    );
 
     return response.data;
   } catch (error) {
@@ -21,7 +24,7 @@ const getFriendList = async (userId, token) => {
   }
 };
 
-const getUserList = async (token) => {
+const getUserList = async (userId, token) => {
   try {
     const config = {
       headers: {
@@ -30,7 +33,7 @@ const getUserList = async (token) => {
       metadata: { clientMessage: "get user list" },
     };
 
-    const response = await axiosInstance.get(API_URL, config);
+    const response = await axiosInstance.get(`${API_URL}${userId}`, config);
 
     return response.data;
   } catch (error) {

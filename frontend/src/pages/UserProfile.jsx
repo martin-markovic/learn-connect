@@ -62,7 +62,7 @@ function UserProfile() {
       dispatch(getFriendList(userId));
     }
 
-    dispatch(getUserList());
+    dispatch(getUserList(userId));
 
     return () => {
       dispatch(resetExam());

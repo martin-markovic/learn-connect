@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import authService from "./authService.js";
 import { handleSliceError } from "../redux.errorHandler.js";
 
+
 const user = JSON.parse(localStorage.getItem("user"));
 
 const initialState = {
