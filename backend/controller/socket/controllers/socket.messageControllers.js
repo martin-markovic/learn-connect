@@ -76,9 +76,20 @@ export const createMessage = async (models, data) => {
 
       await chatFound.save();
 
-      const populatedMessage = await Conversation.findById(newMessage._id)
-        .populate("sender", "name avatar")
-        .populate("receiver", "name avatar");
+      const populatedMessage = await Conversation.findById(
+        newMessage._id,
+        null,
+        {
+          populate: [
+            { path: "sender", select: "name avatar" },
+            { path: "receiver", select: "name avatar" },
+          ],
+        }
+      );
+
+      if (!populatedMessage) {
+        throw new Error("Failed to retrieve saved message");
+      }
 
       messagePayload = {
         _id: populatedMessage?._id.toString(),

@@ -94,6 +94,21 @@ export default class MockSocketModel {
       return this.handleChain(result);
     }
 
+    for (const [key, value] of Object.entries(query)) {
+      if (typeof value === "object" && value !== null && "$all" in value) {
+        result = this.storage[this.currentModel].find((item) => {
+          const itemArray = item[key];
+
+          return (
+            Array.isArray(itemArray) &&
+            value.$all.every((searchValue) => itemArray.includes(searchValue))
+          );
+        });
+
+        return this.handleChain(result);
+      }
+    }
+
     result = this.storage[this.currentModel].find((item) =>
       Object.keys(query).every((key) => item[key] === query[key])
     );
@@ -199,10 +214,9 @@ export default class MockSocketModel {
   }
 
   save() {
-    if (
-      this.currentModel === "conversations" ||
-      (this.currentModel === "chats" && !this.queriedDoc.isRead)
-    ) {
+    if (!this.queriedDoc) return;
+
+    if (!this.queriedDoc.isRead && this.currentModel === "conversations") {
       this.queriedDoc.isRead = false;
       this.queriedDoc.createdAt = new Date();
     }

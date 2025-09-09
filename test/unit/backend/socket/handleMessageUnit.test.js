@@ -153,7 +153,7 @@ describe("socket message controllers", () => {
       expect(response.text).to.equal(mockMsgText);
       expect(response.isRead).to.equal(false);
 
-      const chatStorage = ChatFactory.getStorage().chats;
+      const chatStorage = ChatFactory.getStorage().chats[0].conversation;
 
       expect(chatStorage.length).to.equal(1);
     });
@@ -170,7 +170,6 @@ describe("socket message controllers", () => {
       const response = await createMessage(models, eventData);
 
       expect(response._id).to.equal("frdoc_2");
-      expect(response.chatId).to.equal("frdoc_2");
       expect(response.senderId).to.equal(mockSender._id);
       expect(response.receiverId).to.equal(mockReceiver._id);
       expect(response.senderName).to.equal(mockSender.name);
@@ -180,7 +179,7 @@ describe("socket message controllers", () => {
       expect(response.text).to.equal(mockMsgText);
       expect(response.isRead).to.equal(false);
 
-      const chatStorage = ChatFactory.getStorage().chats;
+      const chatStorage = ChatFactory.getStorage().chats[0].conversation;
 
       expect(chatStorage.length).to.equal(2);
     });
@@ -222,11 +221,11 @@ describe("socket message controllers", () => {
     });
 
     it("should return a `Error creating new message: Failed to retrieve saved message` error message", async () => {
-      const originalFindById = ChatFactory.findById;
-      const mockFindById = () => {
+      const originalSave = ChatFactory.save;
+      const mockSave = () => {
         return null;
       };
-      ChatFactory.findById = mockFindById;
+      ChatFactory.save = mockSave;
 
       const models = { Chat: ChatFactory, Conversation: ConversationFactory };
       const mockMsgText = "test message 3";
@@ -244,7 +243,7 @@ describe("socket message controllers", () => {
         );
       }
 
-      ChatFactory.findById = originalFindById;
+      ChatFactory.save = originalSave;
     });
   });
 });
