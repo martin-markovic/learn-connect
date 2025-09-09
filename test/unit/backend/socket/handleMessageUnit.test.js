@@ -1,7 +1,10 @@
 import { expect } from "chai";
 import MockSocketModel from "../../../mocks/config/mockSocketModel.js";
 import MockData from "../../../mocks/config/mockData.js";
-import { createMessage } from "../../../../backend/controller/socket/controllers/socket.messageControllers.js";
+import {
+  createMessage,
+  updateChatMessages,
+} from "../../../../backend/controller/socket/controllers/socket.messageControllers.js";
 
 class ChatFactory extends MockSocketModel {
   constructor(newDoc) {
@@ -72,6 +75,38 @@ class ConversationFactory extends MockSocketModel {
 
   static async cleanupAll() {
     return new this().cleanupAll();
+  }
+
+  static async updateMany(query, updates) {
+    try {
+      const instance = new this();
+
+      const itemsFound = instance.storage[instance.currentModel].filter(
+        (item) =>
+          Object.entries(query).every(([key, value]) => {
+            if (typeof value === "object" && value !== null && "$in" in value) {
+              return value.$in.includes(item[key]);
+            }
+
+            return item[key] === value;
+          })
+      );
+
+      if (!itemsFound) {
+        return null;
+      }
+
+      itemsFound.forEach((item) => {
+        Object.assign(item, updates.$set);
+      });
+    } catch (error) {
+      const errorMessage = `Error updating documents: ${
+        error.message || "Unknown error"
+      }`;
+
+      console.error(errorMessage);
+      throw new Error(errorMessage);
+    }
   }
 }
 
@@ -244,6 +279,25 @@ describe("socket message controllers", () => {
       }
 
       ChatFactory.save = originalSave;
+    });
+  });
+
+  describe("update chat messages", () => {
+    it("should update chat messages and verify them", async () => {
+      const models = { Chat: ChatFactory, Conversation: ConversationFactory };
+      const eventData = {
+        senderId: mockReceiver._id,
+        receiverId: mockSender._id,
+      };
+
+      const response = await updateChatMessages(models, eventData);
+
+      expect(response.success).to.equal(true);
+      expect(response.newMessages).to.equal(true);
+
+      const conversationStorage = ChatFactory.getStorage().conversations;
+
+      conversationStorage.forEach((item) => expect(item.isRead).to.equal(true));
     });
   });
 });
