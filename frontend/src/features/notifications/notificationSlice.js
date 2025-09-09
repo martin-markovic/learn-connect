@@ -82,7 +82,9 @@ const notificationSlice = createSlice({
         state.isSuccess = false;
         state.isError = true;
         state.errorMessage =
-          action.payload || "Failed to create a new notification";
+          action.payload.message ||
+          action.payload ||
+          "Failed to create a new notification";
       });
   },
 });

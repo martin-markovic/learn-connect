@@ -89,12 +89,9 @@ describe("socket social controller API", () => {
     });
   });
 
-  beforeEach(() => {
-    mockSocketInstance.resetHistory();
-  });
-
   after(() => {
     mockUserModel.cleanupAll();
+    mockFriendModel.cleanupAll();
   });
 
   describe("send friend request", () => {

@@ -25,11 +25,22 @@ export const createMessage = async (models, data) => {
         text,
       });
 
-      await newMessage.save();
+      const savedMessage = await newMessage.save();
 
-      const populatedMessage = await Conversation.findById(newMessage._id)
-        .populate("sender", "name avatar")
-        .populate("receiver", "name avatar");
+      const populatedMessage = await Conversation.findById(
+        savedMessage._id,
+        null,
+        {
+          populate: [
+            { path: "sender", select: "name avatar" },
+            { path: "receiver", select: "name avatar" },
+          ],
+        }
+      );
+
+      if (!populatedMessage) {
+        throw new Error("Failed to retrieve saved message");
+      }
 
       const newChat = new Chat({
         participants: [senderId, receiverId],
@@ -40,16 +51,16 @@ export const createMessage = async (models, data) => {
 
       messagePayload = {
         chatId: chatFound?._id.toString(),
-        _id: populatedMessage?._id.toString(),
-        senderId: populatedMessage.sender._id.toString(),
-        senderName: populatedMessage.sender.name,
-        senderAvatar: populatedMessage.sender.avatar,
-        receiverId: populatedMessage.receiver._id.toString(),
-        receiverName: populatedMessage.receiver.name,
-        receiverAvatar: populatedMessage.receiver.avatar,
-        text: populatedMessage.text,
-        isRead: populatedMessage.isRead,
-        createdAt: populatedMessage.createdAt,
+        _id: populatedMessage?._id?.toString(),
+        senderId: populatedMessage?.sender?._id.toString(),
+        senderName: populatedMessage?.sender?.name,
+        senderAvatar: populatedMessage?.sender?.avatar,
+        receiverId: populatedMessage?.receiver?._id.toString(),
+        receiverName: populatedMessage?.receiver?.name,
+        receiverAvatar: populatedMessage?.receiver?.avatar,
+        text: populatedMessage?.text,
+        isRead: populatedMessage?.isRead,
+        createdAt: populatedMessage?.createdAt,
       };
 
       return messagePayload;
@@ -65,30 +76,43 @@ export const createMessage = async (models, data) => {
 
       await chatFound.save();
 
-      const populatedMessage = await Conversation.findById(newMessage._id)
-        .populate("sender", "name avatar")
-        .populate("receiver", "name avatar");
+      const populatedMessage = await Conversation.findById(
+        newMessage._id,
+        null,
+        {
+          populate: [
+            { path: "sender", select: "name avatar" },
+            { path: "receiver", select: "name avatar" },
+          ],
+        }
+      );
+
+      if (!populatedMessage) {
+        throw new Error("Failed to retrieve saved message");
+      }
 
       messagePayload = {
         _id: populatedMessage?._id.toString(),
-        senderId: populatedMessage.sender._id.toString(),
-        senderName: populatedMessage.sender.name,
-        senderAvatar: populatedMessage.sender.avatar,
-        receiverId: populatedMessage.receiver._id.toString(),
-        receiverName: populatedMessage.receiver.name,
-        receiverAvatar: populatedMessage.receiver.avatar,
-        text: populatedMessage.text,
-        isRead: populatedMessage.isRead,
-        createdAt: populatedMessage.createdAt,
+        senderId: populatedMessage?.sender?._id.toString(),
+        senderName: populatedMessage?.sender?.name,
+        senderAvatar: populatedMessage?.sender?.avatar,
+        receiverId: populatedMessage?.receiver?._id.toString(),
+        receiverName: populatedMessage?.receiver?.name,
+        receiverAvatar: populatedMessage?.receiver?.avatar,
+        text: populatedMessage?.text,
+        isRead: populatedMessage?.isRead,
+        createdAt: populatedMessage?.createdAt,
       };
 
       return messagePayload;
     }
   } catch (error) {
-    console.error(
-      "Error creating new message: ",
+    const errorMessage = `Error creating new message: ${
       error.message || "Server error"
-    );
+    }`;
+
+    console.error(errorMessage);
+    throw new Error(errorMessage);
   }
 };
 

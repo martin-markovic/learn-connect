@@ -8,7 +8,7 @@ import {
   loginUser,
   updateUser,
 } from "../../controller/users/userController.js";
-import { User } from "../../models/users/userModel.js";
+import User from "../../models/users/userModel.js";
 
 import User from "../../models/users/userModel.js";
 
