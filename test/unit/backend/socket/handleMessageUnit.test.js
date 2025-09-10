@@ -93,12 +93,14 @@ class ConversationFactory extends MockSocketModel {
       );
 
       if (!itemsFound) {
-        return null;
+        return { matchedCount: 0, modifiedCount: 0 };
       }
 
       itemsFound.forEach((item) => {
         Object.assign(item, updates.$set);
       });
+
+      return { matchedCount: 1, modifiedCount: itemsFound.length };
     } catch (error) {
       const errorMessage = `Error updating documents: ${
         error.message || "Unknown error"
@@ -298,6 +300,20 @@ describe("socket message controllers", () => {
       const conversationStorage = ChatFactory.getStorage().conversations;
 
       conversationStorage.forEach((item) => expect(item.isRead).to.equal(true));
+    });
+
+    it("should return early, with a message `No unread messages`", async () => {
+      const models = { Chat: ChatFactory, Conversation: ConversationFactory };
+      const eventData = {
+        senderId: mockSender._id,
+        receiverId: mockReceiver._id,
+      };
+
+      const response = await updateChatMessages(models, eventData);
+
+      expect(response.success).to.equal(true);
+      expect(response.newMessages).to.equal(false);
+      expect(response.message).to.equal("No unread messages");
     });
   });
 });

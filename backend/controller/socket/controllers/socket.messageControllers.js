@@ -123,18 +123,33 @@ export const updateChatMessages = async (models, data) => {
       throw new Error("Missing models");
     }
 
+    let response;
+
     const { senderId, receiverId } = data;
 
-    const chatFound =
-      (await Chat.findOne({
-        participants: { $all: [senderId, receiverId] },
-      })) || [];
+    const chatFound = await Chat.findOne({
+      participants: { $all: [senderId, receiverId] },
+    });
 
-    if (!chatFound?.conversation?.length) {
-      return { success: true, newMessage: false };
+    if (!chatFound) {
+      response = {
+        success: false,
+        newMessages: false,
+        message: "Chat not found",
+      };
+      return response;
     }
 
-    await Conversation.updateMany(
+    if (!chatFound?.conversation?.length) {
+      response = {
+        success: true,
+        newMessages: false,
+        message: "No chat messages",
+      };
+      return response;
+    }
+
+    const result = await Conversation.updateMany(
       {
         _id: { $in: chatFound.conversation },
         receiver: senderId,
@@ -143,7 +158,16 @@ export const updateChatMessages = async (models, data) => {
       { $set: { isRead: true } }
     );
 
-    return { success: true, newMessages: true };
+    response = {
+      success: result.matchedCount > 0,
+      newMessages: result.modifiedCount > 0,
+    };
+
+    if (!result.modifiedCount > 0) {
+      response.message = "No unread messages";
+    }
+
+    return response;
   } catch (error) {
     console.error(
       "Error updating chat messages: ",
