@@ -1,7 +1,11 @@
 import { expect } from "chai";
 import MockSocketModel from "../../../mocks/config/mockSocketModel.js";
 import MockData from "../../../mocks/config/mockData.js";
-import { createMessage } from "../../../../backend/controller/socket/controllers/socket.messageControllers.js";
+import {
+  createMessage,
+  markMessageSeen,
+  updateChatMessages,
+} from "../../../../backend/controller/socket/controllers/socket.messageControllers.js";
 
 class ChatFactory extends MockSocketModel {
   constructor(newDoc) {
@@ -72,6 +76,44 @@ class ConversationFactory extends MockSocketModel {
 
   static async cleanupAll() {
     return new this().cleanupAll();
+  }
+
+  static async updateMany(query, updates) {
+    try {
+      const instance = new this();
+
+      const itemsFound = instance.storage[instance.currentModel].filter(
+        (item) =>
+          Object.entries(query).every(([key, value]) => {
+            if (typeof value === "object" && value !== null && "$in" in value) {
+              return value.$in.includes(item[key]);
+            }
+
+            return item[key] === value;
+          })
+      );
+
+      if (!itemsFound) {
+        return { matchedCount: 0, modifiedCount: 0 };
+      }
+
+      itemsFound.forEach((item) => {
+        Object.assign(item, updates.$set);
+      });
+
+      return { matchedCount: 1, modifiedCount: itemsFound.length };
+    } catch (error) {
+      const errorMessage = `Error updating documents: ${
+        error.message || "Unknown error"
+      }`;
+
+      console.error(errorMessage);
+      throw new Error(errorMessage);
+    }
+  }
+
+  static async findByIdAndUpdate(id, updates, options = {}) {
+    return new this().findByIdAndUpdate(id, updates, options);
   }
 }
 
@@ -244,6 +286,141 @@ describe("socket message controllers", () => {
       }
 
       ChatFactory.save = originalSave;
+    });
+  });
+
+  describe("update chat messages", () => {
+    it("should update chat messages and verify them", async () => {
+      const models = { Chat: ChatFactory, Conversation: ConversationFactory };
+      const eventData = {
+        senderId: mockReceiver._id,
+        receiverId: mockSender._id,
+      };
+
+      const response = await updateChatMessages(models, eventData);
+
+      expect(response.success).to.equal(true);
+      expect(response.newMessages).to.equal(true);
+
+      const conversationStorage = ChatFactory.getStorage().conversations;
+
+      conversationStorage.forEach((item) => expect(item.isRead).to.equal(true));
+    });
+
+    it("should return early, with a message `No unread messages`", async () => {
+      const models = { Chat: ChatFactory, Conversation: ConversationFactory };
+      const eventData = {
+        senderId: mockSender._id,
+        receiverId: mockReceiver._id,
+      };
+
+      const response = await updateChatMessages(models, eventData);
+
+      expect(response.success).to.equal(true);
+      expect(response.newMessages).to.equal(false);
+      expect(response.message).to.equal("No unread messages");
+    });
+
+    it("should return early, with a message `Missing models`", async () => {
+      const models = { Chat: undefined, Conversation: ConversationFactory };
+      const eventData = {
+        senderId: mockSender._id,
+        receiverId: mockReceiver._id,
+      };
+
+      try {
+        await updateChatMessages(models, eventData);
+      } catch (error) {
+        expect(error.message).to.equal("Missing models");
+      }
+    });
+
+    it("should return with a message `Chat not found`", async () => {
+      const models = { Chat: ChatFactory, Conversation: ConversationFactory };
+      const eventData = {
+        senderId: mockSender._id,
+        receiverId: "999",
+      };
+
+      const response = await updateChatMessages(models, eventData);
+      expect(response.success).to.equal(false);
+      expect(response.newMessages).to.equal(false);
+      expect(response.message).to.equal("Chat not found");
+    });
+
+    it("should return early, with a message `No chat messages`", async () => {
+      const models = { Chat: ChatFactory, Conversation: ConversationFactory };
+
+      const testUserId = "test user id";
+      ChatFactory.create({
+        participants: [mockSender._id, testUserId],
+        conversation: [],
+      });
+
+      const eventData = {
+        senderId: mockSender._id,
+        receiverId: testUserId,
+      };
+
+      const response = await updateChatMessages(models, eventData);
+      expect(response.success).to.equal(true);
+      expect(response.newMessages).to.equal(false);
+      expect(response.message).to.equal("No chat messages");
+    });
+  });
+
+  describe("mark message as seen", () => {
+    it("should update new message `isRead` property to true and verify it", async () => {
+      const models = { Conversation: ConversationFactory };
+
+      const newMessage = {
+        senderId: mockSender._id,
+        receiverId: mockReceiver._id,
+        text: "mark message seen test message",
+        isRead: false,
+      };
+
+      const createdMessage = await ConversationFactory.create(newMessage);
+
+      const eventData = {
+        messageId: createdMessage?._id,
+      };
+
+      const response = await markMessageSeen(models, eventData);
+
+      expect(response._id).to.equal(createdMessage._id);
+      expect(response.senderId).to.equal(createdMessage.senderId);
+      expect(response.receiverId).to.equal(createdMessage.receiverId);
+      expect(response.text).to.equal(createdMessage.text);
+      expect(response.isRead).to.equal(true);
+    });
+
+    it("should return `Missing models` error message", async () => {
+      const models = { Conversation: undefined };
+
+      const eventData = {
+        messageId: "test message id",
+      };
+
+      try {
+        await markMessageSeen(models, eventData);
+      } catch (error) {
+        expect(error.message).to.equal("Missing models");
+      }
+    });
+
+    it("should return `Invalid message id` error message", async () => {
+      const models = { Conversation: ConversationFactory };
+
+      const eventData = {
+        messageId: undefined,
+      };
+
+      try {
+        await markMessageSeen(models, eventData);
+      } catch (error) {
+        expect(error.message).to.equal("Invalid message id");
+      }
     });
   });
 });
