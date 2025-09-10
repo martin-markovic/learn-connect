@@ -165,7 +165,7 @@ export default class MockSocketModel {
     const updated = { ...items[index], ...updates };
     items[index] = updated;
 
-    return this.handleSelect(options.new ? updated : items[index]);
+    return this.handleChain(options.new ? updated : items[index]);
   }
 
   async findOneAndUpdate(query, updates, options = {}) {

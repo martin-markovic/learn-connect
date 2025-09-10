@@ -3,6 +3,7 @@ import MockSocketModel from "../../../mocks/config/mockSocketModel.js";
 import MockData from "../../../mocks/config/mockData.js";
 import {
   createMessage,
+  markMessageSeen,
   updateChatMessages,
 } from "../../../../backend/controller/socket/controllers/socket.messageControllers.js";
 
@@ -109,6 +110,10 @@ class ConversationFactory extends MockSocketModel {
       console.error(errorMessage);
       throw new Error(errorMessage);
     }
+  }
+
+  static async findByIdAndUpdate(id, updates, options = {}) {
+    return new this().findByIdAndUpdate(id, updates, options);
   }
 }
 
@@ -361,6 +366,33 @@ describe("socket message controllers", () => {
       expect(response.success).to.equal(true);
       expect(response.newMessages).to.equal(false);
       expect(response.message).to.equal("No chat messages");
+    });
+  });
+
+  describe("mark message as seen", () => {
+    it("should update new message `isRead` property to true and verify it", async () => {
+      const models = { Conversation: ConversationFactory };
+
+      const newMessage = {
+        senderId: mockSender._id,
+        receiverId: mockReceiver._id,
+        text: "mark message seen test message",
+        isRead: false,
+      };
+
+      const createdMessage = await ConversationFactory.create(newMessage);
+
+      const eventData = {
+        messageId: createdMessage?._id,
+      };
+
+      const response = await markMessageSeen(models, eventData);
+
+      expect(response._id).to.equal(createdMessage._id);
+      expect(response.senderId).to.equal(createdMessage.senderId);
+      expect(response.receiverId).to.equal(createdMessage.receiverId);
+      expect(response.text).to.equal(createdMessage.text);
+      expect(response.isRead).to.equal(true);
     });
   });
 });
