@@ -394,5 +394,33 @@ describe("socket message controllers", () => {
       expect(response.text).to.equal(createdMessage.text);
       expect(response.isRead).to.equal(true);
     });
+
+    it("should return `Missing models` error message", async () => {
+      const models = { Conversation: undefined };
+
+      const eventData = {
+        messageId: "test message id",
+      };
+
+      try {
+        await markMessageSeen(models, eventData);
+      } catch (error) {
+        expect(error.message).to.equal("Missing models");
+      }
+    });
+
+    it("should return `Invalid message id` error message", async () => {
+      const models = { Conversation: ConversationFactory };
+
+      const eventData = {
+        messageId: undefined,
+      };
+
+      try {
+        await markMessageSeen(models, eventData);
+      } catch (error) {
+        expect(error.message).to.equal("Invalid message id");
+      }
+    });
   });
 });
