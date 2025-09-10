@@ -315,5 +315,52 @@ describe("socket message controllers", () => {
       expect(response.newMessages).to.equal(false);
       expect(response.message).to.equal("No unread messages");
     });
+
+    it("should return early, with a message `Missing models`", async () => {
+      const models = { Chat: undefined, Conversation: ConversationFactory };
+      const eventData = {
+        senderId: mockSender._id,
+        receiverId: mockReceiver._id,
+      };
+
+      try {
+        await updateChatMessages(models, eventData);
+      } catch (error) {
+        expect(error.message).to.equal("Missing models");
+      }
+    });
+
+    it("should return with a message `Chat not found`", async () => {
+      const models = { Chat: ChatFactory, Conversation: ConversationFactory };
+      const eventData = {
+        senderId: mockSender._id,
+        receiverId: "999",
+      };
+
+      const response = await updateChatMessages(models, eventData);
+      expect(response.success).to.equal(false);
+      expect(response.newMessages).to.equal(false);
+      expect(response.message).to.equal("Chat not found");
+    });
+
+    it("should return early, with a message `No chat messages`", async () => {
+      const models = { Chat: ChatFactory, Conversation: ConversationFactory };
+
+      const testUserId = "test user id";
+      ChatFactory.create({
+        participants: [mockSender._id, testUserId],
+        conversation: [],
+      });
+
+      const eventData = {
+        senderId: mockSender._id,
+        receiverId: testUserId,
+      };
+
+      const response = await updateChatMessages(models, eventData);
+      expect(response.success).to.equal(true);
+      expect(response.newMessages).to.equal(false);
+      expect(response.message).to.equal("No chat messages");
+    });
   });
 });

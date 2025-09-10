@@ -45,7 +45,7 @@ export const handleChatOpen = async (context, data) => {
     const response = await updateChatMessages(models, data);
 
     if (!response.success) {
-      throw new Error("Unable to update messages");
+      throw new Error(response.message || "Unable to update messages");
     }
 
     if (!response.newMessages) {
