@@ -207,6 +207,40 @@ export default class MockSocketModel {
     );
   }
 
+  async updateMany(query, updates) {
+    try {
+      const instance = new this();
+
+      const itemsFound = instance.storage[instance.currentModel].filter(
+        (item) =>
+          Object.entries(query).every(([key, value]) => {
+            if (typeof value === "object" && value !== null && "$in" in value) {
+              return value.$in.includes(item[key]);
+            }
+
+            return item[key] === value;
+          })
+      );
+
+      if (!itemsFound) {
+        return { matchedCount: 0, modifiedCount: 0 };
+      }
+
+      itemsFound.forEach((item) => {
+        Object.assign(item, updates.$set);
+      });
+
+      return { matchedCount: 1, modifiedCount: itemsFound.length };
+    } catch (error) {
+      const errorMessage = `Error updating documents: ${
+        error.message || "Unknown error"
+      }`;
+
+      console.error(errorMessage);
+      throw new Error(errorMessage);
+    }
+  }
+
   cleanupAll() {
     for (const key in this.storage) {
       this.storage[key] = [];
@@ -265,3 +299,51 @@ const sharedStorage = {
   friends: [],
   notifications: [],
 };
+
+export function createMockFactory(collectionName) {
+  return class extends MockSocketModel {
+    constructor(newDoc) {
+      super(newDoc, collectionName);
+
+      if (newDoc) {
+        this._id = this.queriedDoc._id;
+      }
+    }
+
+    static async findOne(query) {
+      return new this().findOne(query);
+    }
+
+    static async findById(id) {
+      return new this().findById(id);
+    }
+
+    static async create(doc) {
+      return new this().create(doc);
+    }
+
+    static async findOneAndUpdate(query, updates, options = {}) {
+      return new this().findOneAndUpdate(query, updates, options);
+    }
+
+    static async deleteOne(query) {
+      return new this().deleteOne(query);
+    }
+
+    static async cleanupAll() {
+      return new this().cleanupAll();
+    }
+
+    static getStorage() {
+      return new this().storage;
+    }
+
+    static async updateMany(query, updates) {
+      return new this().updateMany(query, updates);
+    }
+
+    static async findByIdAndUpdate(id, updates, options = {}) {
+      return new this().findByIdAndUpdate(id, updates, options);
+    }
+  };
+}
