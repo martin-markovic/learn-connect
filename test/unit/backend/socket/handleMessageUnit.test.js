@@ -464,5 +464,62 @@ describe("socket message controllers", () => {
       expect(response.success).to.equal(true);
     });
 
+    it("should return a `Missing models` error message", async () => {
+      const models = { User: undefined };
+
+      const newStatus = true;
+
+      const eventData = {
+        userId: mockSender._id,
+        chatConnected: newStatus,
+      };
+
+      try {
+        await changeChatStatus(models, eventData);
+      } catch (error) {
+        expect(error.message).to.equal("Missing models");
+      }
+    });
+
+    it("should return a `User is not authorized` error message", async () => {
+      const models = { User: UserFactory };
+
+      const newStatus = true;
+
+      const eventData = {
+        userId: "999",
+        chatConnected: newStatus,
+      };
+
+      try {
+        await changeChatStatus(models, eventData);
+      } catch (error) {
+        expect(error.message).to.equal("User is not authorized");
+      }
+    });
+
+    it("should return a `Database update failure` error message", async () => {
+      const models = { User: UserFactory };
+      const originalMethod = UserFactory.findByIdAndUpdate;
+
+      UserFactory.findByIdAndUpdate = () => {
+        return null;
+      };
+
+      const newStatus = true;
+
+      const eventData = {
+        userId: "999",
+        chatConnected: newStatus,
+      };
+
+      try {
+        await changeChatStatus(models, eventData);
+      } catch (error) {
+        expect(error.message).to.equal("Database update failure");
+      }
+
+      UserFactory.findByIdAndUpdate = originalMethod;
+    });
   });
 });
