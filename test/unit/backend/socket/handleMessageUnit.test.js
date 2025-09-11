@@ -2,6 +2,7 @@ import { expect } from "chai";
 import MockSocketModel from "../../../mocks/config/mockSocketModel.js";
 import MockData from "../../../mocks/config/mockData.js";
 import {
+  changeChatStatus,
   createMessage,
   markMessageSeen,
   updateChatMessages,
@@ -148,6 +149,10 @@ class UserFactory extends MockSocketModel {
 
   static async cleanupAll() {
     return new this().cleanupAll();
+  }
+
+  static async findByIdAndUpdate(id, updates, options = {}) {
+    return new this().findByIdAndUpdate(id, updates, options);
   }
 }
 
@@ -422,5 +427,42 @@ describe("socket message controllers", () => {
         expect(error.message).to.equal("Invalid message id");
       }
     });
+  });
+
+  describe("change chat status", () => {
+    it("should update chat status value to false and verify it", async () => {
+      const models = { User: UserFactory };
+
+      const newStatus = false;
+
+      const eventData = {
+        userId: mockSender._id,
+        chatConnected: newStatus,
+      };
+
+      const response = await changeChatStatus(models, eventData);
+
+      expect(response.updatedStatus._id).to.equal(mockSender._id);
+      expect(response.updatedStatus.online).to.equal(newStatus);
+      expect(response.success).to.equal(true);
+    });
+
+    it("should update chat status value to true and verify it", async () => {
+      const models = { User: UserFactory };
+
+      const newStatus = true;
+
+      const eventData = {
+        userId: mockSender._id,
+        chatConnected: newStatus,
+      };
+
+      const response = await changeChatStatus(models, eventData);
+
+      expect(response.updatedStatus._id).to.equal(mockSender._id);
+      expect(response.updatedStatus.online).to.equal(newStatus);
+      expect(response.success).to.equal(true);
+    });
+
   });
 });
