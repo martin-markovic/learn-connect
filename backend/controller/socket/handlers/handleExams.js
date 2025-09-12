@@ -4,7 +4,7 @@ import Quiz from "../../../models/quizzes/quizModel.js";
 import Classroom from "../../../models/classrooms/classroomModel.js";
 import Score from "../../../models/quizzes/scoreModel.js";
 import { handleNewNotification } from "./handleNotifications.js";
-import { createExam } from "../controllers/examControllers.js";
+import { createExam, updateExam } from "../controllers/examControllers.js";
 
 export const handleCreateExam = async (context, data) => {
   try {
@@ -31,39 +31,15 @@ export const handleCreateExam = async (context, data) => {
   }
 };
 
-export const updateExam = async (context, data) => {
+export const handleUpdateExam = async (context, data) => {
   try {
-    const { senderId, examData } = data;
+    const payload = await updateExam(models, eventData);
 
-    if (!examData) {
-      throw new Error("Please provide valid exam data");
+    if (!payload) {
+      throw new Error("Unable to update exam");
     }
 
-    const examFound = await Exam.findOne({ studentId: senderId });
-
-    if (!examFound) {
-      throw new Error("Exam not found");
-    }
-
-    const examIsValid = examFound?.examFinish.getTime() - Date.now();
-
-    if (!examIsValid) {
-      throw new Error("Exam has expired");
-    }
-
-    const updatedExam = await Exam.findByIdAndUpdate(
-      examFound?._id,
-      {
-        $set: { [`answers.${examData?.choiceIndex}`]: examData?.choiceData },
-      },
-      { new: true }
-    );
-
-    if (!updatedExam) {
-      throw new Error("Updated exam not found");
-    }
-
-    context.emitEvent("sender", "exam updated", updatedExam);
+    context.emitEvent("sender", "exam updated", payload);
   } catch (error) {
     console.error(`Error updating exam ${data?.receiverId}:  ${error.message}`);
 

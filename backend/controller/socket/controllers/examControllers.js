@@ -64,3 +64,48 @@ export const createExam = async (models, eventData) => {
     throw new Error(error.message);
   }
 };
+
+export const updateExam = async (models, eventData) => {
+  try {
+    const { Exam } = models;
+
+    if (!Exam) {
+      throw new Error("Missing models");
+    }
+
+    const { senderId, examData } = eventData;
+
+    if (!examData) {
+      throw new Error("Please provide valid exam data");
+    }
+
+    const examFound = await Exam.findOne({ studentId: senderId });
+
+    if (!examFound) {
+      throw new Error("Exam not found");
+    }
+
+    const examIsValid = examFound?.examFinish.getTime() - Date.now();
+
+    if (!examIsValid) {
+      throw new Error("Exam has expired");
+    }
+
+    const updatedExam = await Exam.findByIdAndUpdate(
+      examFound?._id,
+      {
+        $set: { [`answers.${examData?.choiceIndex}`]: examData?.choiceData },
+      },
+      { new: true }
+    );
+
+    if (!updatedExam) {
+      throw new Error("Database failure: unable to update exam");
+    }
+
+    return updatedExam;
+  } catch (error) {
+    console.error("update exam error: ", error.message);
+    throw new Error("update exam error: ", error.message);
+  }
+};
