@@ -4,62 +4,18 @@ import Quiz from "../../../models/quizzes/quizModel.js";
 import Classroom from "../../../models/classrooms/classroomModel.js";
 import Score from "../../../models/quizzes/scoreModel.js";
 import { handleNewNotification } from "./handleNotifications.js";
+import { createExam } from "../controllers/examControllers.js";
 
-export const createExam = async (context, data) => {
+export const handleCreateExam = async (context, data) => {
   try {
-    const { senderId, quizId } = data;
+    const models = { Quiz, Classroom, Exam };
+    const payload = await createExam({ models, eventData: data });
 
-    if (!senderId) {
-      throw new Error("User not authorized");
+    if (!payload._id) {
+      throw new Error("Unable to create exam payload");
     }
 
-    const quizFound = await Quiz.findOne({ _id: String(quizId) });
-
-    if (!quizFound) {
-      throw new Error("Quiz not found");
-    }
-
-    const classroomFound = await Classroom.findOne({
-      _id: quizFound?.classroom,
-    });
-
-    if (!classroomFound) {
-      throw new Error("Classroom not found");
-    }
-
-    const isEnrolled = classroomFound.students.some(
-      (student) => String(student?._id) === String(senderId)
-    );
-
-    if (!isEnrolled) {
-      throw new Error(
-        `User is not enrolled in classroom ${classroomFound?._id}`
-      );
-    }
-
-    const examExists = await Exam.findOne({ studentId: senderId });
-
-    if (examExists) {
-      throw new Error(
-        `User is already participating in an exam ${examExists?._id}`
-      );
-    }
-
-    const examStart = new Date();
-    const examFinish = new Date(
-      examStart.getTime() + quizFound?.timeLimit * 60 * 1000
-    );
-
-    const newExam = new Exam({
-      quizId: quizFound?._id,
-      studentId: senderId,
-      examStart,
-      examFinish,
-    });
-
-    const payloadExam = await newExam.save();
-
-    context.emitEvent("sender", "exam created", payloadExam);
+    context.emitEvent("sender", "exam created", payload);
 
     const scheduledTime = examFinish - 1000;
 
