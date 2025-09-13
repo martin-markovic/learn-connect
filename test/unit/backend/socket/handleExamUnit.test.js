@@ -142,3 +142,78 @@ describe("socket exam controllers", () => {
       await classroomFactory.create(originalClassroom);
     });
 
+    it("should return a `User is not enrolled in required classroom` error message", async () => {
+      const models = {
+        Quiz: quizFactory,
+        Classroom: classroomFactory,
+        Exam: examFactory,
+      };
+
+      const eventData = {
+        senderId: unEnrolledUser._id,
+        quizId: createdQuiz._id,
+      };
+
+      try {
+        await createExam(models, eventData);
+      } catch (error) {
+        expect(error.message).to.equal(
+          "User is not enrolled in required classroom"
+        );
+      }
+    });
+
+    it("should return a `User is already participating in an exam` error message", async () => {
+      const models = {
+        Quiz: quizFactory,
+        Classroom: classroomFactory,
+        Exam: examFactory,
+      };
+
+      const eventData = {
+        senderId: hasExamUser._id,
+        quizId: createdQuiz._id,
+      };
+
+      try {
+        await createExam(models, eventData);
+      } catch (error) {
+        expect(error.message).to.equal(
+          "User is already participating in an exam"
+        );
+      }
+    });
+
+    it("should return a `Database Failure: Unable to create new exam payload` error message", async () => {
+      const models = {
+        Quiz: quizFactory,
+        Classroom: classroomFactory,
+        Exam: examFactory,
+      };
+
+      const originalMethod = examFactory.save;
+      examFactory.save = () => {
+        return null;
+      };
+
+      const examFound = examFactory.getStorage().exams[1];
+
+      await examFactory.deleteOne({ _id: examFound._id });
+
+      const eventData = {
+        senderId: noExamUser._id,
+        quizId: createdQuiz._id,
+      };
+
+      try {
+        await createExam(models, eventData);
+      } catch (error) {
+        expect(error.message).to.equal(
+          "Database Failure: Unable to create new exam payload"
+        );
+      }
+
+      examFactory.save = originalMethod;
+    });
+  });
+
