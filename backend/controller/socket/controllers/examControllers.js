@@ -109,3 +109,102 @@ export const updateExam = async (models, eventData) => {
     throw new Error("update exam error: ", error.message);
   }
 };
+
+export const finishExam = async (models, data) => {
+  try {
+    const { Exam, Quiz, Score } = models;
+
+    if (!Exam || !Quiz || !Score) {
+      throw new Error("Missing models");
+    }
+    const { senderId, quizId } = data;
+
+    const examFound = await Exam.findOne({ studentId: senderId });
+
+    if (!examFound) {
+      throw new Error("Exam not found");
+    }
+
+    const examQuestions = examFound?.shuffledQuestions;
+
+    const examIsValid = examFound?.examFinish?.getTime() - Date.now() > 0;
+
+    if (!examIsValid) {
+      throw new Error("Exam not found");
+    }
+
+    await Exam.findByIdAndUpdate(
+      examFound?._id,
+      { isInProgress: false },
+      { new: true }
+    );
+
+    const quizFound = await Quiz.findOne({ _id: quizId });
+
+    if (!quizFound) {
+      throw new Error("Cannot evaluate exam, no matching quiz found");
+    }
+
+    let currentScore = 0;
+
+    let userChoices = [];
+
+    for (let i = 0; i < quizFound?.questions?.length; i++) {
+      const q = quizFound?.questions[i];
+
+      if (q.answer === examFound?.answers[i]) {
+        currentScore += 1;
+      }
+
+      userChoices[i] = {
+        userAnswer: examFound?.answers?.[i],
+        correctAnswer: q.answer,
+      };
+    }
+
+    const scoreFound = await Score.findOne({
+      user: senderId,
+      "quiz.quizId": quizFound?._id,
+    });
+
+    let scorePayload;
+
+    if (scoreFound) {
+      scorePayload = await Score.findByIdAndUpdate(
+        scoreFound?._id,
+        {
+          $set: {
+            "examFeedback.userChoices": userChoices,
+            "examFeedback.randomizedQuestions": examQuestions,
+            highScore: Math.max(scoreFound.highScore, currentScore),
+            latestScore: currentScore,
+          },
+        },
+        { new: true }
+      );
+    } else {
+      scorePayload = await new Score({
+        user: senderId,
+        quiz: {
+          quizId: quizFound._id,
+          quizTitle: quizFound.title,
+        },
+        examFeedback: {
+          userChoices,
+          randomizedQuestions: examQuestions,
+        },
+        highScore: currentScore,
+        latestScore: currentScore,
+      }).save();
+    }
+
+    const examPayload = { examId: examFound?._id, scorePayload };
+
+    await Exam.findByIdAndDelete(examFound?._id);
+
+    return { success: true, examPayload };
+  } catch (error) {
+    console.error(`Error creating exam payload: ${error.message}`);
+    return { success: false, message: `Error finishing exam ${error.message}` };
+  }
+};
