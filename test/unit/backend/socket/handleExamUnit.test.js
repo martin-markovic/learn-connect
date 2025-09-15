@@ -217,3 +217,94 @@ describe("socket exam controllers", () => {
     });
   });
 
+  describe("update exam", () => {
+    it("should update the exam and verify it", async () => {
+      const models = { Exam: examFactory };
+
+      const updatedData = "test data";
+      const testIndex = 1;
+      const existingExam = examFactory.getStorage().exams[0];
+
+      const examUpdates = { choiceIndex: testIndex, choiceData: updatedData };
+
+      const eventData = { senderId: hasExamUser._id, examData: examUpdates };
+
+      const response = await updateExam(models, eventData);
+
+      for (const [key, value] of Object.entries(response)) {
+        if (key === "answers") {
+          expect(response[key][testIndex]).to.equal(updatedData);
+        } else {
+          if (key in existingExam) {
+            expect(existingExam[key]).to.equal(value);
+          }
+        }
+      }
+    });
+
+    it("should return a `update exam error: Missing models` error message", async () => {
+      const models = { Exam: undefined };
+
+      const updatedAnswer = "test data 2";
+      const testIndex = 1;
+
+      const examFound = examFactory.getStorage().exams[0];
+      const currentAnswer = examFound.answers[testIndex];
+
+      const examUpdates = { choiceIndex: testIndex, choiceData: updatedAnswer };
+
+      const eventData = { senderId: hasExamUser._id, examData: examUpdates };
+
+      try {
+        await updateExam(models, eventData);
+      } catch (error) {
+        expect(error.message).to.equal("update exam error: Missing models");
+      }
+
+      expect(currentAnswer).to.not.equal(updatedAnswer);
+    });
+
+    it("should return a `update exam error: Please provide valid exam data` error message", async () => {
+      const models = { Exam: examFactory };
+
+      const updatedAnswer = "test data 2";
+      const testIndex = 1;
+
+      const examFound = examFactory.getStorage().exams[0];
+      const currentAnswer = examFound.answers[testIndex];
+
+      const eventData = { senderId: hasExamUser._id, examData: undefined };
+
+      try {
+        await updateExam(models, eventData);
+      } catch (error) {
+        expect(error.message).to.equal(
+          "update exam error: Please provide valid exam data"
+        );
+      }
+
+      expect(currentAnswer).to.not.equal(updatedAnswer);
+    });
+
+    it("should return a `update exam error: Exam not found` error message", async () => {
+      const models = { Exam: examFactory };
+
+      const updatedAnswer = "test data 2";
+      const testIndex = 1;
+
+      const examFound = examFactory.getStorage().exams[0];
+      const currentAnswer = examFound.answers[testIndex];
+
+      const examUpdates = { choiceIndex: testIndex, choiceData: updatedAnswer };
+
+      const eventData = { senderId: "999", examData: examUpdates };
+
+      try {
+        await updateExam(models, eventData);
+      } catch (error) {
+        expect(error.message).to.equal("update exam error: Exam not found");
+      }
+
+      expect(currentAnswer).to.not.equal(updatedAnswer);
+    });
+});

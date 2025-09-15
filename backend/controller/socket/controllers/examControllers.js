@@ -105,8 +105,8 @@ export const updateExam = async (models, eventData) => {
 
     return updatedExam;
   } catch (error) {
-    console.error("update exam error: ", error.message);
-    throw new Error("update exam error: ", error.message);
+    console.log("error.message", error.message);
+    throw new Error(`update exam error: ${error.message}`);
   }
 };
 
