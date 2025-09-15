@@ -307,4 +307,58 @@ describe("socket exam controllers", () => {
 
       expect(currentAnswer).to.not.equal(updatedAnswer);
     });
+
+    it("should return a `update exam error: Exam has expired` error message", async () => {
+      const models = { Exam: examFactory };
+
+      const updatedAnswer = "test data 2";
+      const testIndex = 1;
+
+      const examData = { senderId: hasExamUser._id, quizId: createdQuiz._id };
+
+      await finishExam(
+        {
+          models: { Exam: examFactory, Quiz: quizFactory, Score: scoreFactory },
+        },
+        examData
+      );
+
+      const examUpdates = { choiceIndex: testIndex, choiceData: updatedAnswer };
+
+      const eventData = { senderId: hasExamUser._id, examData: examUpdates };
+
+      try {
+        await updateExam(models, eventData);
+      } catch (error) {
+        expect(error.message).to.equal("update exam error: Exam has expired");
+      }
+    });
+
+    it("should return a `update exam error: Database failure: unable to update exam` error message", async () => {
+      const currentMethod = examFactory.findByIdAndUpdate;
+
+      examFactory.findByIdAndUpdate = () => {
+        return null;
+      };
+
+      const models = { Exam: examFactory };
+
+      const updatedAnswer = "test data 2";
+      const testIndex = 1;
+
+      const examUpdates = { choiceIndex: testIndex, choiceData: updatedAnswer };
+
+      const eventData = { senderId: hasExamUser._id, examData: examUpdates };
+
+      try {
+        await updateExam(models, eventData);
+      } catch (error) {
+        expect(error.message).to.equal(
+          "update exam error: Database failure: unable to update exam"
+        );
+      }
+
+      examFactory.findByIdAndUpdate = currentMethod;
+    });
+  });
 });
