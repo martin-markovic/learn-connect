@@ -361,4 +361,62 @@ describe("socket exam controllers", () => {
       examFactory.findByIdAndUpdate = currentMethod;
     });
   });
+
+  describe("finish exam", () => {
+    it("should finish the exam and verify it", async () => {
+      const models = {
+        Exam: examFactory,
+        Quiz: quizFactory,
+        Score: scoreFactory,
+      };
+
+      const userExam = examFactory
+        .getStorage()
+        .exams.find((item) => item.studentId === hasExamUser._id);
+
+      const eventData = { senderId: hasExamUser._id, quizId: createdQuiz._id };
+
+      const response = await finishExam(models, eventData);
+
+      const examPayload = response.examPayload;
+      const scorePayload = examPayload.scorePayload;
+
+      expect(response.success).to.equal(true);
+
+      expect(examPayload.examId).to.equal(userExam._id);
+
+      expect(scorePayload.user).to.equal(hasExamUser._id);
+      expect(scorePayload.quiz.quizId).to.equal(createdQuiz._id);
+      expect(scorePayload.quiz.quizTitle).to.equal(createdQuiz.title);
+      expect(scorePayload.examFeedback.userChoices).to.be.an("array").that.is
+        .empty;
+      expect(scorePayload.examFeedback).to.exist;
+      expect(scorePayload.highScore).to.exist;
+      expect(scorePayload.latestScore).to.exist;
+      expect(scorePayload._id).to.equal("frdoc_1");
+
+      const storage = examFactory.getStorage().exams;
+
+      const examDeleted = storage.every(
+        (item) => item._id !== examPayload.examId
+      );
+
+      expect(examDeleted).to.equal(true);
+    });
+
+    it("should return a `Error finishing exam: Missing models` error message", async () => {
+      const models = {
+        Exam: undefined,
+        Quiz: quizFactory,
+        Score: scoreFactory,
+      };
+
+      const eventData = { senderId: hasExamUser._id, quizId: createdQuiz._id };
+
+      const response = await finishExam(models, eventData);
+
+      expect(response.success).to.equal(false);
+      expect(response.message).to.equal("Error finishing exam: Missing models");
+    });
+  });
 });
