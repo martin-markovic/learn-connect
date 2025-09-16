@@ -34,7 +34,10 @@ export const createExam = async (models, eventData) => {
       throw new Error("User is not enrolled in required classroom");
     }
 
-    const examExists = await Exam.findOne({ studentId: senderId });
+    const examExists = await Exam.findOne({
+      studentId: senderId,
+      isInProgress: true,
+    });
 
     if (examExists) {
       throw new Error("User is already participating in an exam");
@@ -50,6 +53,7 @@ export const createExam = async (models, eventData) => {
       studentId: senderId,
       examStart,
       examFinish,
+      isInProgress: true,
     });
 
     const payloadExam = await newExam.save();
@@ -119,17 +123,13 @@ export const finishExam = async (models, data) => {
     }
     const { senderId, quizId } = data;
 
-    const examFound = await Exam.findOne({ studentId: senderId });
+    const examFound = await Exam.findOne({
+      studentId: senderId,
+      quizId: quizId,
+      isInProgress: true,
+    });
 
     if (!examFound) {
-      throw new Error("Exam not found");
-    }
-
-    const examQuestions = examFound?.shuffledQuestions;
-
-    const examIsValid = examFound?.examFinish?.getTime() - Date.now() > 0;
-
-    if (!examIsValid) {
       throw new Error("Exam not found");
     }
 
@@ -175,8 +175,8 @@ export const finishExam = async (models, data) => {
         {
           $set: {
             "examFeedback.userChoices": userChoices,
-            "examFeedback.randomizedQuestions": examQuestions,
-            highScore: Math.max(scoreFound.highScore, currentScore),
+            "examFeedback.randomizedQuestions": examFound?.examQuestions,
+            highScore: Math.max(scoreFound?.highScore, currentScore),
             latestScore: currentScore,
           },
         },
@@ -191,7 +191,7 @@ export const finishExam = async (models, data) => {
         },
         examFeedback: {
           userChoices,
-          randomizedQuestions: examQuestions,
+          randomizedQuestions: examFound?.examQuestions,
         },
         highScore: currentScore,
         latestScore: currentScore,
@@ -205,6 +205,9 @@ export const finishExam = async (models, data) => {
     return { success: true, examPayload };
   } catch (error) {
     console.error(`Error creating exam payload: ${error.message}`);
-    return { success: false, message: `Error finishing exam ${error.message}` };
+    return {
+      success: false,
+      message: `Error finishing exam: ${error.message}`,
+    };
   }
 };
