@@ -20,6 +20,7 @@ const mockClassroom = mockExamData.mockClassrooms[0];
 
 let hasExamUser;
 let noExamUser;
+let shortQuiz;
 let unEnrolledUser;
 let createdQuiz;
 let createdClassroom;
@@ -42,6 +43,27 @@ describe("socket exam controllers", () => {
       timeLimit: quizTimeLimit,
       title: "created quiz",
     });
+  });
+
+  beforeEach(async function () {
+    if (
+      this.currentTest.title ===
+      "should return a `Error finishing exam: Exam not found` error message for expired exam queries"
+    ) {
+      shortQuiz = await quizFactory.create({
+        ...createdQuiz,
+        _id: "frdoc_short",
+        title: "short quiz",
+        classroom: createdClassroom._id,
+        timeLimit: 0,
+      });
+
+      await examFactory.create({
+        studentId: noExamUser._id,
+        quizId: shortQuiz._id,
+        isInProgress: false,
+      });
+    }
   });
 
   after(() => {
@@ -417,6 +439,36 @@ describe("socket exam controllers", () => {
 
       expect(response.success).to.equal(false);
       expect(response.message).to.equal("Error finishing exam: Missing models");
+    });
+
+    it("should return a `Error finishing exam: Exam not found` error message for non-existent exam queries", async () => {
+      const models = {
+        Exam: examFactory,
+        Quiz: quizFactory,
+        Score: scoreFactory,
+      };
+
+      const eventData = { senderId: undefined, quizId: createdQuiz._id };
+
+      const response = await finishExam(models, eventData);
+
+      expect(response.success).to.equal(false);
+      expect(response.message).to.equal("Error finishing exam: Exam not found");
+    });
+
+    it("should return a `Error finishing exam: Exam not found` error message for expired exam queries", async () => {
+      const models = {
+        Exam: examFactory,
+        Quiz: quizFactory,
+        Score: scoreFactory,
+      };
+
+      const eventData = { senderId: noExamUser._id, quizId: shortQuiz._id };
+
+      const response = await finishExam(models, eventData);
+
+      expect(response.success).to.equal(false);
+      expect(response.message).to.equal("Error finishing exam: Exam not found");
     });
   });
 });
