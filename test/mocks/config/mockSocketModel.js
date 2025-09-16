@@ -162,7 +162,36 @@ export default class MockSocketModel {
 
     if (index === -1) return null;
 
-    const updated = { ...items[index], ...updates };
+    const updated = items[index];
+
+    if ("$set" in updates) {
+      Object.entries(updates.$set).forEach(([path, value]) => {
+        if (path.includes(".")) {
+          const keys = path.split(".");
+          let current = updated;
+
+          // Navigate to parent, create arrays/objects as needed
+          for (let i = 0; i < keys.length - 1; i++) {
+            const key = keys[i];
+            const nextKey = keys[i + 1];
+
+            if (!current[key]) {
+              // Create array if next key is numeric, otherwise create object
+              current[key] = /^\d+$/.test(nextKey) ? [] : {};
+            }
+            current = current[key];
+          }
+
+          const finalKey = keys[keys.length - 1];
+          current[finalKey] = value;
+        } else {
+          updated[path] = value;
+        }
+      });
+    } else {
+      Object.assign(updated, updates);
+    }
+
     items[index] = updated;
 
     return this.handleChain(options.new ? updated : items[index]);
@@ -344,6 +373,10 @@ export function createMockFactory(collectionName) {
 
     static async findByIdAndUpdate(id, updates, options = {}) {
       return new this().findByIdAndUpdate(id, updates, options);
+    }
+
+    static async findByIdAndDelete(id) {
+      return new this().findByIdAndDelete(id);
     }
   };
 }
