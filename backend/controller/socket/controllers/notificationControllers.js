@@ -108,6 +108,42 @@ export const markNotificationAsRead = async (models, eventData) => {
   }
 };
 
+export const markAllNotificationsAsRead = async (models, eventData) => {
+  try {
+    const { Notification } = models;
+
+    const { senderId } = eventData;
+
+    if (!senderId) {
+      throw new Error("User not authorized");
+    }
+
+    const result = await Notification.updateMany(
+      { receiver: senderId, isRead: false },
+      {
+        $set: {
+          isRead: true,
+          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        },
+      }
+    );
+
+    const response = {
+      success: true,
+      matchedCount: result.matchedCount,
+      modifiedCount: result.modifiedCount,
+    };
+
+    return response;
+  } catch (error) {
+    console.error(`Error marking all notifications as read: ${error.message}`);
+
+    throw new Error(
+      `Error marking all notifications as read: ${error.message}`
+    );
+  }
+};
+
 const generateNotificationMessage = (data) => {
   const { evtName, userName, quizScore, quizName } = data;
 

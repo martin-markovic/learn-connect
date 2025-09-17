@@ -3,6 +3,7 @@ import Notification from "../../../models/users/notificationModel.js";
 import User from "../../../models/users/userModel.js";
 import {
   markNotificationAsRead,
+  markAllNotificationsAsRead,
   createNewNotification,
 } from "../controllers/notificationControllers.js";
 
@@ -31,34 +32,31 @@ export const handleMarkNotificationAsRead = async (context, data) => {
   }
 };
 
-export const markAllNotificationsAsRead = async (context, data) => {
+export const handleMarkAllNotificationsAsRead = async (context, data) => {
   try {
-    const { senderId } = data;
+    const models = { Notification };
 
-    const result = await Notification.updateMany(
-      { receiver: senderId, isRead: false },
-      {
-        $set: {
-          isRead: true,
-          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-        },
-      }
-    );
-
-    if (result.modifiedCount === 0) {
-      throw new Error("All notifications are already read");
+    if (!Notification) {
+      throw new Error("Invalid models");
     }
 
-    const response = {
-      success: true,
-    };
+    const response = await markAllNotificationsAsRead(models, data);
+
+    if (!response.success) {
+      throw new Error(`Unable to process the request: ${response.message}`);
+    }
 
     context.emitEvent("sender", "marked all as read", response);
   } catch (error) {
-    console.error("Error marking all notifications as read:", error.message);
-    context.emitEvent("sender", "error", {
-      message: "Error updating all notification status",
-    });
+    console.error(
+      "Error handling mark all notifications as read:",
+      error.message
+    );
+
+    throw new Error(
+      "Error handling mark all notifications as read: ",
+      error.message
+    );
   }
 };
 
