@@ -1,12 +1,16 @@
 import {
-  markNotificationAsRead,
   markAllNotificationsAsRead,
+  handleMarkNotificationAsRead,
   handleNewNotification,
 } from "../handlers/handleNotifications.js";
 
-const handleNotificationEvents = (context) => {
+const manageNotificationEvents = (context) => {
   context.socket.on("mark as read", async (data) => {
-    await markNotificationAsRead(context, data);
+    try {
+      await handleMarkNotificationAsRead(context, data);
+    } catch (error) {
+      console.error(`Error emitting event mark as read: `, error.message);
+    }
   });
 
   context.socket.on("mark all as read", async (data) => {

@@ -57,6 +57,57 @@ export const createNewNotification = async (models, eventData) => {
   }
 };
 
+export const markNotificationAsRead = async (models, eventData) => {
+  try {
+    const { Notification } = models;
+
+    if (!Notification) {
+      throw new Error("Missing models");
+    }
+
+    const { notificationId } = eventData;
+
+    if (!notificationId) {
+      throw new Error("Invalid notification id");
+    }
+
+    const notificationFound = await Notification.findOne({
+      _id: notificationId,
+    });
+
+    if (!notificationFound._id) {
+      throw new Error("Notification not found on server");
+    }
+
+    if (notificationFound?.isRead) {
+      throw new Error("Notification already marked as read");
+    }
+
+    const expirationDate = 24 * 60 * 60 * 1000;
+
+    const updatedNotification = await Notification.findByIdAndUpdate(
+      notificationId,
+      {
+        $set: {
+          isRead: true,
+          expiresAt: new Date(Date.now() + expirationDate),
+        },
+      },
+      { new: true }
+    );
+
+    if (!updatedNotification._id) {
+      throw new Error("Database failure: unable to update the notification");
+    }
+
+    return updatedNotification._id;
+  } catch (error) {
+    console.error(`Error marking notification as read: ${error.message}`);
+
+    throw new Error(`Error marking notification as read: ${error.message}`);
+  }
+};
+
 const generateNotificationMessage = (data) => {
   const { evtName, userName, quizScore, quizName } = data;
 

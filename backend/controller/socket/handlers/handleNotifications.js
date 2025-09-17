@@ -2,46 +2,32 @@ import Quiz from "../../../models/quizzes/quizModel.js";
 import Notification from "../../../models/users/notificationModel.js";
 import User from "../../../models/users/userModel.js";
 import {
+  markNotificationAsRead,
   createNewNotification,
 } from "../controllers/notificationControllers.js";
 
-export const markNotificationAsRead = async (context, data) => {
+export const handleMarkNotificationAsRead = async (context, data) => {
   try {
-    const { notificationId } = data;
+    const models = { Notification };
 
-    if (!notificationId) {
-      throw new Error("Invalid notification id");
+    if (!Notification) {
+      throw new Error("Invalid models");
     }
 
-    const notificationFound = await Notification.findOne({
-      _id: notificationId,
-    });
+    const payload = markNotificationAsRead(models, data);
 
-    if (!notificationFound) {
-      throw new Error("Notification not found on server");
+    if (!payload.success) {
+      throw new Error(`Unable to process the request: ${response.message}`);
     }
 
-    if (notificationFound?.isRead) {
-      throw new Error("Notification already marked as read");
-    }
-
-    await Notification.findByIdAndUpdate(
-      notificationId,
-      {
-        $set: {
-          isRead: true,
-          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-        },
-      },
-      { new: true }
-    );
-
-    context.emitEvent("sender", "notification marked as read", notificationId);
+    context.emitEvent("sender", "notification marked as read", payload);
   } catch (error) {
-    console.error("Error marking notification as read:", error.message);
-    context.emitEvent("sender", "error", {
-      message: "Error updating notification status",
-    });
+    console.error("Error handling mark notification as read:", error.message);
+
+    throw new Error(
+      "Error handling mark notification as read: ",
+      error.message
+    );
   }
 };
 
