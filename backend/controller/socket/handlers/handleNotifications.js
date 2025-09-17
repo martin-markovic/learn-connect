@@ -1,6 +1,9 @@
 import Quiz from "../../../models/quizzes/quizModel.js";
 import Notification from "../../../models/users/notificationModel.js";
 import User from "../../../models/users/userModel.js";
+import {
+  createNewNotification,
+} from "../controllers/notificationControllers.js";
 
 export const markNotificationAsRead = async (context, data) => {
   try {
@@ -74,81 +77,33 @@ export const markAllNotificationsAsRead = async (context, data) => {
 };
 
 export const handleNewNotification = async (context, data) => {
-  const { senderId, receiverId, notificationName, quizScore, quizId } = data;
-
   try {
-    const user = await User.findOne({
-      _id: senderId,
-    }).select("name");
+    const models = { User, Notification, Quiz };
 
-    if (!user) {
-      throw new Error("User does not exist");
+    if (!User || !Notification || !Quiz) {
+      throw new Error("Invalid models");
     }
 
-    const { name: senderName } = user;
-    let quizName;
+    const payload = await createNewNotification(models, data);
 
-    if (notificationName === "quiz graded") {
-      const quizFound = await Quiz.findOne({ _id: quizId });
-
-      if (!quizFound) {
-        throw new Error("Quiz not found");
-      }
-      quizName = quizFound?.title;
+    if (!payload.success) {
+      throw new Error(`Unable to process the request: ${response.message}`);
     }
 
-    const notificationData = {
-      evtName: notificationName,
-      userName: senderName,
-      quizScore:
-        quizScore !== null && quizScore !== undefined ? quizScore : undefined,
-      quizName: quizName ? quizName : undefined,
-    };
-
-    const generatedMessage = generateNotificationMessage(notificationData);
-
-    const newNotification = new Notification({
-      receiver: notificationName === "quiz graded" ? senderId : receiverId,
-      message: generatedMessage,
-    });
-
-    const savedNotification = await newNotification.save();
-
-    if (notificationName === "quiz graded") {
+    if (payload.notificationName === "quiz graded") {
       context.emitEvent("sender", "notification received", {
-        savedNotification,
+        savedNotification: response.savedNotification,
       });
+
       return;
     }
 
     context.emitEvent("receiver", "notification received", {
-      savedNotification,
+      savedNotification: payload.savedNotification,
       receiverId,
     });
   } catch (error) {
     console.error("Error generating new notification", error.message);
-    context.emitEvent("sender", "error", {
-      message: "Error creating new notification",
-    });
+    throw new Error("Error handling new notification: ", error.message);
   }
-};
-
-const generateNotificationMessage = (data) => {
-  const { evtName, userName, quizScore, quizName } = data;
-
-  if (evtName === "new friend request") {
-    return `${userName} sent you a friend request`;
-  }
-
-  if (evtName === "friend request accepted") {
-    return `${userName} accepted your friend request`;
-  }
-
-  if (evtName === "quiz graded") {
-    return `You scored ${quizScore} ${
-      quizScore === 1 ? "point" : "points"
-    } on quiz ${quizName}`;
-  }
-
-  return "";
 };
