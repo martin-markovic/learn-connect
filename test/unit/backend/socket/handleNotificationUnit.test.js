@@ -39,4 +39,90 @@ describe("socket notification controllers", () => {
     userFactory.cleanupAll();
   });
 
+  describe("create new notification", () => {
+    it("should create a new notification for `new friend request` event and verify it", async () => {
+      const models = {
+        User: userFactory,
+        Notification: notificationFactory,
+        Quiz: quizFactory,
+      };
+
+      const eventData = {
+        senderId: userOne._id,
+        receiverId: userTwo._id,
+        notificationName: "new friend request",
+      };
+
+      const response = await createNewNotification(models, eventData);
+
+      expect(response.success).to.equal(true);
+
+      expect(response.savedNotification._id).to.equal("frdoc_5");
+
+      expect(response.savedNotification.receiver).to.equal(userTwo._id);
+
+      expect(response.savedNotification.receiver).to.equal(
+        eventData.receiverId
+      );
+
+      expect(response.savedNotification.message).to.equal(
+        `${userOne.name} sent you a friend request`
+      );
+    });
+
+    it("should create a new notification for `friend request accepted` event and verify it", async () => {
+      const models = {
+        User: userFactory,
+        Notification: notificationFactory,
+        Quiz: quizFactory,
+      };
+
+      const eventData = {
+        senderId: userOne._id,
+        receiverId: userTwo._id,
+        notificationName: "friend request accepted",
+      };
+
+      const response = await createNewNotification(models, eventData);
+
+      expect(response.success).to.equal(true);
+
+      expect(response.savedNotification._id).to.equal("frdoc_6");
+
+      expect(response.savedNotification.receiver).to.equal(userTwo._id);
+
+      expect(response.savedNotification.receiver).to.equal(
+        eventData.receiverId
+      );
+
+      expect(response.savedNotification.message).to.equal(
+        `${userOne.name} accepted your friend request`
+      );
+    });
+
+    it("should create a new notification for event `quiz graded` and verify it", async () => {
+      const models = {
+        User: userFactory,
+        Notification: notificationFactory,
+        Quiz: quizFactory,
+      };
+
+      const eventData = {
+        senderId: userOne._id,
+        notificationName: "quiz graded",
+        quizScore: 2,
+        quizName: quizOne.title,
+        quizId: quizOne._id,
+      };
+
+      const response = await createNewNotification(models, eventData);
+
+      expect(response.success).to.equal(true);
+      expect(response.savedNotification._id).to.equal("frdoc_7");
+      expect(response.savedNotification.message).to.equal(
+        `You scored ${eventData.quizScore} points on quiz ${eventData.quizName}`
+      );
+    });
+
+  });
 });
