@@ -6,8 +6,8 @@ import {
 } from "../../../../backend/controller/socket/controllers/notificationControllers.js";
 
 const userFactory = new createMockFactory("users");
-const quizFactory = new createMockFactory("users");
-const notificationFactory = new createMockFactory("users");
+const quizFactory = new createMockFactory("quizzes");
+const notificationFactory = new createMockFactory("notifications");
 
 const mockExamData = new MockData();
 
@@ -57,7 +57,7 @@ describe("socket notification controllers", () => {
 
       expect(response.success).to.equal(true);
 
-      expect(response.savedNotification._id).to.equal("frdoc_5");
+      expect(response.savedNotification._id).to.equal("frdoc_1");
 
       expect(response.savedNotification.receiver).to.equal(userTwo._id);
 
@@ -87,7 +87,7 @@ describe("socket notification controllers", () => {
 
       expect(response.success).to.equal(true);
 
-      expect(response.savedNotification._id).to.equal("frdoc_6");
+      expect(response.savedNotification._id).to.equal("frdoc_2");
 
       expect(response.savedNotification.receiver).to.equal(userTwo._id);
 
@@ -118,7 +118,7 @@ describe("socket notification controllers", () => {
       const response = await createNewNotification(models, eventData);
 
       expect(response.success).to.equal(true);
-      expect(response.savedNotification._id).to.equal("frdoc_7");
+      expect(response.savedNotification._id).to.equal("frdoc_3");
       expect(response.savedNotification.message).to.equal(
         `You scored ${eventData.quizScore} points on quiz ${eventData.quizName}`
       );

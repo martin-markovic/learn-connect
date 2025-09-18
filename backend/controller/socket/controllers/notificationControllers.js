@@ -79,7 +79,7 @@ export const markNotificationAsRead = async (models, eventData) => {
       _id: notificationId,
     });
 
-    if (!notificationFound._id) {
+    if (!notificationFound?._id) {
       throw new Error("Notification not found on server");
     }
 
@@ -100,11 +100,11 @@ export const markNotificationAsRead = async (models, eventData) => {
       { new: true }
     );
 
-    if (!updatedNotification._id) {
+    if (!updatedNotification?._id) {
       throw new Error("Database failure: unable to update the notification");
     }
 
-    return updatedNotification._id;
+    return { success: true, updatedNotification };
   } catch (error) {
     console.error(`Error marking notification as read: ${error.message}`);
 
