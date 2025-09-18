@@ -124,5 +124,53 @@ describe("socket notification controllers", () => {
       );
     });
 
+    it("should return a `Missing models` error message", async () => {
+      const models = {
+        User: undefined,
+        Notification: notificationFactory,
+        Quiz: quizFactory,
+      };
+
+      const eventData = {
+        senderId: userOne._id,
+        notificationName: "quiz graded",
+        quizScore: 2,
+        quizName: quizOne.title,
+        quizId: quizOne._id,
+      };
+
+      try {
+        await createNewNotification(models, eventData);
+      } catch (error) {
+        expect(error.message).to.equal(
+          "Error creating new notification: Missing models"
+        );
+      }
+    });
+
+    it("should return a `User does not exist` error message", async () => {
+      const models = {
+        User: userFactory,
+        Notification: notificationFactory,
+        Quiz: quizFactory,
+      };
+
+      const eventData = {
+        senderId: undefined,
+        notificationName: "quiz graded",
+        quizScore: 2,
+        quizName: quizOne.title,
+        quizId: quizOne._id,
+      };
+
+      try {
+        await createNewNotification(models, eventData);
+      } catch (error) {
+        expect(error.message).to.equal(
+          "Error creating new notification: User does not exist"
+        );
+      }
+    });
+
   });
 });

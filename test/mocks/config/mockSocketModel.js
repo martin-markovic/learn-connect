@@ -292,6 +292,10 @@ export default class MockSocketModel {
     return this;
   }
 
+  select(...args) {
+    return this;
+  }
+
   handleChain(doc) {
     if (!doc) {
       return undefined;
@@ -301,6 +305,7 @@ export default class MockSocketModel {
       ...doc,
       populate: this.populate,
       save: this.save,
+      select: this.select,
     };
 
     return formattedDoc;
