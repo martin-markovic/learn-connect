@@ -3,6 +3,7 @@ import { createMockFactory } from "../../../mocks/config/mockSocketModel.js";
 import MockData from "../../../mocks/config/mockData.js";
 import {
   createNewNotification,
+  markNotificationAsRead,
 } from "../../../../backend/controller/socket/controllers/notificationControllers.js";
 
 const userFactory = new createMockFactory("users");
@@ -228,4 +229,52 @@ describe("socket notification controllers", () => {
       notificationFactory.save = originalMethod;
     });
   });
+
+  describe("mark notification as read", () => {
+    it("should mark notification as read and verify it", async () => {
+      const models = { Notification: notificationFactory };
+      const unreadNotification =
+        notificationFactory.getStorage().notifications[0];
+
+      const eventData = { notificationId: unreadNotification._id };
+
+      const response = await markNotificationAsRead(models, eventData);
+
+      for (const [key, value] of Object.entries(unreadNotification)) {
+        expect(response.updatedNotification[key]).to.equal(value);
+      }
+
+      expect(response.updatedNotification.isRead).to.equal(true);
+    });
+
+    it("should return a `Error marking notification as read: Missing models` error message", async () => {
+      const models = { Notification: undefined };
+      const unreadNotification =
+        notificationFactory.getStorage().notifications[0];
+
+      const eventData = { notificationId: unreadNotification._id };
+
+      try {
+        await markNotificationAsRead(models, eventData);
+      } catch (error) {
+        expect(error.message).to.equal(
+          "Error marking notification as read: Missing models"
+        );
+      }
+    });
+
+    it("should return a `Error marking notification as read: Invalid notification id` error message", async () => {
+      const models = { Notification: notificationFactory };
+
+      const eventData = { notificationId: undefined };
+
+      try {
+        await markNotificationAsRead(models, eventData);
+      } catch (error) {
+        expect(error.message).to.equal(
+          "Error marking notification as read: Invalid notification id"
+        );
+      }
+    });
+
 });
