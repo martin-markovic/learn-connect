@@ -277,4 +277,60 @@ describe("socket notification controllers", () => {
       }
     });
 
+    it("should return a `Error marking notification as read: Notification not found on server` error message", async () => {
+      const models = { Notification: notificationFactory };
+
+      const eventData = { notificationId: "999" };
+
+      try {
+        await markNotificationAsRead(models, eventData);
+      } catch (error) {
+        expect(error.message).to.equal(
+          "Error marking notification as read: Notification not found on server"
+        );
+      }
+    });
+
+    it("should return a `Error marking notification as read: Notification already marked as read` error message", async () => {
+      const models = { Notification: notificationFactory };
+
+      const readNotification =
+        notificationFactory.getStorage().notifications[0];
+
+      const eventData = { notificationId: readNotification._id };
+
+      try {
+        await markNotificationAsRead(models, eventData);
+      } catch (error) {
+        expect(error.message).to.equal(
+          "Error marking notification as read: Notification already marked as read"
+        );
+      }
+    });
+
+    it("should return a `Error marking notification as read: Database failure: unable to update the notification` error message", async () => {
+      const originalMethod = notificationFactory.findByIdAndUpdate;
+
+      notificationFactory.findByIdAndUpdate = () => {
+        return null;
+      };
+
+      const models = { Notification: notificationFactory };
+
+      const unReadNotification =
+        notificationFactory.getStorage().notifications[1];
+
+      const eventData = { notificationId: unReadNotification._id };
+
+      try {
+        await markNotificationAsRead(models, eventData);
+      } catch (error) {
+        expect(error.message).to.equal(
+          "Error marking notification as read: Database failure: unable to update the notification"
+        );
+      }
+
+      notificationFactory.findByIdAndUpdate = originalMethod;
+    });
+  });
 });
