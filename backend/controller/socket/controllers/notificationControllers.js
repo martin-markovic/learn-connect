@@ -13,11 +13,11 @@ export const createNewNotification = async (models, eventData) => {
       _id: senderId,
     });
 
-    user.select("name");
-
-    if (!user._id) {
+    if (!user?._id) {
       throw new Error("User does not exist");
     }
+
+    user?.select("name");
 
     const { name: senderName } = user;
     let quizName;
@@ -48,6 +48,10 @@ export const createNewNotification = async (models, eventData) => {
     });
 
     const savedNotification = await newNotification.save();
+
+    if (!savedNotification || !savedNotification._id) {
+      throw new Error("Database failure: unable to save the notification");
+    }
 
     return { success: true, savedNotification };
   } catch (error) {

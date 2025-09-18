@@ -172,5 +172,60 @@ describe("socket notification controllers", () => {
       }
     });
 
+    it("should return a `Quiz not found` error message", async () => {
+      const models = {
+        User: userFactory,
+        Notification: notificationFactory,
+        Quiz: quizFactory,
+      };
+
+      const eventData = {
+        senderId: userOne._id,
+        notificationName: "quiz graded",
+        quizScore: 2,
+        quizName: quizOne.title,
+        quizId: undefined,
+      };
+
+      try {
+        await createNewNotification(models, eventData);
+      } catch (error) {
+        expect(error.message).to.equal(
+          "Error creating new notification: Quiz not found"
+        );
+      }
+    });
+
+    it("should return a `Database failure: unable to save the notification` error message", async () => {
+      const originalMethod = notificationFactory.save;
+
+      notificationFactory.save = () => {
+        return null;
+      };
+
+      const models = {
+        User: userFactory,
+        Notification: notificationFactory,
+        Quiz: quizFactory,
+      };
+
+      const eventData = {
+        senderId: userOne._id,
+        notificationName: "quiz graded",
+        quizScore: 2,
+        quizName: quizOne.title,
+        quizId: quizOne._id,
+      };
+
+      try {
+        await createNewNotification(models, eventData);
+      } catch (error) {
+        expect(error.message).to.equal(
+          "Error creating new notification: Database failure: unable to save the notification"
+        );
+      }
+
+      notificationFactory.save = originalMethod;
+    });
   });
 });
