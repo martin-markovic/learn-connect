@@ -1,0 +1,79 @@
+import { expect } from "chai";
+import { createMockFactory } from "../../../mocks/config/mockSocketModel.js";
+import MockData from "../../../mocks/config/mockData.js";
+import { createQuiz } from "../../../../backend/controller/socket/controllers/quizControllers.js";
+
+const userFactory = new createMockFactory("users");
+const classroomFactory = new createMockFactory("classrooms");
+const quizFactory = new createMockFactory("quizzes");
+
+const quizData = new MockData();
+
+const userStorage = quizData.mockUsers;
+const classroomStorage = quizData.mockClassrooms;
+const quizStorage = quizData.mockQuizzes;
+
+let mockUser;
+let unenrolledUser;
+let createdClassroom;
+
+describe("socket quiz controllers", () => {
+  before(async () => {
+    mockUser = await userFactory.create({
+      ...userStorage[0],
+    });
+
+    unenrolledUser = await userFactory.create({
+      ...userStorage[1],
+    });
+
+    createdClassroom = await classroomFactory.create({
+      ...classroomStorage[0],
+      students: [mockUser._id],
+    });
+
+    await userFactory.findByIdAndUpdate(mockUser._id, {
+      classrooms: [{ _id: createdClassroom._id }],
+    });
+  });
+
+  after(async () => {
+    userFactory.cleanupAll();
+  });
+
+  describe("create quiz", () => {
+    it("should create a new quiz and verify it", async () => {
+      const models = {
+        User: userFactory,
+        Classroom: classroomFactory,
+        Quiz: quizFactory,
+      };
+
+      const quizData = {
+        title: "mock quiz 1",
+        questions: [...quizStorage[0]],
+        timeLimit: 4,
+        classroomId: createdClassroom._id,
+      };
+
+      const eventData = {
+        senderId: mockUser._id,
+        receiverId: createdClassroom._id,
+        quizData,
+      };
+
+      const response = await createQuiz(models, eventData);
+
+      expect(response.title).to.equal(quizData.title);
+      expect(response.timeLimit).to.equal(quizData.timeLimit);
+      expect(response.classroom).to.equal(quizData.classroomId);
+      expect(response.createdBy).to.equal(mockUser._id);
+
+      expect(response.questions.length).to.equal(quizData.questions.length);
+
+      for (let i = 0; i < quizData.questions.length; i++) {
+        expect(response.questions[i]).to.deep.equal(quizData.questions[i]);
+      }
+    });
+  });
+});
