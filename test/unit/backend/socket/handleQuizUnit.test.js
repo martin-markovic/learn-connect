@@ -134,5 +134,62 @@ describe("socket quiz controllers", () => {
       }
     });
 
+    it("should return a `Error creating new quiz: Please add all fields` error message", async () => {
+      const models = {
+        User: userFactory,
+        Classroom: classroomFactory,
+        Quiz: quizFactory,
+      };
+
+      const quizData = {
+        title: "mock quiz 2",
+        questions: [...quizStorage[0]],
+        timeLimit: 4,
+        classroomId: undefined,
+      };
+
+      const eventData = {
+        senderId: mockUser._id,
+        receiverId: createdClassroom._id,
+        quizData,
+      };
+
+      try {
+        await createQuiz(models, eventData);
+      } catch (error) {
+        expect(error.message).to.equal(
+          "Error creating new quiz: Please add all fields"
+        );
+      }
+    });
+
+    it("should return a `Error creating new quiz: User not found` error message", async () => {
+      const models = {
+        User: userFactory,
+        Classroom: classroomFactory,
+        Quiz: quizFactory,
+      };
+
+      const quizData = {
+        title: "mock quiz 2",
+        questions: [...quizStorage[0]],
+        timeLimit: 4,
+        classroomId: createdClassroom._id,
+      };
+
+      const eventData = {
+        senderId: "999",
+        receiverId: createdClassroom._id,
+        quizData,
+      };
+
+      try {
+        await createQuiz(models, eventData);
+      } catch (error) {
+        expect(error.message).to.equal(
+          "Error creating new quiz: User not found"
+        );
+      }
+    });
   });
 });

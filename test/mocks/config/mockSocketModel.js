@@ -144,6 +144,10 @@ export default class MockSocketModel {
     result =
       this.storage[this.currentModel].find((item) => item._id === id) || null;
 
+    if (!result) {
+      return null;
+    }
+
     if (options.populate) {
       return this.handleChain(result);
     }
