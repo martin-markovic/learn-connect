@@ -13,11 +13,11 @@ export const createNewNotification = async (models, eventData) => {
       _id: senderId,
     });
 
-    user.select("name");
-
-    if (!user._id) {
+    if (!user?._id) {
       throw new Error("User does not exist");
     }
+
+    user?.select("name");
 
     const { name: senderName } = user;
     let quizName;
@@ -49,6 +49,10 @@ export const createNewNotification = async (models, eventData) => {
 
     const savedNotification = await newNotification.save();
 
+    if (!savedNotification || !savedNotification._id) {
+      throw new Error("Database failure: unable to save the notification");
+    }
+
     return { success: true, savedNotification };
   } catch (error) {
     console.error(`Error creating new notification: ${error.message}`);
@@ -75,7 +79,7 @@ export const markNotificationAsRead = async (models, eventData) => {
       _id: notificationId,
     });
 
-    if (!notificationFound._id) {
+    if (!notificationFound?._id) {
       throw new Error("Notification not found on server");
     }
 
@@ -96,11 +100,11 @@ export const markNotificationAsRead = async (models, eventData) => {
       { new: true }
     );
 
-    if (!updatedNotification._id) {
+    if (!updatedNotification?._id) {
       throw new Error("Database failure: unable to update the notification");
     }
 
-    return updatedNotification._id;
+    return { success: true, updatedNotification };
   } catch (error) {
     console.error(`Error marking notification as read: ${error.message}`);
 
@@ -111,6 +115,10 @@ export const markNotificationAsRead = async (models, eventData) => {
 export const markAllNotificationsAsRead = async (models, eventData) => {
   try {
     const { Notification } = models;
+
+    if (!Notification) {
+      throw new Error("Missing models");
+    }
 
     const { senderId } = eventData;
 
@@ -127,6 +135,10 @@ export const markAllNotificationsAsRead = async (models, eventData) => {
         },
       }
     );
+
+    if (!result) {
+      throw new Error("Database failure: unable to update notifications");
+    }
 
     const response = {
       success: true,

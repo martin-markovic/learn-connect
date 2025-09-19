@@ -17,8 +17,12 @@ export const handleMarkNotificationAsRead = async (context, data) => {
 
     const payload = markNotificationAsRead(models, data);
 
-    if (!payload.success) {
+    if (!payload?.success) {
       throw new Error(`Unable to process the request: ${response.message}`);
+    }
+
+    if (!payload?.updatedNotification._id) {
+      throw new Error("Notification update failed: invalid response format");
     }
 
     context.emitEvent("sender", "notification marked as read", payload);
