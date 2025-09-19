@@ -4,6 +4,7 @@ import MockData from "../../../mocks/config/mockData.js";
 import {
   createNewNotification,
   markNotificationAsRead,
+  markAllNotificationsAsRead,
 } from "../../../../backend/controller/socket/controllers/notificationControllers.js";
 
 const userFactory = new createMockFactory("users");
@@ -333,4 +334,29 @@ describe("socket notification controllers", () => {
       notificationFactory.findByIdAndUpdate = originalMethod;
     });
   });
+
+  describe("mark all notifications as read", () => {
+    it("should mark all notifications as read and verify them", async () => {
+      const models = { Notification: notificationFactory };
+      const senderId = userOne._id;
+      const eventData = { senderId };
+
+      const storage = notificationFactory.getStorage().notifications;
+
+      const unreadNotificationsBefore = storage.filter(
+        (n) => (n.isRead === false || !n.isRead) && n.receiver === senderId
+      );
+
+      const response = await markAllNotificationsAsRead(models, eventData);
+
+      expect(response.success).to.equal(true);
+      expect(response.matchedCount).to.equal(unreadNotificationsBefore.length);
+      expect(response.modifiedCount).to.equal(unreadNotificationsBefore.length);
+
+      const unreadNotificationsAfter = storage.filter(
+        (n) => (n.isRead === false || !n.isRead) && n.receiver === senderId
+      );
+
+      expect(unreadNotificationsAfter.length).to.equal(0);
+    });
 });

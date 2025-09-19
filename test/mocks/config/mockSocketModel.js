@@ -238,20 +238,22 @@ export default class MockSocketModel {
 
   async updateMany(query, updates) {
     try {
-      const instance = new this();
+      const itemsFound = this.storage[this.currentModel].filter((item) =>
+        Object.entries(query).every(([key, value]) => {
+          if (typeof value === "object" && value !== null && "$in" in value) {
+            return value.$in.includes(item[key]);
+          }
 
-      const itemsFound = instance.storage[instance.currentModel].filter(
-        (item) =>
-          Object.entries(query).every(([key, value]) => {
-            if (typeof value === "object" && value !== null && "$in" in value) {
-              return value.$in.includes(item[key]);
-            }
+          if (key === "isRead") {
+            const itemIsRead = item[key] !== undefined ? item[key] : false;
+            return itemIsRead === value;
+          }
 
-            return item[key] === value;
-          })
+          return item[key] === value;
+        })
       );
 
-      if (!itemsFound) {
+      if (!itemsFound.length) {
         return { matchedCount: 0, modifiedCount: 0 };
       }
 
@@ -259,7 +261,10 @@ export default class MockSocketModel {
         Object.assign(item, updates.$set);
       });
 
-      return { matchedCount: 1, modifiedCount: itemsFound.length };
+      return {
+        matchedCount: itemsFound.length,
+        modifiedCount: itemsFound.length,
+      };
     } catch (error) {
       const errorMessage = `Error updating documents: ${
         error.message || "Unknown error"
