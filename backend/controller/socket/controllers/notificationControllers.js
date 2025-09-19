@@ -116,6 +116,10 @@ export const markAllNotificationsAsRead = async (models, eventData) => {
   try {
     const { Notification } = models;
 
+    if (!Notification) {
+      throw new Error("Missing models");
+    }
+
     const { senderId } = eventData;
 
     if (!senderId) {
@@ -131,6 +135,10 @@ export const markAllNotificationsAsRead = async (models, eventData) => {
         },
       }
     );
+
+    if (!result) {
+      throw new Error("Database failure: unable to update notifications");
+    }
 
     const response = {
       success: true,

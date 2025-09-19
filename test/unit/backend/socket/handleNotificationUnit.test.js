@@ -18,7 +18,6 @@ const quizStorage = mockExamData.mockQuizzes;
 
 let userOne;
 let userTwo;
-let userThree;
 let quizOne;
 
 describe("socket notification controllers", () => {
@@ -29,7 +28,6 @@ describe("socket notification controllers", () => {
 
     userOne = userFactory.getStorage().users[0];
     userTwo = userFactory.getStorage().users[1];
-    userThree = userFactory.getStorage().users[2];
 
     quizOne = await quizFactory.create({
       ...quizStorage[0],
@@ -359,4 +357,57 @@ describe("socket notification controllers", () => {
 
       expect(unreadNotificationsAfter.length).to.equal(0);
     });
+
+    it("should return a `Error marking all notifications as read: Missing models` error message", async () => {
+      const models = { Notification: undefined };
+
+      const senderId = userOne._id;
+      const eventData = { senderId };
+
+      try {
+        await markAllNotificationsAsRead(models, eventData);
+      } catch (error) {
+        expect(error.message).to.equal(
+          "Error marking all notifications as read: Missing models"
+        );
+      }
+    });
+
+    it("should return a `Error marking all notifications as read: User not authorized` error message", async () => {
+      const models = { Notification: notificationFactory };
+
+      const senderId = undefined;
+      const eventData = { senderId };
+
+      try {
+        await markAllNotificationsAsRead(models, eventData);
+      } catch (error) {
+        expect(error.message).to.equal(
+          "Error marking all notifications as read: User not authorized"
+        );
+      }
+    });
+
+    it("should return a `Error marking all notifications as read: Database failure: unable to update notifications` error message", async () => {
+      const originalMethod = notificationFactory.updateMany;
+      notificationFactory.updateMany = () => {
+        return null;
+      };
+
+      const models = { Notification: notificationFactory };
+
+      const senderId = userOne._id;
+      const eventData = { senderId };
+
+      try {
+        await markAllNotificationsAsRead(models, eventData);
+      } catch (error) {
+        expect(error.message).to.equal(
+          "Error marking all notifications as read: Database failure: unable to update notifications"
+        );
+      }
+
+      notificationFactory.updateMany = originalMethod;
+    });
+  });
 });
