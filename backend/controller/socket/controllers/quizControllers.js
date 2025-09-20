@@ -30,10 +30,16 @@ export const createQuiz = async (models, eventData) => {
 
     const userFound = await User.findById(senderId);
 
-    userFound.populate("classrooms");
-
     if (!userFound || !userFound._id) {
       throw new Error("User not found");
+    }
+
+    userFound.populate("classrooms");
+
+    const classroomFound = await Classroom.findById(receiverId);
+
+    if (!classroomFound) {
+      throw new Error("Classroom not found");
     }
 
     const isEnrolled = userFound?.classrooms.find(
@@ -42,12 +48,6 @@ export const createQuiz = async (models, eventData) => {
 
     if (!isEnrolled) {
       throw new Error(`User is not enrolled in the classroom ${receiverId}`);
-    }
-
-    const classroomFound = await Classroom.findById(receiverId);
-
-    if (!classroomFound) {
-      throw new Error("Classroom not found");
     }
 
     const newQuiz = await Quiz.create({
