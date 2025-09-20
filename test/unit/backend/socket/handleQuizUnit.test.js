@@ -191,5 +191,99 @@ describe("socket quiz controllers", () => {
         );
       }
     });
+
+    it("should return a `Error creating new quiz: Classroom not found` error message", async () => {
+      const models = {
+        User: userFactory,
+        Classroom: classroomFactory,
+        Quiz: quizFactory,
+      };
+
+      const quizData = {
+        title: "mock quiz 2",
+        questions: [...quizStorage[0]],
+        timeLimit: 4,
+        classroomId: "999",
+      };
+
+      const eventData = {
+        senderId: mockUser._id,
+        receiverId: "999",
+        quizData,
+      };
+
+      try {
+        await createQuiz(models, eventData);
+      } catch (error) {
+        expect(error.message).to.equal(
+          "Error creating new quiz: Classroom not found"
+        );
+      }
+    });
+
+    it("should return a `Error creating new quiz: User is not enrolled in the classroom` error message", async () => {
+      const models = {
+        User: userFactory,
+        Classroom: classroomFactory,
+        Quiz: quizFactory,
+      };
+
+      const quizData = {
+        title: "mock quiz 2",
+        questions: [...quizStorage[0]],
+        timeLimit: 4,
+        classroomId: createdClassroom._id,
+      };
+
+      const eventData = {
+        senderId: unenrolledUser._id,
+        receiverId: createdClassroom._id,
+        quizData,
+      };
+
+      try {
+        await createQuiz(models, eventData);
+      } catch (error) {
+        expect(error.message).to.equal(
+          `Error creating new quiz: User is not enrolled in the classroom ${createdClassroom._id}`
+        );
+      }
+    });
+
+    it("should return a `Error creating new quiz: Database failure: unable to create a new quiz` error messages", async () => {
+      const originalMethod = quizFactory.create;
+      quizFactory.create = () => {
+        return null;
+      };
+
+      const models = {
+        User: userFactory,
+        Classroom: classroomFactory,
+        Quiz: quizFactory,
+      };
+
+      const quizData = {
+        title: "mock quiz 2",
+        questions: [...quizStorage[0]],
+        timeLimit: 4,
+        classroomId: createdClassroom._id,
+      };
+
+      const eventData = {
+        senderId: mockUser._id,
+        receiverId: createdClassroom._id,
+        quizData,
+      };
+
+      try {
+        await createQuiz(models, eventData);
+      } catch (error) {
+        expect(error.message).to.equal(
+          "Error creating new quiz: Database failure: unable to create a new quiz"
+        );
+      }
+
+      quizFactory.create = originalMethod;
+    });
   });
 });
