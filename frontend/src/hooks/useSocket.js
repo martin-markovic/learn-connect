@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import io from "socket.io-client";
-import socketEventManager from "../features/socket/socket.eventManager.js";
+import socketEventManager from "../features/socket/managers/socket.eventManager.js";
 
 const useSocket = (token) => {
   const [socketInstance, setSocketInstance] = useState(null);

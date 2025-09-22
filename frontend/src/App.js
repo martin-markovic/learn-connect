@@ -11,7 +11,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
-import socketEventManager from "./features/socket/socket.eventManager.js";
+import socketEventManager from "./features/socket/managers/socket.eventManager.js";
 
 import Dashboard from "./pages/Dashboard.jsx";
 import Login from "./pages/Login.jsx";

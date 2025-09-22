@@ -9,7 +9,7 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { ChatContext } from "../../context/chatContext.js";
 
-import socketEventManager from "../../features/socket/socket.eventManager.js";
+import socketEventManager from "../../features/socket/managers/socket.eventManager.js";
 
 import { FaCircleUser } from "react-icons/fa6";
 

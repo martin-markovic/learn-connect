@@ -1,4 +1,4 @@
-import handleCreateQuiz from "../handlers/handleQuiz.js";
+import { handleCreateQuiz } from "../handlers/handleQuiz.js";
 
 const handleQuizEvents = (context) => {
   context.socket.on("submit quiz", async (data) => {

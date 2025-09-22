@@ -12,7 +12,7 @@ import {
   getExamScores,
   resetExam,
 } from "../features/quizzes/exam/examSlice.js";
-import socketEventManager from "../features/socket/socket.eventManager.js";
+import socketEventManager from "../features/socket/managers/socket.eventManager.js";
 import { FaCircleUser } from "react-icons/fa6";
 
 import UserForm from "../components/users/UserForm.jsx";
