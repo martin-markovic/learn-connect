@@ -13,31 +13,42 @@ import { handleConnectionStatus } from "../config/socket.userPresence.js";
 
 const handleSocketLifeCycle = (io) => {
   io.on("connection", async (socket) => {
-    console.log(`New connection: Socket ID ${socket.id}`);
+    try {
+      console.log(`New connection: Socket ID ${socket.id}`);
 
-    const userId = socket?.user?.id;
-    if (!userId) {
-      console.error("User ID is undefined, aborting socket event handlers");
-      return;
+      const userId = socket?.user?.id;
+
+      if (!userId) {
+        console.error("User ID is undefined, aborting socket event handlers");
+        return;
+      }
+
+      setUserSocket(userId, socket.id);
+
+      const context = createSocketContext(socket, io);
+
+      if (!context || !context.socket || !context.emitEvent) {
+        throw new Error("Unable to create socket context");
+      }
+
+      manageMessages(context);
+      manageNotificationEvents(context);
+      manageSocialEvents(context);
+      manageQuizEvents(context);
+      manageExamEvents(context);
+      manageErrorEvents(socket);
+
+      socket.on("disconnect", async () => {
+        await handleConnectionStatus(context, userId, "disconnected");
+
+        console.log("User disconnected: ", userId);
+        removeUserSocket(userId);
+      });
+    } catch (error) {
+      console.error(`Error connecting socket: `, error.message);
+
+      throw error;
     }
-
-    setUserSocket(userId, socket.id);
-
-    const context = createSocketContext(socket, io);
-
-    manageMessages(context);
-    manageNotificationEvents(context);
-    manageSocialEvents(context);
-    manageQuizEvents(context);
-    manageExamEvents(context);
-    manageErrorEvents(socket);
-
-    socket.on("disconnect", async () => {
-      await handleConnectionStatus(context, userId, "disconnected");
-
-      console.log("User disconnected: ", userId);
-      removeUserSocket(userId);
-    });
   });
 };
 

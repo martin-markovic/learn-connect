@@ -30,10 +30,11 @@ export default function FriendSearch() {
   const navigate = useNavigate();
 
   useEffect(() => {
-
-    dispatch(getUserList(user?._id));
-    dispatch(getUserQuizzes());
-    dispatch(getClassQuizzes());
+    if (user?._id) {
+      dispatch(getUserList(user?._id));
+      dispatch(getUserQuizzes());
+      dispatch(getClassQuizzes());
+    }
 
     return () => {
       dispatch(resetUserList());

@@ -1,12 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  updateExam,
-  finishExam,
-  getExam,
-} from "../../features/quizzes/exam/examSlice.js";
-import socketEventManager from "../../features/socket/socket.eventManager.js";
+import { updateExam, getExam } from "../../features/quizzes/exam/examSlice.js";
+import socketEventManager from "../../features/socket/managers/socket.eventManager.js";
 import { FaArrowAltCircleLeft, FaArrowAltCircleRight } from "react-icons/fa";
 
 import ExamTimer from "./ExamTimer.jsx";

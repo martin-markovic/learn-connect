@@ -6,7 +6,7 @@ import {
   resetClassroom,
   getClassroomList,
 } from "../../features/classroom/classroomSlice.js";
-import socketEventManager from "../../features/socket/socket.eventManager.js";
+import socketEventManager from "../../features/socket/managers/socket.eventManager.js";
 
 const initialQuestionState = {
   question: "",

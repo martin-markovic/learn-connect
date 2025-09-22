@@ -8,7 +8,7 @@ import {
   resetQuizzes,
 } from "../../features/quizzes/quizSlice.js";
 import QuizForm from "./QuizForm.jsx";
-import socketEventManager from "../../features/socket/socket.eventManager.js";
+import socketEventManager from "../../features/socket/managers/socket.eventManager.js";
 import { FaArrowAltCircleLeft, FaArrowAltCircleRight } from "react-icons/fa";
 
 function UserQuizList() {

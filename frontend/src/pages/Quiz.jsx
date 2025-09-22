@@ -9,7 +9,7 @@ import {
   resetExam,
 } from "../features/quizzes/exam/examSlice.js";
 import QuizScore from "../components/exam/QuizScore.jsx";
-import socketEventManager from "../features/socket/socket.eventManager.js";
+import socketEventManager from "../features/socket/managers/socket.eventManager.js";
 
 function Quiz() {
   const [isInProgress, setIsInProgress] = useState(false);

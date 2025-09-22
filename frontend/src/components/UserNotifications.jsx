@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import socketEventManager from "../features/socket/socket.eventManager.js";
+import socketEventManager from "../features/socket/managers/socket.eventManager.js";
 import {
   resetNotifications,
   getNotifications,
