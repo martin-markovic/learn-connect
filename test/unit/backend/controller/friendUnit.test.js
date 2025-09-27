@@ -1,7 +1,7 @@
 process.env.JWT_SECRET = "test-secret";
 import { expect } from "chai";
-import MockModel from "../../../mocks/config/mockModel.js";
-import MockRes from "../../../mocks/config/mockRes.js";
+import MockModel from "../../../mocks/config/CRUD/mockModel.js";
+import MockRes from "../../../mocks/config/CRUD/mockRes.js";
 import MockData from "../../../mocks/config/mockData.js";
 import {
   getFriendList,

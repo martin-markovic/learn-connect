@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import authService from "../../../frontend/src/features/auth/authService.js";
+import authService from "../../../features/auth/authService.js";
 import axios from "axios";
 import nock from "nock";
 

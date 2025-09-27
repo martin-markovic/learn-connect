@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import axios from "axios";
-import quizService from "../../../frontend/src/features/quizzes/quizService.js";
+import quizService from "../../../features/quizzes/quizService.js";
 import nock from "nock";
 
 describe("quizService", () => {
