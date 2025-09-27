@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { createMockFactory } from "../../../mocks/config/mockSocketModel.js";
+import { createMockFactory } from "../../../mocks/config/socket/mockSocketModel.js";
 import MockData from "../../../mocks/config/mockData.js";
 import { createQuiz } from "../../../../backend/controller/socket/controllers/quizControllers.js";
 

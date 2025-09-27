@@ -1,4 +1,4 @@
-import { createMockFactory } from "../../../mocks/config/mockSocketModel.js";
+import { createMockFactory } from "../../../mocks/config/socket/mockSocketModel.js";
 import MockData from "../../../mocks/config/mockData.js";
 import {
   createExam,

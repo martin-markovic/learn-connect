@@ -1,6 +1,6 @@
-import MockModel from "../../../mocks/config/mockModel.js";
+import MockModel from "../../../mocks/config/CRUD/mockModel.js";
 import MockData from "../../../mocks/config/mockData.js";
-import MockRes from "../../../mocks/config/mockRes.js";
+import MockRes from "../../../mocks/config/CRUD/mockRes.js";
 import {
   getUserQuizzes,
   getClassroomQuizzes,

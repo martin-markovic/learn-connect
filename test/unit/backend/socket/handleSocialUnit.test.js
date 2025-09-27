@@ -5,9 +5,9 @@ import {
   handleRemoveFriend,
   handleBlockUser,
 } from "../../../../backend/controller/socket/helpers/socket.friendController.js";
-import MockSocket from "../../../mocks/config/mockSocket.js";
-import MockData from "../../../mocks/config/mockData.js";
-import MockSocketModel from "../../../mocks/config/mockSocketModel.js";
+import MockSocket from "../../../mocks/config/socket/mockSocket.js";
+import MockData from "../../../mocks/config/socket/mockData.js";
+import MockSocketModel from "../../../mocks/config/socket/mockSocketModel.js";
 
 class FriendFactory extends MockSocketModel {
   constructor(newDoc) {
