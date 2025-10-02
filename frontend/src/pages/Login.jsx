@@ -1,15 +1,25 @@
-import { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { loginUser } from "../features/auth/authSlice.js";
 import { toast } from "react-toastify";
 
 function Login() {
   const dispatch = useDispatch();
 
+  const { isLoading, isError, errorMessage } = useSelector(
+    (state) => state.auth
+  );
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
+
+  useEffect(() => {
+    if (isError) {
+      toast.error(errorMessage);
+    }
+  }, [isError, errorMessage]);
 
   const { email, password } = formData;
 
@@ -41,7 +51,7 @@ function Login() {
     <div className="container">
       <form id="login-form" onSubmit={handleSubmit}>
         <div className="auth-form-input_group">
-          <label>Email: </label>
+          <label htmlFor="email">Email: </label>
           <input
             className="auth-input"
             type="email"
@@ -54,7 +64,7 @@ function Login() {
           />
         </div>
         <div className="auth-form-input_group">
-          <label>Password: </label>
+          <label htmlFor="password">Password: </label>
           <input
             className="auth-input"
             type="password"
@@ -67,7 +77,12 @@ function Login() {
             onChange={handleInput}
           />
         </div>
-        <input style={{ marginTop: "1rem" }} type="submit" value="Login" />
+        <input
+          style={{ marginTop: "1rem" }}
+          type="submit"
+          value="Login"
+          disabled={isLoading}
+        />
       </form>
     </div>
   );
