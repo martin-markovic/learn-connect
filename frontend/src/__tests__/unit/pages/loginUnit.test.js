@@ -1,26 +1,33 @@
-import React from "react";
 import { render, fireEvent, screen } from "@testing-library/react";
-
-const mockToast = {
-  error: jest.fn(),
-};
+import { Provider } from "react-redux";
+import { configureStore } from "@reduxjs/toolkit";
+import Login from "../../../pages/Login.jsx";
 
 jest.mock("react-toastify", () => ({
-  toast: mockToast,
+  toast: {
+    error: jest.fn(),
+    success: jest.fn(),
+  },
 }));
 
-const MockLogin = () => {
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const { toast } = require("react-toastify");
-    toast.error("Please provide both fields");
-  };
+const { toast: mockToast } = require("react-toastify");
 
-  return (
-    <form onSubmit={handleSubmit}>
-      <button type="submit">Login</button>
-    </form>
-  );
+const createMockStore = (initialState = {}) => {
+  return configureStore({
+    reducer: {
+      auth: (
+        state = { user: null, isLoading: false, ...initialState },
+        action
+      ) => {
+        return state;
+      },
+    },
+  });
+};
+
+const renderWithStore = (component, initialState) => {
+  const store = createMockStore(initialState);
+  return render(<Provider store={store}>{component}</Provider>);
 };
 
 describe("Login Component", () => {
@@ -28,8 +35,13 @@ describe("Login Component", () => {
     jest.clearAllMocks();
   });
 
-  it("should show error toast if email or password is missing", () => {
-    render(<MockLogin />);
+  it("should render login form with email and password fields", () => {
+    renderWithStore(<Login />);
+
+    expect(screen.getByPlaceholderText(/your email/i)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/your password/i)).toBeInTheDocument();
+    expect(screen.getByDisplayValue(/login/i)).toBeInTheDocument();
+  });
 
     const submitBtn = screen.getByRole("button", { name: /login/i });
     fireEvent.click(submitBtn);
