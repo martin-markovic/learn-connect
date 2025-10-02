@@ -2,7 +2,6 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import authService from "./authService.js";
 import { handleSliceError } from "../redux.errorHandler.js";
 
-
 const user = JSON.parse(localStorage.getItem("user"));
 
 const initialState = {
@@ -10,7 +9,7 @@ const initialState = {
   isError: false,
   isSuccess: false,
   isLoading: false,
-  message: "",
+  errorMessage: "",
 };
 
 export const registerUser = createAsyncThunk(
@@ -62,7 +61,7 @@ export const authSlice = createSlice({
       state.isLoading = false;
       state.isSuccess = false;
       state.isError = false;
-      state.message = "";
+      state.errorMessage = "";
     },
     setUser: (state, action) => {
       state.user = action.payload;
@@ -81,7 +80,7 @@ export const authSlice = createSlice({
       .addCase(registerUser.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
-        state.message = action.payload;
+        state.errorMessage = action.payload;
         state.user = null;
       })
       .addCase(loginUser.pending, (state) => {
@@ -95,7 +94,7 @@ export const authSlice = createSlice({
       .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
-        state.message = action.payload;
+        state.errorMessage = action.payload;
       })
       .addCase(updateUser.pending, (state) => {
         state.isLoading = true;
@@ -108,7 +107,7 @@ export const authSlice = createSlice({
       .addCase(updateUser.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
-        state.message = action.payload;
+        state.errorMessage = action.payload;
       });
   },
 });
