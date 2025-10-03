@@ -97,3 +97,75 @@ describe("Register Component", () => {
     fireEvent.change(nameInput, { target: { value: "John" } });
     expect(nameInput.value).toBe("John");
   });
+
+  it("should show error when submitting empty form", () => {
+    renderWithStore(<Register />);
+
+    const submitBtn = screen.getByDisplayValue(/register/i);
+    fireEvent.click(submitBtn);
+
+    expect(mockToast.error).toHaveBeenCalledWith("All fields are required");
+  });
+
+  it("should show error when submitting mismatching password fields", () => {
+    renderWithStore(<Register />);
+
+    const nameInput = screen.getByPlaceholderText(/your name/i);
+    const emailInput = screen.getByPlaceholderText(/your email/i);
+
+    const passwordInput = screen.getByPlaceholderText(/your password/i);
+    const confirmPasswordInput =
+      screen.getByPlaceholderText(/confirm password/i);
+    const submitBtn = screen.getByDisplayValue(/register/i);
+
+    const { name, email, password, invalidPassword2 } = mockUser;
+
+    fireEvent.change(nameInput, { target: { value: name } });
+
+    fireEvent.change(emailInput, { target: { value: email } });
+
+    fireEvent.change(passwordInput, { target: { value: password } });
+
+    fireEvent.change(confirmPasswordInput, {
+      target: { value: invalidPassword2 },
+    });
+
+    fireEvent.click(submitBtn);
+
+    expect(mockToast.error).toHaveBeenCalledWith("Passwords must match");
+  });
+
+  it("should disable submit button when loading", () => {
+    renderWithStore(<Register />, { isLoading: true });
+
+    const submitBtn = screen.getByDisplayValue(/register/i);
+    expect(submitBtn).toBeDisabled();
+  });
+
+  it("should show error toast when submitting mismatching password fields", () => {
+    renderWithStore(<Register />, {
+      isError: true,
+      errorMessage: "Passwords must match",
+    });
+
+    expect(mockToast.error).toHaveBeenCalledWith("Passwords must match");
+  });
+
+  it("should show error toast when submitting an already registered email", () => {
+    renderWithStore(<Register />, {
+      isError: true,
+      errorMessage: "Email already registered",
+    });
+
+    expect(mockToast.error).toHaveBeenCalledWith("Email already registered");
+  });
+
+  it("should show error toast on server error", () => {
+    renderWithStore(<Register />, {
+      isError: true,
+      errorMessage: "Server error",
+    });
+
+    expect(mockToast.error).toHaveBeenCalledWith("Server error");
+  });
+});
