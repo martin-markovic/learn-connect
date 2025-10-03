@@ -2,6 +2,7 @@ import { render, fireEvent, screen } from "@testing-library/react";
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import Login from "../../../pages/Login.jsx";
+import { loginUser } from "../../../features/auth/authSlice.js";
 
 jest.mock("react-toastify", () => ({
   toast: {
@@ -10,7 +11,16 @@ jest.mock("react-toastify", () => ({
   },
 }));
 
+jest.mock("../../../features/auth/authSlice", () => ({
+  loginUser: jest.fn((credentials) => ({
+    type: "auth/loginUser",
+    payload: credentials,
+  })),
+}));
+
 const { toast: mockToast } = require("react-toastify");
+
+const mockUser = { email: "johndoe@gmail.com", password: "password123" };
 
 const createMockStore = (initialState = {}) => {
   return configureStore({
@@ -40,7 +50,25 @@ describe("Login Component", () => {
 
     expect(screen.getByPlaceholderText(/your email/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/your password/i)).toBeInTheDocument();
-    expect(screen.getByDisplayValue(/login/i)).toBeInTheDocument();
+  });
+
+  it("should successfully login user", () => {
+    renderWithStore(<Login />, { isSuccess: true });
+
+    const emailInput = screen.getByPlaceholderText(/your email/i);
+    const passwordInput = screen.getByPlaceholderText(/your password/i);
+    const submitBtn = screen.getByDisplayValue(/login/i);
+
+    const { email, password } = mockUser;
+
+    fireEvent.change(emailInput, { target: { value: email } });
+    fireEvent.change(passwordInput, { target: { value: password } });
+    fireEvent.click(submitBtn);
+
+    expect(loginUser).toHaveBeenCalledWith({
+      email: email,
+      password: password,
+    });
   });
 
   it("should show error toast when submitting empty form", async () => {
@@ -108,6 +136,15 @@ describe("Login Component", () => {
 
     expect(emailInput.value).toBe(mockEmail);
     expect(passwordInput.value).toBe(mockPassword);
+  });
+
+  it("should show error toast on server error", () => {
+    renderWithStore(<Login />, {
+      isError: true,
+      errorMessage: "Server error",
+    });
+
+    expect(mockToast.error).toHaveBeenCalledWith("Server error");
   });
 
   it("should disable submit button when loading", () => {

@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { registerUser } from "../features/auth/authSlice";
 import { toast } from "react-toastify";
 
@@ -15,6 +15,16 @@ function Register() {
 
   const { name, email, password, password2 } = formData;
 
+  const { isLoading, isError, errorMessage } = useSelector(
+    (state) => state.auth
+  );
+
+  useEffect(() => {
+    if (isError) {
+      toast.error(errorMessage);
+    }
+  }, [isError, errorMessage]);
+
   const handleInput = (e) => {
     e.preventDefault();
 
@@ -28,10 +38,16 @@ function Register() {
     e.preventDefault();
 
     try {
+      if (!name || !email || !password || !password2) {
+        toast.error("All fields are required");
+        return;
+      }
+
       if (password !== password2) {
         toast.error("Passwords must match");
         return;
       }
+
       const userCredentials = {
         name,
         email,
@@ -102,7 +118,12 @@ function Register() {
             onChange={handleInput}
           />{" "}
         </div>
-        <input style={{ marginTop: "1rem" }} type="submit" value="Register" />
+        <input
+          style={{ marginTop: "1rem" }}
+          type="submit"
+          value="Register"
+          disabled={isLoading}
+        />
       </form>
     </div>
   );
