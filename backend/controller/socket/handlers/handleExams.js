@@ -12,8 +12,13 @@ import {
 
 export const handleCreateExam = async (context, data) => {
   try {
+    if (!Quiz || !Classroom || !Exam) {
+      throw new Error("Invalid models");
+    }
+
     const models = { Quiz, Classroom, Exam };
-    const payload = await createExam({ models, eventData: data });
+
+    const payload = await createExam(models, data);
 
     if (!payload._id) {
       throw new Error("Unable to create exam payload");
@@ -37,6 +42,11 @@ export const handleCreateExam = async (context, data) => {
 
 export const handleUpdateExam = async (context, data) => {
   try {
+    if (!Exam) {
+      throw new Error("Invalid models");
+    }
+
+    const models = { Exam };
     const payload = await updateExam(models, eventData);
 
     if (!payload) {
@@ -55,6 +65,10 @@ export const handleUpdateExam = async (context, data) => {
 
 export const handleFinishExam = async (context, data) => {
   try {
+    if (!Exam || !Quiz || !Score) {
+      throw new Error("Invalid models");
+    }
+
     const models = { Exam, Quiz, Score };
 
     const examEndPayload = await finishExam(models, data);

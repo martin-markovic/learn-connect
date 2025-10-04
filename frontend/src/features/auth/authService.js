@@ -10,26 +10,9 @@ const registerUser = async (userData) => {
       throw new Error("Email and password are required.");
     }
 
-
-    let multiPartData;
-
-    if (avatar) {
-      const formData = new FormData();
-      formData.append("avatar", avatar);
-      Object.entries(userData).forEach(([key, value]) => {
-        if (key !== "avatar") formData.append(key, value);
-      });
-
-      multiPartData = formData;
-    }
-
-    const response = await axiosInstance.post(
-      API_URL,
-      avatar ? multiPartData : userData,
-      {
-        metadata: { clientMessage: "register user" },
-      }
-    );
+    const response = await axiosInstance.post(API_URL, userData, {
+      metadata: { clientMessage: "register user" },
+    });
 
     if (response.data) {
       localStorage.setItem("user", JSON.stringify(response.data));

@@ -51,7 +51,7 @@ const useGlobalEvents = (currentLocation, user) => {
     (data) => {
       dispatch(handleAccept(data));
     },
-    [dispatch, user?._id]
+    [dispatch]
   );
 
   const handleRemoveUser = useCallback(

@@ -40,7 +40,7 @@ export default function FriendSearch() {
       dispatch(resetUserList());
       dispatch(resetQuizzes());
     };
-  }, [dispatch]);
+  }, [dispatch,user?._id]);
 
   useEffect(() => {
     if (!userStateLoading) {
