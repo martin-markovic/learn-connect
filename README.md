@@ -1,6 +1,6 @@
 # Learn-connect
 
-This project is a multi-feature platform designed to enhance the online learning experience. It combines real-time chat capabilities, a quiz system for learning reinforcement, and an image gallery for sharing educational resources.
+This project is an MVP version of a multi-feature platform designed to enhance the online learning experience. It combines real-time chat capabilities, a quiz system for learning reinforcement, and an image gallery for sharing educational resources.
 This project provides solid understanding of full-stack development, including front-end frameworks, back-end server handling, and real-time data processing.
 
 ## Note:
@@ -24,31 +24,21 @@ This project is a boilerplate and will be subject to change according to impleme
 
 - **Features**:
 
-  - User authentication and authorization.
-  - Real-time messaging with typing indicators and messeage receipts.
-  - Group chat functionality for class discussions.
+  - User authentication and authorization. Users can add friends, remove connections, or block specific users, with socket delivering immediate updates.
+  - Real-time messaging with typing indicators and message receipts.
   - Chat history saved in a database (MongoDB).
 
 2. **Quiz Application**:
 
 - **Technology**: Node.js for back-end, React.js for the front-end.
-- **Features**:
-  - Multiple-choice quizzes on various educational topics.
-  - Timed quizzes and immediate feedback on answers.
-  - Score tracking and leaderboards.
-  - Admin interface for adding, editing and deleting quiz questions.
-
-3. **Image Gallery**:
-
-- **Technology**: Dropzone.js for file uploading, Reactj.js for the front-end, Node.js for the back-end.
 
 - **Features**:
+  - Shuffled choices on exam start.
+  - Timed exams: server-side timer reflected in UI. 
+  - Immediate notification feedback on quiz score.
+  - Admin priviliges for adding, editing and deleting quiz questions.
+  - Classroom enrollment and access to classroom quizzes. Classroom and user quizzes, as well as the exam feedback stored in database (MongoDB).
 
-  - User authentication to manage who can upload and view iamges.
-  - Image upladodoing with drag-and-drop funcitonality.
-  - Categorize and tag images for easy searching and organization.
-  - Ability to comment on and like imges.
-  - Image metadata storage and retrieval from a database.
 
 ## **Technical Stack**:
 
@@ -61,9 +51,8 @@ This project is a boilerplate and will be subject to change according to impleme
 - **Back-end**:
 
   - Node.js with Express.js for server-side logc
-  - Socket.IO for real-time chat functionalitu
-  - MongoDB for storing user data, chat history, quiz questions, and images
-  - Firebase for optional real-time database and authentication features
+  - Socket.IO for real-time features
+  - MongoDB for storing persistent user data: chat history, quiz questions, and exam feedback
 
 ## Installation
 
@@ -77,7 +66,10 @@ This project is a boilerplate and will be subject to change according to impleme
 2. **Install dependencies:**
 
    ```sh
-   npm install express
+   npm install
+
+   cd frontend
+   npm install
    ```
 
 3. **Set up development environment variables:**
@@ -85,10 +77,23 @@ This project is a boilerplate and will be subject to change according to impleme
    Create a `.env` file in the root directory and add the following:
 
    ```env
+
+   # MongoDB connection URI
    MONGODB_URI=your_mongodb_uri
+
+   # Server configuration
+   SERVER_PORT=your_port_number
+   DATABASE_NAME=your_database_name
+   NODE_ENV=development
+
+   # JWT secret key for authentication
    JWT_SECRET=your_jwt_secret
-   FIREBASE_API_KEY=your_firebase_api_key
-   FIREBASE_AUTH_DOMAIN=your_firebase_auth_domain
+
+   # Cloudinary credentials for image upload
+   CLOUDINARY_CLOUD_NAME=<your_cloud_name>
+   CLOUDINARY_API_KEY=<your_api_key>
+   CLOUDINARY_API_SECRET=<your_api_secret>
+
    ```   
 
 4. **Start the server:**
@@ -100,6 +105,7 @@ This project is a boilerplate and will be subject to change according to impleme
 5. **Start the client:**
 
    ```sh
+   cd frontend
    npm run client
    ```
 
