@@ -1,8 +1,11 @@
 import { act } from "react";
-import { render, screen } from "@testing-library/react";
+import { render, fireEvent, screen } from "@testing-library/react";
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import Quiz from "../../../pages/Quiz";
+import {
+  createExam,
+} from "../../../features/quizzes/exam/examSlice.js";
 import socketEventManager from "../../../features/socket/managers/socket.eventManager.js";
 
 const mockUser = {
@@ -31,8 +34,6 @@ const socketEvents = { "exam created": mockExamCreated };
 
 jest.mock("react-router-dom", () => ({
   ...jest.requireActual("react-router-dom"),
-  useNavigate: () => jest.fn(),
-  useParams: () => jest.fn(),
   useNavigate: () => mockNavigate,
   useParams: () => ({
     quizId: mockQuiz._id,
@@ -44,10 +45,11 @@ jest.mock("react-redux", () => ({
   useDispatch: () => mockDispatch,
 }));
 
-jest.mock("../../../features/socket/managers/socket.eventManager.js", () => ({
-  subscribe: jest.fn(),
-  unsubscribe: jest.fn(),
-  handleEmitEvent: jest.fn(),
+jest.mock("../../../features/quizzes/exam/examSlice.js", () => ({
+  createExam: jest.fn((examData) => ({
+    type: "exam/createExam",
+    payload: examData,
+  })),
 }));
 
 const initialState = {
@@ -115,5 +117,46 @@ describe("Quiz Component", () => {
 
     expect(socketEventManager.subscribe).toHaveBeenCalled();
     expect(socketEventManager.handleEmitEvent).not.toHaveBeenCalled();
+  });
+
+  it("should successfully emit `create exam` socket event", () => {
+    renderWithStore(<Quiz />, {
+      quizzes: [mockQuiz],
+    });
+
+    const startBtn = screen.getByRole("button", { name: /start exam/i });
+    fireEvent.click(startBtn);
+
+    expect(socketEventManager.handleEmitEvent).toHaveBeenCalledWith(
+      "create exam",
+      {
+        senderId: mockUser._id,
+        quizId: mockQuiz._id,
+      }
+    );
+  });
+
+  it("should dispatch createExam and navigate on 'exam created' event", () => {
+    renderWithStore(<Quiz />, {
+      quizzes: [mockQuiz],
+    });
+
+    const subscribeCall = socketEventManager.subscribe.mock.calls.find(
+      ([eventName]) => eventName === "exam created"
+    );
+    const callback = subscribeCall[1];
+
+    const mockData = { _id: mockExam._id, quizId: mockQuiz._id };
+
+    callback(mockData);
+
+    expect(mockDispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: "exam/createExam",
+        payload: mockData,
+      })
+    );
+
+    expect(mockNavigate).toHaveBeenCalledWith(`/exam/${mockData._id}`);
   });
 });
