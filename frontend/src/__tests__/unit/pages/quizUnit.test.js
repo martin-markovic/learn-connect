@@ -5,15 +5,43 @@ import { configureStore } from "@reduxjs/toolkit";
 import Quiz from "../../../pages/Quiz";
 import socketEventManager from "../../../features/socket/managers/socket.eventManager.js";
 
+const mockUser = {
+  _id: "userId_1",
+};
+
+const quizFeedback = { _id: "quizFeedbackId_1", highScore: 2 };
+
+const mockQuiz = {
+  _id: "quizId_1",
+  title: "Mock Quiz 1",
+  questions: [{}, {}, {}, {}, {}],
+  timeLimit: 4,
+};
+
+const mockExam = {
+  _id: "examId_1",
+};
+
+const mockNavigate = jest.fn();
+const mockDispatch = jest.fn();
+
+const mockExamCreated = jest.fn();
+
+const socketEvents = { "exam created": mockExamCreated };
+
 jest.mock("react-router-dom", () => ({
   ...jest.requireActual("react-router-dom"),
   useNavigate: () => jest.fn(),
   useParams: () => jest.fn(),
+  useNavigate: () => mockNavigate,
+  useParams: () => ({
+    quizId: mockQuiz._id,
+  }),
 }));
 
 jest.mock("react-redux", () => ({
   ...jest.requireActual("react-redux"),
-  useDispatch: () => jest.fn(),
+  useDispatch: () => mockDispatch,
 }));
 
 jest.mock("../../../features/socket/managers/socket.eventManager.js", () => ({
@@ -21,10 +49,6 @@ jest.mock("../../../features/socket/managers/socket.eventManager.js", () => ({
   unsubscribe: jest.fn(),
   handleEmitEvent: jest.fn(),
 }));
-
-const mockUser = {
-  _id: "userId_1",
-};
 
 const initialState = {
   isLoading: false,
@@ -38,7 +62,7 @@ const createMockStore = (initState = initialState) => {
       auth: (state, action) => {
         state = {
           ...initState,
-          user: null,
+          user: mockUser,
         };
 
         return state;
@@ -60,23 +84,22 @@ const createMockStore = (initState = initialState) => {
 const renderWithStore = (component, initialState) => {
   const store = createMockStore(initialState);
 
-  let result;
-  act(() => {
-    result = render(<Provider store={store}>{component}</Provider>);
-  });
-
-  return result;
+  return render(<Provider store={store}>{component}</Provider>);
 };
 
 describe("Quiz Component", () => {
+  beforeAll(() => {
+    for (const [evtName, cb] of Object.entries(socketEvents)) {
+      socketEventManager.subscribe(evtName, cb);
+    }
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it("should render quiz data and ", () => {
-    renderWithStore(<Quiz />, {
-      auth: { user: mockUser._id },
-    });
+  it("should render initial loading state with the available quiz info", () => {
+    renderWithStore(<Quiz />);
 
     expect(
       screen.getByText(/loading quizzes, please wait/i)
