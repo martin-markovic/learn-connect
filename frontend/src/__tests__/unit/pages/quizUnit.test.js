@@ -7,7 +7,12 @@ import {
   createExam,
   getExam,
   getExamFeedback,
+  resetExam,
 } from "../../../features/quizzes/exam/examSlice.js";
+import {
+  getClassQuizzes,
+  resetQuizzes,
+} from "../../../features/quizzes/quizSlice.js";
 import socketEventManager from "../../../features/socket/managers/socket.eventManager.js";
 
 const mockUser = {
@@ -76,8 +81,39 @@ jest.mock("../../../features/quizzes/exam/examSlice.js", () => ({
     type: "exam/getExamFeedback",
     payload: {},
   })),
+
+  resetExam: jest.fn(() => ({
+    type: "exam/resetExam",
+    payload: {
+      isLoading: false,
+      isSuccess: false,
+      isError: false,
+      examData: null,
+      quizFeedback: null,
+    },
+  })),
 }));
 
+jest.mock("../../../features/quizzes/quizSlice.js", () => ({
+  getClassQuizzes: jest.fn(() => ({
+    type: "quizzes/getClassQuizzes",
+    payload: {
+      isLoading: false,
+      isSuccess: true,
+      classQuizzes: [mockQuiz],
+    },
+  })),
+
+  resetQuizzes: jest.fn(() => ({
+    type: "quizzes/resetQuizzes",
+    payload: {
+      isLoading: false,
+      isSuccess: false,
+      isError: false,
+      classQuizzes: [],
+    },
+  })),
+}));
 
 const createMockStore = (initState = initialState) => {
   return configureStore({
@@ -162,6 +198,25 @@ describe("Quiz Component", () => {
     );
   });
 
+  it("should cleanup state on component unmount", () => {
+    const { unmount } = renderWithStore(<Quiz />);
+    unmount();
+
+    expect(mockDispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: "quizzes/resetQuizzes",
+        payload: { ...quizInitialState },
+      })
+    );
+
+    expect(mockDispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: "exam/resetExam",
+        payload: { ...examInitialState },
+      })
+    );
+  });
+
   it("should dispatch createExam and navigate on 'exam created' event", () => {
     renderWithStore(<Quiz />, {
       quizzes: [mockQuiz],
@@ -170,6 +225,7 @@ describe("Quiz Component", () => {
     const subscribeCall = socketEventManager.subscribe.mock.calls.find(
       ([eventName]) => eventName === "exam created"
     );
+
     const callback = subscribeCall[1];
 
     const mockData = { _id: mockExam._id, quizId: mockQuiz._id };
