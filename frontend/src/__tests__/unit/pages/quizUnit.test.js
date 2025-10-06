@@ -154,91 +154,106 @@ describe("Quiz Component", () => {
     jest.clearAllMocks();
   });
 
-  it("should render initial loading state with the available quiz info", () => {
-    renderWithStore(<Quiz />);
+  describe("mount and unmount behavior", () => {
+    it("should render initial loading state with the available quiz info", () => {
+      renderWithStore(<Quiz />);
 
-    expect(
-      screen.getByText(/loading quizzes, please wait/i)
-    ).toBeInTheDocument();
+      expect(
+        screen.getByText(/loading quizzes, please wait/i)
+      ).toBeInTheDocument();
 
-    expect(
-      screen.getByText(/you have not taken this quiz yet/i)
-    ).toBeInTheDocument();
+      expect(
+        screen.getByText(/you have not taken this quiz yet/i)
+      ).toBeInTheDocument();
 
-    const startBtn = screen.getByRole("button", { name: /start exam/i });
-    expect(startBtn).toBeInTheDocument();
-    expect(startBtn).toBeEnabled();
+      const startBtn = screen.getByRole("button", { name: /start exam/i });
+      expect(startBtn).toBeInTheDocument();
+      expect(startBtn).toBeEnabled();
 
-    expect(socketEventManager.subscribe).toHaveBeenCalled();
-    expect(socketEventManager.handleEmitEvent).not.toHaveBeenCalled();
+      expect(socketEventManager.subscribe).toHaveBeenCalled();
+      expect(socketEventManager.handleEmitEvent).not.toHaveBeenCalled();
 
-    expect(mockDispatch).toHaveBeenCalledWith(
-      expect.objectContaining({ type: "exam/getExam" })
-    );
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({ type: "exam/getExam" })
+      );
 
-    expect(mockDispatch).toHaveBeenCalledWith(
-      expect.objectContaining({ type: "exam/getExamFeedback" })
-    );
-  });
-
-  it("should successfully emit `create exam` socket event", () => {
-    renderWithStore(<Quiz />, {
-      quizzes: [mockQuiz],
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({ type: "exam/getExamFeedback" })
+      );
     });
 
-    const startBtn = screen.getByRole("button", { name: /start exam/i });
-    fireEvent.click(startBtn);
+    it("should cleanup state on component unmount", () => {
+      const { unmount } = renderWithStore(<Quiz />);
+      unmount();
 
-    expect(socketEventManager.handleEmitEvent).toHaveBeenCalledWith(
-      "create exam",
-      {
-        senderId: mockUser._id,
-        quizId: mockQuiz._id,
-      }
-    );
-  });
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "quizzes/resetQuizzes",
+          payload: { ...quizInitialState },
+        })
+      );
 
-  it("should cleanup state on component unmount", () => {
-    const { unmount } = renderWithStore(<Quiz />);
-    unmount();
-
-    expect(mockDispatch).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: "quizzes/resetQuizzes",
-        payload: { ...quizInitialState },
-      })
-    );
-
-    expect(mockDispatch).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: "exam/resetExam",
-        payload: { ...examInitialState },
-      })
-    );
-  });
-
-  it("should dispatch createExam and navigate on 'exam created' event", () => {
-    renderWithStore(<Quiz />, {
-      quizzes: [mockQuiz],
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "exam/resetExam",
+          payload: { ...examInitialState },
+        })
+      );
     });
 
-    const subscribeCall = socketEventManager.subscribe.mock.calls.find(
-      ([eventName]) => eventName === "exam created"
-    );
+    it("should unsubscribe to socket events", () => {
+      const { unmount } = renderWithStore(<Quiz />);
+      unmount();
 
-    const callback = subscribeCall[1];
+      expect(socketEventManager.unsubscribe).toHaveBeenCalled();
 
-    const mockData = { _id: mockExam._id, quizId: mockQuiz._id };
+      expect(socketEventManager.unsubscribe).toHaveBeenCalledWith(
+        "exam created"
+      );
+    });
+  });
 
-    callback(mockData);
+  describe("socket reactivity behavior", () => {
+    it("should successfully emit `create exam` socket event", () => {
+      renderWithStore(<Quiz />, {
+        quizzes: [mockQuiz],
+      });
 
-    expect(mockDispatch).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: "exam/createExam",
-        payload: mockData,
-      })
-    );
+      const startBtn = screen.getByRole("button", { name: /start exam/i });
+      fireEvent.click(startBtn);
 
-    expect(mockNavigate).toHaveBeenCalledWith(`/exam/${mockData._id}`);
+      expect(socketEventManager.handleEmitEvent).toHaveBeenCalledWith(
+        "create exam",
+        {
+          senderId: mockUser._id,
+          quizId: mockQuiz._id,
+        }
+      );
+    });
+
+    it("should dispatch createExam and navigate on 'exam created' event", () => {
+      renderWithStore(<Quiz />, {
+        quizzes: [mockQuiz],
+      });
+
+      const subscribeCall = socketEventManager.subscribe.mock.calls.find(
+        ([eventName]) => eventName === "exam created"
+      );
+
+      const callback = subscribeCall[1];
+
+      const mockData = { _id: mockExam._id, quizId: mockQuiz._id };
+
+      callback(mockData);
+
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "exam/createExam",
+          payload: mockData,
+        })
+      );
+
+      expect(mockNavigate).toHaveBeenCalledWith(`/exam/${mockData._id}`);
+    });
   });
 });
