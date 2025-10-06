@@ -5,6 +5,8 @@ import { configureStore } from "@reduxjs/toolkit";
 import Quiz from "../../../pages/Quiz";
 import {
   createExam,
+  getExam,
+  getExamFeedback,
 } from "../../../features/quizzes/exam/examSlice.js";
 import socketEventManager from "../../../features/socket/managers/socket.eventManager.js";
 
@@ -32,6 +34,20 @@ const mockExamCreated = jest.fn();
 
 const socketEvents = { "exam created": mockExamCreated };
 
+const initialState = {
+  isLoading: false,
+  isSuccess: false,
+  isError: false,
+};
+
+const setupState = (stateProps) => {
+  return { ...initialState, ...stateProps };
+};
+
+const authInitialState = setupState({ user: mockUser });
+const quizInitialState = setupState({ classQuizzes: [] });
+const examInitialState = setupState({ examData: null, quizFeedback: null });
+
 jest.mock("react-router-dom", () => ({
   ...jest.requireActual("react-router-dom"),
   useNavigate: () => mockNavigate,
@@ -50,32 +66,34 @@ jest.mock("../../../features/quizzes/exam/examSlice.js", () => ({
     type: "exam/createExam",
     payload: examData,
   })),
+
+  getExam: jest.fn(() => ({
+    type: "exam/getExam",
+    payload: {},
+  })),
+
+  getExamFeedback: jest.fn(() => ({
+    type: "exam/getExamFeedback",
+    payload: {},
+  })),
 }));
 
-const initialState = {
-  isLoading: false,
-  isSuccess: false,
-  isError: false,
-};
 
 const createMockStore = (initState = initialState) => {
   return configureStore({
     reducer: {
       auth: (state, action) => {
-        state = {
-          ...initState,
-          user: mockUser,
-        };
+        state = authInitialState;
 
         return state;
       },
       quizzes: (state, action) => {
-        state = { ...initState, classQuizzes: [] };
+        state = quizInitialState;
 
         return state;
       },
       exam: (state, action) => {
-        state = { ...initState, examData: null, quizFeedback: null };
+        state = examInitialState;
 
         return state;
       },
@@ -117,6 +135,14 @@ describe("Quiz Component", () => {
 
     expect(socketEventManager.subscribe).toHaveBeenCalled();
     expect(socketEventManager.handleEmitEvent).not.toHaveBeenCalled();
+
+    expect(mockDispatch).toHaveBeenCalledWith(
+      expect.objectContaining({ type: "exam/getExam" })
+    );
+
+    expect(mockDispatch).toHaveBeenCalledWith(
+      expect.objectContaining({ type: "exam/getExamFeedback" })
+    );
   });
 
   it("should successfully emit `create exam` socket event", () => {
