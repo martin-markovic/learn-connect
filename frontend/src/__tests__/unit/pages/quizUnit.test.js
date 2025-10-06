@@ -115,24 +115,12 @@ jest.mock("../../../features/quizzes/quizSlice.js", () => ({
   })),
 }));
 
-const createMockStore = (initState = initialState) => {
+const createMockStore = (initState = {}) => {
   return configureStore({
     reducer: {
-      auth: (state, action) => {
-        state = authInitialState;
-
-        return state;
-      },
-      quizzes: (state, action) => {
-        state = quizInitialState;
-
-        return state;
-      },
-      exam: (state, action) => {
-        state = examInitialState;
-
-        return state;
-      },
+      auth: (state = { ...authInitialState, ...initState.auth }) => state,
+      quizzes: (state = { ...quizInitialState, ...initState.quizzes }) => state,
+      exam: (state = { ...examInitialState, ...initState.exam }) => state,
     },
   });
 };
@@ -209,6 +197,41 @@ describe("Quiz Component", () => {
 
       expect(socketEventManager.unsubscribe).toHaveBeenCalledWith(
         "exam created"
+      );
+    });
+
+    it("should display quiz feedback if available", () => {
+      const examState = { ...examInitialState, quizFeedback };
+      renderWithStore(<Quiz />, {
+        quizzes: { ...quizInitialState, classQuizzes: [mockQuiz] },
+        exam: examState,
+      });
+
+      expect(screen.getByText(/Your highest score: 2/i)).toBeInTheDocument();
+
+      const resultBtn = screen.getByRole("button", { name: /here/i });
+      fireEvent.click(resultBtn);
+    });
+
+    it("should display in-progress exam message and navigation button if isInProgress is true", () => {
+      const examDataInProgress = { ...mockExam, isInProgress: true };
+
+      const examState = { ...examInitialState, examData: examDataInProgress };
+
+      renderWithStore(<Quiz />, { exam: examState });
+
+      expect(
+        screen.getByText(/exam is currently in progress/i)
+      ).toBeInTheDocument();
+
+      const navigateBtn = screen.getByRole("button", { name: /here/i });
+
+      expect(navigateBtn).toBeInTheDocument();
+      expect(navigateBtn).toBeEnabled();
+
+      fireEvent.click(navigateBtn);
+      expect(mockNavigate).toHaveBeenCalledWith(
+        `/exam/${examDataInProgress._id}`
       );
     });
   });
