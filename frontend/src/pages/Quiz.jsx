@@ -108,7 +108,7 @@ function Quiz() {
               </span>
             </div>
           ) : (
-            <p>You have not taken this quiz yet</p>
+            !isInProgress && <p>You have not taken this quiz yet</p>
           )}
           {!showFeedback &&
             (isInProgress ? (

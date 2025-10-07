@@ -1,6 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import notificationService from "./notificationService.js";
-import { handleSliceError } from "../redux.errorHandler.js";
 
 const initialState = {
   isLoading: false,
