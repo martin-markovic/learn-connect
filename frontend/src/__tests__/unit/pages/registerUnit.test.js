@@ -51,121 +51,110 @@ describe("Register Component", () => {
     jest.clearAllMocks();
   });
 
-  it("should render register form with fields", () => {
-    renderWithStore(<Register />);
+  describe("mount and unmount behavior should", () => {
+    it("render register form with fields", () => {
+      renderWithStore(<Register />);
 
-    expect(screen.getByPlaceholderText(/your name/i)).toBeInTheDocument();
-    expect(screen.getByPlaceholderText(/your email/i)).toBeInTheDocument();
-    expect(screen.getByPlaceholderText(/your password/i)).toBeInTheDocument();
-    expect(
-      screen.getByPlaceholderText(/confirm password/i)
-    ).toBeInTheDocument();
-  });
-
-  it("should successfully register user", () => {
-    renderWithStore(<Register />);
-
-    const nameInput = screen.getByPlaceholderText(/your name/i);
-    const emailInput = screen.getByPlaceholderText(/your email/i);
-    const passwordInput = screen.getByPlaceholderText(/your password/i);
-    const confirmPasswordInput =
-      screen.getByPlaceholderText(/confirm password/i);
-    const submitBtn = screen.getByDisplayValue(/register/i);
-
-    const { name, email, password, validPassword2 } = mockUser;
-
-    fireEvent.change(nameInput, { target: { value: name } });
-    fireEvent.change(emailInput, { target: { value: email } });
-    fireEvent.change(passwordInput, { target: { value: password } });
-    fireEvent.change(confirmPasswordInput, {
-      target: { value: validPassword2 },
+      expect(screen.getByPlaceholderText(/your name/i)).toBeInTheDocument();
+      expect(screen.getByPlaceholderText(/your email/i)).toBeInTheDocument();
+      expect(screen.getByPlaceholderText(/your password/i)).toBeInTheDocument();
+      expect(
+        screen.getByPlaceholderText(/confirm password/i)
+      ).toBeInTheDocument();
     });
-    fireEvent.click(submitBtn);
 
-    expect(registerUser).toHaveBeenCalledWith({
-      name,
-      email,
-      password,
-      password2: validPassword2,
+    it("disable submit button when loading", () => {
+      renderWithStore(<Register />, { isLoading: true });
+
+      const submitBtn = screen.getByDisplayValue(/register/i);
+      expect(submitBtn).toBeDisabled();
     });
   });
 
-  it("should update input values when user types", () => {
-    renderWithStore(<Register />);
+  describe("element behavior should", () => {
+    it("successfully register user", () => {
+      renderWithStore(<Register />);
 
-    const nameInput = screen.getByPlaceholderText(/your name/i);
-    fireEvent.change(nameInput, { target: { value: "John" } });
-    expect(nameInput.value).toBe("John");
-  });
+      const nameInput = screen.getByPlaceholderText(/your name/i);
+      const emailInput = screen.getByPlaceholderText(/your email/i);
+      const passwordInput = screen.getByPlaceholderText(/your password/i);
+      const confirmPasswordInput =
+        screen.getByPlaceholderText(/confirm password/i);
+      const submitBtn = screen.getByDisplayValue(/register/i);
 
-  it("should show error when submitting empty form", () => {
-    renderWithStore(<Register />);
+      const { name, email, password, validPassword2 } = mockUser;
 
-    const submitBtn = screen.getByDisplayValue(/register/i);
-    fireEvent.click(submitBtn);
+      fireEvent.change(nameInput, { target: { value: name } });
+      fireEvent.change(emailInput, { target: { value: email } });
+      fireEvent.change(passwordInput, { target: { value: password } });
+      fireEvent.change(confirmPasswordInput, {
+        target: { value: validPassword2 },
+      });
+      fireEvent.click(submitBtn);
 
-    expect(mockToast.error).toHaveBeenCalledWith("All fields are required");
-  });
-
-  it("should show error when submitting mismatching password fields", () => {
-    renderWithStore(<Register />);
-
-    const nameInput = screen.getByPlaceholderText(/your name/i);
-    const emailInput = screen.getByPlaceholderText(/your email/i);
-
-    const passwordInput = screen.getByPlaceholderText(/your password/i);
-    const confirmPasswordInput =
-      screen.getByPlaceholderText(/confirm password/i);
-    const submitBtn = screen.getByDisplayValue(/register/i);
-
-    const { name, email, password, invalidPassword2 } = mockUser;
-
-    fireEvent.change(nameInput, { target: { value: name } });
-
-    fireEvent.change(emailInput, { target: { value: email } });
-
-    fireEvent.change(passwordInput, { target: { value: password } });
-
-    fireEvent.change(confirmPasswordInput, {
-      target: { value: invalidPassword2 },
+      expect(registerUser).toHaveBeenCalledWith({
+        name,
+        email,
+        password,
+        password2: validPassword2,
+      });
     });
 
-    fireEvent.click(submitBtn);
+    it("update input values when user types", () => {
+      renderWithStore(<Register />);
 
-    expect(mockToast.error).toHaveBeenCalledWith("Passwords must match");
+      const nameInput = screen.getByPlaceholderText(/your name/i);
+      fireEvent.change(nameInput, { target: { value: "John" } });
+      expect(nameInput.value).toBe("John");
+    });
   });
 
-  it("should disable submit button when loading", () => {
-    renderWithStore(<Register />, { isLoading: true });
+  describe("should show error toast", () => {
+    it("when submitting empty form", () => {
+      renderWithStore(<Register />);
 
-    const submitBtn = screen.getByDisplayValue(/register/i);
-    expect(submitBtn).toBeDisabled();
-  });
+      const submitBtn = screen.getByDisplayValue(/register/i);
+      fireEvent.click(submitBtn);
 
-  it("should show error toast when submitting mismatching password fields", () => {
-    renderWithStore(<Register />, {
-      isError: true,
-      errorMessage: "Passwords must match",
+      expect(mockToast.error).toHaveBeenCalledWith("All fields are required");
     });
 
-    expect(mockToast.error).toHaveBeenCalledWith("Passwords must match");
-  });
+    it("when submitting mismatching password fields", () => {
+      renderWithStore(<Register />);
 
-  it("should show error toast when submitting an already registered email", () => {
-    renderWithStore(<Register />, {
-      isError: true,
-      errorMessage: "Email already registered",
+      const nameInput = screen.getByPlaceholderText(/your name/i);
+      const emailInput = screen.getByPlaceholderText(/your email/i);
+
+      const passwordInput = screen.getByPlaceholderText(/your password/i);
+      const confirmPasswordInput =
+        screen.getByPlaceholderText(/confirm password/i);
+      const submitBtn = screen.getByDisplayValue(/register/i);
+
+      const { name, email, password, invalidPassword2 } = mockUser;
+
+      fireEvent.change(nameInput, { target: { value: name } });
+
+      fireEvent.change(emailInput, { target: { value: email } });
+
+      fireEvent.change(passwordInput, { target: { value: password } });
+
+      fireEvent.change(confirmPasswordInput, {
+        target: { value: invalidPassword2 },
+      });
+
+      fireEvent.click(submitBtn);
+
+      expect(mockToast.error).toHaveBeenCalledWith("Passwords must match");
     });
 
-    expect(mockToast.error).toHaveBeenCalledWith("Email already registered");
-  });
+    it("on auth error", () => {
+      const errorMessage = "Auth error";
+      renderWithStore(<Register />, {
+        isError: true,
+        errorMessage,
+      });
 
-  it("should show error toast on server error", () => {
-    renderWithStore(<Register />, {
-      isError: true,
-      errorMessage: "Server error",
+      expect(mockToast.error).toHaveBeenCalledWith(errorMessage);
     });
-
-    expect(mockToast.error).toHaveBeenCalledWith("Server error");
   });
 });
