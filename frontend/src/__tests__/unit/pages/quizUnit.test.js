@@ -1,4 +1,3 @@
-import { act } from "react";
 import { render, fireEvent, screen } from "@testing-library/react";
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
@@ -14,6 +13,12 @@ import {
   resetQuizzes,
 } from "../../../features/quizzes/quizSlice.js";
 import socketEventManager from "../../../features/socket/managers/socket.eventManager.js";
+
+jest.mock("react-toastify", () => ({
+  toast: { error: jest.fn(), success: jest.fn() },
+}));
+
+const { toast: mockToast } = require("react-toastify");
 
 const mockUser = {
   _id: "userId_1",
@@ -277,6 +282,41 @@ describe("Quiz Component", () => {
       );
 
       expect(mockNavigate).toHaveBeenCalledWith(`/exam/${mockData._id}`);
+    });
+  });
+      const errorMessage = "Auth error";
+      renderWithStore(<Quiz />, {
+        auth: {
+          isError: true,
+          errorMessage,
+        },
+      });
+
+      expect(mockToast.error).toHaveBeenCalledWith(errorMessage);
+    });
+
+    it("exam error", () => {
+      const errorMessage = "Exam error";
+      renderWithStore(<Quiz />, {
+        exam: {
+          isError: true,
+          errorMessage,
+        },
+      });
+
+      expect(mockToast.error).toHaveBeenCalledWith(errorMessage);
+    });
+
+    it("quiz error", () => {
+      const errorMessage = "Quizz error";
+      renderWithStore(<Quiz />, {
+        quizzes: {
+          isError: true,
+          errorMessage,
+        },
+      });
+
+      expect(mockToast.error).toHaveBeenCalledWith(errorMessage);
     });
   });
 });
