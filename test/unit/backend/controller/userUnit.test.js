@@ -42,176 +42,188 @@ describe("User API", () => {
   });
 
   describe("registerUser", () => {
-    it("should register a user and verify it", async () => {
-      const mockReq = { body: { ...newUser } };
+    describe("when payload is valid and complete", () => {
+      it("should register a user and verify it", async () => {
+        const mockReq = { body: { ...newUser } };
 
-      await mockRegisterUser(mockReq, userRes);
+        await mockRegisterUser(mockReq, userRes);
 
-      expect(userRes.statusCode).to.equal(201);
+        expect(userRes.statusCode).to.equal(201);
 
-      expect(userRes.body.name).to.equal(newUser.name);
-      expect(userRes.body.email).to.equal(newUser.email);
-      expect(userRes.body).to.have.property("_id");
-      expect(userRes.body).to.have.property("token");
+        expect(userRes.body.name).to.equal(newUser.name);
+        expect(userRes.body.email).to.equal(newUser.email);
+        expect(userRes.body).to.have.property("_id");
+        expect(userRes.body).to.have.property("token");
+      });
     });
 
-    it("should return `Please add all fields` error message", async () => {
-      const invalidUser = { ...newUser };
-      invalidUser.name = undefined;
-      const mockReq = { body: invalidUser };
+    describe("when the request is invalid", () => {
+      it("should return `Please add all fields` error message", async () => {
+        const invalidUser = { ...newUser };
+        invalidUser.name = undefined;
+        const mockReq = { body: invalidUser };
 
-      await mockRegisterUser(mockReq, userRes);
+        await mockRegisterUser(mockReq, userRes);
 
-      expect(userRes.statusCode).to.equal(400);
+        expect(userRes.statusCode).to.equal(400);
 
-      expect(userRes.body.message).to.equal("Please add all fields");
-    });
+        expect(userRes.body.message).to.equal("Please add all fields");
+      });
 
-    it("should return `Passwords must match` error message", async () => {
-      const invalidUser = { ...newUser };
-      invalidUser.password = newUser.password + "0";
-      const mockReq = { body: invalidUser };
+      it("should return `Passwords must match` error message", async () => {
+        const invalidUser = { ...newUser };
+        invalidUser.password = newUser.password + "0";
+        const mockReq = { body: invalidUser };
 
-      await mockRegisterUser(mockReq, userRes);
+        await mockRegisterUser(mockReq, userRes);
 
-      expect(userRes.statusCode).to.equal(400);
+        expect(userRes.statusCode).to.equal(400);
 
-      expect(userRes.body.message).to.equal("Passwords must match");
-    });
+        expect(userRes.body.message).to.equal("Passwords must match");
+      });
 
-    it("should return `Email already registered` error message", async () => {
-      const invalidUser = { ...newUser };
-      invalidUser.email = UserData.mockUsers[0].email;
+      it("should return `Email already registered` error message", async () => {
+        const invalidUser = { ...newUser };
+        invalidUser.email = UserData.mockUsers[0].email;
 
-      const mockReq = { body: invalidUser };
+        const mockReq = { body: invalidUser };
 
-      await mockRegisterUser(mockReq, userRes);
+        await mockRegisterUser(mockReq, userRes);
 
-      expect(userRes.statusCode).to.equal(400);
+        expect(userRes.statusCode).to.equal(400);
 
-      expect(userRes.body.message).to.equal("Email already registered");
+        expect(userRes.body.message).to.equal("Email already registered");
+      });
     });
   });
 
   describe("loginUser", () => {
-    it("should login a user and verify it", async () => {
-      const mockReq = {
-        body: { email: newUser.email, password: newUser.password },
-      };
+    describe("when payload is valid and complete", () => {
+      it("should login a user and verify it", async () => {
+        const mockReq = {
+          body: { email: newUser.email, password: newUser.password },
+        };
 
-      await mockLoginUser(mockReq, userRes);
+        await mockLoginUser(mockReq, userRes);
 
-      expect(userRes.statusCode).to.equal(200);
+        expect(userRes.statusCode).to.equal(200);
 
-      expect(userRes.body.name).to.equal(newUser.name);
-      expect(userRes.body.email).to.equal(newUser.email);
-      expect(userRes.body).to.have.property("_id");
-      expect(userRes.body).to.have.property("token");
+        expect(userRes.body.name).to.equal(newUser.name);
+        expect(userRes.body.email).to.equal(newUser.email);
+        expect(userRes.body).to.have.property("_id");
+        expect(userRes.body).to.have.property("token");
+      });
     });
 
-    it("should return `Both email and password are required to log in` error message", async () => {
-      const invalidUser = { ...newUser };
-      invalidUser.email = undefined;
+    describe("when the request is invalid", () => {
+      it("should return `Both email and password are required to log in` error message", async () => {
+        const invalidUser = { ...newUser };
+        invalidUser.email = undefined;
 
-      const mockReq = { body: invalidUser };
+        const mockReq = { body: invalidUser };
 
-      await mockLoginUser(mockReq, userRes);
+        await mockLoginUser(mockReq, userRes);
 
-      expect(userRes.statusCode).to.equal(400);
+        expect(userRes.statusCode).to.equal(400);
 
-      expect(userRes.body.message).to.equal(
-        "Both email and password are required to log in"
-      );
-    });
+        expect(userRes.body.message).to.equal(
+          "Both email and password are required to log in"
+        );
+      });
 
-    it("should return `User not registered` error message", async () => {
-      const invalidUser = { ...newUser };
-      invalidUser.email = "invaliduser@gmail.com";
+      it("should return `User not registered` error message", async () => {
+        const invalidUser = { ...newUser };
+        invalidUser.email = "invaliduser@gmail.com";
 
-      const mockReq = { body: invalidUser };
+        const mockReq = { body: invalidUser };
 
-      await mockLoginUser(mockReq, userRes);
+        await mockLoginUser(mockReq, userRes);
 
-      expect(userRes.statusCode).to.equal(404);
+        expect(userRes.statusCode).to.equal(404);
 
-      expect(userRes.body.message).to.equal("User not registered");
-    });
+        expect(userRes.body.message).to.equal("User not registered");
+      });
 
-    it("should return `Invalid password` error message", async () => {
-      const invalidUser = { ...newUser };
-      invalidUser.password = newUser.password + "0";
+      it("should return `Invalid password` error message", async () => {
+        const invalidUser = { ...newUser };
+        invalidUser.password = newUser.password + "0";
 
-      const mockReq = { body: invalidUser };
+        const mockReq = { body: invalidUser };
 
-      await mockLoginUser(mockReq, userRes);
+        await mockLoginUser(mockReq, userRes);
 
-      expect(userRes.statusCode).to.equal(400);
+        expect(userRes.statusCode).to.equal(400);
 
-      expect(userRes.body.message).to.equal("Invalid password");
+        expect(userRes.body.message).to.equal("Invalid password");
+      });
     });
   });
 
   describe("updateUser", () => {
-    it("should update user data and verify it", async () => {
-      const updatedName = "Ben Cage";
-      const mockReq = {
-        body: {
-          name: updatedName,
-        },
-        user: { _id: UserData.mockUsers[0]._id },
-      };
+    describe("when payload is valid and complete", () => {
+      it("should update user data and verify it", async () => {
+        const updatedName = "Ben Cage";
+        const mockReq = {
+          body: {
+            name: updatedName,
+          },
+          user: { _id: UserData.mockUsers[0]._id },
+        };
 
-      await mockUpdateUser(mockReq, userRes);
+        await mockUpdateUser(mockReq, userRes);
 
-      expect(userRes.statusCode).to.equal(200);
+        expect(userRes.statusCode).to.equal(200);
 
-      expect(userRes.body.name).to.equal(updatedName);
-      expect(userRes.body.email).to.equal(existingUser.email);
-      expect(userRes.body._id).to.equal(existingUser._id);
+        expect(userRes.body.name).to.equal(updatedName);
+        expect(userRes.body.email).to.equal(existingUser.email);
+        expect(userRes.body._id).to.equal(existingUser._id);
+      });
+
+      it("should update user avatar and verify it", async () => {
+        const updatedAvatar = "newAvatar.png";
+        const mockReq = {
+          file: { path: updatedAvatar },
+          user: { _id: existingUser._id },
+          body: {},
+        };
+
+        await mockUpdateUser(mockReq, userRes);
+
+        expect(userRes.statusCode).to.equal(200);
+        expect(userRes.body._id).to.equal(existingUser._id);
+        expect(userRes.body.email).to.equal(existingUser.email);
+        expect(userRes.body.avatar).to.equal(updatedAvatar);
+      });
     });
 
-    it("should update user avatar and verify it", async () => {
-      const updatedAvatar = "newAvatar.png";
-      const mockReq = {
-        file: { path: updatedAvatar },
-        user: { _id: existingUser._id },
-        body: {},
-      };
+    describe("when the request is invalid", () => {
+      it("should return `Authentication required` error message", async () => {
+        const invalidUser = { ...newUser };
+        invalidUser._id = undefined;
 
-      await mockUpdateUser(mockReq, userRes);
+        const mockReq = { body: invalidUser };
 
-      expect(userRes.statusCode).to.equal(200);
-      expect(userRes.body._id).to.equal(existingUser._id);
-      expect(userRes.body.email).to.equal(existingUser.email);
-      expect(userRes.body.avatar).to.equal(updatedAvatar);
-    });
+        await mockUpdateUser(mockReq, userRes);
 
-    it("should return `Authentication required` error message", async () => {
-      const invalidUser = { ...newUser };
-      invalidUser._id = undefined;
+        expect(userRes.statusCode).to.equal(403);
 
-      const mockReq = { body: invalidUser };
+        expect(userRes.body.message).to.equal("Authentication required");
+      });
 
-      await mockUpdateUser(mockReq, userRes);
+      it("should return `Email already in use` error message", async () => {
+        const updatedEmail = "johndoe@gmail.com";
 
-      expect(userRes.statusCode).to.equal(403);
+        const mockReq = {
+          body: { email: updatedEmail },
+          user: { _id: MockUserModel.storage.users[1]._id },
+        };
 
-      expect(userRes.body.message).to.equal("Authentication required");
-    });
+        await mockUpdateUser(mockReq, userRes);
 
-    it("should return `Email already in use` error message", async () => {
-      const updatedEmail = "johndoe@gmail.com";
+        expect(userRes.statusCode).to.equal(409);
 
-      const mockReq = {
-        body: { email: updatedEmail },
-        user: { _id: MockUserModel.storage.users[1]._id },
-      };
-
-      await mockUpdateUser(mockReq, userRes);
-
-      expect(userRes.statusCode).to.equal(409);
-
-      expect(userRes.body.message).to.equal("Email already in use");
+        expect(userRes.body.message).to.equal("Email already in use");
+      });
     });
   });
 });

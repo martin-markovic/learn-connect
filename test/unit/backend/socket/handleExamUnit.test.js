@@ -70,6 +70,13 @@ describe("socket exam controllers", () => {
     userFactory.cleanupAll();
   });
 
+  /**
+   * 
+        describe("when payload is valid and complete", () => {});
+    
+        describe("when the request is invalid", () => {});
+   */
+
   describe("create exam", () => {
     it("should create a new exam and verify it", async () => {
       const models = {
