@@ -85,59 +85,66 @@ describe("Exam API", () => {
   });
 
   describe("getExam", () => {
-    it("should fetch an ongoing exam and verify it", async () => {
-      const mockReq = {
-        user: { _id: hasAnExamUser._id.toString() },
-      };
+    describe("when payload is valid and complete should", () => {
+      it("should fetch an ongoing exam and verify it", async () => {
+        const mockReq = {
+          user: { _id: hasAnExamUser._id.toString() },
+        };
 
-      await mockGetExam(mockReq, examRes);
+        await mockGetExam(mockReq, examRes);
 
-      expect(examRes.statusCode).to.equal(200);
-      for (const [key, value] of Object.entries(examRes.body)) {
-        expect(ongoingExam[key]).to.equal(value);
-      }
+        expect(examRes.statusCode).to.equal(200);
+        for (const [key, value] of Object.entries(examRes.body)) {
+          expect(ongoingExam[key]).to.equal(value);
+        }
+      });
+
+      it("should return an empty object for users without ongoing exams", async () => {
+        const mockReq = {
+          user: { _id: noExamsUser._id.toString() },
+        };
+
+        await mockGetExam(mockReq, examRes);
+
+        expect(examRes.statusCode).to.equal(200);
+        expect(examRes.body).to.be.an("object").that.is.empty;
+      });
     });
 
-    it("should return an empty object for users without ongoing exams", async () => {
-      const mockReq = {
-        user: { _id: noExamsUser._id.toString() },
-      };
+    describe("when the request is invalid should", () => {
+      it("should return a `Error fetching exam: User id is required` error message", async () => {
+        const mockReq = {
+          user: { _id: undefined },
+        };
 
-      await mockGetExam(mockReq, examRes);
+        await mockGetExam(mockReq, examRes);
 
-      expect(examRes.statusCode).to.equal(200);
-      expect(examRes.body).to.be.an("object").that.is.empty;
-    });
+        expect(examRes.statusCode).to.equal(403);
+        expect(examRes.body.message).to.equal(
+          "Error fetching exam: User id is required"
+        );
+      });
 
-    it("should return a `Error fetching exam: User id is required` error message", async () => {
-      const mockReq = {
-        user: { _id: undefined },
-      };
+      it("should return an empty object as an expired exam payload", async () => {
+        const mockReq = {
+          user: { _id: expiredExamUser._id.toString() },
+        };
 
-      await mockGetExam(mockReq, examRes);
+        await mockGetExam(mockReq, examRes);
 
-      expect(examRes.statusCode).to.equal(403);
-      expect(examRes.body.message).to.equal(
-        "Error fetching exam: User id is required"
-      );
-    });
+        expect(examRes.statusCode).to.equal(200);
+        expect(examRes.body).to.be.an("object").that.is.empty;
 
-    it("should return an empty object as an expired exam payload", async () => {
-      const mockReq = {
-        user: { _id: expiredExamUser._id.toString() },
-      };
-
-      await mockGetExam(mockReq, examRes);
-
-      expect(examRes.statusCode).to.equal(200);
-      expect(examRes.body).to.be.an("object").that.is.empty;
-
-      // mockGetExam deletes the stored expiredExam document
-      await MockExamModel.create(expiredExam);
+        // mockGetExam deletes the stored expiredExam document
+        await MockExamModel.create(expiredExam);
+      });
     });
   });
 
   describe("getExamFeedback", () => {
+    describe("when payload is valid and complete should", () => {});
+    describe("when the request is invalid should", () => {});
+
     it("should fetch the exam feedback and verify it", async () => {
       const mockReq = {
         params: { quizId: expiredExam.quizId.toString() },
@@ -195,66 +202,70 @@ describe("Exam API", () => {
   });
 
   describe("getExamScores", () => {
-    it("should fetch exam scores for request sender and verify them", async () => {
-      const mockReq = {
-        params: { friendId: expiredExamUser._id },
-        user: { _id: expiredExamUser._id },
-      };
+    describe("when payload is valid and complete should", () => {
+      it("fetch exam scores for request sender and verify them", async () => {
+        const mockReq = {
+          params: { friendId: expiredExamUser._id },
+          user: { _id: expiredExamUser._id },
+        };
 
-      await mockGetExamScores(mockReq, examRes);
+        await mockGetExamScores(mockReq, examRes);
 
-      expect(examRes.statusCode).to.equal(200);
-      expect(examRes.body.friendId.toString()).to.equal(
-        expiredExamUser._id.toString()
-      );
-      expect(examRes.body.scoreList[0]._id.toString()).to.equal(
-        mockScore._id.toString()
-      );
+        expect(examRes.statusCode).to.equal(200);
+        expect(examRes.body.friendId.toString()).to.equal(
+          expiredExamUser._id.toString()
+        );
+        expect(examRes.body.scoreList[0]._id.toString()).to.equal(
+          mockScore._id.toString()
+        );
+      });
+
+      it("fetch exam scores for another user and verify them", async () => {
+        const mockReq = {
+          params: { friendId: expiredExamUser._id },
+          user: { _id: noExamsUser._id },
+        };
+
+        await mockGetExamScores(mockReq, examRes);
+
+        expect(examRes.statusCode).to.equal(200);
+        expect(examRes.body.friendId.toString()).to.equal(
+          expiredExamUser._id.toString()
+        );
+        expect(examRes.body.scoreList[0]._id.toString()).to.equal(
+          mockScore._id.toString()
+        );
+      });
     });
 
-    it("should fetch exam scores for another user and verify them", async () => {
-      const mockReq = {
-        params: { friendId: expiredExamUser._id },
-        user: { _id: noExamsUser._id },
-      };
+    describe("when the request is invalid should", () => {
+      it("return a `User id is required` error message", async () => {
+        const mockReq = {
+          params: { friendId: expiredExamUser._id.toString() },
+          user: { _id: undefined },
+        };
 
-      await mockGetExamScores(mockReq, examRes);
+        await mockGetExamScores(mockReq, examRes);
 
-      expect(examRes.statusCode).to.equal(200);
-      expect(examRes.body.friendId.toString()).to.equal(
-        expiredExamUser._id.toString()
-      );
-      expect(examRes.body.scoreList[0]._id.toString()).to.equal(
-        mockScore._id.toString()
-      );
-    });
+        expect(examRes.statusCode).to.equal(403);
+        expect(examRes.body.message).to.equal(
+          "Error fetching exam scores: User id is required"
+        );
+      });
 
-    it("should return a `User id is required` error message", async () => {
-      const mockReq = {
-        params: { friendId: expiredExamUser._id.toString() },
-        user: { _id: undefined },
-      };
+      it("return a `Unindentified friend ID` error message", async () => {
+        const mockReq = {
+          params: { friendId: undefined },
+          user: { _id: noExamsUser._id.toString() },
+        };
 
-      await mockGetExamScores(mockReq, examRes);
+        await mockGetExamScores(mockReq, examRes);
 
-      expect(examRes.statusCode).to.equal(403);
-      expect(examRes.body.message).to.equal(
-        "Error fetching exam scores: User id is required"
-      );
-    });
-
-    it("should return a `Unindentified friend ID` error message", async () => {
-      const mockReq = {
-        params: { friendId: undefined },
-        user: { _id: noExamsUser._id.toString() },
-      };
-
-      await mockGetExamScores(mockReq, examRes);
-
-      expect(examRes.statusCode).to.equal(403);
-      expect(examRes.body.message).to.equal(
-        "Error fetching exam scores: Unindentified friend ID"
-      );
+        expect(examRes.statusCode).to.equal(403);
+        expect(examRes.body.message).to.equal(
+          "Error fetching exam scores: Unindentified friend ID"
+        );
+      });
     });
   });
 });

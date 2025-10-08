@@ -70,405 +70,452 @@ describe("socket exam controllers", () => {
     userFactory.cleanupAll();
   });
 
-  describe("create exam", () => {
-    it("should create a new exam and verify it", async () => {
-      const models = {
-        Quiz: quizFactory,
-        Classroom: classroomFactory,
-        Exam: examFactory,
-      };
-      const eventData = { senderId: hasExamUser._id, quizId: createdQuiz._id };
+  describe("createExam, when the request is", () => {
+    describe("valid and complete", () => {
+      it("should create a new exam and verify it", async () => {
+        const models = {
+          Quiz: quizFactory,
+          Classroom: classroomFactory,
+          Exam: examFactory,
+        };
+        const eventData = {
+          senderId: hasExamUser._id,
+          quizId: createdQuiz._id,
+        };
 
-      const response = await createExam(models, eventData);
+        const response = await createExam(models, eventData);
 
-      expect(response._id).to.equal("frdoc_1");
-      expect(response.quizId).to.equal(createdQuiz._id);
-      expect(response.studentId).to.equal(hasExamUser._id);
-      expect(response.studentId).to.equal(hasExamUser._id);
-      expect(response.examStart).to.not.be.null;
+        expect(response._id).to.equal("frdoc_1");
+        expect(response.quizId).to.equal(createdQuiz._id);
+        expect(response.studentId).to.equal(hasExamUser._id);
+        expect(response.studentId).to.equal(hasExamUser._id);
+        expect(response.examStart).to.not.be.null;
 
-      const examStart = new Date(response.examStart);
-      const examFinish = new Date(response.examFinish);
+        const examStart = new Date(response.examStart);
+        const examFinish = new Date(response.examFinish);
 
-      const timeDifferenceMs = examFinish - examStart;
-      const timeDifferenceMinutes = timeDifferenceMs / (1000 * 60);
+        const timeDifferenceMs = examFinish - examStart;
+        const timeDifferenceMinutes = timeDifferenceMs / (1000 * 60);
 
-      expect(timeDifferenceMinutes).to.equal(quizTimeLimit);
+        expect(timeDifferenceMinutes).to.equal(quizTimeLimit);
+      });
     });
 
-    it("should return a `Missing models` error message", async () => {
-      const models = {
-        Quiz: undefined,
-        Classroom: classroomFactory,
-        Exam: examFactory,
-      };
+    describe("invalid", () => {
+      it("should return a `Missing models` error message", async () => {
+        const models = {
+          Quiz: undefined,
+          Classroom: classroomFactory,
+          Exam: examFactory,
+        };
 
-      const eventData = { senderId: hasExamUser._id, quizId: createdQuiz._id };
+        const eventData = {
+          senderId: hasExamUser._id,
+          quizId: createdQuiz._id,
+        };
 
-      try {
-        await createExam(models, eventData);
-      } catch (error) {
-        expect(error.message).to.equal("Missing models");
-      }
-    });
-    it("should return a `User not authorized` error message", async () => {
-      const models = {
-        Quiz: quizFactory,
-        Classroom: classroomFactory,
-        Exam: examFactory,
-      };
+        try {
+          await createExam(models, eventData);
+        } catch (error) {
+          expect(error.message).to.equal("Missing models");
+        }
+      });
 
-      const eventData = { senderId: undefined, quizId: createdQuiz._id };
+      it("should return a `User not authorized` error message", async () => {
+        const models = {
+          Quiz: quizFactory,
+          Classroom: classroomFactory,
+          Exam: examFactory,
+        };
 
-      try {
-        await createExam(models, eventData);
-      } catch (error) {
-        expect(error.message).to.equal("User not authorized");
-      }
-    });
+        const eventData = { senderId: undefined, quizId: createdQuiz._id };
 
-    it("should return a `Quiz not found` error message", async () => {
-      const models = {
-        Quiz: quizFactory,
-        Classroom: classroomFactory,
-        Exam: examFactory,
-      };
+        try {
+          await createExam(models, eventData);
+        } catch (error) {
+          expect(error.message).to.equal("User not authorized");
+        }
+      });
 
-      const eventData = { senderId: hasExamUser._id, quizId: undefined };
+      it("should return a `Quiz not found` error message", async () => {
+        const models = {
+          Quiz: quizFactory,
+          Classroom: classroomFactory,
+          Exam: examFactory,
+        };
 
-      try {
-        await createExam(models, eventData);
-      } catch (error) {
-        expect(error.message).to.equal("Quiz not found");
-      }
-    });
+        const eventData = { senderId: hasExamUser._id, quizId: undefined };
 
-    it("should return a `Classroom not found` error message", async () => {
-      const models = {
-        Quiz: quizFactory,
-        Classroom: classroomFactory,
-        Exam: examFactory,
-      };
-      const originalClassroom = classroomFactory.getStorage().classrooms;
+        try {
+          await createExam(models, eventData);
+        } catch (error) {
+          expect(error.message).to.equal("Quiz not found");
+        }
+      });
 
-      await classroomFactory.deleteOne({ _id: originalClassroom._id });
+      it("should return a `Classroom not found` error message", async () => {
+        const models = {
+          Quiz: quizFactory,
+          Classroom: classroomFactory,
+          Exam: examFactory,
+        };
+        const originalClassroom = classroomFactory.getStorage().classrooms;
 
-      const eventData = { senderId: noExamUser._id, quizId: createdQuiz._id };
+        await classroomFactory.deleteOne({ _id: originalClassroom._id });
 
-      try {
-        await createExam(models, eventData);
-      } catch (error) {
-        expect(error.message).to.equal("Classroom not found");
-      }
+        const eventData = { senderId: noExamUser._id, quizId: createdQuiz._id };
 
-      await classroomFactory.create(originalClassroom);
-    });
+        try {
+          await createExam(models, eventData);
+        } catch (error) {
+          expect(error.message).to.equal("Classroom not found");
+        }
 
-    it("should return a `User is not enrolled in required classroom` error message", async () => {
-      const models = {
-        Quiz: quizFactory,
-        Classroom: classroomFactory,
-        Exam: examFactory,
-      };
+        await classroomFactory.create(originalClassroom);
+      });
 
-      const eventData = {
-        senderId: unEnrolledUser._id,
-        quizId: createdQuiz._id,
-      };
+      it("should return a `User is not enrolled in required classroom` error message", async () => {
+        const models = {
+          Quiz: quizFactory,
+          Classroom: classroomFactory,
+          Exam: examFactory,
+        };
 
-      try {
-        await createExam(models, eventData);
-      } catch (error) {
-        expect(error.message).to.equal(
-          "User is not enrolled in required classroom"
-        );
-      }
-    });
+        const eventData = {
+          senderId: unEnrolledUser._id,
+          quizId: createdQuiz._id,
+        };
 
-    it("should return a `User is already participating in an exam` error message", async () => {
-      const models = {
-        Quiz: quizFactory,
-        Classroom: classroomFactory,
-        Exam: examFactory,
-      };
+        try {
+          await createExam(models, eventData);
+        } catch (error) {
+          expect(error.message).to.equal(
+            "User is not enrolled in required classroom"
+          );
+        }
+      });
 
-      const eventData = {
-        senderId: hasExamUser._id,
-        quizId: createdQuiz._id,
-      };
+      it("should return a `User is already participating in an exam` error message", async () => {
+        const models = {
+          Quiz: quizFactory,
+          Classroom: classroomFactory,
+          Exam: examFactory,
+        };
 
-      try {
-        await createExam(models, eventData);
-      } catch (error) {
-        expect(error.message).to.equal(
-          "User is already participating in an exam"
-        );
-      }
-    });
+        const eventData = {
+          senderId: hasExamUser._id,
+          quizId: createdQuiz._id,
+        };
 
-    it("should return a `Database Failure: Unable to create new exam payload` error message", async () => {
-      const models = {
-        Quiz: quizFactory,
-        Classroom: classroomFactory,
-        Exam: examFactory,
-      };
+        try {
+          await createExam(models, eventData);
+        } catch (error) {
+          expect(error.message).to.equal(
+            "User is already participating in an exam"
+          );
+        }
+      });
 
-      const originalMethod = examFactory.save;
-      examFactory.save = () => {
-        return null;
-      };
+      it("should return a `Database Failure: Unable to create new exam payload` error message", async () => {
+        const models = {
+          Quiz: quizFactory,
+          Classroom: classroomFactory,
+          Exam: examFactory,
+        };
 
-      const examFound = examFactory.getStorage().exams[1];
+        const originalMethod = examFactory.save;
+        examFactory.save = () => {
+          return null;
+        };
 
-      await examFactory.deleteOne({ _id: examFound._id });
+        const examFound = examFactory.getStorage().exams[1];
 
-      const eventData = {
-        senderId: noExamUser._id,
-        quizId: createdQuiz._id,
-      };
+        await examFactory.deleteOne({ _id: examFound._id });
 
-      try {
-        await createExam(models, eventData);
-      } catch (error) {
-        expect(error.message).to.equal(
-          "Database Failure: Unable to create new exam payload"
-        );
-      }
+        const eventData = {
+          senderId: noExamUser._id,
+          quizId: createdQuiz._id,
+        };
 
-      examFactory.save = originalMethod;
+        try {
+          await createExam(models, eventData);
+        } catch (error) {
+          expect(error.message).to.equal(
+            "Database Failure: Unable to create new exam payload"
+          );
+        }
+
+        examFactory.save = originalMethod;
+      });
     });
   });
 
-  describe("update exam", () => {
-    it("should update the exam and verify it", async () => {
-      const models = { Exam: examFactory };
+  describe("update exam, when the request is", () => {
+    describe("valid and complete", () => {
+      it("should update the exam and verify it", async () => {
+        const models = { Exam: examFactory };
 
-      const updatedData = "test data";
-      const testIndex = 1;
-      const existingExam = examFactory.getStorage().exams[0];
+        const updatedData = "test data";
+        const testIndex = 1;
+        const existingExam = examFactory.getStorage().exams[0];
 
-      const examUpdates = { choiceIndex: testIndex, choiceData: updatedData };
+        const examUpdates = { choiceIndex: testIndex, choiceData: updatedData };
 
-      const eventData = { senderId: hasExamUser._id, examData: examUpdates };
+        const eventData = { senderId: hasExamUser._id, examData: examUpdates };
 
-      const response = await updateExam(models, eventData);
+        const response = await updateExam(models, eventData);
 
-      for (const [key, value] of Object.entries(response)) {
-        if (key === "answers") {
-          expect(response[key][testIndex]).to.equal(updatedData);
-        } else {
-          if (key in existingExam) {
-            expect(existingExam[key]).to.equal(value);
+        for (const [key, value] of Object.entries(response)) {
+          if (key === "answers") {
+            expect(response[key][testIndex]).to.equal(updatedData);
+          } else {
+            if (key in existingExam) {
+              expect(existingExam[key]).to.equal(value);
+            }
           }
         }
-      }
+      });
     });
 
-    it("should return a `update exam error: Missing models` error message", async () => {
-      const models = { Exam: undefined };
+    describe("invalid", () => {
+      it("should return a `update exam error: Missing models` error message", async () => {
+        const models = { Exam: undefined };
 
-      const updatedAnswer = "test data 2";
-      const testIndex = 1;
+        const updatedAnswer = "test data 2";
+        const testIndex = 1;
 
-      const examFound = examFactory.getStorage().exams[0];
-      const currentAnswer = examFound.answers[testIndex];
+        const examFound = examFactory.getStorage().exams[0];
+        const currentAnswer = examFound.answers[testIndex];
 
-      const examUpdates = { choiceIndex: testIndex, choiceData: updatedAnswer };
+        const examUpdates = {
+          choiceIndex: testIndex,
+          choiceData: updatedAnswer,
+        };
 
-      const eventData = { senderId: hasExamUser._id, examData: examUpdates };
+        const eventData = { senderId: hasExamUser._id, examData: examUpdates };
 
-      try {
-        await updateExam(models, eventData);
-      } catch (error) {
-        expect(error.message).to.equal("update exam error: Missing models");
-      }
+        try {
+          await updateExam(models, eventData);
+        } catch (error) {
+          expect(error.message).to.equal("update exam error: Missing models");
+        }
 
-      expect(currentAnswer).to.not.equal(updatedAnswer);
-    });
+        expect(currentAnswer).to.not.equal(updatedAnswer);
+      });
 
-    it("should return a `update exam error: Please provide valid exam data` error message", async () => {
-      const models = { Exam: examFactory };
+      it("should return a `update exam error: Please provide valid exam data` error message", async () => {
+        const models = { Exam: examFactory };
 
-      const updatedAnswer = "test data 2";
-      const testIndex = 1;
+        const updatedAnswer = "test data 2";
+        const testIndex = 1;
 
-      const examFound = examFactory.getStorage().exams[0];
-      const currentAnswer = examFound.answers[testIndex];
+        const examFound = examFactory.getStorage().exams[0];
+        const currentAnswer = examFound.answers[testIndex];
 
-      const eventData = { senderId: hasExamUser._id, examData: undefined };
+        const eventData = { senderId: hasExamUser._id, examData: undefined };
 
-      try {
-        await updateExam(models, eventData);
-      } catch (error) {
-        expect(error.message).to.equal(
-          "update exam error: Please provide valid exam data"
+        try {
+          await updateExam(models, eventData);
+        } catch (error) {
+          expect(error.message).to.equal(
+            "update exam error: Please provide valid exam data"
+          );
+        }
+
+        expect(currentAnswer).to.not.equal(updatedAnswer);
+      });
+
+      it("should return a `update exam error: Exam not found` error message", async () => {
+        const models = { Exam: examFactory };
+
+        const updatedAnswer = "test data 2";
+        const testIndex = 1;
+
+        const examFound = examFactory.getStorage().exams[0];
+        const currentAnswer = examFound.answers[testIndex];
+
+        const examUpdates = {
+          choiceIndex: testIndex,
+          choiceData: updatedAnswer,
+        };
+
+        const eventData = { senderId: "999", examData: examUpdates };
+
+        try {
+          await updateExam(models, eventData);
+        } catch (error) {
+          expect(error.message).to.equal("update exam error: Exam not found");
+        }
+
+        expect(currentAnswer).to.not.equal(updatedAnswer);
+      });
+
+      it("should return a `update exam error: Exam has expired` error message", async () => {
+        const models = { Exam: examFactory };
+
+        const updatedAnswer = "test data 2";
+        const testIndex = 1;
+
+        const examData = { senderId: hasExamUser._id, quizId: createdQuiz._id };
+
+        await finishExam(
+          {
+            models: {
+              Exam: examFactory,
+              Quiz: quizFactory,
+              Score: scoreFactory,
+            },
+          },
+          examData
         );
-      }
 
-      expect(currentAnswer).to.not.equal(updatedAnswer);
-    });
+        const examUpdates = {
+          choiceIndex: testIndex,
+          choiceData: updatedAnswer,
+        };
 
-    it("should return a `update exam error: Exam not found` error message", async () => {
-      const models = { Exam: examFactory };
+        const eventData = { senderId: hasExamUser._id, examData: examUpdates };
 
-      const updatedAnswer = "test data 2";
-      const testIndex = 1;
+        try {
+          await updateExam(models, eventData);
+        } catch (error) {
+          expect(error.message).to.equal("update exam error: Exam has expired");
+        }
+      });
 
-      const examFound = examFactory.getStorage().exams[0];
-      const currentAnswer = examFound.answers[testIndex];
+      it("should return a `update exam error: Database failure: unable to update exam` error message", async () => {
+        const currentMethod = examFactory.findByIdAndUpdate;
 
-      const examUpdates = { choiceIndex: testIndex, choiceData: updatedAnswer };
+        examFactory.findByIdAndUpdate = () => {
+          return null;
+        };
 
-      const eventData = { senderId: "999", examData: examUpdates };
+        const models = { Exam: examFactory };
 
-      try {
-        await updateExam(models, eventData);
-      } catch (error) {
-        expect(error.message).to.equal("update exam error: Exam not found");
-      }
+        const updatedAnswer = "test data 2";
+        const testIndex = 1;
 
-      expect(currentAnswer).to.not.equal(updatedAnswer);
-    });
+        const examUpdates = {
+          choiceIndex: testIndex,
+          choiceData: updatedAnswer,
+        };
 
-    it("should return a `update exam error: Exam has expired` error message", async () => {
-      const models = { Exam: examFactory };
+        const eventData = { senderId: hasExamUser._id, examData: examUpdates };
 
-      const updatedAnswer = "test data 2";
-      const testIndex = 1;
+        try {
+          await updateExam(models, eventData);
+        } catch (error) {
+          expect(error.message).to.equal(
+            "update exam error: Database failure: unable to update exam"
+          );
+        }
 
-      const examData = { senderId: hasExamUser._id, quizId: createdQuiz._id };
-
-      await finishExam(
-        {
-          models: { Exam: examFactory, Quiz: quizFactory, Score: scoreFactory },
-        },
-        examData
-      );
-
-      const examUpdates = { choiceIndex: testIndex, choiceData: updatedAnswer };
-
-      const eventData = { senderId: hasExamUser._id, examData: examUpdates };
-
-      try {
-        await updateExam(models, eventData);
-      } catch (error) {
-        expect(error.message).to.equal("update exam error: Exam has expired");
-      }
-    });
-
-    it("should return a `update exam error: Database failure: unable to update exam` error message", async () => {
-      const currentMethod = examFactory.findByIdAndUpdate;
-
-      examFactory.findByIdAndUpdate = () => {
-        return null;
-      };
-
-      const models = { Exam: examFactory };
-
-      const updatedAnswer = "test data 2";
-      const testIndex = 1;
-
-      const examUpdates = { choiceIndex: testIndex, choiceData: updatedAnswer };
-
-      const eventData = { senderId: hasExamUser._id, examData: examUpdates };
-
-      try {
-        await updateExam(models, eventData);
-      } catch (error) {
-        expect(error.message).to.equal(
-          "update exam error: Database failure: unable to update exam"
-        );
-      }
-
-      examFactory.findByIdAndUpdate = currentMethod;
+        examFactory.findByIdAndUpdate = currentMethod;
+      });
     });
   });
 
-  describe("finish exam", () => {
-    it("should finish the exam and verify it", async () => {
-      const models = {
-        Exam: examFactory,
-        Quiz: quizFactory,
-        Score: scoreFactory,
-      };
+  describe("finish exam, when the request is", () => {
+    describe("valid and complete", () => {
+      it("should finish the exam and verify it", async () => {
+        const models = {
+          Exam: examFactory,
+          Quiz: quizFactory,
+          Score: scoreFactory,
+        };
 
-      const userExam = examFactory
-        .getStorage()
-        .exams.find((item) => item.studentId === hasExamUser._id);
+        const userExam = examFactory
+          .getStorage()
+          .exams.find((item) => item.studentId === hasExamUser._id);
 
-      const eventData = { senderId: hasExamUser._id, quizId: createdQuiz._id };
+        const eventData = {
+          senderId: hasExamUser._id,
+          quizId: createdQuiz._id,
+        };
 
-      const response = await finishExam(models, eventData);
+        const response = await finishExam(models, eventData);
 
-      const examPayload = response.examPayload;
-      const scorePayload = examPayload.scorePayload;
+        const examPayload = response.examPayload;
+        const scorePayload = examPayload.scorePayload;
 
-      expect(response.success).to.equal(true);
+        expect(response.success).to.equal(true);
 
-      expect(examPayload.examId).to.equal(userExam._id);
+        expect(examPayload.examId).to.equal(userExam._id);
 
-      expect(scorePayload.user).to.equal(hasExamUser._id);
-      expect(scorePayload.quiz.quizId).to.equal(createdQuiz._id);
-      expect(scorePayload.quiz.quizTitle).to.equal(createdQuiz.title);
-      expect(scorePayload.examFeedback.userChoices).to.be.an("array").that.is
-        .empty;
-      expect(scorePayload.examFeedback).to.exist;
-      expect(scorePayload.highScore).to.exist;
-      expect(scorePayload.latestScore).to.exist;
-      expect(scorePayload._id).to.equal("frdoc_1");
+        expect(scorePayload.user).to.equal(hasExamUser._id);
+        expect(scorePayload.quiz.quizId).to.equal(createdQuiz._id);
+        expect(scorePayload.quiz.quizTitle).to.equal(createdQuiz.title);
+        expect(scorePayload.examFeedback.userChoices).to.be.an("array").that.is
+          .empty;
+        expect(scorePayload.examFeedback).to.exist;
+        expect(scorePayload.highScore).to.exist;
+        expect(scorePayload.latestScore).to.exist;
+        expect(scorePayload._id).to.equal("frdoc_1");
 
-      const storage = examFactory.getStorage().exams;
+        const storage = examFactory.getStorage().exams;
 
-      const examDeleted = storage.every(
-        (item) => item._id !== examPayload.examId
-      );
+        const examDeleted = storage.every(
+          (item) => item._id !== examPayload.examId
+        );
 
-      expect(examDeleted).to.equal(true);
+        expect(examDeleted).to.equal(true);
+      });
     });
 
-    it("should return a `Error finishing exam: Missing models` error message", async () => {
-      const models = {
-        Exam: undefined,
-        Quiz: quizFactory,
-        Score: scoreFactory,
-      };
+    describe("invalid", () => {
+      it("should return a `Error finishing exam: Missing models` error message", async () => {
+        const models = {
+          Exam: undefined,
+          Quiz: quizFactory,
+          Score: scoreFactory,
+        };
 
-      const eventData = { senderId: hasExamUser._id, quizId: createdQuiz._id };
+        const eventData = {
+          senderId: hasExamUser._id,
+          quizId: createdQuiz._id,
+        };
 
-      const response = await finishExam(models, eventData);
+        const response = await finishExam(models, eventData);
 
-      expect(response.success).to.equal(false);
-      expect(response.message).to.equal("Error finishing exam: Missing models");
-    });
+        expect(response.success).to.equal(false);
+        expect(response.message).to.equal(
+          "Error finishing exam: Missing models"
+        );
+      });
 
-    it("should return a `Error finishing exam: Exam not found` error message for non-existent exam queries", async () => {
-      const models = {
-        Exam: examFactory,
-        Quiz: quizFactory,
-        Score: scoreFactory,
-      };
+      it("should return a `Error finishing exam: Exam not found` error message for non-existent exam queries", async () => {
+        const models = {
+          Exam: examFactory,
+          Quiz: quizFactory,
+          Score: scoreFactory,
+        };
 
-      const eventData = { senderId: undefined, quizId: createdQuiz._id };
+        const eventData = { senderId: undefined, quizId: createdQuiz._id };
 
-      const response = await finishExam(models, eventData);
+        const response = await finishExam(models, eventData);
 
-      expect(response.success).to.equal(false);
-      expect(response.message).to.equal("Error finishing exam: Exam not found");
-    });
+        expect(response.success).to.equal(false);
+        expect(response.message).to.equal(
+          "Error finishing exam: Exam not found"
+        );
+      });
 
-    it("should return a `Error finishing exam: Exam not found` error message for expired exam queries", async () => {
-      const models = {
-        Exam: examFactory,
-        Quiz: quizFactory,
-        Score: scoreFactory,
-      };
+      it("should return a `Error finishing exam: Exam not found` error message for expired exam queries", async () => {
+        const models = {
+          Exam: examFactory,
+          Quiz: quizFactory,
+          Score: scoreFactory,
+        };
 
-      const eventData = { senderId: noExamUser._id, quizId: shortQuiz._id };
+        const eventData = { senderId: noExamUser._id, quizId: shortQuiz._id };
 
-      const response = await finishExam(models, eventData);
+        const response = await finishExam(models, eventData);
 
-      expect(response.success).to.equal(false);
-      expect(response.message).to.equal("Error finishing exam: Exam not found");
+        expect(response.success).to.equal(false);
+        expect(response.message).to.equal(
+          "Error finishing exam: Exam not found"
+        );
+      });
     });
   });
 });

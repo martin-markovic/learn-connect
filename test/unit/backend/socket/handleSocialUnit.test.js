@@ -4,9 +4,10 @@ import {
   handleProcessRequest,
   handleRemoveFriend,
   handleBlockUser,
-} from "../../../../backend/controller/socket/helpers/socket.friendController.js";
+} from "../../../../backend/controller/socket/controllers/socialControllers.js";
+// } from "../../../../backend/controller/socket/helpers/socket.friendController.js";
 import MockSocket from "../../../mocks/config/socket/mockSocket.js";
-import MockData from "../../../mocks/config/socket/mockData.js";
+import MockData from "../../../mocks/config/mockData.js";
 import MockSocketModel from "../../../mocks/config/socket/mockSocketModel.js";
 
 class FriendFactory extends MockSocketModel {
@@ -94,170 +95,179 @@ describe("socket social controller API", () => {
     mockFriendModel.cleanupAll();
   });
 
-  describe("send friend request", () => {
-    it("should create a new friend request and verify it", async () => {
-      const reqSender = mockUsers[1];
-      const reqReceiver = mockUsers[2];
-      const eventData = {
-        senderId: reqSender._id,
-        receiverId: reqReceiver._id,
-      };
+  describe("send friend request event, when the request is", () => {
+    describe("valid and complete", () => {
+      it("should create a new friend request and verify it", async () => {
+        const reqSender = mockUsers[1];
+        const reqReceiver = mockUsers[2];
+        const eventData = {
+          senderId: reqSender._id,
+          receiverId: reqReceiver._id,
+        };
 
-      const response = await handleNewRequest(FriendFactory, eventData);
+        const response = await handleNewRequest(FriendFactory, eventData);
 
-      expect(response._id).to.equal(
-        `frdoc_${mockFriendModel.storage.friends.length}`
-      );
-      expect(response.senderId).to.equal(reqSender._id);
-      expect(response.senderName).to.equal(reqSender.name);
-      expect(response.senderAvatar).to.equal(reqSender.avatar);
-      expect(response.receiverId).to.equal(reqReceiver._id);
-      expect(response.receiverName).to.equal(reqReceiver.name);
-      expect(response.receiverAvatar).to.equal(reqReceiver.avatar);
-      expect(response.status).to.equal("pending");
-    });
-
-    it("should return a `Friend request already pending` error message", async () => {
-      const reqSender = mockUsers[2];
-      const reqReceiver = mockUsers[3];
-      const eventData = {
-        senderId: reqSender._id,
-        receiverId: reqReceiver._id,
-      };
-
-      try {
-        await handleNewRequest(FriendFactory, eventData);
-        throw new Error("Expected function to throw an error");
-      } catch (error) {
-        expect(error.message).to.equal("Friend request already pending");
-      }
-    });
-
-    it("should return a `Please provide valid friend request data` error message", async () => {
-      const reqReceiver = mockUsers[3];
-      const eventData = {
-        senderId: undefined,
-        receiverId: reqReceiver._id,
-      };
-
-      try {
-        await handleNewRequest(FriendFactory, eventData);
-        throw new Error("Expected function to throw an error");
-      } catch (error) {
-        expect(error.message).to.equal(
-          "Please provide valid friend request data"
+        expect(response._id).to.equal(
+          `frdoc_${mockFriendModel.storage.friends.length}`
         );
-      }
+        expect(response.senderId).to.equal(reqSender._id);
+        expect(response.senderName).to.equal(reqSender.name);
+        expect(response.senderAvatar).to.equal(reqSender.avatar);
+        expect(response.receiverId).to.equal(reqReceiver._id);
+        expect(response.receiverName).to.equal(reqReceiver.name);
+        expect(response.receiverAvatar).to.equal(reqReceiver.avatar);
+        expect(response.status).to.equal("pending");
+      });
+    });
+
+    describe("invalid", () => {
+      it("should return a `Friend request already pending` error message", async () => {
+        const reqSender = mockUsers[2];
+        const reqReceiver = mockUsers[3];
+        const eventData = {
+          senderId: reqSender._id,
+          receiverId: reqReceiver._id,
+        };
+
+        try {
+          await handleNewRequest(FriendFactory, eventData);
+          throw new Error("Expected function to throw an error");
+        } catch (error) {
+          expect(error.message).to.equal("Friend request already pending");
+        }
+      });
+
+      it("should return a `Please provide valid friend request data` error message", async () => {
+        const reqReceiver = mockUsers[3];
+        const eventData = {
+          senderId: undefined,
+          receiverId: reqReceiver._id,
+        };
+
+        try {
+          await handleNewRequest(FriendFactory, eventData);
+          throw new Error("Expected function to throw an error");
+        } catch (error) {
+          expect(error.message).to.equal(
+            "Please provide valid friend request data"
+          );
+        }
+      });
     });
   });
 
-  describe("process friend request", () => {
-    it("should process the accepted request and verify it", async () => {
-      const reqSender = mockUsers[3];
-      const reqReceiver = mockUsers[2];
-      const updatedStatus = "accepted";
-      const eventData = {
-        senderId: reqSender._id,
-        receiverId: reqReceiver._id,
-        userResponse: updatedStatus,
-      };
+  describe("process friend request event, when the request is", () => {
+    describe("valid and complete", () => {
+      it("should process the accepted request and verify it", async () => {
+        const reqSender = mockUsers[3];
+        const reqReceiver = mockUsers[2];
+        const updatedStatus = "accepted";
+        const eventData = {
+          senderId: reqSender._id,
+          receiverId: reqReceiver._id,
+          userResponse: updatedStatus,
+        };
 
-      const response = await handleProcessRequest(FriendFactory, eventData);
+        const response = await handleProcessRequest(FriendFactory, eventData);
 
-      expect(response._id).to.equal(existingFriendship._id);
-      expect(response.status).to.equal(updatedStatus);
-      expect(response.receiverId).to.equal(reqReceiver._id);
-      expect(response.senderId).to.equal(reqSender._id);
+        expect(response._id).to.equal(existingFriendship._id);
+        expect(response.status).to.equal(updatedStatus);
+        expect(response.receiverId).to.equal(reqReceiver._id);
+        expect(response.senderId).to.equal(reqSender._id);
 
-      await mockFriendModel.deleteOne({ _id: response._id });
+        await mockFriendModel.deleteOne({ _id: response._id });
 
-      mockFriendModel.storage.friends[mockFriendModel.storage.friends.length] =
-        {
+        mockFriendModel.storage.friends[
+          mockFriendModel.storage.friends.length
+        ] = {
           _id: "frdoc_1",
           sender: mockUsers[3]._id,
           receiver: mockUserModel.storage.users[2]._id,
           status: "pending",
         };
+      });
+
+      it("should process the declined request and verify it", async () => {
+        const reqSender = mockUsers[2];
+        const reqReceiver = mockUsers[3];
+        const updatedStatus = "declined";
+
+        const eventData = {
+          senderId: reqSender._id,
+          receiverId: reqReceiver._id,
+          userResponse: updatedStatus,
+        };
+
+        const storageD = mockFriendModel.storage.friends;
+
+        const response = await handleProcessRequest(FriendFactory, eventData);
+
+        const existsInStorage = mockFriendModel.storage.friends.find(
+          (item) => item._id === response._id
+        );
+
+        expect(response._id).to.equal(existingFriendship._id);
+        expect(existsInStorage).to.equal(undefined);
+      });
     });
 
-    it("should process the declined request and verify it", async () => {
-      const reqSender = mockUsers[2];
-      const reqReceiver = mockUsers[3];
-      const updatedStatus = "declined";
+    describe("invalid", () => {
+      it("should return the `Please provide valid request data` error message", async () => {
+        const reqReceiver = mockUsers[2];
+        const updatedStatus = "accepted";
+        const eventData = {
+          senderId: undefined,
+          receiverId: reqReceiver._id,
+          userResponse: updatedStatus,
+        };
 
-      const eventData = {
-        senderId: reqSender._id,
-        receiverId: reqReceiver._id,
-        userResponse: updatedStatus,
-      };
+        try {
+          await handleProcessRequest(FriendFactory, eventData);
+          throw new Error("Expected function to throw an error");
+        } catch (error) {
+          expect(error.message).to.equal("Please provide valid request data");
+        }
+      });
 
-      const storageD = mockFriendModel.storage.friends;
+      it("should return the `Invalid friend request status` error message", async () => {
+        const reqSender = mockUsers[3];
+        const reqReceiver = mockUsers[2];
+        const updatedStatus = "wrong";
+        const eventData = {
+          senderId: reqSender._id,
+          receiverId: reqReceiver._id,
+          userResponse: updatedStatus,
+        };
 
-      const response = await handleProcessRequest(FriendFactory, eventData);
+        try {
+          await handleProcessRequest(FriendFactory, eventData);
+          throw new Error("Expected function to throw an error");
+        } catch (error) {
+          expect(error.message).to.equal("Invalid friend request status");
+        }
+      });
 
-      const existsInStorage = mockFriendModel.storage.friends.find(
-        (item) => item._id === response._id
-      );
+      it("should return the `Friend request not found` error message", async () => {
+        const reqSender = mockUsers[1];
+        const reqReceiver = mockUsers[3];
+        const updatedStatus = "declined";
+        const eventData = {
+          senderId: reqSender._id,
+          receiverId: reqReceiver._id,
+          userResponse: updatedStatus,
+        };
 
-      expect(response._id).to.equal(existingFriendship._id);
-      expect(existsInStorage).to.equal(undefined);
-    });
-
-    it("should return the `Please provide valid request data` error message", async () => {
-      const reqReceiver = mockUsers[2];
-      const updatedStatus = "accepted";
-      const eventData = {
-        senderId: undefined,
-        receiverId: reqReceiver._id,
-        userResponse: updatedStatus,
-      };
-
-      try {
-        await handleProcessRequest(FriendFactory, eventData);
-        throw new Error("Expected function to throw an error");
-      } catch (error) {
-        expect(error.message).to.equal("Please provide valid request data");
-      }
-    });
-
-    it("should return the `Invalid friend request status` error message", async () => {
-      const reqSender = mockUsers[3];
-      const reqReceiver = mockUsers[2];
-      const updatedStatus = "wrong";
-      const eventData = {
-        senderId: reqSender._id,
-        receiverId: reqReceiver._id,
-        userResponse: updatedStatus,
-      };
-
-      try {
-        await handleProcessRequest(FriendFactory, eventData);
-        throw new Error("Expected function to throw an error");
-      } catch (error) {
-        expect(error.message).to.equal("Invalid friend request status");
-      }
-    });
-
-    it("should return the `Friend request not found` error message", async () => {
-      const reqSender = mockUsers[1];
-      const reqReceiver = mockUsers[3];
-      const updatedStatus = "declined";
-      const eventData = {
-        senderId: reqSender._id,
-        receiverId: reqReceiver._id,
-        userResponse: updatedStatus,
-      };
-
-      try {
-        await handleProcessRequest(FriendFactory, eventData);
-        throw new Error("Expected function to throw an error");
-      } catch (error) {
-        expect(error.message).to.equal("Friend request not found");
-      }
+        try {
+          await handleProcessRequest(FriendFactory, eventData);
+          throw new Error("Expected function to throw an error");
+        } catch (error) {
+          expect(error.message).to.equal("Friend request not found");
+        }
+      });
     });
   });
 
-  describe("remove friend", () => {
+  describe("remove friend event, when the request is", () => {
     it("should remove a friend document and verify it", async () => {
       const reqSender = mockUsers[1];
       const reqReceiver = mockUsers[2];
@@ -308,73 +318,77 @@ describe("socket social controller API", () => {
     });
   });
 
-  describe("block user", () => {
-    it("should change the existing friendship status to `blocked` and verify it", async () => {
-      const reqSender = mockUsers[1];
-      const reqReceiver = mockUsers[3];
+  describe("block user event, when the request is", () => {
+    describe("valid and complete", () => {
+      it("should change the existing friendship status to `blocked` and verify it", async () => {
+        const reqSender = mockUsers[1];
+        const reqReceiver = mockUsers[3];
 
-      const eventData = {
-        senderId: reqSender._id,
-        receiverId: reqReceiver._id,
-      };
+        const eventData = {
+          senderId: reqSender._id,
+          receiverId: reqReceiver._id,
+        };
 
-      const response = await handleBlockUser(
-        UserFactory,
-        FriendFactory,
-        eventData
-      );
+        const response = await handleBlockUser(
+          UserFactory,
+          FriendFactory,
+          eventData
+        );
 
-      expect(response).to.equal(reqReceiver._id);
+        expect(response).to.equal(reqReceiver._id);
+      });
+
+      it("should set the friendship status to `blocked` and verify it", async () => {
+        const reqSender = mockUsers[2];
+        const reqReceiver = mockUsers[3];
+
+        const eventData = {
+          senderId: reqSender._id,
+          receiverId: reqReceiver._id,
+        };
+
+        const response = await handleBlockUser(
+          UserFactory,
+          FriendFactory,
+          eventData
+        );
+
+        expect(response).to.equal(reqReceiver._id);
+      });
     });
 
-    it("should set the friendship status to `blocked` and verify it", async () => {
-      const reqSender = mockUsers[2];
-      const reqReceiver = mockUsers[3];
+    describe("invalid", () => {
+      it("should return the `Please provide valid client data` error message", async () => {
+        const reqReceiver = mockUsers[3];
 
-      const eventData = {
-        senderId: reqSender._id,
-        receiverId: reqReceiver._id,
-      };
+        const eventData = {
+          senderId: undefined,
+          receiverId: reqReceiver._id,
+        };
 
-      const response = await handleBlockUser(
-        UserFactory,
-        FriendFactory,
-        eventData
-      );
+        try {
+          await handleBlockUser(UserFactory, FriendFactory, eventData);
+          throw new Error("Expected function to throw an error");
+        } catch (error) {
+          expect(error.message).to.equal("Please provide valid client data");
+        }
+      });
 
-      expect(response).to.equal(reqReceiver._id);
-    });
+      it("should return the `User not found` error message", async () => {
+        const reqSender = mockUsers[1];
 
-    it("should return the `Please provide valid client data` error message", async () => {
-      const reqReceiver = mockUsers[3];
+        const eventData = {
+          senderId: reqSender._id,
+          receiverId: "1234",
+        };
 
-      const eventData = {
-        senderId: undefined,
-        receiverId: reqReceiver._id,
-      };
-
-      try {
-        await handleBlockUser(UserFactory, FriendFactory, eventData);
-        throw new Error("Expected function to throw an error");
-      } catch (error) {
-        expect(error.message).to.equal("Please provide valid client data");
-      }
-    });
-
-    it("should return the `User not found` error message", async () => {
-      const reqSender = mockUsers[1];
-
-      const eventData = {
-        senderId: reqSender._id,
-        receiverId: "1234",
-      };
-
-      try {
-        await handleBlockUser(UserFactory, FriendFactory, eventData);
-        throw new Error("Expected function to throw an error");
-      } catch (error) {
-        expect(error.message).to.equal("User not found");
-      }
+        try {
+          await handleBlockUser(UserFactory, FriendFactory, eventData);
+          throw new Error("Expected function to throw an error");
+        } catch (error) {
+          expect(error.message).to.equal("User not found");
+        }
+      });
     });
   });
 });

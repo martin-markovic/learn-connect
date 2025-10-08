@@ -10,17 +10,52 @@ import {
 } from "../features/quizzes/exam/examSlice.js";
 import QuizScore from "../components/exam/QuizScore.jsx";
 import socketEventManager from "../features/socket/managers/socket.eventManager.js";
+import { toast } from "react-toastify";
 
 function Quiz() {
   const [isInProgress, setIsInProgress] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
-  const { classQuizzes = [] } = useSelector((state) => state.quizzes);
-  const { user } = useSelector((state) => state.auth);
+  const {
+    isLoading: quizLoading,
+    isError: quizErr,
+    errorMessage: quizErrMessage,
+    classQuizzes = [],
+  } = useSelector((state) => state.quizzes);
+  const {
+    isLoading: authLoading,
+    isError: authErr,
+    errorMessage: authErrMessage,
+    user,
+  } = useSelector((state) => state.auth);
   const { quizId } = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { examData, quizFeedback } = useSelector((state) => state.exam);
+  const {
+    examData,
+    quizFeedback,
+    isLoading: examLoading,
+    isError: examErr,
+    errorMessage: examErrMessage,
+  } = useSelector((state) => state.exam);
+
+  useEffect(() => {
+    if (!examLoading && examErr) {
+      toast.error(examErrMessage);
+    }
+  }, [examLoading, examErr, examErrMessage]);
+
+  useEffect(() => {
+    if (!quizLoading && quizErr) {
+      toast.error(quizErrMessage);
+    }
+  }, [quizLoading, quizErr, quizErrMessage]);
+
+  useEffect(() => {
+    if (!authLoading && authErr) {
+      toast.error(authErrMessage);
+    }
+  }, [authLoading, authErr, authErrMessage]);
 
   useEffect(() => {
     socketEventManager.subscribe("exam created", (data) => {

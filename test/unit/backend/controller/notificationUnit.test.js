@@ -60,48 +60,52 @@ describe("Notification API", () => {
     mockNotificationModel.cleanupAll();
   });
 
-  describe("getNotifiations", () => {
-    it("should fetch unread notification list and verify it", async () => {
-      const mockReq = { params: { userId: mockUserOne._id } };
+  describe("getNotifications", () => {
+    describe("when payload is valid and complete", () => {
+      it("should fetch unread notification list and verify it", async () => {
+        const mockReq = { params: { userId: mockUserOne._id } };
 
-      await mockGetNotifications(mockReq, notificationRes);
+        await mockGetNotifications(mockReq, notificationRes);
 
-      const unreadNotification = mockNotificationList.filter(
-        (n) => n.isRead === false && n.receiver === mockUserOne._id
-      )[0];
+        const unreadNotification = mockNotificationList.filter(
+          (n) => n.isRead === false && n.receiver === mockUserOne._id
+        )[0];
 
-      expect(notificationRes.statusCode).to.equal(200);
-      expect(notificationRes.body.length).to.equal(1);
-      for (const [key, value] of Object.entries(notificationRes.body[0])) {
-        expect(unreadNotification[key]).to.equal(value);
-      }
+        expect(notificationRes.statusCode).to.equal(200);
+        expect(notificationRes.body.length).to.equal(1);
+        for (const [key, value] of Object.entries(notificationRes.body[0])) {
+          expect(unreadNotification[key]).to.equal(value);
+        }
+      });
     });
 
-    it("should fetch an empty array and verify it", async () => {
-      const mockReq = { params: { userId: mockUserThree._id } };
+    describe("when the request is invalid", () => {
+      it("should fetch an empty array and verify it", async () => {
+        const mockReq = { params: { userId: mockUserThree._id } };
 
-      await mockGetNotifications(mockReq, notificationRes);
+        await mockGetNotifications(mockReq, notificationRes);
 
-      expect(notificationRes.statusCode).to.equal(200);
-      expect(notificationRes.body.length).to.equal(0);
-    });
+        expect(notificationRes.statusCode).to.equal(200);
+        expect(notificationRes.body.length).to.equal(0);
+      });
 
-    it("should return a `User id is required` error message", async () => {
-      const mockReq = { params: { userId: undefined } };
+      it("should return a `User id is required` error message", async () => {
+        const mockReq = { params: { userId: undefined } };
 
-      await mockGetNotifications(mockReq, notificationRes);
+        await mockGetNotifications(mockReq, notificationRes);
 
-      expect(notificationRes.statusCode).to.equal(403);
-      expect(notificationRes.body.message).to.equal("User id is required");
-    });
+        expect(notificationRes.statusCode).to.equal(403);
+        expect(notificationRes.body.message).to.equal("User id is required");
+      });
 
-    it("should return a `User does not exist` error message", async () => {
-      const mockReq = { params: { userId: "99" } };
+      it("should return a `User does not exist` error message", async () => {
+        const mockReq = { params: { userId: "99" } };
 
-      await mockGetNotifications(mockReq, notificationRes);
+        await mockGetNotifications(mockReq, notificationRes);
 
-      expect(notificationRes.statusCode).to.equal(404);
-      expect(notificationRes.body.message).to.equal("User does not exist");
+        expect(notificationRes.statusCode).to.equal(404);
+        expect(notificationRes.body.message).to.equal("User does not exist");
+      });
     });
   });
 });

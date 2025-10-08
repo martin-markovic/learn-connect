@@ -64,85 +64,93 @@ describe("Friend API", () => {
   });
 
   describe("getFriendList", () => {
-    it("should fetch a friend list for sender and verify it", async () => {
-      const mockReq = { params: { userId: "0" }, user: { _id: "0" } };
+    describe("when payload is valid and complete", () => {
+      it("should fetch a friend list for sender and verify it", async () => {
+        const mockReq = { params: { userId: "0" }, user: { _id: "0" } };
 
-      await mockGetFriendList(mockReq, friendRes);
+        await mockGetFriendList(mockReq, friendRes);
 
-      expect(friendRes.statusCode).to.equal(200);
+        expect(friendRes.statusCode).to.equal(200);
 
-      expect(friendRes.body).to.be.an("array");
-      expect(friendRes.body.length).to.equal(2);
-      expect(friendRes.body[0].receiver.name).to.equal(receiverDoc.name);
-      expect(friendRes.body[0].sender.name).to.equal(senderDoc.name);
+        expect(friendRes.body).to.be.an("array");
+        expect(friendRes.body.length).to.equal(2);
+        expect(friendRes.body[0].receiver.name).to.equal(receiverDoc.name);
+        expect(friendRes.body[0].sender.name).to.equal(senderDoc.name);
+      });
+
+      it("should fetch a friend list for receiver and verify it", async () => {
+        const mockReq = { params: { userId: "1" }, user: { _id: "1" } };
+
+        await mockGetFriendList(mockReq, friendRes);
+
+        expect(friendRes.statusCode).to.equal(200);
+
+        expect(friendRes.body).to.be.an("array");
+        expect(friendRes.body.length).to.equal(2);
+        expect(friendRes.body[0].receiver.name).to.equal(receiverDoc.name);
+        expect(friendRes.body[0].sender.name).to.equal(senderDoc.name);
+      });
+
+      it("should fetch a friend list for mutual friend and verify it", async () => {
+        const mockReq = { params: { userId: "0" }, user: { _id: "2" } };
+
+        await mockGetFriendList(mockReq, friendRes);
+
+        expect(friendRes.statusCode).to.equal(200);
+
+        expect(friendRes.body).to.be.an("array");
+        expect(friendRes.body.length).to.equal(2);
+        expect(friendRes.body[1].sender.name).to.equal(senderDoc.name);
+        expect(friendRes.body[1].receiver.name).to.equal(mutualFriendDoc.name);
+      });
     });
 
-    it("should fetch a friend list for receiver and verify it", async () => {
-      const mockReq = { params: { userId: "1" }, user: { _id: "1" } };
+    describe("when the request is invalid", () => {
+      it("should return `User id is required` error message", async () => {
+        const mockReq = { params: { userId: undefined }, user: { _id: "1" } };
 
-      await mockGetFriendList(mockReq, friendRes);
+        await mockGetFriendList(mockReq, friendRes);
 
-      expect(friendRes.statusCode).to.equal(200);
+        expect(friendRes.statusCode).to.equal(403);
 
-      expect(friendRes.body).to.be.an("array");
-      expect(friendRes.body.length).to.equal(2);
-      expect(friendRes.body[0].receiver.name).to.equal(receiverDoc.name);
-      expect(friendRes.body[0].sender.name).to.equal(senderDoc.name);
-    });
+        expect(friendRes.body.message).to.equal("User id is required");
+      });
 
-    it("should fetch a friend list for mutual friend and verify it", async () => {
-      const mockReq = { params: { userId: "0" }, user: { _id: "2" } };
+      it("should return `User is not authenticated` error message", async () => {
+        const mockReq = { params: { userId: "0" }, user: { _id: undefined } };
 
-      await mockGetFriendList(mockReq, friendRes);
+        await mockGetFriendList(mockReq, friendRes);
 
-      expect(friendRes.statusCode).to.equal(200);
+        expect(friendRes.statusCode).to.equal(401);
 
-      expect(friendRes.body).to.be.an("array");
-      expect(friendRes.body.length).to.equal(2);
-      expect(friendRes.body[1].sender.name).to.equal(senderDoc.name);
-      expect(friendRes.body[1].receiver.name).to.equal(mutualFriendDoc.name);
-    });
-
-    it("should return `User id is required` error message", async () => {
-      const mockReq = { params: { userId: undefined }, user: { _id: "1" } };
-
-      await mockGetFriendList(mockReq, friendRes);
-
-      expect(friendRes.statusCode).to.equal(403);
-
-      expect(friendRes.body.message).to.equal("User id is required");
-    });
-
-    it("should return `User is not authenticated` error message", async () => {
-      const mockReq = { params: { userId: "0" }, user: { _id: undefined } };
-
-      await mockGetFriendList(mockReq, friendRes);
-
-      expect(friendRes.statusCode).to.equal(401);
-
-      expect(friendRes.body.message).to.equal("User is not authenticated");
+        expect(friendRes.body.message).to.equal("User is not authenticated");
+      });
     });
   });
 
   describe("getUserList", () => {
-    it("should fetch a userlist for sender and verify it", async () => {
-      const mockReq = { user: { _id: senderDoc } };
+    describe("when payload is valid and complete should", () => {
+      it("fetch a userlist for sender and verify it", async () => {
+        const mockReq = { user: { _id: senderDoc } };
 
-      await mockGetUserList(mockReq, friendRes);
+        await mockGetUserList(mockReq, friendRes);
 
-      expect(friendRes.statusCode).to.equal(200);
-      expect(friendRes.body.length).to.equal(2);
-      expect(friendRes.body[0].name).to.equal(senderDoc.name);
-      expect(friendRes.body[1].name).to.equal(receiverDoc.name);
+        expect(friendRes.statusCode).to.equal(200);
+        expect(friendRes.body.length).to.equal(2);
+        expect(friendRes.body[0].name).to.equal(senderDoc.name);
+        expect(friendRes.body[1].name).to.equal(receiverDoc.name);
+      });
     });
 
-    it("should return `User id is required` error message", async () => {
-      const mockReq = { user: { _id: undefined } };
+    describe("when the request is invalid should", () => {
+      it("return `User id is required` error message", async () => {
+        const mockReq = { user: { _id: undefined } };
 
-      await mockGetUserList(mockReq, friendRes);
+        await mockGetUserList(mockReq, friendRes);
 
-      expect(friendRes.statusCode).to.equal(403);
-      expect(friendRes.body.message).to.equal("User id is required");
+        expect(friendRes.statusCode).to.equal(403);
+        expect(friendRes.body.message).to.equal("User id is required");
+      });
     });
   });
 });

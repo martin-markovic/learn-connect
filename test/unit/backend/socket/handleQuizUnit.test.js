@@ -41,249 +41,253 @@ describe("socket quiz controllers", () => {
     userFactory.cleanupAll();
   });
 
-  describe("create quiz", () => {
-    it("should create a new quiz and verify it", async () => {
-      const models = {
-        User: userFactory,
-        Classroom: classroomFactory,
-        Quiz: quizFactory,
-      };
+  describe("create quiz, when the request is", () => {
+    describe("valid and complete", () => {
+      it("should create a new quiz and verify it", async () => {
+        const models = {
+          User: userFactory,
+          Classroom: classroomFactory,
+          Quiz: quizFactory,
+        };
 
-      const quizData = {
-        title: "mock quiz 1",
-        questions: [...quizStorage[0]],
-        timeLimit: 4,
-        classroomId: createdClassroom._id,
-      };
+        const quizData = {
+          title: "mock quiz 1",
+          questions: [...quizStorage[0]],
+          timeLimit: 4,
+          classroomId: createdClassroom._id,
+        };
 
-      const eventData = {
-        senderId: mockUser._id,
-        receiverId: createdClassroom._id,
-        quizData,
-      };
+        const eventData = {
+          senderId: mockUser._id,
+          receiverId: createdClassroom._id,
+          quizData,
+        };
 
-      const response = await createQuiz(models, eventData);
+        const response = await createQuiz(models, eventData);
 
-      expect(response.title).to.equal(quizData.title);
-      expect(response.timeLimit).to.equal(quizData.timeLimit);
-      expect(response.classroom).to.equal(quizData.classroomId);
-      expect(response.createdBy).to.equal(mockUser._id);
+        expect(response.title).to.equal(quizData.title);
+        expect(response.timeLimit).to.equal(quizData.timeLimit);
+        expect(response.classroom).to.equal(quizData.classroomId);
+        expect(response.createdBy).to.equal(mockUser._id);
 
-      expect(response.questions.length).to.equal(quizData.questions.length);
+        expect(response.questions.length).to.equal(quizData.questions.length);
 
-      for (let i = 0; i < quizData.questions.length; i++) {
-        expect(response.questions[i]).to.deep.equal(quizData.questions[i]);
-      }
+        for (let i = 0; i < quizData.questions.length; i++) {
+          expect(response.questions[i]).to.deep.equal(quizData.questions[i]);
+        }
+      });
     });
 
-    it("should return a `Error creating new quiz: Missing models` error message", async () => {
-      const models = {
-        User: undefined,
-        Classroom: classroomFactory,
-        Quiz: quizFactory,
-      };
+    describe("invalid", () => {
+      it("should return a `Error creating new quiz: Missing models` error message", async () => {
+        const models = {
+          User: undefined,
+          Classroom: classroomFactory,
+          Quiz: quizFactory,
+        };
 
-      const quizData = {
-        title: "mock quiz 2",
-        questions: [...quizStorage[0]],
-        timeLimit: 4,
-        classroomId: createdClassroom._id,
-      };
+        const quizData = {
+          title: "mock quiz 2",
+          questions: [...quizStorage[0]],
+          timeLimit: 4,
+          classroomId: createdClassroom._id,
+        };
 
-      const eventData = {
-        senderId: mockUser._id,
-        receiverId: createdClassroom._id,
-        quizData,
-      };
+        const eventData = {
+          senderId: mockUser._id,
+          receiverId: createdClassroom._id,
+          quizData,
+        };
 
-      try {
-        await createQuiz(models, eventData);
-      } catch (error) {
-        expect(error.message).to.equal(
-          "Error creating new quiz: Missing models"
-        );
-      }
-    });
+        try {
+          await createQuiz(models, eventData);
+        } catch (error) {
+          expect(error.message).to.equal(
+            "Error creating new quiz: Missing models"
+          );
+        }
+      });
 
-    it("should return a `Error creating new quiz: Classroom id is required` error message", async () => {
-      const models = {
-        User: userFactory,
-        Classroom: classroomFactory,
-        Quiz: quizFactory,
-      };
+      it("should return a `Error creating new quiz: Classroom id is required` error message", async () => {
+        const models = {
+          User: userFactory,
+          Classroom: classroomFactory,
+          Quiz: quizFactory,
+        };
 
-      const quizData = {
-        title: "mock quiz 2",
-        questions: [...quizStorage[0]],
-        timeLimit: 4,
-        classroomId: createdClassroom._id,
-      };
+        const quizData = {
+          title: "mock quiz 2",
+          questions: [...quizStorage[0]],
+          timeLimit: 4,
+          classroomId: createdClassroom._id,
+        };
 
-      const eventData = {
-        senderId: mockUser._id,
-        receiverId: undefined,
-        quizData,
-      };
+        const eventData = {
+          senderId: mockUser._id,
+          receiverId: undefined,
+          quizData,
+        };
 
-      try {
-        await createQuiz(models, eventData);
-      } catch (error) {
-        expect(error.message).to.equal(
-          "Error creating new quiz: Classroom id is required"
-        );
-      }
-    });
+        try {
+          await createQuiz(models, eventData);
+        } catch (error) {
+          expect(error.message).to.equal(
+            "Error creating new quiz: Classroom id is required"
+          );
+        }
+      });
 
-    it("should return a `Error creating new quiz: Please add all fields` error message", async () => {
-      const models = {
-        User: userFactory,
-        Classroom: classroomFactory,
-        Quiz: quizFactory,
-      };
+      it("should return a `Error creating new quiz: Please add all fields` error message", async () => {
+        const models = {
+          User: userFactory,
+          Classroom: classroomFactory,
+          Quiz: quizFactory,
+        };
 
-      const quizData = {
-        title: "mock quiz 2",
-        questions: [...quizStorage[0]],
-        timeLimit: 4,
-        classroomId: undefined,
-      };
+        const quizData = {
+          title: "mock quiz 2",
+          questions: [...quizStorage[0]],
+          timeLimit: 4,
+          classroomId: undefined,
+        };
 
-      const eventData = {
-        senderId: mockUser._id,
-        receiverId: createdClassroom._id,
-        quizData,
-      };
+        const eventData = {
+          senderId: mockUser._id,
+          receiverId: createdClassroom._id,
+          quizData,
+        };
 
-      try {
-        await createQuiz(models, eventData);
-      } catch (error) {
-        expect(error.message).to.equal(
-          "Error creating new quiz: Please add all fields"
-        );
-      }
-    });
+        try {
+          await createQuiz(models, eventData);
+        } catch (error) {
+          expect(error.message).to.equal(
+            "Error creating new quiz: Please add all fields"
+          );
+        }
+      });
 
-    it("should return a `Error creating new quiz: User not found` error message", async () => {
-      const models = {
-        User: userFactory,
-        Classroom: classroomFactory,
-        Quiz: quizFactory,
-      };
+      it("should return a `Error creating new quiz: User not found` error message", async () => {
+        const models = {
+          User: userFactory,
+          Classroom: classroomFactory,
+          Quiz: quizFactory,
+        };
 
-      const quizData = {
-        title: "mock quiz 2",
-        questions: [...quizStorage[0]],
-        timeLimit: 4,
-        classroomId: createdClassroom._id,
-      };
+        const quizData = {
+          title: "mock quiz 2",
+          questions: [...quizStorage[0]],
+          timeLimit: 4,
+          classroomId: createdClassroom._id,
+        };
 
-      const eventData = {
-        senderId: "999",
-        receiverId: createdClassroom._id,
-        quizData,
-      };
+        const eventData = {
+          senderId: "999",
+          receiverId: createdClassroom._id,
+          quizData,
+        };
 
-      try {
-        await createQuiz(models, eventData);
-      } catch (error) {
-        expect(error.message).to.equal(
-          "Error creating new quiz: User not found"
-        );
-      }
-    });
+        try {
+          await createQuiz(models, eventData);
+        } catch (error) {
+          expect(error.message).to.equal(
+            "Error creating new quiz: User not found"
+          );
+        }
+      });
 
-    it("should return a `Error creating new quiz: Classroom not found` error message", async () => {
-      const models = {
-        User: userFactory,
-        Classroom: classroomFactory,
-        Quiz: quizFactory,
-      };
+      it("should return a `Error creating new quiz: Classroom not found` error message", async () => {
+        const models = {
+          User: userFactory,
+          Classroom: classroomFactory,
+          Quiz: quizFactory,
+        };
 
-      const quizData = {
-        title: "mock quiz 2",
-        questions: [...quizStorage[0]],
-        timeLimit: 4,
-        classroomId: "999",
-      };
+        const quizData = {
+          title: "mock quiz 2",
+          questions: [...quizStorage[0]],
+          timeLimit: 4,
+          classroomId: "999",
+        };
 
-      const eventData = {
-        senderId: mockUser._id,
-        receiverId: "999",
-        quizData,
-      };
+        const eventData = {
+          senderId: mockUser._id,
+          receiverId: "999",
+          quizData,
+        };
 
-      try {
-        await createQuiz(models, eventData);
-      } catch (error) {
-        expect(error.message).to.equal(
-          "Error creating new quiz: Classroom not found"
-        );
-      }
-    });
+        try {
+          await createQuiz(models, eventData);
+        } catch (error) {
+          expect(error.message).to.equal(
+            "Error creating new quiz: Classroom not found"
+          );
+        }
+      });
 
-    it("should return a `Error creating new quiz: User is not enrolled in the classroom` error message", async () => {
-      const models = {
-        User: userFactory,
-        Classroom: classroomFactory,
-        Quiz: quizFactory,
-      };
+      it("should return a `Error creating new quiz: User is not enrolled in the classroom` error message", async () => {
+        const models = {
+          User: userFactory,
+          Classroom: classroomFactory,
+          Quiz: quizFactory,
+        };
 
-      const quizData = {
-        title: "mock quiz 2",
-        questions: [...quizStorage[0]],
-        timeLimit: 4,
-        classroomId: createdClassroom._id,
-      };
+        const quizData = {
+          title: "mock quiz 2",
+          questions: [...quizStorage[0]],
+          timeLimit: 4,
+          classroomId: createdClassroom._id,
+        };
 
-      const eventData = {
-        senderId: unenrolledUser._id,
-        receiverId: createdClassroom._id,
-        quizData,
-      };
+        const eventData = {
+          senderId: unenrolledUser._id,
+          receiverId: createdClassroom._id,
+          quizData,
+        };
 
-      try {
-        await createQuiz(models, eventData);
-      } catch (error) {
-        expect(error.message).to.equal(
-          `Error creating new quiz: User is not enrolled in the classroom ${createdClassroom._id}`
-        );
-      }
-    });
+        try {
+          await createQuiz(models, eventData);
+        } catch (error) {
+          expect(error.message).to.equal(
+            `Error creating new quiz: User is not enrolled in the classroom ${createdClassroom._id}`
+          );
+        }
+      });
 
-    it("should return a `Error creating new quiz: Database failure: unable to create a new quiz` error messages", async () => {
-      const originalMethod = quizFactory.create;
-      quizFactory.create = () => {
-        return null;
-      };
+      it("should return a `Error creating new quiz: Database failure: unable to create a new quiz` error messages", async () => {
+        const originalMethod = quizFactory.create;
+        quizFactory.create = () => {
+          return null;
+        };
 
-      const models = {
-        User: userFactory,
-        Classroom: classroomFactory,
-        Quiz: quizFactory,
-      };
+        const models = {
+          User: userFactory,
+          Classroom: classroomFactory,
+          Quiz: quizFactory,
+        };
 
-      const quizData = {
-        title: "mock quiz 2",
-        questions: [...quizStorage[0]],
-        timeLimit: 4,
-        classroomId: createdClassroom._id,
-      };
+        const quizData = {
+          title: "mock quiz 2",
+          questions: [...quizStorage[0]],
+          timeLimit: 4,
+          classroomId: createdClassroom._id,
+        };
 
-      const eventData = {
-        senderId: mockUser._id,
-        receiverId: createdClassroom._id,
-        quizData,
-      };
+        const eventData = {
+          senderId: mockUser._id,
+          receiverId: createdClassroom._id,
+          quizData,
+        };
 
-      try {
-        await createQuiz(models, eventData);
-      } catch (error) {
-        expect(error.message).to.equal(
-          "Error creating new quiz: Database failure: unable to create a new quiz"
-        );
-      }
+        try {
+          await createQuiz(models, eventData);
+        } catch (error) {
+          expect(error.message).to.equal(
+            "Error creating new quiz: Database failure: unable to create a new quiz"
+          );
+        }
 
-      quizFactory.create = originalMethod;
+        quizFactory.create = originalMethod;
+      });
     });
   });
 });

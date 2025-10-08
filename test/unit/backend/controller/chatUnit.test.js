@@ -68,96 +68,105 @@ describe("Chat API", () => {
   });
 
   describe("getMessages", () => {
-    it("should fetch messages and verify them", async () => {
-      const mockReq = { user: { _id: mockUserOne._id } };
-      await mockGetMessages(mockReq, chatRes);
+    describe("when payload is valid and complete should", () => {
+      it("fetch messages and verify them", async () => {
+        const mockReq = { user: { _id: mockUserOne._id } };
+        await mockGetMessages(mockReq, chatRes);
 
-      expect(chatRes.statusCode).to.equal(200);
-      expect(chatRes.body.length).to.equal(2);
-      expect(
-        chatRes.body.every((chat) =>
-          chat.messages.every(
-            (m) =>
-              m.senderId === mockUserOne._id || m.receiverId === mockUserOne._id
+        expect(chatRes.statusCode).to.equal(200);
+        expect(chatRes.body.length).to.equal(2);
+        expect(
+          chatRes.body.every((chat) =>
+            chat.messages.every(
+              (m) =>
+                m.senderId === mockUserOne._id ||
+                m.receiverId === mockUserOne._id
+            )
           )
-        )
-      ).to.be.true;
+        ).to.be.true;
 
-      chatRes.body.forEach((chat) => {
-        chat.messages.forEach((msg) => {
-          expect(msg).to.have.all.keys([
-            "_id",
-            "text",
-            "senderId",
-            "senderName",
-            "senderAvatar",
-            "receiverId",
-            "receiverName",
-            "receiverAvatar",
-            "createdAt",
-            "isRead",
-          ]);
+        chatRes.body.forEach((chat) => {
+          chat.messages.forEach((msg) => {
+            expect(msg).to.have.all.keys([
+              "_id",
+              "text",
+              "senderId",
+              "senderName",
+              "senderAvatar",
+              "receiverId",
+              "receiverName",
+              "receiverAvatar",
+              "createdAt",
+              "isRead",
+            ]);
+          });
         });
+      });
+
+      it("return an empty array as response payload", async () => {
+        const mockReq = { user: { _id: noMessageUser._id } };
+
+        await mockGetMessages(mockReq, chatRes);
+
+        expect(chatRes.statusCode).to.equal(200);
+
+        expect(chatRes.body.length).to.equal(0);
       });
     });
 
-    it("should return an empty array as response payload", async () => {
-      const mockReq = { user: { _id: noMessageUser._id } };
+    describe("when the request is invalid should", () => {
+      it("return `Authentication required` error message", async () => {
+        const mockReq = { user: { _id: undefined } };
 
-      await mockGetMessages(mockReq, chatRes);
+        await mockGetMessages(mockReq, chatRes);
 
-      expect(chatRes.statusCode).to.equal(200);
-
-      expect(chatRes.body.length).to.equal(0);
-    });
-
-    it("should return `Authentication required` error message", async () => {
-      const mockReq = { user: { _id: undefined } };
-
-      await mockGetMessages(mockReq, chatRes);
-
-      expect(chatRes.statusCode).to.equal(403);
-      expect(chatRes.body.message).to.equal("Authentication required");
+        expect(chatRes.statusCode).to.equal(403);
+        expect(chatRes.body.message).to.equal("Authentication required");
+      });
     });
   });
 
   describe("getChatStatus", () => {
-    it("should fetch online user chat status and confirm it", async () => {
-      const mockReq = { user: { _id: mockUserOne._id } };
+    describe("when payload is valid and complete should", () => {
+      it("fetch online user chat status and confirm it", async () => {
+        const mockReq = { user: { _id: mockUserOne._id } };
 
-      await mockGetChatStatus(mockReq, chatRes);
+        await mockGetChatStatus(mockReq, chatRes);
 
-      expect(chatRes.statusCode).to.equal(200);
-      expect(chatRes.body.online).to.equal(true);
+        expect(chatRes.statusCode).to.equal(200);
+        expect(chatRes.body.online).to.equal(true);
+      });
+
+      it("should fetch offline user chat status and confirm it", async () => {
+        const mockReq = { user: { _id: noMessageUser._id } };
+
+        await mockGetChatStatus(mockReq, chatRes);
+
+        expect(chatRes.statusCode).to.equal(200);
+        expect(chatRes.body.online).to.equal(false);
+      });
     });
 
-    it("should fetch offline user chat status and confirm it", async () => {
-      const mockReq = { user: { _id: noMessageUser._id } };
+    describe("when the request is invalid should", () => {
+      it("should return `Authentication required` error message", async () => {
+        const mockReq = { user: { _id: undefined } };
 
-      await mockGetChatStatus(mockReq, chatRes);
+        await mockGetChatStatus(mockReq, chatRes);
 
-      expect(chatRes.statusCode).to.equal(200);
-      expect(chatRes.body.online).to.equal(false);
-    });
+        expect(chatRes.statusCode).to.equal(403);
+        expect(chatRes.body.message).to.equal("Authentication required");
+      });
 
-    it("should return `Authentication required` error message", async () => {
-      const mockReq = { user: { _id: undefined } };
+      it("should return `Access denied, user is not registered` error message", async () => {
+        const mockReq = { user: { _id: "01987" } };
 
-      await mockGetChatStatus(mockReq, chatRes);
+        await mockGetChatStatus(mockReq, chatRes);
 
-      expect(chatRes.statusCode).to.equal(403);
-      expect(chatRes.body.message).to.equal("Authentication required");
-    });
-
-    it("should return `Access denied, user is not registered` error message", async () => {
-      const mockReq = { user: { _id: "01987" } };
-
-      await mockGetChatStatus(mockReq, chatRes);
-
-      expect(chatRes.statusCode).to.equal(403);
-      expect(chatRes.body.message).to.equal(
-        "Access denied, user is not registered"
-      );
+        expect(chatRes.statusCode).to.equal(403);
+        expect(chatRes.body.message).to.equal(
+          "Access denied, user is not registered"
+        );
+      });
     });
   });
 });

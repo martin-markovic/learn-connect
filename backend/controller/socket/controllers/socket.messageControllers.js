@@ -137,6 +137,7 @@ export const updateChatMessages = async (models, data) => {
         newMessages: false,
         message: "Chat not found",
       };
+
       return response;
     }
 
@@ -146,6 +147,7 @@ export const updateChatMessages = async (models, data) => {
         newMessages: false,
         message: "No chat messages",
       };
+
       return response;
     }
 
@@ -159,7 +161,7 @@ export const updateChatMessages = async (models, data) => {
     );
 
     response = {
-      success: result.matchedCount > 0,
+      success: true,
       newMessages: result.modifiedCount > 0,
     };
 

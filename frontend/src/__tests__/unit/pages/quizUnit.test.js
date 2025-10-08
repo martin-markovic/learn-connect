@@ -284,6 +284,9 @@ describe("Quiz Component", () => {
       expect(mockNavigate).toHaveBeenCalledWith(`/exam/${mockData._id}`);
     });
   });
+
+  describe("should toast error messages on redux", () => {
+    it("auth error", () => {
       const errorMessage = "Auth error";
       renderWithStore(<Quiz />, {
         auth: {
