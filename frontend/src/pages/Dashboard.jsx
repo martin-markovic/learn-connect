@@ -54,7 +54,7 @@ export default function Dashboard() {
               </div>
             )}
           </div>
-          <h1>{user?.name}</h1>
+          {user?.name && <h1>{user?.name}</h1>}
         </div>
         <div className="dashboard-classroom">
           <Classroom />
