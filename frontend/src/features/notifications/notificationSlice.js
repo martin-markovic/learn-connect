@@ -38,7 +38,7 @@ export const getNotifications = createAsyncThunk(
 
       return response;
     } catch (error) {
-      return thunkAPI.rejectWithValue(error, thunkAPI);
+      return thunkAPI.rejectWithValue(error.message, thunkAPI);
     }
   }
 );

@@ -10,7 +10,7 @@ const Chat = () => {
   const online = useSelector((state) => state.chat.online);
 
   return (
-    <div className="conversation">
+    <div data-testid="chat-container" className="conversation">
       <div
         className={`conversation-chat__display ${
           selectedChat && online ? "chat-active" : "chat-closed"
