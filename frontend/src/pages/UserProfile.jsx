@@ -16,6 +16,7 @@ import socketEventManager from "../features/socket/managers/socket.eventManager.
 import { FaCircleUser } from "react-icons/fa6";
 
 import UserForm from "../components/users/UserForm.jsx";
+import ProfileHeader from "../components/users/ProfileHeader.jsx";
 
 function UserProfile() {
   const [userInfo, setUserInfo] = useState(null);
@@ -76,10 +77,19 @@ function UserProfile() {
   }, [userId, dispatch]);
 
   useEffect(() => {
-    const selectedUser = userList.find((person) => person._id === userId);
+    if (!userList.length || isLoading || !user?._id) return;
+
+    const userFound = userList.find(
+      (item) => item.sender._id === userId || item.receiver?._id === userId
+    );
+
+    if (!userFound.status || userFound.status === "blocked") return;
+
+    const selectedUser =
+      userFound.receiver._id === userId ? userFound.receiver : userFound.sender;
 
     setUserInfo(selectedUser);
-  }, [userList, userId]);
+  }, [userList, userId, isLoading, user?._id]);
 
   useEffect(() => {
     const isFriend = friendList.find(
@@ -224,44 +234,9 @@ function UserProfile() {
     />
   ) : (
     <div className="user__profile-container">
-      <div
-        className="user__profile-top__box
-      "
-      >
+      <div className="user__profile-top__box">
         <div>
-          <div className="user__profile-avatar">
-            {userInfo?.avatar ? (
-              <img
-                src={userInfo?.avatar}
-                alt="user avatar"
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  borderRadius: "50%",
-                  objectFit: "cover",
-                }}
-              />
-            ) : (
-              <div
-                style={{
-                  borderRadius: "50%",
-                  overflow: "hidden",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  backgroundColor: "white",
-                }}
-              >
-                <FaCircleUser
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    color: "grey",
-                  }}
-                />
-              </div>
-            )}
-          </div>
+          <ProfileHeader userInfo={userInfo} />
         </div>
 
         <section>
@@ -359,10 +334,7 @@ function UserProfile() {
           </>
         )}
       </div>
-      <div
-        className="user__profile-bottom__box
-      "
-      >
+      <div className="user__profile-bottom__box">
         <div className="user__profile-bottom__box-content">
           {friendList.length ? (
             <div className="user__profile-friendlist-container">
