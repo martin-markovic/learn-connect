@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -17,14 +17,11 @@ import { FaCircleUser } from "react-icons/fa6";
 
 import UserForm from "../components/users/UserForm.jsx";
 import ProfileHeader from "../components/users/ProfileHeader.jsx";
+import FriendshipModal from "../components/friends/FriendshipModal.jsx";
 
 function UserProfile() {
   const [userInfo, setUserInfo] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [actionToConfirm, setActionToConfirm] = useState("");
-  const selectRef = useRef(null);
   const { userId } = useParams();
   const {
     isLoading,
@@ -128,91 +125,6 @@ function UserProfile() {
     };
   }, [dispatch, user?._id]);
 
-  const handleSend = () => {
-    try {
-      if (!userId) {
-        throw new Error("Invalid user id");
-      }
-
-      if (!user?._id) {
-        throw new Error("User not authorized");
-      }
-
-      if (friendshipStatus === "sent" || friendshipStatus === "accepted") {
-        const errorString =
-          friendshipStatus === "sent"
-            ? "Friend request already sent"
-            : "You are already friends";
-
-        throw new Error(errorString);
-      }
-
-      socketEventManager.handleEmitEvent("send friend request", {
-        senderId: user._id,
-        receiverId: userId,
-        currentStatus: "pending",
-      });
-    } catch (error) {
-      console.error("Error sending friend request: ", error.message);
-    }
-  };
-
-  const handleProcessRequest = (e) => {
-    setIsProcessing(true);
-
-    const friendReqResponse = e.target.dataset.response;
-
-    try {
-      const eventData = {
-        senderId: user?._id,
-        receiverId: userId,
-        userResponse: friendReqResponse === "accept" ? "accepted" : "declined",
-      };
-
-      socketEventManager.handleEmitEvent("process friend request", eventData);
-    } catch (error) {
-      console.error("Error processing request :", error.message);
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const handleStatusChange = (e) => {
-    const newStatus = e.target.value;
-
-    setModalOpen(true);
-    setActionToConfirm(newStatus);
-  };
-
-  const handleConfirmAction = () => {
-    try {
-      const validActions = ["unfriend", "block"];
-
-      if (!validActions.includes(actionToConfirm)) {
-        throw new Error(`Invalid action ${actionToConfirm}`);
-      }
-
-      const actionName =
-        actionToConfirm === "unfriend" ? "remove friend" : "block user";
-
-      socketEventManager.handleEmitEvent(actionName, {
-        senderId: user._id,
-        receiverId: userId,
-      });
-    } catch (error) {
-      console.error("Error removing friend: ", error.message);
-    }
-
-    setModalOpen(false);
-  };
-
-  const handleCancelAction = () => {
-    setModalOpen(false);
-    if (selectRef.current) {
-      selectRef.current.value = "friends";
-    }
-  };
-
   if (!isLoading && isBlocked) {
     return <p>You cannot interact with this user.</p>;
   }
@@ -253,85 +165,15 @@ function UserProfile() {
           </button>
         )}
         {String(user?._id) !== String(userId) && (
-          <>
-            {friendshipStatus === "pending" &&
-              friendList.find(
-                (item) =>
-                  String(item.senderId) === String(user._id) &&
-                  String(item.receiverId) === String(userId)
-              ) && <button disabled={true}>Request Sent</button>}
-            {friendshipStatus === "pending" &&
-              friendList.find(
-                (item) =>
-                  String(item.receiverId) === String(user?._id) &&
-                  String(item.senderId) === String(userId)
-              ) && (
-                <div>
-                  <button
-                    type="button"
-                    data-response="accept"
-                    disabled={isProcessing}
-                    onClick={handleProcessRequest}
-                  >
-                    Accept
-                  </button>
-                  <button
-                    type="button"
-                    data-response="decline"
-                    disabled={isProcessing}
-                    onClick={handleProcessRequest}
-                  >
-                    Decline
-                  </button>
-                </div>
-              )}
-            {friendshipStatus === "accepted" && (
-              <div className="friendship-container">
-                <select
-                  name="friendshipStatus"
-                  id="friendshipStatus"
-                  defaultValue="friends"
-                  onChange={handleStatusChange}
-                  ref={selectRef}
-                >
-                  <option value="friends" hidden>
-                    Friends
-                  </option>
-                  <option value="unfriend">Unfriend</option>
-                  <option value="block">Block</option>
-                </select>
-              </div>
-            )}
-            <div className="modal">
-              {modalOpen && (
-                <div className="modal-container">
-                  <p>
-                    Are you sure you want to {actionToConfirm} {userInfo?.name}?
-                  </p>
-                  <div className="modal-buttons">
-                    <button onClick={handleConfirmAction}>Yes</button>
-                    <button onClick={handleCancelAction}>Cancel</button>
-                  </div>
-                </div>
-              )}
-            </div>
-            {!isLoading && friendshipStatus === null && !modalOpen && (
-              <div>
-                <button type="button" onClick={handleSend}>
-                  Add Friend
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setModalOpen(true);
-                    setActionToConfirm("block");
-                  }}
-                >
-                  Block User
-                </button>
-              </div>
-            )}
-          </>
+          <FriendshipModal
+            modalData={{
+              friendshipStatus,
+              friendList,
+              authUserId: user?._id,
+              userId,
+              userName: user?.name,
+            }}
+          />
         )}
       </div>
       <div className="user__profile-bottom__box">
