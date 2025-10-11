@@ -30,33 +30,35 @@ function UserProfile() {
   } = useSelector((state) => state.friends);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const user = useSelector((state) => state.auth.user);
+  const { _id: authUserId, name: userName } = useSelector(
+    (state) => state.auth.user
+  );
   const { examScores } = useSelector((state) => state.exam);
 
   const friendshipStatus = useMemo(() => {
     const relation = friendList.find(
       (item) =>
         (String(item.senderId) === String(userId) &&
-          String(item.receiverId) === String(user?._id)) ||
+          String(item.receiverId) === String(authUserId)) ||
         (String(item.receiverId) === String(userId) &&
-          String(item.senderId) === String(user?._id))
+          String(item.senderId) === String(authUserId))
     );
     return relation?.status ?? null;
-  }, [friendList, userId, user?._id]);
+  }, [friendList, userId, authUserId]);
 
   const isBlocked = useMemo(() => {
     const relation = friendList.find(
       (item) =>
         (String(item.senderId) === String(userId) &&
-          String(item.receiverId) === String(user?._id)) ||
+          String(item.receiverId) === String(authUserId)) ||
         (String(item.receiverId) === String(userId) &&
-          String(item.senderId) === String(user?._id))
+          String(item.senderId) === String(authUserId))
     );
     return relation?.status === "blocked";
-  }, [friendList, userId, user?._id]);
+  }, [friendList, userId, authUserId]);
 
   useEffect(() => {
-    if (userId === user?._id || !isBlocked) {
+    if (userId === authUserId || !isBlocked) {
       dispatch(getFriendList(userId));
     }
 
@@ -66,7 +68,7 @@ function UserProfile() {
       dispatch(resetExam());
       dispatch(resetUserList());
     };
-  }, [dispatch, user?._id, userId, isBlocked]);
+  }, [dispatch, authUserId, userId, isBlocked]);
 
   useEffect(() => {
     dispatch(resetExam());
@@ -74,7 +76,7 @@ function UserProfile() {
   }, [userId, dispatch]);
 
   useEffect(() => {
-    if (!userList.length || isLoading || !user?._id) return;
+    if (!userList.length || isLoading || !authUserId) return;
 
     const userFound = userList.find(
       (item) => item.sender._id === userId || item.receiver?._id === userId
@@ -86,24 +88,24 @@ function UserProfile() {
       userFound.receiver._id === userId ? userFound.receiver : userFound.sender;
 
     setUserInfo(selectedUser);
-  }, [userList, userId, isLoading, user?._id]);
+  }, [userList, userId, isLoading, authUserId]);
 
   useEffect(() => {
     const isFriend = friendList.find(
       (item) =>
         (item.senderId === String(userId) &&
-          item.receiverId === String(user?._id)) ||
+          item.receiverId === String(authUserId)) ||
         (item.receiverId === String(userId) &&
-          item.senderId === String(user?._id))
+          item.senderId === String(authUserId))
     )?.status;
 
     if (
-      (isFriend === "accepted" || userId === user?._id) &&
+      (isFriend === "accepted" || userId === authUserId) &&
       !examScores[userId]
     ) {
       dispatch(getExamScores(userId));
     }
-  }, [friendList, userId, user?._id, friendshipStatus, examScores, dispatch]);
+  }, [friendList, userId, authUserId, friendshipStatus, examScores, dispatch]);
 
   useEffect(() => {
     socketEventManager.subscribe("user blocked", (data) => {
@@ -112,7 +114,7 @@ function UserProfile() {
       setUserInfo((prev) => (prev._id === data ? null : prev));
 
       dispatch(getUserList());
-      dispatch(getFriendList(user?._id));
+      dispatch(getFriendList(authUserId));
     });
 
     socketEventManager.subscribe("friend request sent", (data) => {
@@ -123,7 +125,7 @@ function UserProfile() {
       socketEventManager.unsubscribe("user blocked");
       socketEventManager.unsubscribe("friend request sent");
     };
-  }, [dispatch, user?._id]);
+  }, [dispatch, authUserId]);
 
   if (!isLoading && isBlocked) {
     return <p>You cannot interact with this user.</p>;
@@ -136,14 +138,7 @@ function UserProfile() {
   return isLoading ? (
     <p>Loading,please wait...</p>
   ) : isEditing ? (
-    <UserForm
-      setIsEditing={setIsEditing}
-      userDetails={{
-        avatar: user?.avatar,
-        email: user?.email,
-        name: user?.name,
-      }}
-    />
+    <UserForm setIsEditing={setIsEditing} />
   ) : (
     <div className="user__profile-container">
       <div className="user__profile-top__box">
@@ -154,7 +149,7 @@ function UserProfile() {
         <section>
           <h1>{userInfo?.name}</h1>
         </section>
-        {String(user?._id) === String(userId) && (
+        {String(authUserId) === String(userId) && (
           <button
             type="button"
             onClick={() => {
@@ -164,14 +159,14 @@ function UserProfile() {
             Edit Account Info
           </button>
         )}
-        {String(user?._id) !== String(userId) && (
+        {String(authUserId) !== String(userId) && (
           <FriendshipModal
             modalData={{
               friendshipStatus,
               friendList,
-              authUserId: user?._id,
+              authUserId,
               userId,
-              userName: user?.name,
+              userName,
             }}
           />
         )}
