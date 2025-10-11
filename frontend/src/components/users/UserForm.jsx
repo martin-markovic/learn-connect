@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { FaCircleUser } from "react-icons/fa6";
 import { MdFileUpload } from "react-icons/md";
 import { updateUser } from "../../features/auth/authSlice.js";
@@ -8,7 +8,7 @@ import {
   updateFriendList,
 } from "../../features/friend/friendSlice.js";
 
-function UserForm({ setIsEditing, userDetails }) {
+function UserForm({ setIsEditing }) {
   const [avatarPreview, setAvatarPreview] = useState(null);
   const [formData, setFormData] = useState({
     avatar: null,
@@ -31,14 +31,16 @@ function UserForm({ setIsEditing, userDetails }) {
     password: false,
   });
 
+  const { user } = useSelector((state) => state.auth);
+
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if (!userDetails) return;
+    if (!user?._id) return;
 
-    setFormData(userDetails);
-    setAvatarPreview(userDetails.avatar);
-  }, [userDetails]);
+    setFormData(user);
+    setAvatarPreview(user.avatar);
+  }, [user]);
 
   /**
    * Cleans up the object URL for avatar preview when the component unmounts or dependencies change.
@@ -106,16 +108,13 @@ function UserForm({ setIsEditing, userDetails }) {
       const userData = Object.entries(pendingChanges).reduce(
         (acc, [key, value]) => {
           if (key === "avatar") {
-            if (
-              value === "removeAvatar" ||
-              value?.name !== userDetails[key]?.name
-            ) {
+            if (value === "removeAvatar" || value?.name !== user[key]?.name) {
               acc[key] = value;
             }
             return acc;
           }
 
-          if (userDetails[key] !== value) {
+          if (user[key] !== value) {
             acc[key] = value;
           }
 
@@ -142,7 +141,7 @@ function UserForm({ setIsEditing, userDetails }) {
       ...prevState,
       [e.target.name]: pendingChanges[e.target.name]
         ? pendingChanges[e.target.name]
-        : userDetails[e.target.name],
+        : user[e.target.name],
     }));
   };
 
@@ -182,17 +181,17 @@ function UserForm({ setIsEditing, userDetails }) {
                 onClick={(e) => {
                   setFormData((prevState) => ({
                     ...prevState,
-                    [e.target.name]: userDetails[e.target.name],
+                    [e.target.name]: user[e.target.name],
                   }));
                   setPendingChanges((prevState) => ({
                     ...prevState,
-                    [e.target.name]: userDetails[e.target.name],
+                    [e.target.name]: user[e.target.name],
                   }));
                   setEditInfo((prevState) => ({
                     ...prevState,
                     [e.target.name]: false,
                   }));
-                  setAvatarPreview(userDetails.avatar);
+                  setAvatarPreview(user.avatar);
                 }}
               >
                 Cancel
@@ -232,7 +231,7 @@ function UserForm({ setIsEditing, userDetails }) {
             />
             <MdFileUpload style={{ height: "30%", width: "30%" }} />
           </label>
-          {userDetails?.avatar && formData?.avatar !== "removeAvatar" && (
+          {user?.avatar && formData?.avatar !== "removeAvatar" && (
             <button
               type="button"
               className="avatar-remove"
@@ -285,7 +284,7 @@ function UserForm({ setIsEditing, userDetails }) {
                 onClick={(e) => {
                   setFormData((prevState) => ({
                     ...prevState,
-                    [e.target.name]: userDetails[e.target.name],
+                    [e.target.name]: user[e.target.name],
                   }));
                   setEditInfo((prevState) => ({
                     ...prevState,
@@ -299,9 +298,7 @@ function UserForm({ setIsEditing, userDetails }) {
           ) : (
             <div className="edit__info-entry-container">
               <h2>
-                {pendingChanges?.name
-                  ? pendingChanges?.name
-                  : userDetails?.name}
+                {pendingChanges?.name ? pendingChanges?.name : user?.name}
               </h2>
               <button name="name" type="button" onClick={handleEdit}>
                 Change Name
@@ -340,7 +337,7 @@ function UserForm({ setIsEditing, userDetails }) {
                 onClick={(e) => {
                   setFormData((prevState) => ({
                     ...prevState,
-                    [e.target.name]: userDetails[e.target.name],
+                    [e.target.name]: user[e.target.name],
                   }));
                   setEditInfo((prevState) => ({
                     ...prevState,
@@ -354,9 +351,7 @@ function UserForm({ setIsEditing, userDetails }) {
           ) : (
             <div className="edit__info-entry-container">
               <p>
-                {pendingChanges?.email
-                  ? pendingChanges?.email
-                  : userDetails?.email}
+                {pendingChanges?.email ? pendingChanges?.email : user?.email}
               </p>
               <button name="email" type="button" onClick={handleEdit}>
                 Change Email
@@ -446,7 +441,7 @@ function UserForm({ setIsEditing, userDetails }) {
             disabled={
               Object.values(pendingChanges).length === 0 ||
               Object.keys(pendingChanges).every(
-                (key) => pendingChanges[key] === userDetails[key]
+                (key) => pendingChanges[key] === user[key]
               )
             }
           />

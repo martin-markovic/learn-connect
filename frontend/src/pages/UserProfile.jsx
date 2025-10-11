@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef, useMemo } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useState, useEffect, useMemo } from "react";
+import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getUserList,
@@ -13,17 +13,16 @@ import {
   resetExam,
 } from "../features/quizzes/exam/examSlice.js";
 import socketEventManager from "../features/socket/managers/socket.eventManager.js";
-import { FaCircleUser } from "react-icons/fa6";
 
 import UserForm from "../components/users/UserForm.jsx";
+import ProfileHeader from "../components/users/ProfileHeader.jsx";
+import FriendshipModal from "../components/friends/FriendshipModal.jsx";
+import FriendList from "../components/friends/FriendList.jsx";
+import ExamScores from "../components/exam/ExamScores.jsx";
 
 function UserProfile() {
   const [userInfo, setUserInfo] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [actionToConfirm, setActionToConfirm] = useState("");
-  const selectRef = useRef(null);
   const { userId } = useParams();
   const {
     isLoading,
@@ -31,34 +30,35 @@ function UserProfile() {
     friendList = [],
   } = useSelector((state) => state.friends);
   const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const user = useSelector((state) => state.auth.user);
+  const { _id: authUserId, name: userName } = useSelector(
+    (state) => state.auth.user
+  );
   const { examScores } = useSelector((state) => state.exam);
 
   const friendshipStatus = useMemo(() => {
     const relation = friendList.find(
       (item) =>
         (String(item.senderId) === String(userId) &&
-          String(item.receiverId) === String(user?._id)) ||
+          String(item.receiverId) === String(authUserId)) ||
         (String(item.receiverId) === String(userId) &&
-          String(item.senderId) === String(user?._id))
+          String(item.senderId) === String(authUserId))
     );
     return relation?.status ?? null;
-  }, [friendList, userId, user?._id]);
+  }, [friendList, userId, authUserId]);
 
   const isBlocked = useMemo(() => {
     const relation = friendList.find(
       (item) =>
         (String(item.senderId) === String(userId) &&
-          String(item.receiverId) === String(user?._id)) ||
+          String(item.receiverId) === String(authUserId)) ||
         (String(item.receiverId) === String(userId) &&
-          String(item.senderId) === String(user?._id))
+          String(item.senderId) === String(authUserId))
     );
     return relation?.status === "blocked";
-  }, [friendList, userId, user?._id]);
+  }, [friendList, userId, authUserId]);
 
   useEffect(() => {
-    if (userId === user?._id || !isBlocked) {
+    if (userId === authUserId || !isBlocked) {
       dispatch(getFriendList(userId));
     }
 
@@ -68,7 +68,7 @@ function UserProfile() {
       dispatch(resetExam());
       dispatch(resetUserList());
     };
-  }, [dispatch, user?._id, userId, isBlocked]);
+  }, [dispatch, authUserId, userId, isBlocked]);
 
   useEffect(() => {
     dispatch(resetExam());
@@ -76,27 +76,36 @@ function UserProfile() {
   }, [userId, dispatch]);
 
   useEffect(() => {
-    const selectedUser = userList.find((person) => person._id === userId);
+    if (!userList.length || isLoading || !authUserId) return;
+
+    const userFound = userList.find(
+      (item) => item.sender._id === userId || item.receiver?._id === userId
+    );
+
+    if (!userFound.status || userFound.status === "blocked") return;
+
+    const selectedUser =
+      userFound.receiver._id === userId ? userFound.receiver : userFound.sender;
 
     setUserInfo(selectedUser);
-  }, [userList, userId]);
+  }, [userList, userId, isLoading, authUserId]);
 
   useEffect(() => {
     const isFriend = friendList.find(
       (item) =>
         (item.senderId === String(userId) &&
-          item.receiverId === String(user?._id)) ||
+          item.receiverId === String(authUserId)) ||
         (item.receiverId === String(userId) &&
-          item.senderId === String(user?._id))
+          item.senderId === String(authUserId))
     )?.status;
 
     if (
-      (isFriend === "accepted" || userId === user?._id) &&
+      (isFriend === "accepted" || userId === authUserId) &&
       !examScores[userId]
     ) {
       dispatch(getExamScores(userId));
     }
-  }, [friendList, userId, user?._id, friendshipStatus, examScores, dispatch]);
+  }, [friendList, userId, authUserId, friendshipStatus, examScores, dispatch]);
 
   useEffect(() => {
     socketEventManager.subscribe("user blocked", (data) => {
@@ -105,7 +114,7 @@ function UserProfile() {
       setUserInfo((prev) => (prev._id === data ? null : prev));
 
       dispatch(getUserList());
-      dispatch(getFriendList(user?._id));
+      dispatch(getFriendList(authUserId));
     });
 
     socketEventManager.subscribe("friend request sent", (data) => {
@@ -116,92 +125,7 @@ function UserProfile() {
       socketEventManager.unsubscribe("user blocked");
       socketEventManager.unsubscribe("friend request sent");
     };
-  }, [dispatch, user?._id]);
-
-  const handleSend = () => {
-    try {
-      if (!userId) {
-        throw new Error("Invalid user id");
-      }
-
-      if (!user?._id) {
-        throw new Error("User not authorized");
-      }
-
-      if (friendshipStatus === "sent" || friendshipStatus === "accepted") {
-        const errorString =
-          friendshipStatus === "sent"
-            ? "Friend request already sent"
-            : "You are already friends";
-
-        throw new Error(errorString);
-      }
-
-      socketEventManager.handleEmitEvent("send friend request", {
-        senderId: user._id,
-        receiverId: userId,
-        currentStatus: "pending",
-      });
-    } catch (error) {
-      console.error("Error sending friend request: ", error.message);
-    }
-  };
-
-  const handleProcessRequest = (e) => {
-    setIsProcessing(true);
-
-    const friendReqResponse = e.target.dataset.response;
-
-    try {
-      const eventData = {
-        senderId: user?._id,
-        receiverId: userId,
-        userResponse: friendReqResponse === "accept" ? "accepted" : "declined",
-      };
-
-      socketEventManager.handleEmitEvent("process friend request", eventData);
-    } catch (error) {
-      console.error("Error processing request :", error.message);
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const handleStatusChange = (e) => {
-    const newStatus = e.target.value;
-
-    setModalOpen(true);
-    setActionToConfirm(newStatus);
-  };
-
-  const handleConfirmAction = () => {
-    try {
-      const validActions = ["unfriend", "block"];
-
-      if (!validActions.includes(actionToConfirm)) {
-        throw new Error(`Invalid action ${actionToConfirm}`);
-      }
-
-      const actionName =
-        actionToConfirm === "unfriend" ? "remove friend" : "block user";
-
-      socketEventManager.handleEmitEvent(actionName, {
-        senderId: user._id,
-        receiverId: userId,
-      });
-    } catch (error) {
-      console.error("Error removing friend: ", error.message);
-    }
-
-    setModalOpen(false);
-  };
-
-  const handleCancelAction = () => {
-    setModalOpen(false);
-    if (selectRef.current) {
-      selectRef.current.value = "friends";
-    }
-  };
+  }, [dispatch, authUserId]);
 
   if (!isLoading && isBlocked) {
     return <p>You cannot interact with this user.</p>;
@@ -214,60 +138,18 @@ function UserProfile() {
   return isLoading ? (
     <p>Loading,please wait...</p>
   ) : isEditing ? (
-    <UserForm
-      setIsEditing={setIsEditing}
-      userDetails={{
-        avatar: user?.avatar,
-        email: user?.email,
-        name: user?.name,
-      }}
-    />
+    <UserForm setIsEditing={setIsEditing} />
   ) : (
     <div className="user__profile-container">
-      <div
-        className="user__profile-top__box
-      "
-      >
+      <div className="user__profile-top__box">
         <div>
-          <div className="user__profile-avatar">
-            {userInfo?.avatar ? (
-              <img
-                src={userInfo?.avatar}
-                alt="user avatar"
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  borderRadius: "50%",
-                  objectFit: "cover",
-                }}
-              />
-            ) : (
-              <div
-                style={{
-                  borderRadius: "50%",
-                  overflow: "hidden",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  backgroundColor: "white",
-                }}
-              >
-                <FaCircleUser
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    color: "grey",
-                  }}
-                />
-              </div>
-            )}
-          </div>
+          <ProfileHeader userInfo={userInfo} />
         </div>
 
         <section>
           <h1>{userInfo?.name}</h1>
         </section>
-        {String(user?._id) === String(userId) && (
+        {String(authUserId) === String(userId) && (
           <button
             type="button"
             onClick={() => {
@@ -277,202 +159,27 @@ function UserProfile() {
             Edit Account Info
           </button>
         )}
-        {String(user?._id) !== String(userId) && (
-          <>
-            {friendshipStatus === "pending" &&
-              friendList.find(
-                (item) =>
-                  String(item.senderId) === String(user._id) &&
-                  String(item.receiverId) === String(userId)
-              ) && <button disabled={true}>Request Sent</button>}
-            {friendshipStatus === "pending" &&
-              friendList.find(
-                (item) =>
-                  String(item.receiverId) === String(user?._id) &&
-                  String(item.senderId) === String(userId)
-              ) && (
-                <div>
-                  <button
-                    type="button"
-                    data-response="accept"
-                    disabled={isProcessing}
-                    onClick={handleProcessRequest}
-                  >
-                    Accept
-                  </button>
-                  <button
-                    type="button"
-                    data-response="decline"
-                    disabled={isProcessing}
-                    onClick={handleProcessRequest}
-                  >
-                    Decline
-                  </button>
-                </div>
-              )}
-            {friendshipStatus === "accepted" && (
-              <div className="friendship-container">
-                <select
-                  name="friendshipStatus"
-                  id="friendshipStatus"
-                  defaultValue="friends"
-                  onChange={handleStatusChange}
-                  ref={selectRef}
-                >
-                  <option value="friends" hidden>
-                    Friends
-                  </option>
-                  <option value="unfriend">Unfriend</option>
-                  <option value="block">Block</option>
-                </select>
-              </div>
-            )}
-            <div className="modal">
-              {modalOpen && (
-                <div className="modal-container">
-                  <p>
-                    Are you sure you want to {actionToConfirm} {userInfo?.name}?
-                  </p>
-                  <div className="modal-buttons">
-                    <button onClick={handleConfirmAction}>Yes</button>
-                    <button onClick={handleCancelAction}>Cancel</button>
-                  </div>
-                </div>
-              )}
-            </div>
-            {!isLoading && friendshipStatus === null && !modalOpen && (
-              <div>
-                <button type="button" onClick={handleSend}>
-                  Add Friend
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setModalOpen(true);
-                    setActionToConfirm("block");
-                  }}
-                >
-                  Block User
-                </button>
-              </div>
-            )}
-          </>
+        {String(authUserId) !== String(userId) && (
+          <FriendshipModal
+            modalData={{
+              friendshipStatus,
+              friendList,
+              authUserId,
+              userId,
+              userName,
+            }}
+          />
         )}
       </div>
-      <div
-        className="user__profile-bottom__box
-      "
-      >
+      <div className="user__profile-bottom__box">
         <div className="user__profile-bottom__box-content">
           {friendList.length ? (
-            <div className="user__profile-friendlist-container">
-              <h4>Friends</h4>
-              <ul className="user__profile-list">
-                {friendList.map((friend, index) =>
-                  friend?.status === "accepted" ? (
-                    <li
-                      title={`visit ${
-                        friend?.senderId === userId
-                          ? friend?.receiverName?.split(" ")[0]
-                          : friend.senderName?.split(" ")[0]
-                      }'s profile`}
-                      className="user__profile-list__entry list__item-friend clickable"
-                      key={`friend-${index}`}
-                      onClick={() => {
-                        navigate(
-                          `/profile/${
-                            friend?.senderId === userId
-                              ? friend?.receiverId
-                              : friend?.senderId
-                          }`
-                        );
-                      }}
-                    >
-                      {(
-                        friend?.senderId === userId
-                          ? friend?.receiverAvatar
-                          : friend?.senderAvatar
-                      ) ? (
-                        <img
-                          alt="user avatar"
-                          src={
-                            friend?.senderId === userId
-                              ? friend?.receiverAvatar
-                              : friend?.senderAvatar
-                          }
-                          style={{
-                            width: "60px",
-                            height: "60px",
-                            borderRadius: "50%",
-                            objectFit: "cover",
-                          }}
-                        />
-                      ) : (
-                        <div
-                          style={{
-                            width: "60px",
-                            height: "60px",
-                            borderRadius: "50%",
-                            background: "white",
-                          }}
-                        >
-                          <FaCircleUser
-                            style={{
-                              height: "100%",
-                              width: "100%",
-                              color: "grey",
-                            }}
-                          />
-                        </div>
-                      )}
-                      <p style={{ width: "100%", textAlign: "center" }}>
-                        {friend?.senderId === userId
-                          ? friend?.receiverName
-                          : friend?.senderName}
-                      </p>
-                    </li>
-                  ) : null
-                )}
-              </ul>
-            </div>
+            <FriendList friendList={friendList} userId={userId} />
           ) : (
             <p>Friend list is empty</p>
           )}
         </div>
-        <div className="user__profile-bottom__box-content">
-          <h2>Classroom Space</h2>
-        </div>
-        <div className="user__profile-bottom__box-content">
-          <h4>Recent Quiz Scores</h4>
-          <ul className="user__profile-list">
-            {examScores[userId]?.length ? (
-              examScores[userId]?.map((entry) => {
-                return (
-                  <li
-                    className="user__profile-list__entry list__item-quiz"
-                    key={entry?.quiz?.quizId}
-                  >
-                    <p className="quiz__entry-title">
-                      {entry?.quiz?.quizTitle}
-                    </p>
-                    <div className="quiz__entry-scores">
-                      <div className="quiz__entry-scores-item">
-                        <div>Last score:</div>
-                        <div>{entry?.latestScore}</div>
-                      </div>
-                      <div className="quiz__entry-scores-item">
-                        <div>High score:</div>
-                        <div>{entry?.highScore}</div>
-                      </div>
-                    </div>
-                  </li>
-                );
-              })
-            ) : (
-              <p>User has no quiz records</p>
-            )}
-          </ul>
-        </div>
+        <ExamScores examData={{ userId, examScores }} />
       </div>
     </div>
   );
