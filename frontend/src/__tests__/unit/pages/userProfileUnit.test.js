@@ -1,0 +1,116 @@
+import { render, fireEvent, screen } from "@testing-library/react";
+import { Provider } from "react-redux";
+import { configureStore } from "@reduxjs/toolkit";
+import socketEventManager from "../../../features/socket/managers/socket.eventManager";
+import UserProfile from "../../../pages/UserProfile";
+
+const initialState = {
+  isLoading: false,
+  isSuccess: false,
+  isError: false,
+  errorMessage: "",
+};
+
+const setupState = (stateProps) => {
+  return { ...initialState, stateProps };
+};
+
+const mockUser = {
+  _id: "userId_1",
+  name: "John Doe",
+};
+
+const mockScores = {};
+mockScores["userId_1"] = [];
+const mockUserList = [];
+const mockFriendList = [];
+
+const authInitialState = setupState({ user: mockUser });
+const examInitialState = setupState({ examScores: mockScores });
+const friendInitialState = setupState({
+  userList: mockUserList,
+  friendList: mockFriendList,
+});
+
+const mockNavigate = jest.fn();
+const mockDispatch = jest.fn();
+const mockUseParams = jest.fn();
+
+const socketEvents = {};
+
+jest.mock("react-router-dom", () => ({
+  ...jest.requireActual("react-router-dom"),
+  useNavigate: () => mockNavigate,
+  useParams: () => mockUseParams(),
+}));
+
+jest.mock("react-redux", () => ({
+  ...jest.requireActual("react-redux"),
+  useDispatch: () => mockDispatch,
+}));
+
+jest.mock("../../../features/friend/friendReducers.js", () => ({
+  handleBlock: jest.fn(),
+  newFriendRequest: jest.fn(),
+}));
+
+jest.mock("../../../features/friend/friendSlice.js", () => ({
+  getUserList: jest.fn(),
+  getFriendList: jest.fn(),
+  resetUserList: jest.fn(),
+}));
+
+jest.mock("../../../features/quizzes/exam/examSlice.js", () => ({
+  getExamScores: jest.fn(),
+  resetExam: jest.fn(),
+}));
+
+const createMockStore = (initState = {}) => {
+  return configureStore({
+    reducer: {
+      auth: (state = { ...authInitialState, ...initState.auth }) => state,
+      friends: (state = { ...friendInitialState, ...initState.friend }) =>
+        state,
+      exam: (state = { ...examInitialState, ...initState.exam }) => state,
+    },
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware({
+        serializableCheck: false,
+        immutableCheck: false,
+      }),
+  });
+};
+
+const renderWithStore = (component, initialState) => {
+  const store = createMockStore(initialState);
+
+  return render(<Provider store={store}>{component}</Provider>);
+};
+
+describe("User Profile Component", () => {
+  beforeAll(() => {
+    for (const [evtName, cb] of Object.entries(socketEvents)) {
+      socketEventManager.subscribe(evtName, cb);
+    }
+
+    jest.useFakeTimers();
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  afterAll(() => jest.useRealTimers());
+
+  describe("mount and unmount behavior", () => {
+    describe("redux behavior should render", () => {
+      it("message `user not found` when param is undefined", () => {
+        mockUseParams.mockReturnValue({ userId: undefined });
+
+        renderWithStore(<UserProfile />);
+
+        expect(screen.getByText(/User not found/i)).toBeInTheDocument();
+      });
+    });
+  });
+});
