@@ -12,20 +12,34 @@ const initialState = {
 };
 
 const setupState = (stateProps) => {
-  return { ...initialState, stateProps };
+  return { ...initialState, ...stateProps };
 };
 
-const mockUser = {
+const mockSender = {
   _id: "userId_1",
-  name: "John Doe",
+  name: "Alice One",
+};
+const mockReceiver = {
+  _id: "userId_2",
+  name: "Bob Two",
 };
 
 const mockScores = {};
 mockScores["userId_1"] = [];
+mockScores["userId_2"] = [];
+
 const mockUserList = [];
 const mockFriendList = [];
+const mockFriendDoc = {
+  _id: "friendDoc_1",
+  senderId: mockSender._id,
+  receiverId: mockReceiver._id,
+  sender: { ...mockSender },
+  receiver: { ...mockReceiver },
+  status: "accepted",
+};
 
-const authInitialState = setupState({ user: mockUser });
+const authInitialState = setupState({ user: mockSender });
 const examInitialState = setupState({ examScores: mockScores });
 const friendInitialState = setupState({
   userList: mockUserList,
@@ -84,7 +98,7 @@ const createMockStore = (initState = {}) => {
 const renderWithStore = (component, initialState) => {
   const store = createMockStore(initialState);
 
-  return render(<Provider store={store}>{component}</Provider>);
+  return { ...render(<Provider store={store}>{component}</Provider>), store };
 };
 
 describe("User Profile Component", () => {
@@ -102,14 +116,34 @@ describe("User Profile Component", () => {
 
   afterAll(() => jest.useRealTimers());
 
-  describe("mount and unmount behavior", () => {
-    describe("redux behavior should render", () => {
-      it("message `user not found` when param is undefined", () => {
-        mockUseParams.mockReturnValue({ userId: undefined });
+  describe("on mount and unmount", () => {
+    describe("redux-related behavior, should render", () => {
+      describe("message `user not found` when", () => {
+        it("param is undefined", () => {
+          mockUseParams.mockReturnValue({ userId: undefined });
+          renderWithStore(<UserProfile />);
+          expect(screen.getByText(/User not found/i)).toBeInTheDocument();
+        });
 
-        renderWithStore(<UserProfile />);
-
-        expect(screen.getByText(/User not found/i)).toBeInTheDocument();
+        it("user profile does not exist", () => {
+          mockUseParams.mockReturnValue({ userId: "randomUser_1" });
+          const mockState = {
+            friends: {
+              isLoading: false,
+              userList: [
+                {
+                  sender: { _id: "user_2", name: "Alice" },
+                  receiver: { _id: "user_3", name: "Bob" },
+                },
+              ],
+              friendList: [],
+            },
+            auth: { user: { _id: "authUser_1", name: "Auth User" } },
+            exam: { examScores: {} },
+          };
+          renderWithStore(<UserProfile />, mockState);
+          expect(screen.getByText(/User not found/i)).toBeInTheDocument();
+        });
       });
     });
   });
