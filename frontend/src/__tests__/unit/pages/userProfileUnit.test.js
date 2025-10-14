@@ -145,6 +145,48 @@ describe("User Profile Component", () => {
           expect(screen.getByText(/User not found/i)).toBeInTheDocument();
         });
       });
+
+      describe("sender profile info, when", () => {
+        it("sender views page", () => {
+          mockUseParams.mockReturnValue({ userId: mockSender._id });
+          const { store } = renderWithStore(<UserProfile />, {
+            auth: { user: mockSender },
+            friend: {
+              userList: [{ ...mockFriendDoc }],
+              friendList: [{ ...mockFriendDoc }],
+            },
+          });
+          expect(screen.getByText(/Alice One/i)).toBeInTheDocument();
+          expect(
+            screen.getByRole("button", { name: /Edit Account Info/i })
+          ).toBeInTheDocument();
+          const renderedFriendlist = store.getState().friends.friendList;
+          expect(renderedFriendlist).toHaveLength(1);
+          for (const [key, value] of Object.entries(renderedFriendlist[0])) {
+            expect(mockFriendDoc[key]).toEqual(value);
+          }
+        });
+
+        it("receiver views page", () => {
+          mockUseParams.mockReturnValue({ userId: mockSender._id });
+          const { store } = renderWithStore(<UserProfile />, {
+            auth: { user: mockReceiver },
+            friend: {
+              userList: [{ ...mockFriendDoc }],
+              friendList: [{ ...mockFriendDoc }],
+            },
+          });
+          const renderedFriendlist = store.getState().friends.friendList;
+          expect(screen.getByText(/Alice One/i)).toBeInTheDocument();
+          expect(
+            screen.queryByRole("button", { name: /Edit Account Info/i })
+          ).not.toBeInTheDocument();
+          expect(renderedFriendlist).toHaveLength(1);
+          for (const [key, value] of Object.entries(renderedFriendlist[0])) {
+            expect(mockFriendDoc[key]).toEqual(value);
+          }
+        });
+      });
     });
   });
 });
