@@ -3,6 +3,16 @@ import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import socketEventManager from "../../../features/socket/managers/socket.eventManager";
 import UserProfile from "../../../pages/UserProfile";
+import {
+  getUserList,
+  getFriendList,
+  resetUserList,
+  handleBlock,
+} from "../../../features/friend/friendSlice.js";
+import {
+  getExamScores,
+  resetExam,
+} from "../../../features/quizzes/exam/examSlice.js";
 
 const initialState = {
   isLoading: false,
@@ -243,6 +253,53 @@ describe("User Profile Component", () => {
           }
         });
       });
+
+      describe("block message, when", () => {
+        it("sender visits the page", () => {
+          mockUseParams.mockReturnValue({ userId: mockSender._id });
+
+          renderWithStore(<UserProfile />, {
+            auth: { ...mockSender },
+            friend: {
+              userList: [
+                {
+                  ...blockedFriend,
+                  _id: "friendDoc_2",
+                  sender: { ...mockReceiver },
+                  receiver: { ...mockSender },
+                },
+              ],
+            },
+          });
+
+          expect(
+            screen.queryByText(/You cannot interact with this user/i)
+          ).toBeInTheDocument();
+        });
+
+        it("receiver visits the page", () => {
+          mockUseParams.mockReturnValue({ userId: mockReceiver._id });
+
+          renderWithStore(<UserProfile />, {
+            auth: { ...mockReceiver },
+            friend: {
+              userList: [
+                {
+                  ...blockedFriend,
+                  _id: "friendDoc_2",
+                  sender: { ...mockReceiver },
+                  receiver: { ...mockSender },
+                },
+              ],
+            },
+          });
+
+          expect(
+            screen.queryByText(/You cannot interact with this user/i)
+          ).toBeInTheDocument();
+        });
+      });
+    });
     });
   });
 });
