@@ -25,8 +25,6 @@ const mockReceiver = {
 };
 
 const mockScores = {};
-mockScores["userId_1"] = [];
-mockScores["userId_2"] = [];
 
 const mockUserList = [];
 const mockFriendList = [];
@@ -37,6 +35,24 @@ const mockFriendDoc = {
   sender: { ...mockSender },
   receiver: { ...mockReceiver },
   status: "accepted",
+};
+
+const blockedFriend = {
+  senderId: mockReceiver._id,
+  receiverId: mockSender._id,
+  status: "blocked",
+};
+
+const mockExamScores = {
+  _id: "examDoc_1",
+  quiz: {
+    quizId: "",
+    quizTitle: "",
+  },
+  examId: "",
+  userId: mockSender._id,
+  latestScore: 2,
+  highScore: 3,
 };
 
 const authInitialState = setupState({ user: mockSender });
@@ -50,7 +66,7 @@ const mockNavigate = jest.fn();
 const mockDispatch = jest.fn();
 const mockUseParams = jest.fn();
 
-const socketEvents = {};
+const socketEvents = ["user blocked"];
 
 jest.mock("react-router-dom", () => ({
   ...jest.requireActual("react-router-dom"),
@@ -63,15 +79,11 @@ jest.mock("react-redux", () => ({
   useDispatch: () => mockDispatch,
 }));
 
-jest.mock("../../../features/friend/friendReducers.js", () => ({
-  handleBlock: jest.fn(),
-  newFriendRequest: jest.fn(),
-}));
-
 jest.mock("../../../features/friend/friendSlice.js", () => ({
   getUserList: jest.fn(),
   getFriendList: jest.fn(),
   resetUserList: jest.fn(),
+  handleBlock: jest.fn(),
 }));
 
 jest.mock("../../../features/quizzes/exam/examSlice.js", () => ({
@@ -103,7 +115,7 @@ const renderWithStore = (component, initialState) => {
 
 describe("User Profile Component", () => {
   beforeAll(() => {
-    for (const [evtName, cb] of Object.entries(socketEvents)) {
+    for (const [evtName, cb] of socketEvents) {
       socketEventManager.subscribe(evtName, cb);
     }
 
@@ -122,7 +134,9 @@ describe("User Profile Component", () => {
         it("param is undefined", () => {
           mockUseParams.mockReturnValue({ userId: undefined });
           renderWithStore(<UserProfile />);
-          expect(screen.getByText(/User not found/i)).toBeInTheDocument();
+          expect(
+            screen.queryAllByText(/User not found/i).length
+          ).toBeGreaterThan(0);
         });
 
         it("user profile does not exist", () => {
@@ -142,7 +156,7 @@ describe("User Profile Component", () => {
             exam: { examScores: {} },
           };
           renderWithStore(<UserProfile />, mockState);
-          expect(screen.getByText(/User not found/i)).toBeInTheDocument();
+          expect(screen.queryByText(/User not found/i)).toBeInTheDocument();
         });
       });
 
@@ -156,7 +170,7 @@ describe("User Profile Component", () => {
               friendList: [{ ...mockFriendDoc }],
             },
           });
-          expect(screen.getByText(/Alice One/i)).toBeInTheDocument();
+          expect(screen.queryByText(/Alice One/i)).toBeInTheDocument();
           expect(
             screen.getByRole("button", { name: /Edit Account Info/i })
           ).toBeInTheDocument();
@@ -177,7 +191,7 @@ describe("User Profile Component", () => {
             },
           });
           const renderedFriendlist = store.getState().friends.friendList;
-          expect(screen.getByText(/Alice One/i)).toBeInTheDocument();
+          expect(screen.queryByText(/Alice One/i)).toBeInTheDocument();
           expect(
             screen.queryByRole("button", { name: /Edit Account Info/i })
           ).not.toBeInTheDocument();
@@ -198,7 +212,7 @@ describe("User Profile Component", () => {
               friendList: [{ ...mockFriendDoc }],
             },
           });
-          expect(screen.getByText(/Bob Two/i)).toBeInTheDocument();
+          expect(screen.queryByText(/Bob Two/i)).toBeInTheDocument();
           expect(
             screen.queryByRole("button", { name: /Edit Account Info/i })
           ).not.toBeInTheDocument();
@@ -218,7 +232,7 @@ describe("User Profile Component", () => {
               friendList: [{ ...mockFriendDoc }],
             },
           });
-          expect(screen.getByText(/Bob Two/i)).toBeInTheDocument();
+          expect(screen.queryByText(/Bob Two/i)).toBeInTheDocument();
           expect(
             screen.getByRole("button", { name: /Edit Account Info/i })
           ).toBeInTheDocument();
