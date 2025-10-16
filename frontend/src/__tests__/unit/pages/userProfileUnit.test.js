@@ -300,6 +300,91 @@ describe("User Profile Component", () => {
         });
       });
     });
+
+    describe("should dispatch reducers to", () => {
+      it("fetch initial data, on component mount", () => {
+        const paramId = mockSender._id;
+        mockUseParams.mockReturnValue({ userId: paramId });
+
+        renderWithStore(<UserProfile />, { auth: { ...mockSender } });
+
+        expect(getFriendList).toHaveBeenCalled();
+        expect(getFriendList).toHaveBeenCalledTimes(1);
+
+        expect(getUserList).toHaveBeenCalled();
+        expect(getUserList).toHaveBeenCalledTimes(1);
+
+        expect(getExamScores).toHaveBeenCalled();
+        expect(getExamScores).toHaveBeenCalledTimes(1);
+      });
+
+      it("reset redux state, on component unmount", () => {
+        const paramId = mockSender._id;
+        mockUseParams.mockReturnValue({ userId: paramId });
+
+        const { unmount } = renderWithStore(<UserProfile />, {
+          auth: { ...mockSender },
+        });
+
+        unmount();
+
+        expect(resetUserList).toHaveBeenCalled();
+        expect(resetUserList).toHaveBeenCalledTimes(1);
+
+        expect(resetExam).toHaveBeenCalled();
+        expect(resetExam).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe("socket related behavior, should ", () => {
+      it("subscribe to socket events on mount", () => {
+        const paramId = mockSender._id;
+        mockUseParams.mockReturnValue({ userId: paramId });
+
+        renderWithStore(<UserProfile />, { auth: { ...mockSender } });
+
+        for (const evt of socketEvents) {
+          expect(socketEventManager.subscribe).toHaveBeenCalledWith(
+            evt,
+            expect.any(Function)
+          );
+        }
+      });
+
+      it("react to `user blocked` socket event", () => {
+        mockUseParams.mockReturnValue({ userId: mockReceiver._id });
+
+        renderWithStore(<UserProfile />, { auth: { user: mockSender } });
+
+        const subscribeCall = socketEventManager.subscribe.mock.calls.find(
+          ([eventName]) => eventName === "user blocked"
+        );
+
+        const callback = subscribeCall[1];
+
+        callback(mockReceiver._id);
+
+        expect(mockDispatch).toHaveBeenCalledWith(handleBlock());
+        expect(mockDispatch).toHaveBeenCalledWith(getUserList());
+        expect(mockDispatch).toHaveBeenCalledWith(
+          getFriendList(mockSender._id)
+        );
+      });
+
+      it("unsubscribe to socket events on unmount", () => {
+        const paramId = mockSender._id;
+        mockUseParams.mockReturnValue({ userId: paramId });
+
+        const { unmount } = renderWithStore(<UserProfile />, {
+          auth: { ...mockSender },
+        });
+
+        unmount();
+
+        for (const evt of socketEvents) {
+          expect(socketEventManager.unsubscribe).toHaveBeenCalledWith(evt);
+        }
+      });
     });
   });
 });
