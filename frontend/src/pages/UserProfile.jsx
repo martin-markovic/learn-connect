@@ -5,7 +5,6 @@ import {
   getUserList,
   getFriendList,
   handleBlock,
-  newFriendRequest,
   resetUserList,
 } from "../features/friend/friendSlice.js";
 import {
@@ -31,9 +30,9 @@ function UserProfile() {
   } = useSelector((state) => state.friends);
   const dispatch = useDispatch();
   const { _id: authUserId, name: userName } = useSelector(
-    (state) => state.auth.user
+    (state) => state.auth.user || {}
   );
-  const { examScores } = useSelector((state) => state.exam);
+  const { examScores } = useSelector((state) => state.exam || {});
 
   const friendshipStatus = useMemo(() => {
     const relation = friendList.find(
@@ -71,11 +70,6 @@ function UserProfile() {
   }, [dispatch, authUserId, userId, isBlocked]);
 
   useEffect(() => {
-    dispatch(resetExam());
-    dispatch(resetUserList());
-  }, [userId, dispatch]);
-
-  useEffect(() => {
     if (!userList.length || isLoading || !authUserId) return;
 
     const userFound = userList.find(
@@ -101,7 +95,7 @@ function UserProfile() {
 
     if (
       (isFriend === "accepted" || userId === authUserId) &&
-      !examScores[userId]
+      !examScores?.[userId]
     ) {
       dispatch(getExamScores(userId));
     }
@@ -117,13 +111,8 @@ function UserProfile() {
       dispatch(getFriendList(authUserId));
     });
 
-    socketEventManager.subscribe("friend request sent", (data) => {
-      dispatch(newFriendRequest(data));
-    });
-
     return () => {
       socketEventManager.unsubscribe("user blocked");
-      socketEventManager.unsubscribe("friend request sent");
     };
   }, [dispatch, authUserId]);
 
@@ -173,7 +162,7 @@ function UserProfile() {
       </div>
       <div className="user__profile-bottom__box">
         <div className="user__profile-bottom__box-content">
-          {friendList.length ? (
+          {friendList?.length ? (
             <FriendList friendList={friendList} userId={userId} />
           ) : (
             <p>Friend list is empty</p>

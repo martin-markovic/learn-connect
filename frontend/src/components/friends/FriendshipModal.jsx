@@ -1,6 +1,7 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import socketEventManager from "../../features/socket/managers/socket.eventManager.js";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { newFriendRequest } from "../../features/friend/friendSlice.js";
 
 function FriendshipModal(modalData) {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -13,6 +14,18 @@ function FriendshipModal(modalData) {
   const { isLoading } = useSelector((state) => state.friends);
 
   const selectRef = useRef(null);
+
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    socketEventManager.subscribe("friend request sent", (data) => {
+      dispatch(newFriendRequest(data));
+    });
+
+    return () => {
+      socketEventManager.unsubscribe("friend request sent");
+    };
+  }, [dispatch]);
 
   const handleConfirmAction = () => {
     try {
