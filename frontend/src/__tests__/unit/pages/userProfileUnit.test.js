@@ -140,6 +140,19 @@ describe("User Profile Component", () => {
 
   describe("on mount and unmount", () => {
     describe("redux-related behavior, should render", () => {
+      describe("message `please wait`, while", () => {
+        it("auth state is loading", () => {
+          mockUseParams.mockReturnValue({ userId: mockSender._id });
+
+          renderWithStore(<UserProfile />, {
+            auth: { isLoading: true, user: mockSender },
+          });
+
+          expect(screen.getByText(/Loading,please wait/i)).toBeInTheDocument();
+          expect(screen.queryByText(mockSender.name)).not.toBeInTheDocument();
+        });
+      });
+
       describe("message `user not found` when", () => {
         it("param is undefined", () => {
           mockUseParams.mockReturnValue({ userId: undefined });
