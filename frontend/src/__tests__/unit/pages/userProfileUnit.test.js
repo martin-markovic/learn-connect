@@ -1,4 +1,5 @@
-import { render, fireEvent, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
+import { act } from "react";
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import socketEventManager from "../../../features/socket/managers/socket.eventManager";
@@ -175,8 +176,11 @@ describe("User Profile Component", () => {
               ],
               friendList: [],
             },
-            auth: { user: { _id: "authUser_1", name: "Auth User" } },
-            exam: { examScores: {} },
+            auth: {
+              isLoading: false,
+              user: { _id: "authUser_1", name: "Auth User" },
+            },
+            exam: { isLoading: false, examScores: {} },
           };
           renderWithStore(<UserProfile />, mockState);
           expect(screen.queryByText(/User not found/i)).toBeInTheDocument();
@@ -229,11 +233,13 @@ describe("User Profile Component", () => {
         it("sender views page", () => {
           mockUseParams.mockReturnValue({ userId: mockReceiver._id });
           const { store } = renderWithStore(<UserProfile />, {
-            auth: { user: mockSender },
+            auth: { isLoading: false, user: mockSender },
             friend: {
+              isLoading: false,
               userList: [{ ...mockFriendDoc }],
               friendList: [{ ...mockFriendDoc }],
             },
+            exam: { isLoading: false },
           });
           expect(screen.queryByText(/Bob Two/i)).toBeInTheDocument();
           expect(
@@ -249,11 +255,13 @@ describe("User Profile Component", () => {
         it("receiver views page", () => {
           mockUseParams.mockReturnValue({ userId: mockReceiver._id });
           const { store } = renderWithStore(<UserProfile />, {
-            auth: { user: mockReceiver },
+            auth: { isLoading: false, user: mockReceiver },
             friend: {
+              isLoading: false,
               userList: [{ ...mockFriendDoc }],
               friendList: [{ ...mockFriendDoc }],
             },
+            exam: { isLoading: false },
           });
           expect(screen.queryByText(/Bob Two/i)).toBeInTheDocument();
           expect(
@@ -269,20 +277,16 @@ describe("User Profile Component", () => {
 
       describe("block message, when", () => {
         it("sender visits the page", () => {
-          mockUseParams.mockReturnValue({ userId: mockSender._id });
+          mockUseParams.mockReturnValue({ userId: mockReceiver._id });
 
           renderWithStore(<UserProfile />, {
-            auth: { ...mockSender },
+            auth: { isLoading: false, user: { ...mockSender } },
             friend: {
-              userList: [
-                {
-                  ...blockedFriend,
-                  _id: "friendDoc_2",
-                  sender: { ...mockReceiver },
-                  receiver: { ...mockSender },
-                },
-              ],
+              isLoading: false,
+              isLoading: false,
+              friendList: [blockedFriend],
             },
+            exam: { isLoading: false },
           });
 
           expect(
@@ -291,20 +295,15 @@ describe("User Profile Component", () => {
         });
 
         it("receiver visits the page", () => {
-          mockUseParams.mockReturnValue({ userId: mockReceiver._id });
+          mockUseParams.mockReturnValue({ userId: mockSender._id });
 
           renderWithStore(<UserProfile />, {
-            auth: { ...mockReceiver },
+            auth: { isLoading: false, user: mockReceiver },
             friend: {
-              userList: [
-                {
-                  ...blockedFriend,
-                  _id: "friendDoc_2",
-                  sender: { ...mockReceiver },
-                  receiver: { ...mockSender },
-                },
-              ],
+              isLoading: false,
+              friendList: [blockedFriend],
             },
+            exam: { isLoading: false },
           });
 
           expect(
@@ -319,7 +318,11 @@ describe("User Profile Component", () => {
         const paramId = mockSender._id;
         mockUseParams.mockReturnValue({ userId: paramId });
 
-        renderWithStore(<UserProfile />, { auth: { ...mockSender } });
+        renderWithStore(<UserProfile />, {
+          auth: { isLoading: false, ...mockSender },
+          friend: { isLoading: false },
+          exam: { isLoading: false },
+        });
 
         expect(getFriendList).toHaveBeenCalled();
         expect(getFriendList).toHaveBeenCalledTimes(1);
@@ -336,7 +339,9 @@ describe("User Profile Component", () => {
         mockUseParams.mockReturnValue({ userId: paramId });
 
         const { unmount } = renderWithStore(<UserProfile />, {
-          auth: { ...mockSender },
+          auth: { isLoading: false, ...mockSender },
+          friend: { isLoading: false },
+          exam: { isLoading: false },
         });
 
         unmount();
@@ -354,7 +359,11 @@ describe("User Profile Component", () => {
         const paramId = mockSender._id;
         mockUseParams.mockReturnValue({ userId: paramId });
 
-        renderWithStore(<UserProfile />, { auth: { ...mockSender } });
+        renderWithStore(<UserProfile />, {
+          auth: { isLoading: false, ...mockSender },
+          friend: { isLoading: false },
+          exam: { isLoading: false },
+        });
 
         for (const evt of socketEvents) {
           expect(socketEventManager.subscribe).toHaveBeenCalledWith(
@@ -367,7 +376,11 @@ describe("User Profile Component", () => {
       it("react to `user blocked` socket event", () => {
         mockUseParams.mockReturnValue({ userId: mockReceiver._id });
 
-        renderWithStore(<UserProfile />, { auth: { user: mockSender } });
+        renderWithStore(<UserProfile />, {
+          auth: { isLoading: false, user: mockSender },
+          friend: { isLoading: false },
+          exam: { isLoading: false },
+        });
 
         const subscribeCall = socketEventManager.subscribe.mock.calls.find(
           ([eventName]) => eventName === "user blocked"
@@ -375,7 +388,9 @@ describe("User Profile Component", () => {
 
         const callback = subscribeCall[1];
 
-        callback(mockReceiver._id);
+        act(() => {
+          callback(mockReceiver._id);
+        });
 
         expect(mockDispatch).toHaveBeenCalledWith(handleBlock());
         expect(mockDispatch).toHaveBeenCalledWith(getUserList());
@@ -389,7 +404,9 @@ describe("User Profile Component", () => {
         mockUseParams.mockReturnValue({ userId: paramId });
 
         const { unmount } = renderWithStore(<UserProfile />, {
-          auth: { ...mockSender },
+          auth: { isLoading: false, ...mockSender },
+          friend: { isLoading: false },
+          exam: { isLoading: false },
         });
 
         unmount();
