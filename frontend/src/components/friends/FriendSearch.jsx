@@ -24,7 +24,7 @@ export default function FriendSearch() {
     classQuizzes,
   } = useSelector((state) => state.quizzes);
 
-  const user = useSelector((state) => state.auth);
+  const { user } = useSelector((state) => state.auth);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -40,7 +40,7 @@ export default function FriendSearch() {
       dispatch(resetUserList());
       dispatch(resetQuizzes());
     };
-  }, [dispatch,user?._id]);
+  }, [dispatch, user?._id]);
 
   useEffect(() => {
     if (!userStateLoading) {
@@ -49,7 +49,9 @@ export default function FriendSearch() {
         users: [...userList],
       }));
     }
+  }, [userStateLoading, userList]);
 
+  useEffect(() => {
     if (!quizStateLoading && userQuizzes?.length && classQuizzes?.length) {
       const quizList = [...userQuizzes, ...classQuizzes];
       const quizIdSet = new Set();
@@ -70,7 +72,7 @@ export default function FriendSearch() {
         quizzes: filteredList,
       }));
     }
-  }, [userStateLoading, quizStateLoading, userList, classQuizzes, userQuizzes]);
+  }, [quizStateLoading, classQuizzes, userQuizzes]);
 
   const handleChange = (e) => {
     e.preventDefault();

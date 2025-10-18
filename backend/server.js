@@ -43,7 +43,6 @@ const configureMiddleware = (app) => {
   app.use(express.static(path.join(__dirname, "public")));
 
   app.use((req, res, next) => {
-    console.log(`Incoming request: ${req.method} ${req.url}`);
     next();
   });
 };
@@ -51,8 +50,6 @@ const configureMiddleware = (app) => {
 const configureErrorHandling = (app) => {
   app.use((err, req, res, next) => {
     console.error("Global error handler:", err.stack || err.message);
-
-    console.log(`Incoming request: ${req.method} ${req.url}`);
 
     return res.status(err.status || 500).json({
       message: err.message || "Internal server error",
