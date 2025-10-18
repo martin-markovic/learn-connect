@@ -22,17 +22,27 @@ import ExamScores from "../components/exam/ExamScores.jsx";
 function UserProfile() {
   const [userInfo, setUserInfo] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [pageReady, setPageReady] = useState(false);
   const { userId } = useParams();
   const {
-    isLoading,
+    isLoading: friendsLoading,
     userList = [],
     friendList = [],
   } = useSelector((state) => state.friends);
   const dispatch = useDispatch();
-  const { _id: authUserId, name: userName } = useSelector(
-    (state) => state.auth.user || {}
+  const { isLoading: authLoading, user } = useSelector(
+    (state) => state.auth || {}
   );
-  const { examScores } = useSelector((state) => state.exam || {});
+  const { isLoading: examLoading, examScores } = useSelector(
+    (state) => state.exam || {}
+  );
+  const { _id: authUserId, name: userName } = user || {};
+
+  useEffect(() => {
+    const statesReady = !authLoading && !friendsLoading && !examLoading;
+
+    setPageReady(statesReady);
+  }, [authLoading, friendsLoading, examLoading]);
 
   const friendshipStatus = useMemo(() => {
     const relation = friendList.find(
@@ -70,7 +80,7 @@ function UserProfile() {
   }, [dispatch, authUserId, userId, isBlocked]);
 
   useEffect(() => {
-    if (!userList.length || isLoading || !authUserId) return;
+    if (!userList.length || pageReady || !authUserId) return;
 
     const userFound = userList.find(
       (item) => item.sender._id === userId || item.receiver?._id === userId
@@ -82,7 +92,7 @@ function UserProfile() {
       userFound.receiver._id === userId ? userFound.receiver : userFound.sender;
 
     setUserInfo(selectedUser);
-  }, [userList, userId, isLoading, authUserId]);
+  }, [userList, userId, pageReady, authUserId]);
 
   useEffect(() => {
     const isFriend = friendList.find(
@@ -105,7 +115,7 @@ function UserProfile() {
     socketEventManager.subscribe("user blocked", (data) => {
       dispatch(handleBlock(data));
 
-      setUserInfo((prev) => (prev._id === data ? null : prev));
+      setUserInfo((prev) => (prev && prev._id === data ? null : prev));
 
       dispatch(getUserList());
       dispatch(getFriendList(authUserId));
@@ -116,17 +126,23 @@ function UserProfile() {
     };
   }, [dispatch, authUserId]);
 
-  if (!isLoading && isBlocked) {
-    return <p>You cannot interact with this user.</p>;
+  if (authLoading || friendsLoading || examLoading) {
+    return <p>Loading,please wait...</p>;
   }
 
-  if (!isLoading && !userInfo) {
+  if (!userId) {
     return <p>User not found.</p>;
   }
 
-  return isLoading ? (
-    <p>Loading,please wait...</p>
-  ) : isEditing ? (
+  if (isBlocked) {
+    return <p>You cannot interact with this user.</p>;
+  }
+
+  if (!userInfo) {
+    return <p>User not found.</p>;
+  }
+
+  return isEditing ? (
     <UserForm setIsEditing={setIsEditing} />
   ) : (
     <div className="user__profile-container">
