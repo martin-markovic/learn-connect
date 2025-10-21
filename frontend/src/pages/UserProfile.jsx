@@ -80,18 +80,13 @@ function UserProfile() {
   }, [dispatch, authUserId, userId, isBlocked]);
 
   useEffect(() => {
-    if (!userList.length || pageReady || !authUserId) return;
+    if (!userList.length || !pageReady || !authUserId) return;
 
-    const userFound = userList.find(
-      (item) => item.sender._id === userId || item.receiver?._id === userId
-    );
+    const userFound = userList.find((item) => item._id === userId);
 
-    if (!userFound.status || userFound.status === "blocked") return;
+    if (userFound.status === "blocked") return;
 
-    const selectedUser =
-      userFound.receiver._id === userId ? userFound.receiver : userFound.sender;
-
-    setUserInfo(selectedUser);
+    setUserInfo(userFound);
   }, [userList, userId, pageReady, authUserId]);
 
   useEffect(() => {
@@ -112,14 +107,18 @@ function UserProfile() {
   }, [friendList, userId, authUserId, friendshipStatus, examScores, dispatch]);
 
   useEffect(() => {
-    socketEventManager.subscribe("user blocked", (data) => {
-      dispatch(handleBlock(data));
+    try {
+      socketEventManager.subscribe("user blocked", (data) => {
+        dispatch(handleBlock(data));
 
-      setUserInfo((prev) => (prev && prev._id === data ? null : prev));
+        setUserInfo((prev) => (prev && prev._id === data ? null : prev));
 
-      dispatch(getUserList());
-      dispatch(getFriendList(authUserId));
-    });
+        dispatch(getUserList());
+        dispatch(getFriendList(authUserId));
+      });
+    } catch (error) {
+      console.error(error.message);
+    }
 
     return () => {
       socketEventManager.unsubscribe("user blocked");

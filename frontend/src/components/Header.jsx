@@ -17,13 +17,18 @@ import { resetUserList } from "../features/friend/friendSlice.js";
 import { getExam, resetExam } from "../features/quizzes/exam/examSlice.js";
 import { useEffect } from "react";
 import useGlobalEvents from "../hooks/useGlobalEvents.js";
+import { toast } from "react-toastify";
 
-function Header() {
+const Header = function () {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const location = useLocation();
   const { user } = useSelector((state) => state.auth);
-  const examId = useSelector((state) => state.exam.examData?._id);
+  const { isLoading: examLoading, examData } = useSelector(
+    (state) => state.exam
+  );
+
+  const examId = examData?._id;
 
   const handleLogout = () => {
     dispatch(resetQuizzes());
@@ -38,18 +43,25 @@ function Header() {
     navigate("/login");
   };
 
-  useGlobalEvents(location.pathname, user);
+  if (user?._id) {
+    useGlobalEvents(location.pathname);
+  }
 
   useEffect(() => {
-    if (!["/register", "/login"].includes(location.pathname)) {
+    if (
+      !examLoading &&
+      !examId &&
+      !["/register", "/login"].includes(location.pathname) &&
+      user?._id
+    ) {
       dispatch(getExam());
     }
-  }, [dispatch, location.pathname]);
+  }, [dispatch, location.pathname, user?._id, examLoading, examId]);
 
   return (
     <header>
       <ul>
-        {user ? (
+        {user?._id ? (
           <div className="nav-buttons">
             <li>
               <button
@@ -90,6 +102,7 @@ function Header() {
                       navigate(`/exam/${examId}`);
                     } catch (error) {
                       console.error("Error navigating to exam", error.message);
+                      toast.error("Unable to navigate the to exam");
                       dispatch(getExam());
                     }
                   }
@@ -137,6 +150,6 @@ function Header() {
       </ul>
     </header>
   );
-}
+};
 
 export default Header;
