@@ -38,19 +38,23 @@ jest.mock("../../../features/quizzes/exam/examSlice.js", () => ({
   resetExam: jest.fn(),
 }));
 
+const mockUseGlobalEvents = jest.fn();
+
 jest.mock("../../../hooks/useGlobalEvents.js", () => ({
   __esModule: true,
-  default: jest.fn(),
+  default: () => mockUseGlobalEvents(),
 }));
 
 const mockNavigate = jest.fn();
 const mockDispatch = jest.fn();
 
+const mockUseLocation = jest.fn(() => ({ pathname: "/" }));
+
 jest.mock("react-router-dom", () => ({
   ...jest.requireActual("react-router-dom"),
 
   useNavigate: () => mockNavigate,
-  useLocation: () => ({ pathname: "/" }),
+  useLocation: () => mockUseLocation(),
 }));
 
 jest.mock("react-redux", () => {
@@ -71,6 +75,12 @@ const unregisteredUser = {
   _id: null,
   email: null,
   name: "John Doe",
+};
+
+const mockExam = {
+  examData: {
+    _id: "examId_1",
+  },
 };
 
 const initialState = {
