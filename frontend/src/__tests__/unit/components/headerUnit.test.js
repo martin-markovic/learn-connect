@@ -128,9 +128,9 @@ describe("Header component", () => {
 
   afterAll(() => jest.useRealTimers());
 
-  describe("lifecycle behavior", () => {
-    describe("on mount should", () => {
-      it("render initial data with authenticated user", () => {
+  describe("mount behavior", () => {
+    describe("with authenticated user", () => {
+      it("renders navigation links", () => {
         renderWithStore(<Header />);
 
         expect(screen.queryByText(/Home/i)).toBeInTheDocument();
@@ -142,7 +142,21 @@ describe("Header component", () => {
         expect(screen.queryByText(/Register/i)).not.toBeInTheDocument();
       });
 
-      it("render links to auth pages without authenticated user", () => {
+      it("dispatches getExam on mount", () => {
+        renderWithStore(<Header />);
+
+        expect(mockDispatch).toHaveBeenCalledWith(getExam());
+      });
+    describe("without authenticated user", () => {
+      it("does not dispatch getExam action", () => {
+        renderWithStore(<Header />, {
+          auth: { user: null },
+        });
+
+        expect(mockDispatch).not.toHaveBeenCalledWith();
+      });
+
+      it("renders links to auth pages, but not navigation", () => {
         renderWithStore(<Header />, {
           auth: { user: null },
         });
@@ -157,6 +171,8 @@ describe("Header component", () => {
       });
 
       it("render links to auth pages with for users without _id field", () => {
+    describe("with invalid user (_id missing)", () => {
+      it("renders links to auth pages, but not navigation", () => {
         renderWithStore(<Header />, {
           auth: { user: unregisteredUser },
         });
@@ -168,14 +184,37 @@ describe("Header component", () => {
 
         expect(screen.queryByText(/Login/i)).not.toBeInTheDocument();
         expect(screen.queryByText(/Register/i)).toBeInTheDocument();
+
+        expect(mockDispatch).not.toHaveBeenCalled();
+      });
       });
     });
   });
 
-  describe("interactive behavior", () => {
-    it("should navigate to auth pages on link clicks", () => {});
+  describe("navigation behavior", () => {
+    it("navigates to the exam page, with ongoing exam", () => {
+      renderWithStore(<Header />, {
+        exam: mockExam,
+      });
 
-    it("should dispatch reducers for resetting redux state on logout, and navigate to login page", () => {
+      fireEvent.click(screen.getByText(/Exam/i));
+
+      expect(mockNavigate).toHaveBeenCalledWith(
+        `/exam/${mockExam.examData._id}`
+      );
+    });
+
+    it("does not navigate to the exam page, with no ongoing exam", () => {
+      renderWithStore(<Header />, {
+        exam: null,
+      });
+
+      fireEvent.click(screen.getByText(/Exam/i));
+
+      expect(mockNavigate).not.toHaveBeenCalled();
+    });
+  });
+
       renderWithStore(<Header />);
 
       fireEvent.click(screen.getByText(/Logout/i));
