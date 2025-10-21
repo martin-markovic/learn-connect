@@ -147,6 +147,14 @@ describe("Header component", () => {
 
         expect(mockDispatch).toHaveBeenCalledWith(getExam());
       });
+
+      it("calls `useGlobalEvents` hook", () => {
+        renderWithStore(<Header />);
+
+        expect(mockUseGlobalEvents).toHaveBeenCalled();
+      });
+    });
+
     describe("without authenticated user", () => {
       it("does not dispatch getExam action", () => {
         renderWithStore(<Header />, {
@@ -170,7 +178,15 @@ describe("Header component", () => {
         expect(screen.queryByText(/Register/i)).toBeInTheDocument();
       });
 
-      it("render links to auth pages with for users without _id field", () => {
+      it("does not call `useGlobalEvents` hook", () => {
+        renderWithStore(<Header />, {
+          auth: { user: null },
+        });
+
+        expect(mockUseGlobalEvents).not.toHaveBeenCalled();
+      });
+    });
+
     describe("with invalid user (_id missing)", () => {
       it("renders links to auth pages, but not navigation", () => {
         renderWithStore(<Header />, {
@@ -187,6 +203,13 @@ describe("Header component", () => {
 
         expect(mockDispatch).not.toHaveBeenCalled();
       });
+
+      it("does not call `useGlobalEvents` hook", () => {
+        renderWithStore(<Header />, {
+          auth: { user: unregisteredUser },
+        });
+
+        expect(mockUseGlobalEvents).not.toHaveBeenCalled();
       });
     });
   });
@@ -215,6 +238,8 @@ describe("Header component", () => {
     });
   });
 
+  describe("logout behavior", () => {
+    it("dispatches all reset actions", () => {
       renderWithStore(<Header />);
 
       fireEvent.click(screen.getByText(/Logout/i));
@@ -225,7 +250,37 @@ describe("Header component", () => {
       expect(mockDispatch).toHaveBeenCalledWith(resetClassroom());
       expect(mockDispatch).toHaveBeenCalledWith(resetUserList());
       expect(mockDispatch).toHaveBeenCalledWith(resetExam());
+    });
+
+    it("navigates to login page", () => {
+      renderWithStore(<Header />);
+
+      fireEvent.click(screen.getByText(/Logout/i));
+
       expect(mockNavigate).toHaveBeenCalledWith("/login");
+    });
+  });
+
+  describe("redux and side effects", () => {
+    it("does not dispatch getExam if already fetched", () => {
+      renderWithStore(<Header />, { isLoading: false, exam: mockExam });
+
+      expect(mockDispatch).not.toHaveBeenCalledWith(getExam());
+    });
+
+    it("does not dispatch getExam on auth pages", () => {
+      mockUseLocation.mockReturnValue({ pathname: "/login" });
+
+      renderWithStore(<Header />);
+
+      expect(mockDispatch).not.toHaveBeenCalledWith(getExam());
+
+      jest.clearAllMocks();
+
+      mockUseLocation.mockReturnValue({ pathname: "/register" });
+
+      renderWithStore(<Header />);
+      expect(mockDispatch).not.toHaveBeenCalledWith(getExam());
     });
   });
 });

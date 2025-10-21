@@ -48,10 +48,15 @@ const Header = function () {
   }
 
   useEffect(() => {
-    if (!["/register", "/login"].includes(location.pathname)) {
+    if (
+      !examLoading &&
+      !examId &&
+      !["/register", "/login"].includes(location.pathname) &&
+      user?._id
+    ) {
       dispatch(getExam());
     }
-  }, [dispatch, location.pathname]);
+  }, [dispatch, location.pathname, user?._id, examLoading, examId]);
 
   return (
     <header>
