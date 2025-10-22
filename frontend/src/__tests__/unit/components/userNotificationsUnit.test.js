@@ -14,6 +14,32 @@ jest.mock("react-redux", () => {
   };
 });
 
+const mockHandleMark = jest.fn();
+const mockHandleMarkAll = jest.fn();
+
+const socketEventList = {
+  "notification marked as read": mockHandleMark,
+  "marked all as read": mockHandleMarkAll,
+};
+
+const mockSubscribe = jest.fn();
+const mockUnSubscribe = jest.fn();
+
+jest.mock("../../../features/socket/managers/socket.eventManager.js", () => ({
+  subscribe: jest.fn((eventName, handler) => mockSubscribe(eventName, handler)),
+  unsubscribe: jest.fn((eventName) => mockUnSubscribe(eventName)),
+}));
+
+const mockResetNotifications = jest.fn();
+const mockGetNotifications = jest.fn();
+const mockMarkNotificationAsRead = jest.fn();
+
+jest.mock("../../../features/notifications/notificationSlice.js", () => ({
+  resetNotifications: () => mockResetNotifications,
+  getNotifications: () => mockGetNotifications,
+  markNotificationAsRead: () => mockMarkNotificationAsRead,
+}));
+
 const initialState = {
   isLoading: false,
   isSuccess: false,
@@ -28,7 +54,6 @@ const createMockStore = (initState = {}) => {
     reducer: {
       auth: (state = { ...initialState, user: mockUser, ...initState.auth }) =>
         state,
-      exam: (state = { ...initialState, ...initState.exam }) => state,
       notifications: (
         state = {
           ...initialState,
@@ -77,6 +102,35 @@ describe("User Notifications component", () => {
         expect(
           container.querySelector(".notification-controller")
         ).not.toBeInTheDocument();
+      });
+
+      it("should dispatch getNotifications", () => {
+        renderWithStore(<UserNotifications />);
+
+        expect(mockDispatch).toHaveBeenCalledWith(mockGetNotifications);
+      });
+
+      it("should subscribe to socket notification events", () => {
+        renderWithStore(<UserNotifications />);
+
+        for (const [evtName] of Object.entries(socketEventList)) {
+          expect(mockSubscribe).toHaveBeenCalledWith(
+            evtName,
+            expect.any(Function)
+          );
+        }
+      });
+
+      it("should attach document click listener on mount", () => {
+        const addEventListenerSpy = jest.spyOn(document, "addEventListener");
+
+        renderWithStore(<UserNotifications />);
+        expect(addEventListenerSpy).toHaveBeenCalledWith(
+          "click",
+          expect.any(Function)
+        );
+
+        addEventListenerSpy.mockRestore();
       });
     });
   });
