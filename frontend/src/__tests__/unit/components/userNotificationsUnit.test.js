@@ -187,5 +187,39 @@ describe("User Notifications component", () => {
         addEventListenerSpy.mockRestore();
       });
     });
+
+    describe("notification list length indicator", () => {
+      it("should not be rendered if list is empty", () => {
+        const { container } = renderWithStore(<UserNotifications />, {
+          auth: { user: mockUser },
+          notifications: { userNotifications: [] },
+        });
+
+        expect(
+          container.querySelector(".notification-count")
+        ).not.toBeInTheDocument();
+      });
+
+      it("should be rendered if list is not empty", () => {
+        const { container } = renderWithStore(<UserNotifications />, {
+          auth: { user: mockUser },
+          notifications: { userNotifications: [{ _id: "notificationId_1" }] },
+        });
+
+        expect(
+          container.querySelector(".notification-count")
+        ).toBeInTheDocument();
+      });
+    });
   });
+
+  describe("unmount behavior", () => {
+    it("should dispatch reset reducers", () => {
+      const { unmount } = renderWithStore(<UserNotifications />);
+      unmount();
+
+      expect(mockDispatch).toHaveBeenCalledWith(mockResetNotifications);
+    });
+  });
+
 });
