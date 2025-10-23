@@ -133,5 +133,59 @@ describe("User Notifications component", () => {
         addEventListenerSpy.mockRestore();
       });
     });
+
+    describe("without authenticated user", () => {
+      it("should render initial data", () => {
+        const { container } = renderWithStore(<UserNotifications />, {
+          auth: { user: null },
+        });
+
+        expect(screen.queryByText(/Mark all as read/i)).toBeInTheDocument();
+
+        expect(
+          container.querySelector(".notification-count")
+        ).not.toBeInTheDocument();
+
+        expect(
+          container.querySelector(".notification-controller")
+        ).not.toBeInTheDocument();
+      });
+
+      it("should not dispatch getNotifications", () => {
+        renderWithStore(<UserNotifications />, {
+          auth: { user: null },
+        });
+
+        expect(mockDispatch).not.toHaveBeenCalledWith(mockGetNotifications);
+      });
+
+      it("should not subscribe to socket notification events", () => {
+        renderWithStore(<UserNotifications />, {
+          auth: { user: null },
+        });
+
+        for (const [evtName] of Object.entries(socketEventList)) {
+          expect(mockSubscribe).not.toHaveBeenCalledWith(
+            evtName,
+            expect.any(Function)
+          );
+        }
+      });
+
+      it("should not attach document click listener", () => {
+        const addEventListenerSpy = jest.spyOn(document, "addEventListener");
+
+        renderWithStore(<UserNotifications />, {
+          auth: { user: null },
+        });
+
+        expect(addEventListenerSpy).not.toHaveBeenCalledWith(
+          "click",
+          expect.any(Function)
+        );
+
+        addEventListenerSpy.mockRestore();
+      });
+    });
   });
 });
