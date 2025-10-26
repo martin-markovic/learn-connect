@@ -16,19 +16,32 @@ function UserNotifications() {
   const clickRef = useRef();
 
   useEffect(() => {
-    dispatch(getNotifications());
-  }, [dispatch]);
+    if (user?._id) {
+      dispatch(getNotifications());
+    }
+  }, [dispatch, user?._id]);
 
   useEffect(() => {
-    socketEventManager.subscribe("notification marked as read", (data) => {
-      dispatch(markNotificationAsRead(data));
-    });
-
-    socketEventManager.subscribe("marked all as read", (data) => {
-      if (data.success) {
-        dispatch(resetNotifications());
+    try {
+      if (!user?._id) {
+        throw new Error("Invalid user ID");
       }
-    });
+
+      socketEventManager.subscribe("notification marked as read", (data) => {
+        dispatch(markNotificationAsRead(data));
+      });
+
+      socketEventManager.subscribe("marked all as read", (data) => {
+        if (data.success) {
+          dispatch(resetNotifications());
+        }
+      });
+    } catch (error) {
+      console.error(
+        "Unable to subscribe to notification events: ",
+        error.message
+      );
+    }
 
     return () => {
       dispatch(resetNotifications());
@@ -39,6 +52,8 @@ function UserNotifications() {
   }, [dispatch]);
 
   useEffect(() => {
+    if (!user?._id) return;
+
     function handleClick(e) {
       if (clickRef.current) {
         if (!clickRef.current.contains(e.target)) {
@@ -52,7 +67,7 @@ function UserNotifications() {
     return () => {
       document.removeEventListener("click", handleClick);
     };
-  }, []);
+  }, [user?._id]);
 
   const handleOpen = () => {
     setNewsOpen((prev) => !prev);
@@ -90,9 +105,9 @@ function UserNotifications() {
         >
           <span style={{ position: "relative" }}>
             Notifications
-            {userNotifications.length > 0 ? (
+            {userNotifications?.length > 0 ? (
               <span className="notification-count">
-                {userNotifications.length}
+                {userNotifications?.length}
               </span>
             ) : null}
           </span>
@@ -111,7 +126,10 @@ function UserNotifications() {
           <ul>
             {userNotifications && userNotifications.length > 0 ? (
               userNotifications.map((notification, index) => (
-                <li key={`notification-${index}`}>
+                <li
+                  data-testid={`notification-${index}`}
+                  key={`notification-${index}`}
+                >
                   {notification?.message && notification?.message.trim() ? (
                     <p>{notification?.message}</p>
                   ) : (
