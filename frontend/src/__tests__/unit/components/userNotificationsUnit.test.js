@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { configureStore, createSlice } from "@reduxjs/toolkit";
 import { Provider, useDispatch } from "react-redux";
 import { MemoryRouter } from "react-router-dom";
@@ -101,6 +101,7 @@ const renderWithStore = (component, initStore) => {
 describe("User Notifications component", () => {
   beforeAll(() => {
     jest.useFakeTimers();
+    consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
   });
 
   beforeEach(() => {
@@ -110,9 +111,14 @@ describe("User Notifications component", () => {
 
   afterAll(() => {
     jest.useRealTimers();
+    consoleErrorSpy.mockRestore();
   });
 
   describe("mount behavior", () => {
+    afterAll(() => {
+      jest.restoreAllMocks();
+    });
+
     describe("with authenticated user", () => {
       it("should render initial data", () => {
         const { container } = renderWithStore(<UserNotifications />);
@@ -131,7 +137,9 @@ describe("User Notifications component", () => {
       it("should dispatch getNotifications", () => {
         renderWithStore(<UserNotifications />);
 
-        expect(mockDispatch).toHaveBeenCalledWith(mockGetNotifications);
+        expect(dispatchedActions).toContainEqual({
+          type: "notifications/getNotifications",
+        });
       });
 
       it("should subscribe to socket notification events", () => {
@@ -180,7 +188,9 @@ describe("User Notifications component", () => {
           auth: { user: null },
         });
 
-        expect(mockDispatch).not.toHaveBeenCalledWith(mockGetNotifications);
+        expect(dispatchedActions).not.toContainEqual({
+          type: "notifications/getNotifications",
+        });
       });
 
       it("should not subscribe to socket notification events", () => {
@@ -242,7 +252,52 @@ describe("User Notifications component", () => {
       const { unmount } = renderWithStore(<UserNotifications />);
       unmount();
 
-      expect(mockDispatch).toHaveBeenCalledWith(mockResetNotifications);
+      expect(dispatchedActions).toContainEqual({
+        type: "notifications/resetNotifications",
+      });
+    });
+  });
+
+  describe("interactive behavior", () => {
+    it("should open and close notification list", () => {
+      const { container } = renderWithStore(<UserNotifications />, {
+        notifications: { userNotifications: [{ _id: "notificationId_1" }] },
+      });
+
+      const heading = container.querySelector(".notification-heading");
+      fireEvent.click(heading);
+
+      expect(
+        container.querySelector('[data-testid="notification-0"]')
+      ).toBeInTheDocument();
+
+      fireEvent.click(heading);
+
+      expect(
+        container.querySelector('[data-testid="notification-0"]')
+      ).not.toBeInTheDocument();
+    });
+
+    it("removes notification from DOM when it is marked as read", async () => {
+      const mockNotification = { _id: "notificationId_1", message: "Test" };
+      const { container, store } = renderWithStore(<UserNotifications />, {
+        auth: { user: mockUser },
+        notifications: { userNotifications: [mockNotification] },
+      });
+
+      expect(
+        container.querySelector(".notification-count")
+      ).toBeInTheDocument();
+
+      store.dispatch(
+        notificationsSlice.actions.markNotificationAsRead(mockNotification._id)
+      );
+
+      await screen.findByText(/Mark all as read/i);
+
+      expect(
+        container.querySelector(".notification-count")
+      ).not.toBeInTheDocument();
     });
   });
 

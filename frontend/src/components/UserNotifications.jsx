@@ -126,7 +126,10 @@ function UserNotifications() {
           <ul>
             {userNotifications && userNotifications.length > 0 ? (
               userNotifications.map((notification, index) => (
-                <li key={`notification-${index}`}>
+                <li
+                  data-testid={`notification-${index}`}
+                  key={`notification-${index}`}
+                >
                   {notification?.message && notification?.message.trim() ? (
                     <p>{notification?.message}</p>
                   ) : (
