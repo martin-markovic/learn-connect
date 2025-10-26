@@ -256,6 +256,15 @@ describe("User Notifications component", () => {
         type: "notifications/resetNotifications",
       });
     });
+
+    it("should unsubscribe to socket events", () => {
+      const { unmount } = renderWithStore(<UserNotifications />);
+      unmount();
+
+      for (const [evtName] of Object.entries(socketEventList)) {
+        expect(mockUnSubscribe).toHaveBeenCalledWith(evtName);
+      }
+    });
   });
 
   describe("interactive behavior", () => {
@@ -298,6 +307,49 @@ describe("User Notifications component", () => {
       expect(
         container.querySelector(".notification-count")
       ).not.toBeInTheDocument();
+    });
+
+    it("should close notification list when clicking outside container", () => {
+      const { container } = renderWithStore(<UserNotifications />, {
+        notifications: {
+          userNotifications: [{ _id: "notificationId_1", message: "Hello" }],
+        },
+      });
+
+      const heading = container.querySelector(".notification-heading");
+      fireEvent.click(heading);
+
+      expect(
+        container.querySelector('[data-testid="notification-0"]')
+      ).toBeInTheDocument();
+
+      fireEvent.click(document.body);
+
+      expect(
+        container.querySelector('[data-testid="notification-0"]')
+      ).not.toBeInTheDocument();
+    });
+
+    it("should not close notification list when clicking inside container", () => {
+      const { container } = renderWithStore(<UserNotifications />, {
+        notifications: {
+          userNotifications: [{ _id: "notificationId_1", message: "Hello" }],
+        },
+      });
+
+      const heading = container.querySelector(".notification-heading");
+      fireEvent.click(heading);
+
+      expect(
+        container.querySelector('[data-testid="notification-0"]')
+      ).toBeInTheDocument();
+
+      const refContainer = container.querySelector(".notification-container");
+      fireEvent.click(refContainer);
+
+      expect(
+        container.querySelector('[data-testid="notification-0"]')
+      ).toBeInTheDocument();
     });
   });
 
