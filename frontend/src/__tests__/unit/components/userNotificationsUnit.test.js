@@ -1,18 +1,16 @@
 import { render, screen } from "@testing-library/react";
-import { configureStore } from "@reduxjs/toolkit";
+import { configureStore, createSlice } from "@reduxjs/toolkit";
 import { Provider, useDispatch } from "react-redux";
 import { MemoryRouter } from "react-router-dom";
 import UserNotifications from "../../../components/UserNotifications";
+import {
+  getNotifications,
+  resetNotifications,
+} from "../../../features/notifications/notificationSlice";
 
-const mockDispatch = jest.fn();
 
-jest.mock("react-redux", () => {
-  const actual = jest.requireActual("react-redux");
-  return {
-    ...actual,
-    useDispatch: () => mockDispatch,
-  };
-});
+
+let consoleErrorSpy;
 
 const mockHandleMark = jest.fn();
 const mockHandleMarkAll = jest.fn();
@@ -30,16 +28,6 @@ jest.mock("../../../features/socket/managers/socket.eventManager.js", () => ({
   unsubscribe: jest.fn((eventName) => mockUnSubscribe(eventName)),
 }));
 
-const mockResetNotifications = jest.fn();
-const mockGetNotifications = jest.fn();
-const mockMarkNotificationAsRead = jest.fn();
-
-jest.mock("../../../features/notifications/notificationSlice.js", () => ({
-  resetNotifications: () => mockResetNotifications,
-  getNotifications: () => mockGetNotifications,
-  markNotificationAsRead: () => mockMarkNotificationAsRead,
-}));
-
 const initialState = {
   isLoading: false,
   isSuccess: false,
@@ -49,30 +37,65 @@ const initialState = {
 
 const mockUser = { _id: "userId_1" };
 
+jest.mock("../../../features/notifications/notificationSlice.js", () => ({
+  resetNotifications: jest.fn(() => ({
+    type: "notifications/resetNotifications",
+  })),
+  getNotifications: jest.fn(() => ({ type: "notifications/getNotifications" })),
+  markNotificationAsRead: jest.fn((payload) => ({
+    type: "notifications/markNotificationAsRead",
+    payload,
+  })),
+}));
+
+const notificationsSlice = createSlice({
+  name: "notifications",
+  initialState: { userNotifications: [] },
+  reducers: {
+    markNotificationAsRead: (state, action) => {
+      state.userNotifications = state.userNotifications.filter(
+        (n) => n._id !== action.payload
+      );
+    },
+    resetNotifications: (state) => {
+      state.userNotifications = [];
+    },
+  },
+});
+
+let dispatchedActions = [];
+
 const createMockStore = (initState = {}) => {
   return configureStore({
     reducer: {
       auth: (state = { ...initialState, user: mockUser, ...initState.auth }) =>
         state,
       notifications: (
-        state = {
-          ...initialState,
-          notifications: [],
-          ...initState.notifications,
-        }
-      ) => state,
+        state = { userNotifications: [], ...initState.notifications },
+        action
+      ) => notificationsSlice.reducer(state, action),
     },
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware({
+        serializableCheck: false,
+        immutableCheck: false,
+      }).concat(() => (next) => (action) => {
+        dispatchedActions.push(action);
+        return next(action);
+      }),
   });
 };
 
 const renderWithStore = (component, initStore) => {
   const store = createMockStore(initStore);
 
-  return render(
+  const result = render(
     <Provider store={store}>
       <MemoryRouter>{component}</MemoryRouter>
     </Provider>
   );
+
+  return { ...result, store };
 };
 
 describe("User Notifications component", () => {
@@ -82,6 +105,7 @@ describe("User Notifications component", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    dispatchedActions = [];
   });
 
   afterAll(() => {
