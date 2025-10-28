@@ -400,6 +400,54 @@ describe("User Notifications component", () => {
           senderId: mockUser?._id,
         });
       });
+
+      it("should dispatch markNotificationAsRead on marked as read event receptin", () => {
+        const mockNotification = { _id: "notificationId_1" };
+
+        renderWithStore(<UserNotifications />, {
+          notifications: { userNotifications: [] },
+        });
+
+        const handler = mockSubscribe.mock.calls.find(
+          ([eventName]) => eventName === "notification marked as read"
+        )[1];
+
+        const mockData = { _id: mockNotification._id };
+        handler(mockData);
+
+        expect(dispatchedActions).toContainEqual({
+          type: "notifications/markNotificationAsRead",
+          payload: mockData,
+        });
+      });
+
+      it("should dispatch resetNotifications on marked all as read event reception", () => {
+        renderWithStore(<UserNotifications />);
+
+        const handler = mockSubscribe.mock.calls.find(
+          ([eventName]) => eventName === "marked all as read"
+        )[1];
+
+        handler({ success: true });
+
+        expect(dispatchedActions).toContainEqual({
+          type: "notifications/resetNotifications",
+        });
+      });
+
+      it("should not dispatch resetNotifications on marked all as read event reception when received success: false", () => {
+        renderWithStore(<UserNotifications />);
+
+        const handler = mockSubscribe.mock.calls.find(
+          ([eventName]) => eventName === "marked all as read"
+        )[1];
+
+        handler({ success: false });
+
+        expect(dispatchedActions).not.toContainEqual({
+          type: "notifications/resetNotifications",
+        });
+      });
     });
   });
 
