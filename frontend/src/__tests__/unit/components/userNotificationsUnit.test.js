@@ -223,10 +223,21 @@ describe("User Notifications component", () => {
 
         addEventListenerSpy.mockRestore();
       });
+
+      it("should log error when subscribing fails", () => {
+        mockSubscribe.mockImplementationOnce(() => {
+          throw new Error("test failure");
+        });
+        renderWithStore(<UserNotifications />, { auth: { user: mockUser } });
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+          "Unable to subscribe to notification events: ",
+          "test failure"
+        );
+      });
     });
 
-    describe("notification list length indicator", () => {
-      it("should not be rendered if list is empty", () => {
+    describe("notification list", () => {
+      it("length indicator should not be rendered if list is empty", () => {
         const { container } = renderWithStore(<UserNotifications />, {
           auth: { user: mockUser },
           notifications: { userNotifications: [] },
@@ -237,7 +248,7 @@ describe("User Notifications component", () => {
         ).not.toBeInTheDocument();
       });
 
-      it("should be rendered if list is not empty", () => {
+      it("length indicator should be rendered if list is not empty", () => {
         const { container } = renderWithStore(<UserNotifications />, {
           auth: { user: mockUser },
           notifications: { userNotifications: [{ _id: "notificationId_1" }] },
@@ -246,6 +257,14 @@ describe("User Notifications component", () => {
         expect(
           container.querySelector(".notification-count")
         ).toBeInTheDocument();
+      });
+
+      it("should render 'No message available' if notification message is empty", () => {
+        const { getByText } = renderWithStore(<UserNotifications />, {
+          notifications: { userNotifications: [{ _id: "1", message: "" }] },
+        });
+        fireEvent.click(screen.getByText(/Notifications/i));
+        expect(getByText(/No message available/i)).toBeInTheDocument();
       });
     });
   });
@@ -267,6 +286,23 @@ describe("User Notifications component", () => {
       for (const [evtName] of Object.entries(socketEventList)) {
         expect(mockUnSubscribe).toHaveBeenCalledWith(evtName);
       }
+    });
+
+    it("should remove document click listener on unmount", () => {
+      const removeEventListenerSpy = jest.spyOn(
+        document,
+        "removeEventListener"
+      );
+
+      const { unmount } = renderWithStore(<UserNotifications />);
+      unmount();
+
+      expect(removeEventListenerSpy).toHaveBeenCalledWith(
+        "click",
+        expect.any(Function)
+      );
+
+      removeEventListenerSpy.mockRestore();
     });
   });
 
