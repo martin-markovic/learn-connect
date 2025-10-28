@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { configureStore, createSlice } from "@reduxjs/toolkit";
 import { Provider, useDispatch } from "react-redux";
 import { MemoryRouter } from "react-router-dom";
@@ -22,10 +22,12 @@ const socketEventList = {
 
 const mockSubscribe = jest.fn();
 const mockUnSubscribe = jest.fn();
+const mockEmitEvent = jest.fn();
 
 jest.mock("../../../features/socket/managers/socket.eventManager.js", () => ({
   subscribe: jest.fn((eventName, handler) => mockSubscribe(eventName, handler)),
   unsubscribe: jest.fn((eventName) => mockUnSubscribe(eventName)),
+  handleEmitEvent: jest.fn((eventName, data) => mockEmitEvent(eventName, data)),
 }));
 
 const initialState = {
@@ -107,6 +109,7 @@ describe("User Notifications component", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     dispatchedActions = [];
+    cleanup();
   });
 
   afterAll(() => {
@@ -220,10 +223,21 @@ describe("User Notifications component", () => {
 
         addEventListenerSpy.mockRestore();
       });
+
+      it("should log error when subscribing fails", () => {
+        mockSubscribe.mockImplementationOnce(() => {
+          throw new Error("test failure");
+        });
+        renderWithStore(<UserNotifications />, { auth: { user: mockUser } });
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+          "Unable to subscribe to notification events: ",
+          "test failure"
+        );
+      });
     });
 
-    describe("notification list length indicator", () => {
-      it("should not be rendered if list is empty", () => {
+    describe("notification list", () => {
+      it("length indicator should not be rendered if list is empty", () => {
         const { container } = renderWithStore(<UserNotifications />, {
           auth: { user: mockUser },
           notifications: { userNotifications: [] },
@@ -234,7 +248,7 @@ describe("User Notifications component", () => {
         ).not.toBeInTheDocument();
       });
 
-      it("should be rendered if list is not empty", () => {
+      it("length indicator should be rendered if list is not empty", () => {
         const { container } = renderWithStore(<UserNotifications />, {
           auth: { user: mockUser },
           notifications: { userNotifications: [{ _id: "notificationId_1" }] },
@@ -243,6 +257,14 @@ describe("User Notifications component", () => {
         expect(
           container.querySelector(".notification-count")
         ).toBeInTheDocument();
+      });
+
+      it("should render 'No message available' if notification message is empty", () => {
+        const { getByText } = renderWithStore(<UserNotifications />, {
+          notifications: { userNotifications: [{ _id: "1", message: "" }] },
+        });
+        fireEvent.click(screen.getByText(/Notifications/i));
+        expect(getByText(/No message available/i)).toBeInTheDocument();
       });
     });
   });
@@ -264,6 +286,23 @@ describe("User Notifications component", () => {
       for (const [evtName] of Object.entries(socketEventList)) {
         expect(mockUnSubscribe).toHaveBeenCalledWith(evtName);
       }
+    });
+
+    it("should remove document click listener on unmount", () => {
+      const removeEventListenerSpy = jest.spyOn(
+        document,
+        "removeEventListener"
+      );
+
+      const { unmount } = renderWithStore(<UserNotifications />);
+      unmount();
+
+      expect(removeEventListenerSpy).toHaveBeenCalledWith(
+        "click",
+        expect.any(Function)
+      );
+
+      removeEventListenerSpy.mockRestore();
     });
   });
 
@@ -350,6 +389,101 @@ describe("User Notifications component", () => {
       expect(
         container.querySelector('[data-testid="notification-0"]')
       ).toBeInTheDocument();
+    });
+
+    describe("socket behavior", () => {
+      it("should emit mark as read socket event on button click", () => {
+        const mockNotification = { _id: "notificationId_1", message: "Test" };
+
+        renderWithStore(<UserNotifications />, {
+          notifications: {
+            userNotifications: [mockNotification],
+          },
+        });
+
+        fireEvent.click(screen.getByText(/Notifications/i));
+
+        const btn = screen.queryByText(/Mark as read/i);
+
+        fireEvent.click(btn);
+
+        expect(mockEmitEvent).toHaveBeenCalledWith("mark as read", {
+          senderId: mockUser?._id,
+          notificationId: mockNotification._id,
+        });
+      });
+
+      it("should emit mark all as read socket event on button click", () => {
+        const mockNotification = { _id: "notificationId_1", message: "Test" };
+        const mockNotification2 = {
+          _id: "notificationId_2",
+          message: "Test 2",
+        };
+
+        renderWithStore(<UserNotifications />, {
+          notifications: {
+            userNotifications: [mockNotification, mockNotification2],
+          },
+        });
+
+        fireEvent.click(screen.getByText(/Notifications/i));
+
+        const btn = screen.queryByText(/Mark all as read/i);
+
+        fireEvent.click(btn);
+
+        expect(mockEmitEvent).toHaveBeenCalledWith("mark all as read", {
+          senderId: mockUser?._id,
+        });
+      });
+
+      it("should dispatch markNotificationAsRead on marked as read event receptin", () => {
+        const mockNotification = { _id: "notificationId_1" };
+
+        renderWithStore(<UserNotifications />, {
+          notifications: { userNotifications: [] },
+        });
+
+        const handler = mockSubscribe.mock.calls.find(
+          ([eventName]) => eventName === "notification marked as read"
+        )[1];
+
+        const mockData = { _id: mockNotification._id };
+        handler(mockData);
+
+        expect(dispatchedActions).toContainEqual({
+          type: "notifications/markNotificationAsRead",
+          payload: mockData,
+        });
+      });
+
+      it("should dispatch resetNotifications on marked all as read event reception", () => {
+        renderWithStore(<UserNotifications />);
+
+        const handler = mockSubscribe.mock.calls.find(
+          ([eventName]) => eventName === "marked all as read"
+        )[1];
+
+        handler({ success: true });
+
+        expect(dispatchedActions).toContainEqual({
+          type: "notifications/resetNotifications",
+        });
+      });
+
+      it("should not dispatch resetNotifications on marked all as read event reception when received success: false", () => {
+        renderWithStore(<UserNotifications />);
+
+        const handler = mockSubscribe.mock.calls.find(
+          ([eventName]) => eventName === "marked all as read"
+        )[1];
+
+        handler({ success: false });
+
+        expect(dispatchedActions).not.toContainEqual({
+          type: "notifications/resetNotifications",
+        });
+      });
     });
   });
 
