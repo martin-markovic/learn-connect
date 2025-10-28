@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { configureStore, createSlice } from "@reduxjs/toolkit";
 import { Provider, useDispatch } from "react-redux";
 import { MemoryRouter } from "react-router-dom";
@@ -22,10 +22,12 @@ const socketEventList = {
 
 const mockSubscribe = jest.fn();
 const mockUnSubscribe = jest.fn();
+const mockEmitEvent = jest.fn();
 
 jest.mock("../../../features/socket/managers/socket.eventManager.js", () => ({
   subscribe: jest.fn((eventName, handler) => mockSubscribe(eventName, handler)),
   unsubscribe: jest.fn((eventName) => mockUnSubscribe(eventName)),
+  handleEmitEvent: jest.fn((eventName, data) => mockEmitEvent(eventName, data)),
 }));
 
 const initialState = {
@@ -107,6 +109,7 @@ describe("User Notifications component", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     dispatchedActions = [];
+    cleanup();
   });
 
   afterAll(() => {
@@ -350,6 +353,53 @@ describe("User Notifications component", () => {
       expect(
         container.querySelector('[data-testid="notification-0"]')
       ).toBeInTheDocument();
+    });
+
+    describe("socket behavior", () => {
+      it("should emit mark as read socket event on button click", () => {
+        const mockNotification = { _id: "notificationId_1", message: "Test" };
+
+        renderWithStore(<UserNotifications />, {
+          notifications: {
+            userNotifications: [mockNotification],
+          },
+        });
+
+        fireEvent.click(screen.getByText(/Notifications/i));
+
+        const btn = screen.queryByText(/Mark as read/i);
+
+        fireEvent.click(btn);
+
+        expect(mockEmitEvent).toHaveBeenCalledWith("mark as read", {
+          senderId: mockUser?._id,
+          notificationId: mockNotification._id,
+        });
+      });
+
+      it("should emit mark all as read socket event on button click", () => {
+        const mockNotification = { _id: "notificationId_1", message: "Test" };
+        const mockNotification2 = {
+          _id: "notificationId_2",
+          message: "Test 2",
+        };
+
+        renderWithStore(<UserNotifications />, {
+          notifications: {
+            userNotifications: [mockNotification, mockNotification2],
+          },
+        });
+
+        fireEvent.click(screen.getByText(/Notifications/i));
+
+        const btn = screen.queryByText(/Mark all as read/i);
+
+        fireEvent.click(btn);
+
+        expect(mockEmitEvent).toHaveBeenCalledWith("mark all as read", {
+          senderId: mockUser?._id,
+        });
+      });
     });
   });
 
