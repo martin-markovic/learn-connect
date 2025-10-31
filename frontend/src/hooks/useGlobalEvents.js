@@ -11,7 +11,7 @@ import {
 import { addNewNotification } from "../features/notifications/notificationSlice.js";
 import socketEventManager from "../features/socket/managers/socket.eventManager.js";
 
-const useGlobalEvents = (currentLocation, user) => {
+const useGlobalEvents = (currentLocation) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
