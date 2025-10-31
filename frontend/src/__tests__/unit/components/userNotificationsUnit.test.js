@@ -1,14 +1,14 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { configureStore, createSlice } from "@reduxjs/toolkit";
-import { Provider, useDispatch } from "react-redux";
+import { Provider } from "react-redux";
 import { MemoryRouter } from "react-router-dom";
 import UserNotifications from "../../../components/UserNotifications";
 import {
-  getNotifications,
-  resetNotifications,
-} from "../../../features/notifications/notificationSlice";
-
-
+  mockSubscribe,
+  mockUnSubscribe,
+  mockEmitEvent,
+  resetCallbacks,
+} from "../../__mocks__/config/mockSocketManager.js";
 
 let consoleErrorSpy;
 
@@ -19,16 +19,6 @@ const socketEventList = {
   "notification marked as read": mockHandleMark,
   "marked all as read": mockHandleMarkAll,
 };
-
-const mockSubscribe = jest.fn();
-const mockUnSubscribe = jest.fn();
-const mockEmitEvent = jest.fn();
-
-jest.mock("../../../features/socket/managers/socket.eventManager.js", () => ({
-  subscribe: jest.fn((eventName, handler) => mockSubscribe(eventName, handler)),
-  unsubscribe: jest.fn((eventName) => mockUnSubscribe(eventName)),
-  handleEmitEvent: jest.fn((eventName, data) => mockEmitEvent(eventName, data)),
-}));
 
 const initialState = {
   isLoading: false,
@@ -102,19 +92,24 @@ const renderWithStore = (component, initStore) => {
 
 describe("User Notifications component", () => {
   beforeAll(() => {
+    jest.clearAllMocks();
     jest.useFakeTimers();
     consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    resetCallbacks();
   });
 
   beforeEach(() => {
     jest.clearAllMocks();
     dispatchedActions = [];
     cleanup();
+    resetCallbacks();
   });
 
   afterAll(() => {
     jest.useRealTimers();
     consoleErrorSpy.mockRestore();
+    jest.clearAllMocks();
+    resetCallbacks();
   });
 
   describe("mount behavior", () => {
@@ -486,5 +481,4 @@ describe("User Notifications component", () => {
       });
     });
   });
-
 });

@@ -2,7 +2,6 @@ import { render, screen } from "@testing-library/react";
 import { act } from "react";
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
-import socketEventManager from "../../../features/socket/managers/socket.eventManager";
 import UserProfile from "../../../pages/UserProfile";
 import {
   getUserList,
@@ -14,6 +13,11 @@ import {
   getExamScores,
   resetExam,
 } from "../../../features/quizzes/exam/examSlice.js";
+import {
+  mockSubscribe,
+  mockUnSubscribe,
+  resetCallbacks,
+} from "../../__mocks__/config/mockSocketManager.js";
 
 const initialState = {
   isLoading: false,
@@ -52,18 +56,6 @@ const blockedFriend = {
   senderId: mockReceiver._id,
   receiverId: mockSender._id,
   status: "blocked",
-};
-
-const mockExamScores = {
-  _id: "examDoc_1",
-  quiz: {
-    quizId: "",
-    quizTitle: "",
-  },
-  examId: "",
-  userId: mockSender._id,
-  latestScore: 2,
-  highScore: 3,
 };
 
 const authInitialState = setupState({ user: mockSender });
@@ -126,18 +118,21 @@ const renderWithStore = (component, initialState) => {
 
 describe("User Profile Component", () => {
   beforeAll(() => {
-    for (const [evtName, cb] of socketEvents) {
-      socketEventManager.subscribe(evtName, cb);
-    }
-
     jest.useFakeTimers();
+    resetCallbacks();
+    jest.clearAllMocks();
   });
 
   beforeEach(() => {
     jest.clearAllMocks();
+    resetCallbacks();
   });
 
-  afterAll(() => jest.useRealTimers());
+  afterAll(() => {
+    jest.clearAllMocks();
+    jest.useRealTimers();
+    resetCallbacks();
+  });
 
   describe("on mount and unmount", () => {
     describe("redux-related behavior, should render", () => {
@@ -366,7 +361,7 @@ describe("User Profile Component", () => {
         });
 
         for (const evt of socketEvents) {
-          expect(socketEventManager.subscribe).toHaveBeenCalledWith(
+          expect(mockUnSubscribe).toHaveBeenCalledWith(
             evt,
             expect.any(Function)
           );
@@ -382,7 +377,7 @@ describe("User Profile Component", () => {
           exam: { isLoading: false },
         });
 
-        const subscribeCall = socketEventManager.subscribe.mock.calls.find(
+        const subscribeCall = mockSubscribe.mock.calls.find(
           ([eventName]) => eventName === "user blocked"
         );
 
@@ -412,7 +407,7 @@ describe("User Profile Component", () => {
         unmount();
 
         for (const evt of socketEvents) {
-          expect(socketEventManager.unsubscribe).toHaveBeenCalledWith(evt);
+          expect(mockUnSubscribe).toHaveBeenCalledWith(evt);
         }
       });
     });

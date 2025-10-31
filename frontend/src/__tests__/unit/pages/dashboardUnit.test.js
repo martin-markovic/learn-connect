@@ -41,7 +41,9 @@ const mockUser = {
 };
 
 const setupState = (stateProps) => {
-  return { ...initialState, ...stateProps };
+  const initState = JSON.parse(JSON.stringify(initialState));
+
+  return { ...initState, ...stateProps };
 };
 
 const initialAuthState = setupState({ user: mockUser });
@@ -54,13 +56,17 @@ const initialChatState = setupState({ online: true });
 const createMockStore = (initState = {}) => {
   return configureStore({
     reducer: {
-      auth: (state = { ...initialAuthState, ...initState }) => state,
-      classroom: (state = { ...initialClassroomState, ...initState }) => state,
-      notifications: (state = { ...initialNotificationState, ...initState }) =>
+      auth: (state = { ...initialAuthState, ...initState.auth }) => state,
+      classroom: (
+        state = { ...initialClassroomState, ...initState.classroom }
+      ) => state,
+      notifications: (
+        state = { ...initialNotificationState, ...initState.notifications }
+      ) => state,
+      friends: (state = { ...initialFriendState, ...initState.friends }) =>
         state,
-      friends: (state = { ...initialFriendState, ...initState }) => state,
-      quizzes: (state = { ...initialQuizState, ...initState }) => state,
-      chat: (state = { ...initialChatState, ...initState }) => state,
+      quizzes: (state = { ...initialQuizState, ...initState.quizzes }) => state,
+      chat: (state = { ...initialChatState, ...initState.chat }) => state,
     },
     middleware: (getDefaultMiddleware) =>
       // speeds up testing process, clears errors
@@ -80,11 +86,13 @@ const renderWithStore = (component, initStore) => {
 describe("Dashboard component ", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-
     jest.useFakeTimers();
   });
 
-  afterAll(() => jest.useRealTimers());
+  afterAll(() => {
+    jest.useRealTimers();
+    jest.clearAllMocks();
+  });
 
   describe("should render", () => {
     it("user data", () => {
@@ -106,8 +114,9 @@ describe("Dashboard component ", () => {
     });
 
     it("fallback avatar icon", () => {
-      const noAvatarUser = { ...mockUser, avatar: null };
-      renderWithStore(<Dashboard />, { user: noAvatarUser });
+      renderWithStore(<Dashboard />, {
+        auth: { user: { ...mockUser, avatar: null } },
+      });
 
       const fallbackIcon = screen.getByTitle(/visit your profile/i);
       expect(fallbackIcon).toBeInTheDocument();
@@ -123,7 +132,7 @@ describe("Dashboard component ", () => {
     });
 
     it("data safely without user in redux state", () => {
-      renderWithStore(<Dashboard />, { user: null });
+      renderWithStore(<Dashboard />, { auth: { user: null } });
 
       expect(screen.queryByAltText("user avatar")).not.toBeInTheDocument();
 
